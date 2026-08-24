@@ -1,0 +1,477 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces */
+  --color-surface-primary: #FAF9F6;
+  --color-surface-secondary: #FFFFFF;
+  --color-surface-tertiary: #F3F1ED;
+  --color-surface-dark: #1C1C1C;
+  --color-surface-dark-subtle: #2A2A2A;
+
+  /* Sidebar Tokens */
+  --sidebar-background: #FFFFFF;
+  --sidebar-foreground: #1C1C1C;
+  --sidebar-primary: #1C1C1C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F3F1ED;
+  --sidebar-accent-foreground: #1C1C1C;
+  --sidebar-border: #E8E5E0;
+  --sidebar-ring: #087F5B;
+
+  /* Text */
+  --color-text-primary: #1C1C1C;
+  --color-text-secondary: #64635F;
+  --color-text-tertiary: #9C9A95;
+
+  /* Borders */
+  --color-border-primary: #E8E5E0;
+  --color-border-secondary: #F0EDE8;
+
+  /* Accent */
+  --color-accent: #1C1C1C;
+  --color-accent-light: #F5F5DC;
+  --color-accent-hover: #333333;
+
+  /* Semantic */
+  --color-negative: #C92A2A;
+  --color-warning: #E67700;
+
+  /* Fonts */
+  --font-serif: 'Instrument Serif', 'Georgia', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Base ── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    font-size: 16px;
+    line-height: 1.625;
+  }
+
+  ::selection {
+    background: var(--color-accent-light);
+    color: var(--color-accent);
+  }
+}
+
+/* ── Shadcn / Animate-UI Sidebar Button Styles ── */
+[data-sidebar="menu-button"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  box-sizing: border-box;
+}
+
+[data-sidebar="menu-button"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+[data-sidebar="menu-button"][data-active="true"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+  font-weight: 600;
+}
+
+[data-sidebar="menu-button"][data-active="true"] svg {
+  color: var(--color-accent) !important;
+}
+
+[data-sidebar="menu-button"] svg {
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+/* Tooltip Component (High Z-Index, Right Position) */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 12px;
+  background: var(--color-surface-dark);
+  color: #FFFFFF;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 99999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  animation: tooltip-slide-right 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+[data-tip]:hover::before {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 6px;
+  border-width: 5px 6px 5px 0;
+  border-style: solid;
+  border-color: transparent var(--color-surface-dark) transparent transparent;
+  pointer-events: none;
+  z-index: 99999;
+  animation: tooltip-slide-right 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes tooltip-slide-right {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* ── Architectural Grid Background ── */
+.arch-grid {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.arch-grid svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Section Spacing ── */
+.section {
+  padding: 120px 24px;
+  position: relative;
+}
+
+.section-sm {
+  padding: 80px 24px;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Section Label (Swiss caption) ── */
+.section-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 16px;
+}
+
+/* ── Headings ── */
+.heading-1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.heading-2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(32px, 3.5vw, 44px);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.heading-3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+/* ── Body Text ── */
+.body-text {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+}
+
+.body-small {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Buttons (Refined 6px-8px border-radius) ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--color-text-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  background: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-text-primary);
+  background: rgba(28, 28, 28, 0.03);
+}
+
+/* ── Badge (6px border-radius) ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--color-accent-light);
+  border: 1px solid rgba(8, 127, 91, 0.12);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  animation: pulse-soft 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  padding: 32px;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Inputs ── */
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-secondary);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--color-text-primary);
+  box-shadow: 0 0 0 3px rgba(28, 28, 28, 0.04);
+}
+
+.input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* ── Hero Email Capture (Architectural 6px radius) ── */
+.email-capture {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 4px 4px 4px 16px;
+  max-width: 440px;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.email-capture:focus-within {
+  border-color: #1C1C1C !important;
+  box-shadow: 0 0 0 3px rgba(28, 28, 28, 0.08), 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+.email-capture input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: transparent;
+  min-width: 0;
+}
+
+.email-capture input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.email-capture button {
+  padding: 10px 20px;
+  background: var(--color-text-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.email-capture button:hover {
+  background: #333;
+}
+
+/* ── Stats Divider ── */
+.stat-divider {
+  width: 1px;
+  height: 48px;
+  background: var(--color-border-primary);
+  align-self: center;
+}
+
+/* ── Pricing ── */
+.pricing-popular {
+  border-left: 2px solid var(--color-accent);
+}
+
+/* ── Dashboard Preview Container (Refined 8px radius) ── */
+.preview-container {
+  background: var(--color-surface-dark);
+  border-radius: 8px;
+  border: 1px solid var(--color-surface-dark-subtle);
+  padding: 32px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-primary);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 20px;
+  }
+  .section-sm {
+    padding: 80px 20px;
+  }
+  .email-capture {
+    flex-direction: column;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .email-capture input {
+    padding: 12px 16px;
+    width: 100%;
+  }
+  .email-capture button {
+    width: 100%;
+    border-radius: 6px;
+    padding: 12px;
+  }
+}
