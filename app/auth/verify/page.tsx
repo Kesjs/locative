@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import AuthLayout from "@/components/auth/AuthLayout";
 import OtpVerification from "@/components/auth/OtpVerification";
 
-export default function VerifyPage() {
+function VerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
@@ -51,3 +51,12 @@ export default function VerifyPage() {
     </AuthLayout>
   );
 }
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyContent />
+    </Suspense>
+  );
+}
+
