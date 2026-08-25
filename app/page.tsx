@@ -3,6 +3,7 @@ import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import DashboardPreview from "@/components/landing/DashboardPreview";
 import Stats from "@/components/landing/Stats";
+import ConversionSection from "@/components/landing/ConversionSection";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
@@ -20,6 +21,7 @@ export default function Home() {
         <Features />
         <DashboardPreview />
         <Stats />
+        <ConversionSection />
         <HowItWorks />
         <Pricing />
         <FAQ />

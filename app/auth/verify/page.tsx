@@ -31,7 +31,7 @@ function VerifyContent() {
         <div className="mb-6 text-left">
           <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight mb-2">
             Vérification de votre{" "}
-            <span className="font-serif italic font-normal text-[#64635F]">
+            <span className="font-serif italic font-normal text-[#1C1C1C]">
               identité
             </span>
           </h1>
@@ -59,4 +59,3 @@ export default function VerifyPage() {
     </Suspense>
   );
 }
-

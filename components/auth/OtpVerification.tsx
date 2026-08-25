@@ -151,7 +151,6 @@ export default function OtpVerification({
     }
   };
 
-  // Gestion des touches du clavier
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace") {
       if (!digits[index] && index > 0) {
@@ -164,34 +163,11 @@ export default function OtpVerification({
     }
   };
 
-  // Gestion du Paste global (support 6 et 8 chiffres)
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").replace(/\D/g, "");
-    if (!pasteData) return;
-
-    const targetLength = pasteData.length === 6 ? 6 : length;
-    const nextDigits = Array(length).fill("");
-    pasteData.slice(0, length).split("").forEach((char, i) => {
-      if (i < length) nextDigits[i] = char;
-    });
-    setDigits(nextDigits);
-
-    if (pasteData.length >= targetLength) {
-      verifyCode(pasteData.slice(0, targetLength));
-    } else {
-      const focusIndex = Math.min(pasteData.length, length - 1);
-      inputRefs.current[focusIndex]?.focus();
-    }
-  };
-
-  // Renvoyer un code OTP
+  // Renvoi du code OTP
   const handleResend = async () => {
     if (countdown > 0 || resending) return;
-
     setResending(true);
     setErrorMessage(null);
-    setResendSuccess(false);
 
     try {
       if (isSupabaseConfigured()) {
@@ -206,13 +182,14 @@ export default function OtpVerification({
         if (error) throw error;
       }
 
-      setCountdown(60);
       setResendSuccess(true);
+      setCountdown(60);
+      setDigits(Array(length).fill(""));
       setTimeout(() => setResendSuccess(false), 4000);
       inputRefs.current[0]?.focus();
     } catch (err: any) {
-      console.error("Erreur renvoi OTP:", err);
-      setErrorMessage(err.message || "Impossible de renvoyer le code pour le moment.");
+      console.error("Erreur renvoi code:", err);
+      setErrorMessage("Impossible de renvoyer le code. Veuillez patienter.");
     } finally {
       setResending(false);
     }
@@ -220,82 +197,66 @@ export default function OtpVerification({
 
   return (
     <div className="w-full space-y-5">
-      {/* Badge statut email */}
-      <div className="flex items-center justify-between p-3.5 bg-white border border-[#E8E5E0] rounded-[8px] shadow-xs">
+      {/* Email Info & Change Button */}
+      <div className="flex items-center justify-between p-3 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] text-[13px]">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] flex items-center justify-center flex-shrink-0">
-            <EnvelopeIcon className="w-4 h-4 text-[#1C1C1C]" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-[11px] font-semibold text-[#9C9A95] uppercase tracking-wider">
-              Code envoyé à
-            </div>
-            <div className="text-[13px] font-bold text-[#1C1C1C] truncate">
-              {email}
-            </div>
-          </div>
+          <EnvelopeIcon className="w-4 h-4 text-[#1C1C1C] flex-shrink-0" />
+          <span className="font-semibold text-[#1C1C1C] truncate">{email}</span>
         </div>
-
         {onChangeEmail && (
           <button
             type="button"
             onClick={onChangeEmail}
-            className="text-[12px] font-semibold text-[#64635F] hover:text-[#1C1C1C] hover:underline px-2 py-1 flex-shrink-0 transition-colors"
+            className="text-[12px] font-bold text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 py-0.5 rounded transition-colors flex-shrink-0 ml-2 cursor-pointer"
           >
             Modifier
           </button>
         )}
       </div>
 
-      {/* Messages d'erreur et de succès */}
+      {/* Messages Feedback */}
       <AnimatePresence mode="wait">
         {errorMessage && (
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="p-3 rounded-[6px] bg-red-50 border border-red-200 text-[#C92A2A] text-[13px] flex items-start gap-2"
+            className="p-3 rounded-[6px] bg-red-50 border border-red-200 text-[#C92A2A] text-[13px] flex items-center gap-2"
           >
-            <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
             <span>{errorMessage}</span>
           </motion.div>
         )}
 
-        {resendSuccess && !errorMessage && (
+        {resendSuccess && (
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="p-3 rounded-[6px] bg-[#E6F5EF] border border-[#087F5B]/30 text-[#087F5B] text-[13px] flex items-center gap-2"
+            className="p-3 rounded-[6px] bg-[#FAF9F6] border border-[#E8E5E0] text-[#1C1C1C] text-[13px] flex items-center gap-2"
           >
-            <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+            <CheckCircleIcon className="w-4 h-4 flex-shrink-0 text-[#1C1C1C]" />
             <span>Un nouveau code a été envoyé avec succès !</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Zone des carrés OTP (8 chiffres) */}
-      <div onPaste={handlePaste} className="space-y-2.5">
+      {/* Inputs Pin Code 6 Chiffres */}
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="text-[12px] font-semibold text-[#1C1C1C]">
             Saisissez le code de sécurité ({length} chiffres)
           </label>
-          <span className="text-[11px] text-[#9C9A95] flex items-center gap-1">
-            <ShieldCheckIcon className="w-3.5 h-3.5 text-[#087F5B]" />
-            Resend SMTP
+          <span className="text-[11px] text-[#64635F] flex items-center gap-1 font-medium bg-[#F3F2EE] border border-[#E8E5E0] px-2 py-0.5 rounded-full">
+            <EnvelopeIcon className="w-3 h-3 text-[#1C1C1C]" />
+            <span>Envoyé par Email sécurisé</span>
           </span>
         </div>
 
         <motion.div
-          animate={
-            isShaking
-              ? {
-                  x: [-8, 8, -6, 6, -3, 3, 0],
-                  transition: { duration: 0.4 },
-                }
-              : {}
-          }
-          className={`grid gap-1.5 sm:gap-2 ${length === 8 ? "grid-cols-8" : "grid-cols-6"}`}
+          animate={isShaking ? { x: [-8, 8, -6, 6, -3, 3, 0] } : {}}
+          transition={{ duration: 0.4 }}
+          className="grid grid-cols-6 gap-2 sm:gap-2.5"
         >
           {digits.map((digit, index) => (
             <div key={index} className="relative">
@@ -313,7 +274,7 @@ export default function OtpVerification({
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-full h-11 sm:h-13 text-center text-[18px] sm:text-[20px] font-mono font-bold rounded-[6px] sm:rounded-[8px] border transition-all duration-150 outline-none select-all ${
                   isSuccess
-                    ? "bg-[#E6F5EF] border-[#087F5B] text-[#087F5B]"
+                    ? "bg-[#FAF9F6] border-[#1C1C1C] text-[#1C1C1C]"
                     : digit
                     ? "bg-white border-[#1C1C1C] text-[#1C1C1C] shadow-xs ring-1 ring-[#1C1C1C]/10"
                     : "bg-white border-[#E8E5E0] text-[#1C1C1C] focus:border-[#1C1C1C] focus:ring-2 focus:ring-[#1C1C1C]/5 shadow-xs"
@@ -333,16 +294,16 @@ export default function OtpVerification({
         </p>
       </div>
 
-      {/* Bouton de validation (Primary - Deep Black) */}
+      {/* Bouton de validation (Primary - Deep Black avec hover couleur de sélection #F5F5DC) */}
       <button
         type="button"
         onClick={() => verifyCode(digits.join(""))}
         disabled={isLoading || isSuccess || digits.some((d) => d === "")}
-        className="w-full py-3 px-4 bg-[#1C1C1C] hover:bg-[#333333] text-white text-[13px] font-semibold rounded-[8px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3 px-4 bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[8px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {isSuccess ? (
           <span className="inline-flex items-center gap-2">
-            <CheckCircleIcon className="w-4 h-4 text-[#51CF66]" />
+            <CheckCircleIcon className="w-4 h-4 text-[#1C1C1C]" />
             Succès...
           </span>
         ) : isLoading ? (
@@ -370,7 +331,7 @@ export default function OtpVerification({
             type="button"
             onClick={handleResend}
             disabled={resending}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#1C1C1C] hover:text-[#087F5B] transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 py-1 rounded transition-colors disabled:opacity-50 cursor-pointer"
           >
             <ArrowPathIcon className={`w-3.5 h-3.5 ${resending ? "animate-spin" : ""}`} />
             <span>Renvoyer le code</span>
@@ -381,7 +342,7 @@ export default function OtpVerification({
           <button
             type="button"
             onClick={onFallbackPassword}
-            className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] hover:underline transition-colors"
+            className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 py-1 rounded transition-colors cursor-pointer"
           >
             Utiliser un mot de passe
           </button>

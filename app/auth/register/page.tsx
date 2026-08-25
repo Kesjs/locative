@@ -73,7 +73,7 @@ export default function RegisterPage() {
         <div className="mb-8 text-left">
           <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight mb-2">
             Créer votre espace{" "}
-            <span className="font-serif italic font-normal text-[#64635F]">
+            <span className="font-serif italic font-normal text-[#1C1C1C]">
               Lokka
             </span>
           </h1>
@@ -118,7 +118,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#333333] text-white text-[13px] font-semibold rounded-[6px] transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? "Envoi..." : "Continuer"}
               <ArrowRightIcon className="h-3.5 w-3.5" />

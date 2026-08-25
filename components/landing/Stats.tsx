@@ -32,7 +32,7 @@ export default function Stats() {
                 style={{ fontSize: "clamp(2.5rem, 4vw, 3.5rem)", color: "#1C1C1C", lineHeight: 1 }}
               >
                 {stat.value}
-                <span style={{ color: "#087F5B", fontSize: "0.6em", fontFamily: "Inter, sans-serif", fontWeight: 600, marginLeft: 4 }}>
+                <span style={{ color: "#1C1C1C", fontSize: "0.6em", fontFamily: "Inter, sans-serif", fontWeight: 600, marginLeft: 4 }}>
                   {stat.suffix}
                 </span>
               </div>

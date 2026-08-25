@@ -100,9 +100,9 @@ export default function LoginPage() {
         {/* Titre & Sous-titre éditorial */}
         <div className="mb-8 text-left">
           <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight mb-2">
-            Bon retour parmi{" "}
-            <span className="font-serif italic font-normal text-[#64635F]">
-              nous
+            Bon retour sur{" "}
+            <span className="font-serif italic font-normal text-[#1C1C1C]">
+              Lokka
             </span>
           </h1>
           <p className="text-[14px] text-[#64635F]">
@@ -145,7 +145,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading || !email}
-                  className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#333333] text-white text-[13px] font-semibold rounded-[6px] transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
                   {isLoading ? "Envoi..." : "Continuer"}
                   <ArrowRightIcon className="h-3.5 w-3.5" />
@@ -158,7 +158,7 @@ export default function LoginPage() {
                       setUsePassword(true);
                       setErrorMessage(null);
                     }}
-                    className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] transition-colors"
+                    className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] px-2 py-1 rounded hover:bg-[#F5F5DC] transition-colors cursor-pointer"
                   >
                     Utiliser un mot de passe
                   </button>
@@ -214,7 +214,7 @@ export default function LoginPage() {
                     setUsePassword(false);
                     setCodeSent(false);
                   }}
-                  className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] transition-colors"
+                  className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] px-2 py-1 rounded hover:bg-[#F5F5DC] transition-colors cursor-pointer"
                 >
                   Connexion sans mot de passe
                 </button>
@@ -234,7 +234,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#9C9A95] hover:text-[#1C1C1C]"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#9C9A95] hover:text-[#1C1C1C] cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-4 w-4" />
@@ -261,7 +261,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#333333] text-white text-[13px] font-semibold rounded-[6px] transition shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] mt-2 disabled:opacity-60"
+              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] mt-2 disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? "Connexion..." : "Se connecter"}
               <ArrowRightIcon className="h-3.5 w-3.5" />
@@ -274,7 +274,7 @@ export default function LoginPage() {
                   setUsePassword(false);
                   setErrorMessage(null);
                 }}
-                className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] transition-colors"
+                className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] px-2 py-1 rounded hover:bg-[#F5F5DC] transition-colors cursor-pointer"
               >
                 ← Revenir au code par email
               </button>

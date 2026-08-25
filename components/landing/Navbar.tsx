@@ -40,7 +40,7 @@ export default function Navbar() {
           <Logo size="sm" variant="dark" />
         </div>
 
-        {/* Desktop Navigation Links with Hover & Active Pill Indicator */}
+        {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-1 bg-[#1C1C1C]/[0.03] p-1 rounded-[8px] border border-[#1C1C1C]/[0.04]">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
@@ -50,8 +50,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`text-[13px] rounded-[6px] px-3.5 py-1.5 transition-all duration-200 ${
                   isActive
-                    ? "font-semibold text-[#1C1C1C] bg-white shadow-sm"
-                    : "font-medium text-[#64635F] hover:text-[#1C1C1C] hover:bg-white/60 shadow-none"
+                    ? "font-semibold text-[#1C1C1C] bg-white shadow-xs"
+                    : "font-medium text-[#64635F] hover:text-[#1C1C1C] hover:bg-[#F5F5DC] shadow-none"
                 }`}
               >
                 {link.label}
@@ -60,13 +60,13 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Desktop Right Action: Single "Se connecter" button with refined 6px radius */}
+        {/* Desktop Right Action: "Se connecter" button en couleur de sélection de base */}
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/auth/login"
-            className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-[#1C1C1C] hover:bg-[#333333] px-4 py-2 rounded-[6px] transition-all duration-200 shadow-sm active:scale-95"
+            className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#1C1C1C] bg-[#F5F5DC] hover:bg-[#1C1C1C] hover:text-white border border-[#E8E5E0] hover:border-[#1C1C1C] px-4 py-2 rounded-[6px] transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
           >
-            Se connecter
+            <span>Se connecter</span>
             <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </div>
@@ -75,7 +75,7 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-1.5 text-[#1C1C1C] hover:text-[#087F5B] transition-colors rounded-[6px] hover:bg-black/5"
+          className="md:hidden p-1.5 text-[#1C1C1C] hover:text-[#1C1C1C] hover:bg-[#F5F5DC] transition-colors rounded-[6px]"
           aria-label="Toggle Navigation Menu"
         >
           {mobileMenuOpen ? (
@@ -93,7 +93,7 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-[15px] font-medium text-[#1C1C1C] py-2 border-b border-[#E8E5E0]"
+              className="text-[15px] font-medium text-[#1C1C1C] py-2 border-b border-[#E8E5E0] hover:bg-[#F5F5DC] px-2 rounded transition-colors"
             >
               Accueil
             </Link>
@@ -102,7 +102,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[15px] font-medium text-[#64635F] hover:text-[#1C1C1C] py-2 border-b border-[#E8E5E0]"
+                className="text-[15px] font-medium text-[#64635F] hover:text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 rounded py-2 border-b border-[#E8E5E0] transition-colors"
               >
                 {link.label}
               </Link>
@@ -111,14 +111,14 @@ export default function Navbar() {
               <Link
                 href="/auth/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-[6px] border border-[#E8E5E0] text-[14px] font-medium text-[#1C1C1C] bg-white shadow-sm"
+                className="w-full text-center py-2.5 rounded-[6px] border border-[#E8E5E0] text-[14px] font-semibold text-[#1C1C1C] bg-[#F5F5DC] hover:bg-[#1C1C1C] hover:text-white transition-colors shadow-xs"
               >
                 Se connecter
               </Link>
               <Link
                 href="/auth/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-[6px] text-[14px] font-medium text-white bg-[#1C1C1C] flex items-center justify-center gap-2 shadow-md"
+                className="w-full text-center py-2.5 rounded-[6px] text-[14px] font-medium text-white bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent transition-colors flex items-center justify-center gap-2 shadow-xs"
               >
                 Commencer <ArrowRightIcon className="h-4 w-4" />
               </Link>

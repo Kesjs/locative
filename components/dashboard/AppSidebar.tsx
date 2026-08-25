@@ -127,7 +127,12 @@ const DATA = {
   ],
   navSecondary: [
     {
-      title: "Annonces",
+      title: "Portail Locataire",
+      url: "/locataire",
+      icon: Users,
+    },
+    {
+      title: "Annonces & Vitrine",
       url: "/dashboard/annonces",
       icon: Megaphone,
     },
@@ -165,7 +170,12 @@ export function AppSidebar() {
         
         const name = o.userName || u.name || "Bailleur Lokka";
         const email = u.email || "contact@lokka.bj";
-        const role = o.profileType === "gestionnaire" ? "Gestionnaire Agréé" : o.profileType === "agence" ? "Agence Immobilière" : "Propriétaire Bailleur";
+        const role =
+          o.profileType === "gestionnaire" || o.profileType === "agence"
+            ? "Gestionnaire Agréé"
+            : o.profileType === "diaspora"
+            ? "Investisseur Diaspora"
+            : "Propriétaire Bailleur";
         
         setUserProfile({
           name,

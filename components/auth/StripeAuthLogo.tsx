@@ -13,7 +13,7 @@ export default function StripeAuthLogo() {
       href="/"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative inline-flex items-center gap-3 p-1.5 -ml-1.5 rounded-[10px] transition-colors duration-200 hover:bg-white hover:shadow-xs hover:border hover:border-[#E8E5E0] border border-transparent select-none"
+      className="group relative inline-flex items-center gap-3 p-1.5 -ml-1.5 rounded-[10px] transition-colors duration-200 hover:bg-[#F5F5DC] hover:shadow-xs hover:border hover:border-[#E8E5E0] border border-transparent select-none cursor-pointer"
     >
       {/* Icon Box with Morphing Animation */}
       <div className="relative w-8 h-8 rounded-[8px] bg-[#1C1C1C] flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-sm">

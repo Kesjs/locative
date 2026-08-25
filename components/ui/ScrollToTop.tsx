@@ -47,7 +47,7 @@ export default function ScrollToTop() {
           exit={{ opacity: 0, scale: 0.8, y: 16 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           aria-label="Revenir en haut de page"
-          className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md text-[#1C1C1C] border border-[#E8E5E0] shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:bg-[#1C1C1C] hover:text-white hover:border-[#1C1C1C] hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] group cursor-pointer"
+          className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-white text-[#1C1C1C] border border-[#E8E5E0] shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-200 hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] group cursor-pointer"
           style={{ width: size, height: size }}
         >
           {/* Indicateur circulaire de progression du scroll */}
@@ -66,18 +66,18 @@ export default function ScrollToTop() {
               strokeWidth={strokeWidth}
               className="opacity-40"
             />
-            {/* Anneau de progression vert */}
+            {/* Anneau de progression (Noir avec halo doré) */}
             <circle
               cx={size / 2}
               cy={size / 2}
               r={radius}
               fill="transparent"
-              stroke="#087F5B"
+              stroke="#1C1C1C"
               strokeWidth={strokeWidth}
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              className="transition-[stroke-dashoffset] duration-150 group-hover:stroke-white"
+              className="transition-[stroke-dashoffset] duration-150 group-hover:stroke-[#C5A880]"
             />
           </svg>
 
