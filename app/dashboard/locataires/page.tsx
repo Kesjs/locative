@@ -244,16 +244,15 @@ export default function TenantsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[1440px] mx-auto pb-10">
       <Header
-        breadcrumbs={["Tableau de bord", "Locataires"]}
-        title="Locataires &amp; Baux d'habitation"
-        subtitle="Gestion des locataires, envoi des accès au portail web et suivi de conformité Loi n° 2022-30."
+        title="Locataires & Baux"
+        subtitle="Gestion des locataires, contrats et conformité Loi n° 2022-30."
       />
 
       {/* Filter & Action bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 bg-white border border-[#E8E5E0] rounded-[6px] px-3 py-1.5 w-full sm:w-80 shadow-2xs">
+        <div className="flex items-center gap-2 bg-white border border-[#E8E5E0] rounded-[8px] px-3 py-2 w-full sm:w-80 shadow-2xs">
           <MagnifyingGlassIcon className="w-4 h-4 text-[#9C9A95]" />
           <input
             type="text"
@@ -267,7 +266,7 @@ export default function TenantsPage() {
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="btn-primary py-2 px-4 text-[13px] inline-flex items-center gap-2 cursor-pointer shrink-0"
+          className="px-4 py-2 bg-[#1C1C1C] hover:bg-[#333333] text-white text-[12px] font-semibold rounded-[8px] transition shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
         >
           <PlusIcon className="w-4 h-4" />
           <span>Ajouter un locataire</span>

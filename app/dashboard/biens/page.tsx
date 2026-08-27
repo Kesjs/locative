@@ -157,10 +157,9 @@ export default function PropertiesPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[1440px] mx-auto pb-10">
       <Header
-        breadcrumbs={["Tableau de bord", "Mes Biens"]}
-        title="Gestion des Biens &amp; Vitrine"
+        title="Mes Biens & Vitrine"
         subtitle="Gérez votre parc immobilier, l'état d'occupation et la publication sur votre site vitrine public."
       />
 
@@ -168,7 +167,7 @@ export default function PropertiesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
           {/* Search */}
-          <div className="flex items-center gap-2 bg-white border border-[#E8E5E0] rounded-[6px] px-3 py-1.5 w-72 shadow-2xs">
+          <div className="flex items-center gap-2 bg-white border border-[#E8E5E0] rounded-[8px] px-3 py-2 w-72 shadow-2xs">
             <MagnifyingGlassIcon className="w-4 h-4 text-[#9C9A95]" />
             <input
               type="text"
@@ -180,7 +179,7 @@ export default function PropertiesPage() {
           </div>
 
           {/* Status Tabs */}
-          <div className="inline-flex bg-[#F0EFEA] border border-[#E8E5E0] rounded-[6px] p-1 gap-1">
+          <div className="inline-flex bg-[#F0EFEA] border border-[#E8E5E0] rounded-[8px] p-1 gap-1">
             {[
               { id: "all", label: `Tous (${properties.length})` },
               { id: "occupied", label: "Occupés" },
@@ -191,11 +190,10 @@ export default function PropertiesPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilter(tab.id)}
-                className={`px-3 py-1 text-[12px] font-semibold rounded-[4px] transition cursor-pointer ${
-                  filter === tab.id
+                className={`px-3 py-1 text-[12px] font-semibold rounded-[6px] transition cursor-pointer ${filter === tab.id
                     ? "bg-white text-[#1C1C1C] shadow-xs"
                     : "text-[#64635F] hover:text-[#1C1C1C]"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -206,7 +204,7 @@ export default function PropertiesPage() {
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="btn-primary py-2 px-4 text-[13px] inline-flex items-center gap-2 cursor-pointer"
+          className="px-4 py-2 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-hover)] text-[var(--text-inverse)] text-[12px] font-semibold rounded-[var(--radius-md)] transition shadow-xs flex items-center gap-1.5 cursor-pointer"
         >
           <PlusIcon className="w-4 h-4" />
           <span>Nouveau bien</span>
@@ -229,18 +227,17 @@ export default function PropertiesPage() {
               />
               <div className="absolute top-3 left-3 flex gap-1.5">
                 <span
-                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                    prop.status === "Occupé"
-                      ? "bg-[#E6F5EF] text-[#1C1C1C] border border-[#1C1C1C]/20"
+                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${prop.status === "Occupé"
+                      ? "bg-[#E6F5EF] text-[var(--text-primary)] border border-[var(--border-strong)]"
                       : "bg-[#FFF3D6] text-[#D97706] border border-[#D97706]/20"
-                  }`}
+                    }`}
                 >
                   ● {prop.status}
                 </span>
 
                 {prop.isPublished && (
-                  <span className="bg-[#1C1C1C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                    <GlobeAltIcon className="w-3 h-3 text-[#1C1C1C]" />
+                  <span className="bg-[var(--color-brand-primary)] text-[var(--text-inverse)] text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                    <GlobeAltIcon className="w-3 h-3 text-[var(--text-inverse)]" />
                     <span>En Vitrine</span>
                   </span>
                 )}
@@ -274,34 +271,34 @@ export default function PropertiesPage() {
                 </div>
 
                 {/* Spécificités Bénin */}
-                <div className="flex flex-wrap gap-1.5 mt-3 text-[10px] font-medium text-[#64635F]">
-                  <span className="bg-[#FAF9F6] border border-[#E8E5E0] px-2 py-0.5 rounded">
+                <div className="flex flex-wrap gap-1.5 mt-3 text-[11px] font-medium text-[var(--text-secondary)]">
+                  <span className="bg-[var(--bg-canvas)] border border-[var(--border-default)] px-2 py-0.5 rounded-[var(--radius-sm)]">
                     ⚡ {prop.sbeeType}
                   </span>
-                  <span className="bg-[#FAF9F6] border border-[#E8E5E0] px-2 py-0.5 rounded">
+                  <span className="bg-[var(--bg-canvas)] border border-[var(--border-default)] px-2 py-0.5 rounded-[var(--radius-sm)]">
                     💧 {prop.waterType}
                   </span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#E8E5E0] flex items-center justify-between">
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-[#9C9A95] uppercase font-bold block">
+                  <span className="text-[11px] text-[var(--text-muted)] uppercase font-bold block">
                     Loyer Mensuel
                   </span>
-                  <span className="text-[15px] font-extrabold text-[#1C1C1C]">
+                  <span className="text-[15px] font-extrabold text-[var(--text-primary)]">
                     {prop.rent}{" "}
-                    <span className="text-[11px] font-normal text-[#64635F]">
+                    <span className="text-[11px] font-normal text-[var(--text-secondary)]">
                       + {prop.charges}
                     </span>
                   </span>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[10px] text-[#9C9A95] uppercase font-bold block">
+                  <span className="text-[11px] text-[var(--text-muted)] uppercase font-bold block">
                     Locataire
                   </span>
-                  <span className="text-[12px] font-semibold text-[#1C1C1C]">
+                  <span className="text-[12px] font-semibold text-[var(--text-primary)]">
                     {prop.tenant}
                   </span>
                 </div>

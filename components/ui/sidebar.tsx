@@ -8,14 +8,84 @@ import { cn } from "@/lib/utils";
 const SIDEBAR_WIDTH = "240px";
 const SIDEBAR_WIDTH_ICON = "68px";
 
+export type SidebarVariant = "sidebar" | "floating" | "inset";
+export type LayoutMode = "default" | "compact" | "full";
+export type ThemeMode = "system" | "light" | "dark";
+export type CurrencyMode = "fcfa" | "eur";
+export type ColorTheme = "zinc" | "emerald" | "amber" | "blue" | "violet" | "rose";
+
+export const COLOR_THEMES: Record<
+  ColorTheme,
+  { name: string; hex: string; primary: string; hover: string; light: string; text: string }
+> = {
+  zinc: {
+    name: "Zinc",
+    hex: "#18181B",
+    primary: "#18181B",
+    hover: "#27272A",
+    light: "#F4F4F5",
+    text: "#FFFFFF",
+  },
+  emerald: {
+    name: "Emerald",
+    hex: "#059669",
+    primary: "#059669",
+    hover: "#047857",
+    light: "#ECFDF5",
+    text: "#FFFFFF",
+  },
+  amber: {
+    name: "Gold",
+    hex: "#D97706",
+    primary: "#D97706",
+    hover: "#B45309",
+    light: "#FFFBEB",
+    text: "#FFFFFF",
+  },
+  blue: {
+    name: "Sapphire",
+    hex: "#2563EB",
+    primary: "#2563EB",
+    hover: "#1D4ED8",
+    light: "#EFF6FF",
+    text: "#FFFFFF",
+  },
+  violet: {
+    name: "Violet",
+    hex: "#7C3AED",
+    primary: "#7C3AED",
+    hover: "#6D28D9",
+    light: "#F5F3FF",
+    text: "#FFFFFF",
+  },
+  rose: {
+    name: "Ruby",
+    hex: "#E11D48",
+    primary: "#E11D48",
+    hover: "#BE123C",
+    light: "#FFF1F2",
+    text: "#FFFFFF",
+  },
+};
+
 type SidebarContext = {
   state: "expanded" | "collapsed";
   open: boolean;
-  setOpen: (open: boolean) => void;
+  setOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   openMobile: boolean;
-  setOpenMobile: (open: boolean) => void;
+  setOpenMobile: (open: boolean | ((prev: boolean) => boolean)) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  variant: SidebarVariant;
+  setVariant: (v: SidebarVariant) => void;
+  layoutMode: LayoutMode;
+  setLayoutMode: (l: LayoutMode) => void;
+  theme: ThemeMode;
+  setTheme: (t: ThemeMode) => void;
+  currency: CurrencyMode;
+  setCurrency: (c: CurrencyMode) => void;
+  colorTheme: ColorTheme;
+  setColorTheme: (c: ColorTheme) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -51,25 +121,147 @@ export const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
 
+    const isControlled = openProp !== undefined;
     const [_open, _setOpen] = React.useState(defaultOpen);
-    const open = openProp ?? _open;
+    const open = isControlled ? openProp : _open;
+
     const setOpen = React.useCallback(
-      (value: boolean | ((value: boolean) => boolean)) => {
-        const openState = typeof value === "function" ? value(open) : value;
-        if (setOpenProp) {
-          setOpenProp(openState);
+      (value: boolean | ((prev: boolean) => boolean)) => {
+        if (isControlled) {
+          const next = typeof value === "function" ? value(open) : value;
+          setOpenProp?.(next);
         } else {
-          _setOpen(openState);
+          _setOpen(value);
         }
       },
-      [setOpenProp, open]
+      [isControlled, open, setOpenProp]
     );
 
+    // Dynamic preferences
+    const [variant, setVariantState] = React.useState<SidebarVariant>("floating");
+    const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("default");
+    const [theme, setThemeState] = React.useState<ThemeMode>("light");
+    const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
+    const [colorTheme, setColorThemeState] = React.useState<ColorTheme>("zinc");
+
+    const applyColor = (c: ColorTheme) => {
+      const pal = COLOR_THEMES[c] || COLOR_THEMES.zinc;
+      if (typeof document !== "undefined") {
+        document.documentElement.style.setProperty("--color-brand-primary", pal.primary);
+        document.documentElement.style.setProperty("--color-brand-hover", pal.hover);
+        document.documentElement.style.setProperty("--color-brand-light", pal.light);
+        document.documentElement.style.setProperty("--color-brand-text", pal.text);
+      }
+    };
+
+    const applyThemeClass = (t: ThemeMode) => {
+      if (typeof document === "undefined") return;
+      if (t === "dark") {
+        document.documentElement.classList.add("dark");
+      } else if (t === "light") {
+        document.documentElement.classList.remove("dark");
+      } else if (t === "system") {
+        const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (isDark) document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+      }
+    };
+
+    React.useEffect(() => {
+      try {
+        const sv = localStorage.getItem("lokka_pref_sidebar");
+        if (sv === "sidebar" || sv === "floating" || sv === "inset") setVariantState(sv);
+
+        const lm = localStorage.getItem("lokka_pref_layout");
+        if (lm === "default" || lm === "compact" || lm === "full") {
+          setLayoutModeState(lm);
+          if (lm === "full" || lm === "compact") {
+            _setOpen(false);
+          } else {
+            _setOpen(true);
+          }
+        }
+
+        const th = localStorage.getItem("lokka_pref_theme");
+        if (th === "system" || th === "light" || th === "dark") {
+          setThemeState(th);
+          applyThemeClass(th);
+        } else {
+          applyThemeClass("light");
+        }
+
+        const cu = localStorage.getItem("lokka_pref_currency");
+        if (cu === "fcfa" || cu === "eur") setCurrencyState(cu);
+
+        const co = localStorage.getItem("lokka_pref_color") as ColorTheme;
+        if (co && COLOR_THEMES[co]) {
+          setColorThemeState(co);
+          applyColor(co);
+        }
+      } catch (_) { }
+    }, []);
+
+    React.useEffect(() => {
+      if (theme === "system") {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        const handler = (e: MediaQueryListEvent) => {
+          if (e.matches) document.documentElement.classList.add("dark");
+          else document.documentElement.classList.remove("dark");
+        };
+        mq.addEventListener("change", handler);
+        return () => mq.removeEventListener("change", handler);
+      }
+    }, [theme]);
+
+    const setVariant = (v: SidebarVariant) => {
+      setVariantState(v);
+      try {
+        localStorage.setItem("lokka_pref_sidebar", v);
+      } catch (_) { }
+    };
+
+    const setLayoutMode = (l: LayoutMode) => {
+      setLayoutModeState(l);
+      try {
+        localStorage.setItem("lokka_pref_layout", l);
+      } catch (_) { }
+      if (l === "full" || l === "compact") {
+        _setOpen(false);
+      } else {
+        _setOpen(true);
+      }
+    };
+
+    const setTheme = (t: ThemeMode) => {
+      setThemeState(t);
+      try {
+        localStorage.setItem("lokka_pref_theme", t);
+        applyThemeClass(t);
+      } catch (_) { }
+    };
+
+    const setCurrency = (c: CurrencyMode) => {
+      setCurrencyState(c);
+      try {
+        localStorage.setItem("lokka_pref_currency", c);
+      } catch (_) { }
+    };
+
+    const setColorTheme = (c: ColorTheme) => {
+      setColorThemeState(c);
+      try {
+        localStorage.setItem("lokka_pref_color", c);
+        applyColor(c);
+      } catch (_) { }
+    };
+
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open);
-    }, [isMobile, setOpen, setOpenMobile]);
+      if (isMobile) {
+        setOpenMobile((prev) => !prev);
+      } else {
+        _setOpen((prev) => !prev);
+      }
+    }, [isMobile]);
 
     const state = open ? "expanded" : "collapsed";
 
@@ -82,8 +274,31 @@ export const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        variant,
+        setVariant,
+        layoutMode,
+        setLayoutMode,
+        theme,
+        setTheme,
+        currency,
+        setCurrency,
+        colorTheme,
+        setColorTheme,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [
+        state,
+        open,
+        setOpen,
+        isMobile,
+        openMobile,
+        setOpenMobile,
+        toggleSidebar,
+        variant,
+        layoutMode,
+        theme,
+        currency,
+        colorTheme,
+      ]
     );
 
     return (
@@ -119,7 +334,7 @@ export const Sidebar = React.forwardRef<
   (
     {
       side = "left",
-      variant = "sidebar",
+      variant: variantProp,
       collapsible = "icon",
       className,
       children,
@@ -128,32 +343,51 @@ export const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { state } = useSidebar();
+    const { state, variant: ctxVariant, layoutMode } = useSidebar();
     const isCollapsed = state === "collapsed";
+    const variant = variantProp || ctxVariant;
+    const isFloating = variant === "floating";
+
+    // In Full Layout mode, when collapsed, the sidebar is completely hidden offscreen (0px footprint)
+    const isHiddenOffscreen = layoutMode === "full" && isCollapsed;
 
     return (
       <aside
         ref={ref}
         data-state={state}
+        data-variant={variant}
+        data-layout={layoutMode}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         style={{
           width: isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
-          height: "100vh",
+          height: isFloating ? "calc(100vh - 24px)" : "100vh",
           position: "fixed",
-          top: 0,
-          left: 0,
+          top: isFloating ? 12 : 0,
+          left: isFloating ? 12 : 0,
           zIndex: 40,
-          background: "var(--color-surface-secondary)",
-          borderRight: "1px solid var(--color-border-primary)",
+          transform: isHiddenOffscreen ? "translateX(-130%)" : "translateX(0)",
+          opacity: isHiddenOffscreen ? 0 : 1,
+          pointerEvents: isHiddenOffscreen ? "none" : "auto",
+          background: "var(--bg-sidebar, #FFFFFF)",
+          border: isFloating
+            ? "1px solid var(--sidebar-border, var(--border-default))"
+            : undefined,
+          borderRight: !isFloating
+            ? "1px solid var(--sidebar-border, var(--border-default))"
+            : undefined,
+          borderRadius: isFloating ? 14 : 0,
+          boxShadow: isFloating
+            ? "var(--shadow-card)"
+            : "none",
           display: "flex",
           flexDirection: "column",
-          transition: "width 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           overflow: isCollapsed ? "visible" : "hidden",
           boxSizing: "border-box",
           padding: "16px 12px",
           ...style,
         }}
-        className={cn("sidebar-container group/sidebar", className)}
+        className={cn("sidebar-container group/sidebar text-[var(--text-primary)]", className)}
         {...props}
       >
         {children}
@@ -167,7 +401,7 @@ export const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, onClick, style, ...props }, ref) => {
-  const { toggleSidebar, state } = useSidebar();
+  const { toggleSidebar, state, layoutMode, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   return (
@@ -176,15 +410,19 @@ export const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       onClick={(event) => {
         onClick?.(event);
-        toggleSidebar();
+        if (layoutMode === "full" && isCollapsed) {
+          setOpen(true);
+        } else {
+          toggleSidebar();
+        }
       }}
       style={{
-        background: "var(--color-surface-secondary)",
-        border: "1px solid var(--color-border-primary)",
-        borderRadius: 6,
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-default)",
+        borderRadius: 8,
         padding: "6px 8px",
         cursor: "pointer",
-        color: "var(--color-text-primary)",
+        color: "var(--text-primary)",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -252,17 +490,45 @@ export const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"main">
 >(({ className, style, ...props }, ref) => {
-  const { state } = useSidebar();
+  const { state, variant, layoutMode } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const isFloating = variant === "floating";
+  const isInset = variant === "inset";
+
+  // In Full Layout mode, when collapsed, the margin is strictly 0px (100% full screen)
+  const isFullLayoutActive = layoutMode === "full" && isCollapsed;
+
+  const marginLeft = isFullLayoutActive
+    ? "0px"
+    : isFloating
+      ? isCollapsed
+        ? "88px"
+        : "260px"
+      : isInset
+        ? isCollapsed
+          ? "76px"
+          : "248px"
+        : isCollapsed
+          ? SIDEBAR_WIDTH_ICON
+          : SIDEBAR_WIDTH;
 
   return (
     <main
       ref={ref}
+      data-variant={variant}
+      data-layout={layoutMode}
       style={{
-        marginLeft: isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
-        width: "100%",
-        minHeight: "100vh",
-        transition: "margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+        marginLeft,
+        width: isFullLayoutActive ? "100%" : "auto",
+        minHeight: isInset ? "calc(100vh - 24px)" : "100vh",
+        marginRight: isInset && !isFullLayoutActive ? 12 : 0,
+        marginTop: isInset && !isFullLayoutActive ? 12 : 0,
+        marginBottom: isInset && !isFullLayoutActive ? 12 : 0,
+        borderRadius: isInset && !isFullLayoutActive ? 14 : 0,
+        border: isInset && !isFullLayoutActive ? "1px solid var(--color-border-primary)" : "none",
+        backgroundColor: isInset ? "var(--color-surface-secondary)" : undefined,
+        boxShadow: isInset && !isFullLayoutActive ? "0 4px 20px rgba(0,0,0,0.03)" : "none",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         ...style,
       }}
       className={cn("sidebar-inset", className)}
@@ -300,8 +566,9 @@ export const SidebarFooter = React.forwardRef<
     data-sidebar="footer"
     style={{
       marginTop: "auto",
-      paddingTop: 12,
-      borderTop: "1px solid var(--color-border-primary)",
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
       ...style,
     }}
     {...props}
@@ -312,27 +579,19 @@ SidebarFooter.displayName = "SidebarFooter";
 export const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
->(({ className, style, ...props }, ref) => {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
-
-  return (
-    <div
-      ref={ref}
-      data-sidebar="content"
-      style={{
-        display: "flex",
-        flex: 1,
-        flexDirection: "column",
-        gap: 16,
-        overflowY: isCollapsed ? "visible" : "auto",
-        overflowX: isCollapsed ? "visible" : "hidden",
-        ...style,
-      }}
-      {...props}
-    />
-  );
-});
+>(({ className, style, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-sidebar="content"
+    style={{
+      flex: 1,
+      overflowY: "auto",
+      overflowX: "hidden",
+      ...style,
+    }}
+    {...props}
+  />
+));
 SidebarContent.displayName = "SidebarContent";
 
 export const SidebarGroup = React.forwardRef<
@@ -346,6 +605,7 @@ export const SidebarGroup = React.forwardRef<
       display: "flex",
       flexDirection: "column",
       gap: 4,
+      marginBottom: 16,
       ...style,
     }}
     {...props}
@@ -355,27 +615,22 @@ SidebarGroup.displayName = "SidebarGroup";
 
 export const SidebarGroupLabel = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> & { asChild?: boolean }
->(({ className, asChild = false, style, ...props }, ref) => {
+  React.ComponentProps<"div">
+>(({ className, style, ...props }, ref) => {
   const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
-  const Comp = asChild ? Slot : "div";
+  if (state === "collapsed") return null;
 
   return (
-    <Comp
+    <div
       ref={ref}
       data-sidebar="group-label"
       style={{
         fontSize: 11,
-        fontWeight: 600,
-        color: "var(--color-text-tertiary)",
+        fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.05em",
-        padding: "4px 10px",
-        opacity: isCollapsed ? 0 : 1,
-        transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
+        color: "var(--color-text-tertiary)",
+        padding: "4px 8px",
         ...style,
       }}
       {...props}
@@ -392,13 +647,10 @@ export const SidebarMenu = React.forwardRef<
     ref={ref}
     data-sidebar="menu"
     style={{
-      display: "flex",
-      width: "100%",
-      flexDirection: "column",
-      gap: 4,
       listStyle: "none",
-      margin: 0,
-      padding: 0,
+      display: "flex",
+      flexDirection: "column",
+      gap: 2,
       ...style,
     }}
     {...props}
@@ -409,18 +661,7 @@ SidebarMenu.displayName = "SidebarMenu";
 export const SidebarMenuItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
->(({ className, style, ...props }, ref) => (
-  <li
-    ref={ref}
-    data-sidebar="menu-item"
-    style={{
-      position: "relative",
-      listStyle: "none",
-      ...style,
-    }}
-    {...props}
-  />
-));
+>(({ ...props }, ref) => <li ref={ref} {...props} />);
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 export const SidebarMenuButton = React.forwardRef<
@@ -429,7 +670,7 @@ export const SidebarMenuButton = React.forwardRef<
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string;
-    size?: "default" | "sm" | "lg";
+    size?: "sm" | "md" | "lg";
   }
 >(
   (
@@ -437,10 +678,10 @@ export const SidebarMenuButton = React.forwardRef<
       asChild = false,
       isActive = false,
       tooltip,
-      size = "default",
+      size = "md",
       className,
-      style,
       children,
+      style,
       ...props
     },
     ref
@@ -448,28 +689,73 @@ export const SidebarMenuButton = React.forwardRef<
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
     const Comp = asChild ? Slot : "button";
+    const [isHovered, setIsHovered] = React.useState(false);
+    const [tooltipTop, setTooltipTop] = React.useState(0);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    const handleMouseEnter = () => {
+      if (isCollapsed && tooltip && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setTooltipTop(rect.top + rect.height / 2);
+      }
+      setIsHovered(true);
+    };
 
     return (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-active={isActive}
-        data-tip={isCollapsed ? tooltip : undefined}
-        className={cn(className)}
-        style={{
-          width: "100%",
-          height: size === "lg" ? 48 : size === "sm" ? 32 : 38,
-          padding: "0 11px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          boxSizing: "border-box",
-          ...style,
-        }}
-        {...props}
+      <div
+        ref={containerRef}
+        className="relative flex items-center w-full"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        {children}
-      </Comp>
+        <Comp
+          ref={ref}
+          data-sidebar="menu-button"
+          data-active={isActive}
+          title={isCollapsed && tooltip ? tooltip : undefined}
+          className={cn(className)}
+          style={{
+            width: "100%",
+            height: size === "lg" ? 48 : size === "sm" ? 32 : 38,
+            padding: isCollapsed ? 0 : "0 11px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: isCollapsed ? "center" : "flex-start",
+            gap: 10,
+            boxSizing: "border-box",
+            ...style,
+          }}
+          {...props}
+        >
+          {children}
+        </Comp>
+
+        {/* Floating Fixed Tooltip - Never clipped by overflow containers */}
+        {isCollapsed && tooltip && isHovered && (
+          <div
+            style={{
+              position: "fixed",
+              left: 76,
+              top: tooltipTop,
+              transform: "translateY(-50%)",
+              zIndex: 9999999,
+              backgroundColor: "#18181B",
+              color: "#FFFFFF",
+              padding: "5px 10px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
+              animation: "tooltip-slide-right 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+            }}
+            className="dark:bg-white dark:text-[#18181B]"
+          >
+            {tooltip}
+          </div>
+        )}
+      </div>
     );
   }
 );

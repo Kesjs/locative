@@ -1,65 +1,203 @@
 "use client";
 
+import { useState } from "react";
 import Header from "@/components/dashboard/Header";
-import { ArrowDownTrayIcon, CalculatorIcon } from "@heroicons/react/24/outline";
+import { NumberTicker } from "@/components/ui/number-ticker";
+import { BorderBeam } from "@/components/ui/border-beam";
+import {
+  ArrowDownTrayIcon,
+  CalculatorIcon,
+  ShieldCheckIcon,
+  DocumentCheckIcon,
+  BuildingOffice2Icon,
+  BanknotesIcon,
+} from "@heroicons/react/24/outline";
 
 export default function AccountingPage() {
+  const [selectedYear, setSelectedYear] = useState("2026");
+
+  const accountingLines = [
+    {
+      label: "Loyers bruts encaissés (Total annuel)",
+      val: 58200000,
+      note: "Total des encaissements Mobile Money & Virements",
+      type: "income",
+    },
+    {
+      label: "Dépenses d'entretien, plomberie et réfection",
+      val: 3450000,
+      note: "Travaux d'urgence et rénovations justifiées",
+      type: "expense",
+    },
+    {
+      label: "Charges de gardiennage et entretien parties communes",
+      val: 2800000,
+      note: "Contrats prestataires et sécurité",
+      type: "expense",
+    },
+    {
+      label: "Commissions de gestion d'agence (Plafonné à 10% — Loi 2022-30)",
+      val: 5820000,
+      note: "Honoraires de gestion mandataire déductibles",
+      type: "expense",
+    },
+    {
+      label: "Taxe Foncière Unique estimée (TFU DGI Bénin)",
+      val: 2910000,
+      note: "Estimation fiscale conforme au Code Général des Impôts",
+      type: "tax",
+    },
+  ];
+
   return (
-    <div>
+    <div className="space-y-6 max-w-[1440px] mx-auto pb-10">
       <Header
-        breadcrumbs={["Tableau de bord", "Comptabilité"]}
-        title="Comptabilité & Fiscalité Foncière"
-        subtitle="Bilan annuel des revenus locatifs, charges d'entretien, commissions de gestion et estimation de la Taxe Foncière Unique (TFU Bénin)."
+        title="Comptabilité & Fiscalité"
+        subtitle="Bilan financier, charges d'entretien et estimation officielle TFU DGI Bénin."
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
-        <div style={{ background: "var(--color-surface-secondary)", border: "1px solid var(--color-border-primary)", borderRadius: 8, padding: 20 }}>
-          <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500, marginBottom: 6 }}>Revenus bruts perçus (YTD)</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--color-text-primary)" }}>58 200 000 FCFA</div>
+      {/* 3 Summary Bento Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="text-[12px] text-[var(--text-secondary)] font-medium mb-1">
+              Revenus bruts perçus (YTD {selectedYear})
+            </div>
+            <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-2 flex items-baseline gap-1">
+              <NumberTicker value={58200000} />
+              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">FCFA</span>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)]">
+            100% des loyers enregistrés avec reçu
+          </div>
         </div>
 
-        <div style={{ background: "var(--color-surface-secondary)", border: "1px solid var(--color-border-primary)", borderRadius: 8, padding: 20 }}>
-          <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500, marginBottom: 6 }}>Charges & Réparations</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--color-text-primary)" }}>6 250 000 FCFA</div>
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="text-[12px] text-[var(--text-secondary)] font-medium mb-1">
+              Charges &amp; Réparations déductibles
+            </div>
+            <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-2 flex items-baseline gap-1">
+              <NumberTicker value={6250000} />
+              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">FCFA</span>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)]">
+            10.7% du chiffre d&apos;affaires brut
+          </div>
         </div>
 
-        <div style={{ background: "var(--color-surface-secondary)", border: "1px solid var(--color-border-primary)", borderRadius: 8, padding: 20 }}>
-          <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", fontWeight: 500, marginBottom: 6 }}>Revenu net foncier estimé</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--color-accent)" }}>51 950 000 FCFA</div>
+        <div className="relative bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col justify-between overflow-hidden">
+          <BorderBeam size={160} duration={12} colorFrom="#C5A880" colorTo="#FAF9F6" />
+          <div>
+            <div className="text-[12px] text-[var(--text-secondary)] font-medium mb-1">
+              Revenu net foncier estimé
+            </div>
+            <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-2 flex items-baseline gap-1">
+              <NumberTicker value={51950000} className="text-[var(--text-primary)]" />
+              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">FCFA</span>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[#22C55E] font-bold">
+            Marge nette d&apos;exploitation : 89.3%
+          </div>
         </div>
       </div>
 
-      <div style={{ background: "var(--color-surface-secondary)", border: "1px solid var(--color-border-primary)", borderRadius: 8, padding: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, color: "var(--color-text-primary)" }}>Synthèse Comptable & Déclaration TFU 2026</h3>
-          <button className="btn-primary" style={{ padding: "6px 14px", fontSize: 13, gap: 6 }}>
-            <ArrowDownTrayIcon style={{ width: 14, height: 14 }} /> Exporter le bilan annuel (PDF)
-          </button>
+      {/* Main Breakdown Section */}
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--border-default)] mb-5">
+          <div>
+            <h3 className="text-[17px] font-bold text-[var(--text-primary)]">
+              Synthèse Comptable &amp; Déclaration TFU {selectedYear}
+            </h3>
+            <p className="text-[12px] text-[var(--text-secondary)]">
+              Ventilation des postes conforme aux règles fiscales de la République du Bénin
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-[6px] bg-[var(--bg-canvas)] border border-[var(--border-default)] p-0.5">
+              {["2024", "2025", "2026"].map((yr) => (
+                <button
+                  key={yr}
+                  type="button"
+                  onClick={() => setSelectedYear(yr)}
+                  className={`px-3 py-1 text-[11px] font-semibold rounded-[4px] transition cursor-pointer ${
+                    selectedYear === yr
+                      ? "bg-[var(--color-brand-primary)] text-[var(--text-inverse)] shadow-xs"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  {yr}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => alert("Génération du bilan certifié PDF...")}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--color-brand-primary)] hover:bg-[#F5F5DC] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] border border-transparent text-[var(--text-inverse)] text-[12px] font-semibold rounded-[6px] transition cursor-pointer"
+            >
+              <ArrowDownTrayIcon className="h-3.5 w-3.5" />
+              <span>Exporter le bilan annuel (PDF)</span>
+            </button>
+          </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {[
-            { label: "Loyers bruts encaissés (Total annuel)", val: "58 200 000 FCFA" },
-            { label: "Dépenses d'entretien, plomberie et réfection", val: "3 450 000 FCFA" },
-            { label: "Charges de gardiennage et entretien parties communes", val: "2 800 000 FCFA" },
-            { label: "Commissions de gestion d'agence (Plafonné à 10% — Loi 2022-30)", val: "5 820 000 FCFA" },
-            { label: "Taxe Foncière Unique estimée (TFU Bénin)", val: "2 910 000 FCFA" },
-          ].map((item, i) => (
+        <div className="space-y-2.5">
+          {accountingLines.map((item, i) => (
             <div
               key={i}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "12px 16px",
-                borderRadius: 6,
-                background: "var(--color-surface-tertiary)",
-                fontSize: 14,
-              }}
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-[8px] bg-[var(--bg-canvas)] border border-[var(--border-default)] gap-2 hover:border-[#1C1C1C] transition-colors"
             >
-              <span style={{ fontWeight: 500, color: "var(--color-text-primary)" }}>{item.label}</span>
-              <span style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>{item.val}</span>
+              <div>
+                <span className="font-semibold text-[var(--text-primary)] text-[13px] block">
+                  {item.label}
+                </span>
+                <span className="text-[11px] text-[var(--text-secondary)]">{item.note}</span>
+              </div>
+              <div className="text-right shrink-0">
+                <span
+                  className={`text-[15px] font-bold ${
+                    item.type === "income"
+                      ? "text-[var(--text-primary)]"
+                      : item.type === "tax"
+                      ? "text-[#E67700]"
+                      : "text-[var(--text-secondary)]"
+                  }`}
+                >
+                  {item.type === "expense" && "- "}
+                  {item.val.toLocaleString("fr-FR")} FCFA
+                </span>
+              </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-5 p-4 rounded-[8px] bg-[var(--bg-canvas)] border border-[var(--border-default)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+              <ShieldCheckIcon className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-[13px] font-bold text-[var(--text-primary)]">
+                Calcul certifié conforme Loi n° 2022-30 &amp; Code Général des Impôts
+              </div>
+              <div className="text-[11px] text-[var(--text-secondary)]">
+                TFU déclarable en ligne auprès de la Direction Générale des Impôts (DGI Bénin)
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => alert("Ouverture du portail télépaiement DGI Bénin...")}
+            className="px-3.5 py-1.5 bg-[var(--bg-surface)] hover:bg-[var(--bg-canvas)] border border-[var(--border-default)] text-[var(--text-primary)] text-[12px] font-semibold rounded-[6px] shadow-2xs transition cursor-pointer shrink-0"
+          >
+            Guide Télédéclaration DGI →
+          </button>
         </div>
       </div>
     </div>
