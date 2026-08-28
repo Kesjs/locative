@@ -62,32 +62,27 @@ export default function OtpVerification({
       setErrorMessage(null);
 
       try {
-        if (isSupabaseConfigured()) {
-          const supabase = createClient();
-          const { data, error } = await supabase.auth.verifyOtp({
-            email,
-            token: cleanToken,
-            type: "email",
-          });
-
-          if (error) {
-            throw error;
-          }
-
-          if (data.session) {
-            setIsSuccess(true);
-            setTimeout(() => {
-              if (onSuccess) {
-                onSuccess();
-              } else {
-                window.location.href = "/dashboard";
-              }
-            }, 800);
-            return;
-          }
+        if (!isSupabaseConfigured()) {
+          throw new Error(
+            "Configuration Supabase manquante. Contactez le support."
+          );
         }
 
-        // Mode prototype local
+        const supabase = createClient();
+        const { data, error } = await supabase.auth.verifyOtp({
+          email,
+          token: cleanToken,
+          type: "email",
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data.session) {
+          throw new Error("Code incorrect ou expiré. Veuillez vérifier et réessayer.");
+        }
+
         setIsSuccess(true);
         setTimeout(() => {
           if (onSuccess) {
