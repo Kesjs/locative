@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LayoutCustomizer } from "@/components/dashboard/LayoutCustomizer";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import {
   MagnifyingGlassIcon,
@@ -68,29 +69,7 @@ export default function Header({
   const [showNotifications, setShowNotifications] = React.useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = React.useState(false);
 
-  const [userProfile, setUserProfile] = React.useState({
-    name: "Alexandre K.",
-    email: "alexandre@lokka.bj",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    role: "Propriétaire Bailleur",
-  });
-
-  React.useEffect(() => {
-    try {
-      const session = localStorage.getItem("lokka_session");
-      if (session) {
-        const parsed = JSON.parse(session);
-        setUserProfile({
-          name: parsed.nom || "Alexandre K.",
-          email: parsed.email || "alexandre@lokka.bj",
-          avatar:
-            parsed.avatar ||
-            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-          role: parsed.role || "Propriétaire Bailleur",
-        });
-      }
-    } catch (_) {}
-  }, []);
+  const userProfile = useUserProfile();
 
   // Keyboard shortcut for ⌘K
   React.useEffect(() => {
