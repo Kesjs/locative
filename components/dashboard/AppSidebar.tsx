@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useUserProfile } from "@/lib/hooks/useUserProfile";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import {
   LayoutDashboard,
   Building2,
