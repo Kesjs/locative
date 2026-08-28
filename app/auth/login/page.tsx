@@ -41,18 +41,20 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      if (isSupabaseConfigured()) {
-        const supabase = createClient();
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            shouldCreateUser: true,
-          },
-        });
-
-        if (error) throw error;
+      if (!isSupabaseConfigured()) {
+        throw new Error("Configuration Supabase manquante. Contactez le support.");
       }
+
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          shouldCreateUser: true,
+        },
+      });
+
+      if (error) throw error;
 
       setCodeSent(true);
     } catch (err: any) {
