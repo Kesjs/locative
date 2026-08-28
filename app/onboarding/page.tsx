@@ -502,6 +502,18 @@ function OnboardingContent() {
             })
             .eq("id", user.id);
 
+          if (userEmail) {
+            await supabase
+              .from("leads_waitlist")
+              .update({
+                full_name: displayName,
+                phone: fullOwnerPhone,
+                profile_type: profileType,
+                city,
+              })
+              .eq("email", userEmail);
+          }
+
           const { data: propData } = await supabase
             .from("properties")
             .insert([
