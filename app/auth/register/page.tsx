@@ -5,6 +5,7 @@ import Link from "next/link";
 import AuthLayout from "@/components/auth/AuthLayout";
 import OtpVerification from "@/components/auth/OtpVerification";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { getPostAuthRedirect } from "@/lib/supabase/postAuthRedirect";
 import {
   EnvelopeIcon,
   ArrowRightIcon,
@@ -126,8 +127,9 @@ export default function RegisterPage() {
           <OtpVerification
             email={email}
             length={6}
-            onSuccess={() => {
-              window.location.href = `/onboarding?email=${encodeURIComponent(email)}`;
+            onSuccess={async () => {
+              const redirectTo = await getPostAuthRedirect(email);
+              window.location.href = redirectTo;
             }}
             onChangeEmail={() => setOtpSent(false)}
           />
