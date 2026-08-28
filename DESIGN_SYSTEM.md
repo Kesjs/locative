@@ -38,40 +38,57 @@ L'interface doit évoquer un produit de **wealth-management premium** — calme,
 
 ## 2. Palette de Couleurs
 
-```
-Surfaces
-├── surface-primary     #FAF9F6    Fond principal (warm off-white)
-├── surface-secondary   #FFFFFF    Cards, surfaces élevées
-├── surface-tertiary    #F3F1ED    Alternance de sections, footer
-├── surface-dark        #1C1C1C    Containers sombres (dashboard preview)
-└── surface-dark-subtle #2A2A2A    Bordures sur fond sombre
+> **Source unique de vérité : `app/globals.css` (`@theme` + `:root`).**
+> Les valeurs ci-dessous sont les vraies valeurs des tokens CSS, pas un idéal théorique.
+> Les composants doivent utiliser les classes de tokens (`bg-bg-canvas`, `text-text-primary`...)
+> et non des hex en dur (`bg-[#FAF9F6]`) — voir §12 "Dette technique" pour le plan de migration.
 
-Textes
-├── text-primary        #1C1C1C    Titres, texte principal
-├── text-secondary      #64635F    Corps, descriptions
-└── text-tertiary       #9C9A95    Captions, labels, placeholders
+```
+Surfaces (var --bg-*, clair)
+├── bg-canvas            #FAF9F6    Fond principal (warm off-white)
+├── bg-surface           #FFFFFF    Cards, surfaces élevées
+├── bg-subtle            #F4F2EC    Alternance de sections, footer, badges
+├── bg-muted             #EAE7DF    États hover/active discrets
+└── bg-sidebar           #FFFFFF    Sidebar dashboard
+
+Containers sombres (usage ponctuel, ex. dashboard preview landing)
+├── surface-dark          #1C1C1C
+└── surface-dark-subtle   #2A2A2A
+
+Textes (WCAG AA/AAA vérifié sur fond blanc)
+├── text-primary         #18181B    Titres, texte principal (contraste 14.2:1)
+├── text-secondary       #52525B    Corps, descriptions (contraste 6.1:1)
+└── text-muted           #71717A    Captions, labels, placeholders (contraste 4.6:1)
 
 Bordures
-├── border-primary      #E8E5E0    Bordures de cards, dividers
-└── border-secondary    #F0EDE8    Séparateurs très subtils
+├── border-subtle         #F0EDE6    Séparateurs très subtils
+├── border-default         #E4E0D8    Bordures de cards, dividers
+└── border-strong          #D1CBBF    Bordures interactives/focus
 
-Accent (usage MINIMAL)
-├── accent              #087F5B    Accent principal — dots, badges, liens
-├── accent-light        #E6F5EF    Fond de badges accent
-└── accent-hover        #065F43    Hover sur accent
+Accent marque (usage MINIMAL — jamais de grandes surfaces)
+├── brand-primary        #18181B    CTA, liens actifs, sidebar item actif
+├── brand-hover          #27272A    Hover sur brand-primary
+└── brand-light           #F4F2EC    Fond de badges/sélection
 
-Sémantique
-├── negative            #C92A2A    Erreurs, retards (usage minimal)
-└── warning             #E67700    Avertissements (usage minimal)
+Sémantique (statuts, usage minimal)
+├── success               #16A34A    Confirmations, statuts positifs
+├── warning               #D97706    Avertissements
+├── danger                #DC2626    Erreurs, retards
+└── info                  #2563EB    Informatif
 ```
 
-### Règle d'or du vert
-Le vert `#087F5B` ne couvre **jamais** de grandes surfaces. Il est utilisé uniquement pour :
-- Points (●) de statut
-- Badges de texte petits
-- Checkmarks
-- Liens occasionnels
-- Left-border accent (`2px`) sur cards mises en avant
+### Note historique — accent vert `#087F5B`
+Les premières itérations du design prévoyaient un vert `#087F5B` comme accent de marque
+(badges, dots de statut, liens). Le thème réel en prod utilise `success` (`#16A34A`) à la
+place pour ce rôle, et le noir (`brand-primary`) comme accent principal. Ne pas réintroduire
+`#087F5B` dans du nouveau code — utiliser `success` pour les statuts positifs et `brand-primary`
+pour les accents de marque.
+
+### Dark mode
+Le thème sombre existe déjà et est piloté par la classe `.dark` sur `<html>`/`<body>` — toutes
+les variables `--bg-*`, `--text-*`, `--border-*` ont un équivalent dans le bloc `.dark { }` de
+`globals.css`. Un nouveau composant qui utilise les classes de tokens (pas des hex en dur)
+supporte le dark mode automatiquement, sans code supplémentaire.
 
 ---
 
@@ -126,11 +143,13 @@ Ex: "Gérez votre patrimoine locatif. *Sereinement.*"
 - Transition : `0.25s ease`
 
 ### Boutons
-- **Primary** : fond `#1C1C1C`, texte blanc, `border-radius: 100px`, padding `11px 24px`
-- **Secondary** : transparent, border `1px solid #E8E5E0`, `border-radius: 100px`
-- **Hover primary** : fond `#333`, `translateY(-1px)`, shadow `0 4px 12px rgba(0,0,0,0.1)`
-- Font : Inter 500, 14px
-- Jamais de bouton vert plein — le vert est un accent, pas un CTA
+> Mis à jour : les boutons réels du site ne sont **pas en pill** (`100px`) — c'est un carré
+> arrondi doux, cohérent avec les cards. Ne pas repasser en pill sans changer tout le site.
+- **Primary** : fond `brand-primary` (#18181B), texte blanc, `border-radius: 6px`, padding `12px 20-24px`
+- **Secondary** : transparent, border `1px solid border-default`, `border-radius: 8px`
+- **Hover primary** : fond `brand-hover` (#27272A), transition `0.2s`
+- Font : Inter 500/600, 13-14px
+- Jamais de bouton vert plein — le vert (`success`) est un accent de statut, pas un CTA
 
 ### Inputs
 - Border : `1px solid #E8E5E0`
@@ -162,42 +181,42 @@ Ex: "Gérez votre patrimoine locatif. *Sereinement.*"
 
 ---
 
-## 6. Animations (GSAP)
+## 6. Animations (Framer Motion)
+
+> Mis à jour : le code utilise réellement **framer-motion** (`motion.div`, `initial`/`animate`/
+> `transition`), pas GSAP. GSAP reste une dépendance possible pour des cas avancés (scroll-scrub
+> complexe) mais n'est pas le standard actuel — ne pas mélanger les deux dans un même composant.
 
 ### Principes
 - **Subtiles et mesurées** — jamais bouncy, jamais overshoot
-- Ease : `power2.out` pour tout
+- Easing standard : `[0.16, 1, 0.3, 1]` (ease-out doux, signature du site)
 - Durée : 0.5s à 0.8s max
-- Stagger : 0.1s à 0.15s entre éléments
+- Stagger : delay manuel de 0.1s à 0.15s entre éléments (via `transition.delay`)
+- Toujours combiné à un `initial={{ opacity: 0, y: ... }}` → `animate={{ opacity: 1, y: 0 }}`
 
 ### Catalogue
 
-| Élément | Animation | Durée | Ease |
+| Élément | Animation | Durée | Delay |
 |---|---|---|---|
-| Hero titre | Fade up, ligne par ligne | 0.8s, stagger 0.15s | `power2.out` |
-| Hero sous-titre | Fade up | 0.6s, delay 0.4s | `power2.out` |
-| Hero CTA | Fade up | 0.5s, delay 0.6s | `power2.out` |
-| Headings de section | Fade up au scroll | 0.7s | `power2.out` |
-| Cards (features, pricing) | Fade up stagger au scroll | 0.6s, stagger 0.1s | `power2.out` |
-| Stats chiffres | Count-up au scroll | 1.2s | `power2.out` |
-| Dashboard preview | Fade up au scroll | 0.8s | `power2.out` |
+| Hero badge | Fade up | 0.5s | 0 |
+| Hero titre (H1) | Fade up | 0.7s | 0.1s |
+| Hero sous-titre | Fade up | 0.6s | 0.25s |
+| Hero form CTA | Fade up | 0.6s | 0.4s |
+| Hero preuve sociale | Fade up | 0.5s | 0.55s |
+| Headings de section / cards au scroll | Fade up | 0.6-0.7s | stagger 0.1s |
 
-### Pattern GSAP standard
+### Pattern Framer Motion standard
 ```tsx
-useEffect(() => {
-  const ctx = gsap.context(() => {
-    gsap.fromTo(".selector", 
-      { opacity: 0, y: 20 },
-      { 
-        opacity: 1, y: 0, 
-        duration: 0.7, ease: "power2.out",
-        scrollTrigger: { trigger: ".selector", start: "top 85%", once: true }
-      }
-    );
-  }, sectionRef);
-  return () => ctx.revert();
-}, []);
+<motion.div
+  initial={{ opacity: 0, y: 16 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+>
+  ...
+</motion.div>
 ```
+Pour les animations déclenchées au scroll (hors Hero), utiliser `whileInView` au lieu de
+`animate`, avec `viewport={{ once: true, margin: "-100px" }}` pour ne jouer qu'une fois.
 
 ---
 
@@ -328,6 +347,24 @@ lokka/
 - Header : fond `surface-tertiary`, texte `text-tertiary`, caption uppercase
 - Rows : bordure bottom `border-secondary`, hover fond `surface-tertiary`
 - Pas de zebra striping agressif
+
+---
+
+---
+
+## 13. Dette technique — Tokens en dur
+
+Beaucoup de composants existants (`Hero.tsx`, `CTA.tsx`, `Features.tsx`...) utilisent des
+valeurs hex en dur (`bg-[#FAF9F6]`, `text-[#1C1C1C]`) au lieu des classes de tokens
+(`bg-bg-canvas`, `text-text-primary`). Ça fonctionne visuellement — `globals.css` contient des
+règles `.dark .bg-\[\#FAF9F6\]` qui interceptent ces valeurs pour le dark mode — mais c'est
+fragile : toute nouvelle couleur en dur qui n'a pas son override `.dark` explicite cassera le
+thème sombre silencieusement.
+
+**Règle pour tout nouveau code** : toujours utiliser les classes de tokens, jamais de hex en dur.
+**Pour le code existant** : migration progressive, pas de refonte d'un coup — à chaque fois qu'on
+touche un composant pour une autre raison, on en profite pour remplacer ses hex en dur par les
+tokens correspondants.
 
 ---
 
