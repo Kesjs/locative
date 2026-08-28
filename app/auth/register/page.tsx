@@ -41,8 +41,6 @@ export default function RegisterPage() {
           {
             email,
             source: "register_page",
-            profile_type: "bailleur",
-            city: "Cotonou",
           },
         ]);
 
