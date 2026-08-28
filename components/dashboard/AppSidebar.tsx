@@ -29,14 +29,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserProfile } from "@/lib/hooks/useUserProfile";
 import {
   LayoutDashboard,
   Building2,
   Users,
   CreditCard,
   Calculator,
-  Wrench,
-  FileText,
   Globe,
   Settings,
   ChevronRight,
@@ -83,58 +82,36 @@ const SIDEBAR_DATA = {
       icon: LayoutDashboard,
     },
     {
-      title: "Mes Biens",
+      title: "Biens",
       url: "/dashboard/biens",
       icon: Building2,
       badge: "12",
-      items: [
-        { title: "Tous les biens", url: "/dashboard/biens" },
-        { title: "Nouveau bien", url: "/dashboard/biens" },
-      ],
     },
     {
       title: "Locataires",
       url: "/dashboard/locataires",
       icon: Users,
       badge: "12",
-      items: [
-        { title: "Liste locataires", url: "/dashboard/locataires" },
-        { title: "Contrats & Baux", url: "/dashboard/locataires" },
-      ],
     },
     {
-      title: "Loyers & Paiements",
+      title: "Loyers",
       url: "/dashboard/loyers",
       icon: CreditCard,
       badge: "1 retard",
       badgeType: "danger",
-      items: [
-        { title: "Appels & Échéances", url: "/dashboard/loyers" },
-        { title: "Historique MoMo", url: "/dashboard/loyers" },
-      ],
     },
   ] as NavItem[],
   navManagement: [
     {
-      title: "Comptabilité & TFU",
+      title: "Comptabilité",
       url: "/dashboard/comptabilite",
       icon: Calculator,
       badge: "DGI 2026",
     },
-    {
-      title: "Interventions & Travaux",
-      url: "/dashboard/interventions",
-      icon: Wrench,
-    },
-    {
-      title: "Documents & Baux",
-      url: "/dashboard/documents",
-      icon: FileText,
-    },
   ] as NavItem[],
   navSecondary: [
     {
-      title: "Site Web & Vitrine",
+      title: "Vitrine",
       url: "/vitrine",
       icon: Globe,
       badge: "Actif",
@@ -278,24 +255,7 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
 
   const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
-  const [userProfile, setUserProfile] = React.useState(SIDEBAR_DATA.user);
-
-  React.useEffect(() => {
-    try {
-      const session = localStorage.getItem("lokka_session");
-      if (session) {
-        const parsed = JSON.parse(session);
-        setUserProfile({
-          name: parsed.nom || "Alexandre K.",
-          email: parsed.email || "alexandre@lokka.bj",
-          avatar:
-            parsed.avatar ||
-            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-          role: parsed.role || "Propriétaire Bailleur",
-        });
-      }
-    } catch (_) {}
-  }, []);
+  const userProfile = useUserProfile();
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
