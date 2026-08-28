@@ -499,6 +499,7 @@ function OnboardingContent() {
               city,
               phone_number: fullOwnerPhone,
               role: profileType === "diaspora" ? "bailleur" : profileType,
+              onboarding_completed: true,
             })
             .eq("id", user.id);
 
