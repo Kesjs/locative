@@ -387,6 +387,7 @@ function OnboardingContent() {
   const [agencyName, setAgencyName] = useState("Cabinet Immobilier du Golfe");
   const [diasporaCountry, setDiasporaCountry] = useState("France");
   const [city, setCity] = useState("Cotonou");
+  const [isOtherCity, setIsOtherCity] = useState(false);
   
   // Canaux : "mobile" (MTN/Moov), "banque", "especes"
   const [paymentChannel, setPaymentChannel] = useState<"mobile" | "banque" | "especes">("mobile");
@@ -423,8 +424,23 @@ function OnboardingContent() {
   const depositAmount = rentAmount * depositMonths;
   const isDepositCompliant = depositMonths <= 3;
 
-  // Multi-devises preview
-  const rentEuros = Math.round(rentAmount / 655.957);
+  // Multi-devises preview — suit le pays de résidence choisi, pas toujours l'euro.
+  // CI et Sénégal partagent le FCFA (UEMOA) avec le Bénin, donc pas de conversion à faire.
+  const DIASPORA_CURRENCY: Record<string, { code: string; symbol: string; rate: number } | "XOF" | null> = {
+    France: { code: "EUR", symbol: "€", rate: 655.957 },
+    Belgique: { code: "EUR", symbol: "€", rate: 655.957 },
+    "États-Unis": { code: "USD", symbol: "$", rate: 590 },
+    Canada: { code: "CAD", symbol: "CA$", rate: 430 },
+    "Royaume-Uni": { code: "GBP", symbol: "£", rate: 760 },
+    "Côte d'Ivoire": "XOF",
+    Sénégal: "XOF",
+    "Autre pays": null,
+  };
+  const diasporaCurrency = DIASPORA_CURRENCY[diasporaCountry] ?? null;
+  const rentInDiasporaCurrency =
+    diasporaCurrency && diasporaCurrency !== "XOF"
+      ? Math.round(rentAmount / diasporaCurrency.rate)
+      : null;
 
   const handleFinishOnboarding = async () => {
     setIsFinalizing(true);
@@ -737,14 +753,17 @@ function OnboardingContent() {
                   <label className="block text-[12px] font-semibold text-[#1C1C1C] mb-1">
                     Ville principale de vos biens au Bénin
                   </label>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                     {["Cotonou", "Calavi", "Porto-Novo", "Parakou", "Ouidah"].map((v) => (
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setCity(v)}
+                        onClick={() => {
+                          setCity(v);
+                          setIsOtherCity(false);
+                        }}
                         className={`py-1.5 px-1 text-center text-[11.5px] font-semibold rounded-[6px] border transition-all cursor-pointer ${
-                          city === v
+                          city === v && !isOtherCity
                             ? "bg-[#1C1C1C] text-white border-[#1C1C1C] shadow-xs"
                             : "bg-white text-[#64635F] border-[#E8E5E0] hover:border-[#1C1C1C]"
                         }`}
@@ -752,7 +771,31 @@ function OnboardingContent() {
                         {v}
                       </button>
                     ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsOtherCity(true);
+                        setCity("");
+                      }}
+                      className={`py-1.5 px-1 text-center text-[11.5px] font-semibold rounded-[6px] border transition-all cursor-pointer ${
+                        isOtherCity
+                          ? "bg-[#1C1C1C] text-white border-[#1C1C1C] shadow-xs"
+                          : "bg-white text-[#64635F] border-[#E8E5E0] hover:border-[#1C1C1C]"
+                      }`}
+                    >
+                      Autre
+                    </button>
                   </div>
+                  {isOtherCity && (
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      autoFocus
+                      className="w-full mt-1.5 px-3 py-2 bg-white border border-[#E8E5E0] rounded-[6px] text-[12.5px] text-[#1C1C1C] focus:outline-none focus:border-[#1C1C1C] shadow-xs"
+                      placeholder="Ex: Abomey, Djougou, Natitingou, Lokossa..."
+                    />
+                  )}
                 </div>
 
                 {/* ================================================================= */}
@@ -1015,7 +1058,10 @@ function OnboardingContent() {
 
                 <div className="grid grid-cols-3 gap-2">
                   {[
+                    { id: "chambre", label: "Chambre" },
+                    { id: "maison", label: "Maison" },
                     { id: "appartement", label: "Appartement" },
+                    { id: "studio", label: "Studio" },
                     { id: "villa", label: "Villa" },
                     { id: "commercial", label: "Local / Bureau" },
                   ].map((t) => (
@@ -1058,9 +1104,14 @@ function OnboardingContent() {
                       onChange={(e) => setRentAmount(Number(e.target.value))}
                       className="w-full px-3.5 py-2 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] font-extrabold text-[#1C1C1C] focus:outline-none focus:border-[#1C1C1C] shadow-xs"
                     />
-                    {profileType === "diaspora" && (
+                    {profileType === "diaspora" && rentInDiasporaCurrency !== null && (
                       <span className="text-[11px] text-[#1C1C1C] font-semibold mt-1 block">
-                        ≈ {rentEuros} € / mois
+                        ≈ {rentInDiasporaCurrency.toLocaleString("fr-FR")} {(diasporaCurrency as { symbol: string }).symbol} / mois
+                      </span>
+                    )}
+                    {profileType === "diaspora" && diasporaCurrency === "XOF" && (
+                      <span className="text-[11px] text-[#64635F] mt-1 block">
+                        Même devise (FCFA) que votre pays de résidence.
                       </span>
                     )}
                   </div>
