@@ -36,25 +36,27 @@ export default function RegisterPage() {
     setErrorMessage(null);
 
     try {
-      if (isSupabaseConfigured()) {
-        const supabase = createClient();
-        await supabase.from("leads_waitlist").insert([
-          {
-            email,
-            source: "register_page",
-          },
-        ]);
-
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-            shouldCreateUser: true,
-          },
-        });
-
-        if (error) throw error;
+      if (!isSupabaseConfigured()) {
+        throw new Error("Configuration Supabase manquante. Contactez le support.");
       }
+
+      const supabase = createClient();
+      await supabase.from("leads_waitlist").insert([
+        {
+          email,
+          source: "register_page",
+        },
+      ]);
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+          shouldCreateUser: true,
+        },
+      });
+
+      if (error) throw error;
 
       setOtpSent(true);
     } catch (err: any) {
