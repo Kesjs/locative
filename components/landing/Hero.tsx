@@ -46,7 +46,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-20 bg-[#FAF9F6] min-h-screen flex flex-col items-center justify-center">
+    <section className="relative overflow-hidden pt-24 pb-12 sm:pt-32 sm:pb-20 bg-[#FAF9F6] sm:min-h-screen flex flex-col items-center justify-start sm:justify-center">
       {/* ─── 1. WEBGL SIDE RAYS (Volumetric Silver-Platinum Glow) ─── */}
       <div className="absolute top-0 right-0 w-[520px] h-[520px] pointer-events-none opacity-25 sm:opacity-35 overflow-hidden z-0">
         <SideRays
