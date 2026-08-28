@@ -343,13 +343,61 @@ export const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { state, variant: ctxVariant, layoutMode } = useSidebar();
+    const { state, variant: ctxVariant, layoutMode, isMobile, openMobile, setOpenMobile } = useSidebar();
     const isCollapsed = state === "collapsed";
     const variant = variantProp || ctxVariant;
     const isFloating = variant === "floating";
 
     // In Full Layout mode, when collapsed, the sidebar is completely hidden offscreen (0px footprint)
     const isHiddenOffscreen = layoutMode === "full" && isCollapsed;
+
+    // Sur mobile, la sidebar n'est jamais "collapsed en icônes" — c'est un tiroir
+    // plein écran qui glisse par-dessus le contenu (jamais en layout poussé).
+    if (isMobile) {
+      return (
+        <>
+          {openMobile && (
+            <div
+              onClick={() => setOpenMobile(false)}
+              style={{
+                position: "fixed",
+                inset: 0,
+                zIndex: 45,
+                background: "rgba(0,0,0,0.4)",
+              }}
+            />
+          )}
+          <aside
+            ref={ref}
+            data-state={openMobile ? "expanded" : "collapsed"}
+            data-variant={variant}
+            data-layout={layoutMode}
+            style={{
+              width: SIDEBAR_WIDTH,
+              height: "100vh",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              zIndex: 50,
+              transform: openMobile ? "translateX(0)" : "translateX(-100%)",
+              background: "var(--bg-sidebar, #FFFFFF)",
+              borderRight: "1px solid var(--sidebar-border, var(--border-default))",
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              overflow: "hidden",
+              boxSizing: "border-box",
+              padding: "16px 12px",
+              ...style,
+            }}
+            className={cn("sidebar-container group/sidebar text-[var(--text-primary)]", className)}
+            {...props}
+          >
+            {children}
+          </aside>
+        </>
+      );
+    }
 
     return (
       <aside
@@ -490,7 +538,7 @@ export const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"main">
 >(({ className, style, ...props }, ref) => {
-  const { state, variant, layoutMode } = useSidebar();
+  const { state, variant, layoutMode, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const isFloating = variant === "floating";
   const isInset = variant === "inset";
@@ -498,7 +546,9 @@ export const SidebarInset = React.forwardRef<
   // In Full Layout mode, when collapsed, the margin is strictly 0px (100% full screen)
   const isFullLayoutActive = layoutMode === "full" && isCollapsed;
 
-  const marginLeft = isFullLayoutActive
+  const marginLeft = isMobile
+    ? "0px"
+    : isFullLayoutActive
     ? "0px"
     : isFloating
       ? isCollapsed
