@@ -13,251 +13,151 @@ import {
 
 interface FeatureRow {
   name: string;
-  detail?: string;
   decouverte: string | boolean;
   pro: string | boolean;
+  diaspora: string | boolean;
   agence: string | boolean;
 }
 
-interface FeatureCategory {
-  category: string;
-  features: FeatureRow[];
+interface Plan {
+  name: string;
+  monthlyPrice: string;
+  annualPrice: string;
+  period: string;
+  annualDetail: string;
+  description: string;
+  bienLabel: string;
+  features: string[];
+  cta: string;
+  popular: boolean;
+  badgeLabel?: string;
 }
 
-const COMPARISON_DATA: FeatureCategory[] = [
+// SOURCE UNIQUE DE DONNÉES — cards ET tableau comparatif sont générés à partir
+// de ce seul tableau (spec section 19 : "il ne doit jamais exister deux
+// sources différentes pour les prix ou fonctionnalités").
+const PLANS: Plan[] = [
   {
-    category: "1. Gestion Locative & Quittances",
+    name: "Découverte",
+    monthlyPrice: "0 FCFA",
+    annualPrice: "0 FCFA",
+    period: "",
+    annualDetail: "Gratuit pour démarrer",
+    description: "Pour découvrir Lokka avec 1 ou 2 logements, sans engagement.",
+    bienLabel: "Jusqu'à 2 biens",
     features: [
-      {
-        name: "Nombre de biens & lots gérés",
-        detail: "Appartements, villas, studios ou boutiques",
-        decouverte: "Jusqu'à 2",
-        pro: "Jusqu'à 10",
-        agence: "Illimité",
-      },
-      {
-        name: "Quittances PDF certifiées web",
-        detail: "Valeur juridique Loi n° 2022-30",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "QR Code d'authentification officiel",
-        detail: "Vérifiable instantanément par scan",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Espace Locataire dédié sécurisé",
-        detail: "Connexion sans mot de passe par code OTP",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Encaissements MTN MoMo & Moov Money",
-        detail: "Pointage automatique et mise à jour en direct",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Plafonnement caution 3 mois (Loi 2022-30)",
-        detail: "Bouclier juridique anti-contentieux",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
+      "Gestion des locataires",
+      "Gestion des baux",
+      "Quittances PDF",
+      "Accès portail locataire",
     ],
+    cta: "Créer mon compte gratuit",
+    popular: false,
   },
   {
-    category: "2. Site Vitrine Public & Acquisition",
+    name: "Bailleur Pro",
+    monthlyPrice: "5 000 FCFA",
+    annualPrice: "4 200 FCFA",
+    period: "/mois",
+    annualDetail: "50 000 FCFA facturés par an (2 mois offerts)",
+    description: "Pour les bailleurs indépendants qui gèrent leur propre patrimoine.",
+    bienLabel: "Jusqu'à 10 biens",
     features: [
-      {
-        name: "Page vitrine publique partagée",
-        detail: "lokka.bj/p/votre-bien",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Sous-domaine dédié personnalisé",
-        detail: "mon-nom.lokka.bj",
-        decouverte: false,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Nom de Domaine Pro indépendant",
-        detail: "www.monagence.bj (SSL & hébergement inclus)",
-        decouverte: false,
-        pro: false,
-        agence: true,
-      },
-      {
-        name: "Module de réservation de visite en ligne",
-        detail: "Planning synchronisé avec vos disponibilités",
-        decouverte: false,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Bouton de contact direct WhatsApp",
-        detail: "Message pré-rempli avec référence du logement",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Site en marque blanche (Votre logo)",
-        detail: "Suppression totale des mentions Lokka",
-        decouverte: false,
-        pro: false,
-        agence: true,
-      },
+      "Quittances illimitées",
+      "Mobile Money",
+      "Suivi des paiements",
+      "Publication sur la vitrine Lokka",
+      "Vitrine dédiée",
+      "Relances",
+      "Statistiques",
+      "Partage WhatsApp",
     ],
+    cta: "Démarrer l'essai 14 jours",
+    popular: true,
+    badgeLabel: "Le Plus Populaire",
   },
   {
-    category: "3. Comptabilité, Fiscalité & Bilan",
+    name: "Diaspora & Patrimoine",
+    monthlyPrice: "12 000 FCFA",
+    annualPrice: "10 000 FCFA",
+    period: "/mois",
+    annualDetail: "120 000 FCFA facturés par an (2 mois offerts)",
+    description: "Pour les propriétaires vivant à l'étranger qui suivent leur patrimoine à distance.",
+    bienLabel: "Jusqu'à 30 biens",
     features: [
-      {
-        name: "Calculateur & Bilan fiscal TFU DGI",
-        detail: "Taxe Foncière Unique déclarable aux impôts",
-        decouverte: false,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Double affichage devises (FCFA / € / $)",
-        detail: "Idéal pour la diaspora et investisseurs",
-        decouverte: false,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Comptes-Rendus de Gestion (CRG) en 1 clic",
-        detail: "Relevé officiel mensuel pour mandants",
-        decouverte: false,
-        pro: false,
-        agence: true,
-      },
-      {
-        name: "Barème commission 10% Loi 2022-30",
-        detail: "Honoraires de gestion automatisés",
-        decouverte: false,
-        pro: false,
-        agence: true,
-      },
-      {
-        name: "Multi-comptes / Collaborateurs d'agence",
-        detail: "Accès gestionnaires, comptables et agents",
-        decouverte: false,
-        pro: false,
-        agence: true,
-      },
+      "Dashboard patrimoine",
+      "Suivi à distance",
+      "Alertes",
+      "Suivi des encaissements",
+      "Gestion des visites",
+      "États des lieux",
+      "Rapports",
+      "Export fiscal",
     ],
+    cta: "Choisir Diaspora & Patrimoine",
+    popular: false,
   },
   {
-    category: "4. Accompagnement & Sécurité",
+    name: "Agence & Conciergerie",
+    monthlyPrice: "25 000 FCFA",
+    annualPrice: "20 800 FCFA",
+    period: "/mois",
+    annualDetail: "250 000 FCFA facturés par an (2 mois offerts)",
+    description: "Pour les agences immobilières et gestionnaires multi-mandants.",
+    bienLabel: "Biens illimités",
     features: [
-      {
-        name: "Relances WhatsApp automatiques (J+5)",
-        detail: "Rappels cordiaux avec lien de paiement",
-        decouverte: false,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Sauvegarde cloud quotidienne chiffrée",
-        detail: "Données protégées et disponibles 24/7",
-        decouverte: true,
-        pro: true,
-        agence: true,
-      },
-      {
-        name: "Niveau de support technique",
-        detail: "Assistance par email, chat et téléphone",
-        decouverte: "Email standard",
-        pro: "Support Prioritaire",
-        agence: "Support VIP Dédié Cotonou",
-      },
+      "Multi-propriétaires",
+      "Mandats",
+      "Équipe",
+      "Rôles et permissions",
+      "Commissions",
+      "Reporting",
+      "Vitrine professionnelle",
+      "Domaine personnalisé",
+      "Support prioritaire",
     ],
+    cta: "Choisir le Plan Agence",
+    popular: false,
   },
 ];
+
+// Le tableau comparatif est dérivé de PLANS : union ordonnée de tous les
+// libellés (bienLabel + features), un seul passage, aucune donnée ajoutée.
+function buildComparisonRows(): FeatureRow[] {
+  const rows: FeatureRow[] = [
+    {
+      name: "Nombre de biens",
+      decouverte: PLANS[0].bienLabel,
+      pro: PLANS[1].bienLabel,
+      diaspora: PLANS[2].bienLabel,
+      agence: PLANS[3].bienLabel,
+    },
+  ];
+
+  const seen = new Set<string>();
+  PLANS.forEach((plan) => {
+    plan.features.forEach((label) => {
+      if (seen.has(label)) return;
+      seen.add(label);
+      rows.push({
+        name: label,
+        decouverte: PLANS[0].features.includes(label),
+        pro: PLANS[1].features.includes(label),
+        diaspora: PLANS[2].features.includes(label),
+        agence: PLANS[3].features.includes(label),
+      });
+    });
+  });
+
+  return rows;
+}
 
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-
-  const plans = [
-    {
-      name: "Découverte",
-      monthlyPrice: "0 FCFA",
-      annualPrice: "0 FCFA",
-      period: "",
-      pricePrefix: "",
-      annualDetail: "Gratuit pour démarrer",
-      description: "Pour les bailleurs avec 1 ou 2 logements qui veulent tester Lokka en toute simplicité.",
-      features: [
-        "Jusqu'à 2 biens gérés",
-        "Quittances PDF certifiées web",
-        "Espace Locataire dédié",
-        "Suivi des règlements MTN & Moov",
-        "Conformité Loi n° 2022-30",
-        "Page vitrine partagée lokka.bj",
-      ],
-      cta: "Créer mon compte gratuit",
-      popular: false,
-    },
-    {
-      name: "Propriétaire Pro",
-      monthlyPrice: "9 900 FCFA",
-      annualPrice: "7 900 FCFA",
-      period: "/mois",
-      pricePrefix: "",
-      annualDetail: "94 800 FCFA facturés par an (-20%)",
-      description: "Pour les bailleurs actifs et la diaspora gérant jusqu'à 10 logements.",
-      features: [
-        "Jusqu'à 10 biens gérés",
-        "Tout Découverte, plus :",
-        "Sous-domaine dédié (mon-nom.lokka.bj)",
-        "Module de réservation de visite en ligne",
-        "Option Frais de visite en FCFA",
-        "Double affichage devises (FCFA / € / $)",
-        "Calculateur & Bilan fiscal TFU DGI",
-        "Rappels WhatsApp automatiques",
-      ],
-      cta: "Démarrer l'essai 14 jours",
-      popular: true,
-      badgeLabel: "Le Plus Populaire",
-    },
-    {
-      name: "Agence & SCI",
-      monthlyPrice: "29 000 FCFA",
-      annualPrice: "24 000 FCFA",
-      period: "/mois",
-      pricePrefix: "",
-      annualDetail: "288 000 FCFA facturés par an (-20%)",
-      description: "Pour les agences immobilières, gestionnaires agréés et parcs multi-propriétaires.",
-      features: [
-        "Biens & Lots illimités",
-        "Tout Propriétaire Pro, plus :",
-        "NOM DE DOMAINE PRO (www.monagence.bj)",
-        "Site vitrine en marque blanche (votre logo)",
-        "Gestion multi-propriétaires mandants",
-        "Comptes-Rendus de Gestion (CRG) en 1 clic",
-        "Commission 10% Loi 2022-30 intégrée",
-        "Multi-comptes / Collaborateurs d'agence",
-        "Support VIP dédié à Cotonou",
-      ],
-      cta: "Choisir le Plan Agence",
-      popular: false,
-    },
-  ];
+  const comparisonRows = React.useMemo(() => buildComparisonRows(), []);
 
   return (
     <section ref={sectionRef} id="pricing" className="py-24 sm:py-32 bg-[#FAF9F6] border-t border-[#E8E5E0]">
@@ -299,21 +199,21 @@ export default function Pricing() {
                 Annuel
               </span>
               <span className="inline-flex items-center rounded-full bg-[#F3F2EE] border border-[#E8E5E0] px-2.5 py-0.5 text-[11px] font-bold text-[#1C1C1C]">
-                -20% Économie
+                Jusqu'à 2 mois offerts
               </span>
             </div>
           </div>
         </motion.div>
 
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-12">
-          {plans.map((plan, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch mb-12">
+          {PLANS.map((plan, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="relative flex flex-col justify-between p-7 sm:p-8 rounded-[10px] transition-all duration-300 group hover:-translate-y-1"
+              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="relative flex flex-col justify-between p-6 sm:p-7 rounded-[10px] transition-all duration-300 group hover:-translate-y-1"
               style={{
                 backgroundColor: plan.popular ? "#1C1C1C" : "#FFFFFF",
                 border: plan.popular ? "1px solid #1C1C1C" : "1px solid #E8E5E0",
@@ -338,7 +238,7 @@ export default function Pricing() {
 
                   <div className="flex items-baseline gap-1.5 mt-2">
                     <span
-                      className="font-extrabold text-[28px] sm:text-[34px] tracking-tight"
+                      className="font-extrabold text-[24px] sm:text-[28px] tracking-tight"
                       style={{ color: "inherit" }}
                     >
                       {isAnnual ? plan.annualPrice : plan.monthlyPrice}
@@ -373,15 +273,25 @@ export default function Pricing() {
                   }}
                 >
                   <ul className="space-y-3">
+                    <li className="flex items-start gap-2.5 text-[13px] font-bold">
+                      <CheckIcon
+                        className="h-4 w-4 shrink-0 mt-0.5"
+                        style={{ color: plan.popular ? "#FFFFFF" : "#1C1C1C" }}
+                      />
+                      <span>{plan.bienLabel}</span>
+                    </li>
+                    {i > 0 && (
+                      <li className="text-[12px] italic opacity-60 pl-[26px]">
+                        Tout {PLANS[i - 1].name}, plus :
+                      </li>
+                    )}
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-2.5 text-[13px]">
                         <CheckIcon
                           className="h-4 w-4 shrink-0 mt-0.5"
                           style={{ color: plan.popular ? "#FFFFFF" : "#1C1C1C" }}
                         />
-                        <span className={feature.startsWith("NOM DE") || feature.startsWith("Tout") ? "font-bold" : "opacity-90"}>
-                          {feature}
-                        </span>
+                        <span className="opacity-90">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -440,99 +350,100 @@ export default function Pricing() {
                   {/* Table Header */}
                   <thead>
                     <tr className="border-b border-[#E8E5E0] bg-[#FAF9F6]">
-                      <th className="py-4 px-6 text-[13px] font-extrabold text-[#1C1C1C] w-2/5">
+                      <th className="py-4 px-6 text-[13px] font-extrabold text-[#1C1C1C] w-1/3">
                         Fonctionnalités &amp; Services
                       </th>
-                      <th className="py-4 px-5 text-[13px] font-bold text-[#1C1C1C] text-center w-1/5">
+                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
                         Découverte
                         <span className="block text-[11px] font-normal text-[#64635F]">0 FCFA</span>
                       </th>
-                      <th className="py-4 px-5 text-[13px] font-bold text-[#1C1C1C] text-center w-1/5 bg-[#F5F5DC]/40 border-x border-[#E8E5E0]">
-                        <span className="inline-flex items-center gap-1">
-                          Propriétaire Pro
+                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center bg-[#F5F5DC]/40 border-x border-[#E8E5E0]">
+                        <span className="inline-flex items-center gap-1 justify-center">
+                          Bailleur Pro
                           <SparklesIcon className="h-3.5 w-3.5 text-[#C5A880]" />
                         </span>
                         <span className="block text-[11px] font-bold text-[#1C1C1C]">
-                          {isAnnual ? "7 900 FCFA" : "9 900 FCFA"}
+                          {isAnnual ? "4 200 FCFA" : "5 000 FCFA"}
                         </span>
                       </th>
-                      <th className="py-4 px-5 text-[13px] font-bold text-[#1C1C1C] text-center w-1/5">
-                        Agence &amp; SCI
+                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
+                        Diaspora
                         <span className="block text-[11px] font-normal text-[#64635F]">
-                          {isAnnual ? "24 000 FCFA" : "29 000 FCFA"}
+                          {isAnnual ? "10 000 FCFA" : "12 000 FCFA"}
+                        </span>
+                      </th>
+                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
+                        Agence
+                        <span className="block text-[11px] font-normal text-[#64635F]">
+                          {isAnnual ? "20 800 FCFA" : "25 000 FCFA"}
                         </span>
                       </th>
                     </tr>
                   </thead>
 
-                  {/* Table Body by Categories */}
+                  {/* Table Body — dérivé de PLANS, aucune donnée additionnelle */}
                   <tbody className="divide-y divide-[#E8E5E0]">
-                    {COMPARISON_DATA.map((cat, catIdx) => (
-                      <React.Fragment key={catIdx}>
-                        {/* Category Row */}
-                        <tr className="bg-[#FAF9F6]/80">
-                          <td
-                            colSpan={4}
-                            className="py-3 px-6 text-[12px] font-bold uppercase tracking-wider text-[#1C1C1C]"
-                          >
-                            {cat.category}
-                          </td>
-                        </tr>
+                    {comparisonRows.map((feat, fIdx) => (
+                      <tr
+                        key={fIdx}
+                        className="hover:bg-[#FAF9F6]/50 transition-colors text-[13px]"
+                      >
+                        <td className="py-3.5 px-6">
+                          <div className="font-bold text-[#1C1C1C]">{feat.name}</div>
+                        </td>
 
-                        {/* Feature Rows */}
-                        {cat.features.map((feat, fIdx) => (
-                          <tr
-                            key={fIdx}
-                            className="hover:bg-[#FAF9F6]/50 transition-colors text-[13px]"
-                          >
-                            <td className="py-3.5 px-6">
-                              <div className="font-bold text-[#1C1C1C]">{feat.name}</div>
-                              {feat.detail && (
-                                <div className="text-[11px] text-[#64635F]">{feat.detail}</div>
-                              )}
-                            </td>
+                        {/* Découverte */}
+                        <td className="py-3.5 px-4 text-center">
+                          {typeof feat.decouverte === "boolean" ? (
+                            feat.decouverte ? (
+                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
+                            ) : (
+                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
+                            )
+                          ) : (
+                            <span className="font-bold text-[#1C1C1C]">{feat.decouverte}</span>
+                          )}
+                        </td>
 
-                            {/* Découverte */}
-                            <td className="py-3.5 px-5 text-center">
-                              {typeof feat.decouverte === "boolean" ? (
-                                feat.decouverte ? (
-                                  <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                                ) : (
-                                  <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                                )
-                              ) : (
-                                <span className="font-bold text-[#1C1C1C]">{feat.decouverte}</span>
-                              )}
-                            </td>
+                        {/* Bailleur Pro (Highlighted Column) */}
+                        <td className="py-3.5 px-4 text-center bg-[#F5F5DC]/25 border-x border-[#E8E5E0]">
+                          {typeof feat.pro === "boolean" ? (
+                            feat.pro ? (
+                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
+                            ) : (
+                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
+                            )
+                          ) : (
+                            <span className="font-bold text-[#1C1C1C]">{feat.pro}</span>
+                          )}
+                        </td>
 
-                            {/* Propriétaire Pro (Highlighted Column) */}
-                            <td className="py-3.5 px-5 text-center bg-[#F5F5DC]/25 border-x border-[#E8E5E0]">
-                              {typeof feat.pro === "boolean" ? (
-                                feat.pro ? (
-                                  <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                                ) : (
-                                  <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                                )
-                              ) : (
-                                <span className="font-bold text-[#1C1C1C]">{feat.pro}</span>
-                              )}
-                            </td>
+                        {/* Diaspora & Patrimoine */}
+                        <td className="py-3.5 px-4 text-center">
+                          {typeof feat.diaspora === "boolean" ? (
+                            feat.diaspora ? (
+                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
+                            ) : (
+                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
+                            )
+                          ) : (
+                            <span className="font-bold text-[#1C1C1C]">{feat.diaspora}</span>
+                          )}
+                        </td>
 
-                            {/* Agence & SCI */}
-                            <td className="py-3.5 px-5 text-center">
-                              {typeof feat.agence === "boolean" ? (
-                                feat.agence ? (
-                                  <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                                ) : (
-                                  <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                                )
-                              ) : (
-                                <span className="font-bold text-[#1C1C1C]">{feat.agence}</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </React.Fragment>
+                        {/* Agence & Conciergerie */}
+                        <td className="py-3.5 px-4 text-center">
+                          {typeof feat.agence === "boolean" ? (
+                            feat.agence ? (
+                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
+                            ) : (
+                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
+                            )
+                          ) : (
+                            <span className="font-bold text-[#1C1C1C]">{feat.agence}</span>
+                          )}
+                        </td>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
