@@ -52,9 +52,13 @@ export default function AuthLayout({
           loop
           muted
           playsInline
+          preload="auto"
+          poster="/videos/login-poster.jpg"
           className="absolute inset-0 w-full h-full object-cover opacity-90 scale-[1.02]"
-          src="/videos/login.mp4"
-        />
+        >
+          <source src="/videos/login.webm" type="video/webm" />
+          <source src="/videos/login.mp4" type="video/mp4" />
+        </video>
 
         {/* Subtle Bottom Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
