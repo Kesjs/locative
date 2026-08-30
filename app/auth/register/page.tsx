@@ -6,6 +6,7 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import OtpVerification from "@/components/auth/OtpVerification";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { getPostAuthRedirect } from "@/lib/supabase/postAuthRedirect";
+import { getErrorMessage, logError } from "@/lib/errors";
 import {
   EnvelopeIcon,
   ArrowRightIcon,
@@ -60,8 +61,10 @@ export default function RegisterPage() {
 
       setOtpSent(true);
     } catch (err: any) {
-      console.error("Erreur envoi OTP inscription:", err);
-      setErrorMessage(err.message || "Erreur lors de l'envoi du code. Vérifiez votre adresse email.");
+      logError(err, "register:sendOtp");
+      setErrorMessage(
+        getErrorMessage(err, "Erreur lors de l'envoi du code. Vérifiez votre adresse email.")
+      );
     } finally {
       setIsLoading(false);
     }
