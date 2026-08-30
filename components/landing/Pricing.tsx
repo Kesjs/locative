@@ -193,8 +193,8 @@ export default function Pricing() {
               <span className={`text-[13px] font-bold ${isAnnual ? "text-[#1C1C1C]" : "text-[#9C9A95]"}`}>
                 Annuel
               </span>
-              <span className="inline-flex items-center rounded-full bg-[#F3F2EE] border border-[#E8E5E0] px-2.5 py-0.5 text-[11px] font-bold text-[#1C1C1C]">
-                Jusqu'à 2 mois offerts
+              <span className="inline-flex items-center rounded-full bg-[#E6F5EF] px-2.5 py-0.5 text-[11px] font-bold text-[#087F5B]">
+                Jusqu&apos;à 2 mois offerts
               </span>
             </div>
           </div>
@@ -219,7 +219,7 @@ export default function Pricing() {
               }}
             >
               {plan.popular && (
-                <span className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#333333] text-white border border-white/20 shadow-xs">
+                <span className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#087F5B] text-white shadow-xs">
                   {plan.badgeLabel}
                 </span>
               )}
@@ -300,14 +300,14 @@ export default function Pricing() {
                 </div>
               </div>
 
-              {/* Boutons CTA : Milieu en blanc, Découverte & Agence en couleur de sélection (#F5F5DC) */}
+              {/* Boutons CTA : Milieu en blanc, Découverte & Agence en vert pastel (#E6F5EF) */}
               <Link href="/auth/register" className="w-full block mt-auto">
                 <button
                   type="button"
                   className={`w-full py-3 px-4 rounded-[6px] text-[13px] font-bold transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.98] border ${
                     plan.popular
-                      ? "bg-white text-[#1C1C1C] border-white/30 hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#C5A880]"
-                      : "bg-[#F5F5DC] text-[#1C1C1C] border-[#E8E5E0] hover:bg-[#1C1C1C] hover:text-white hover:border-[#1C1C1C]"
+                      ? "bg-white text-[#1C1C1C] border-white/30 hover:bg-[#E6F5EF] hover:text-[#087F5B] hover:border-[#087F5B]"
+                      : "bg-[#E6F5EF] text-[#087F5B] border-[#E6F5EF] hover:bg-[#087F5B] hover:text-white hover:border-[#087F5B]"
                   }`}
                 >
                   {plan.cta}
@@ -324,7 +324,7 @@ export default function Pricing() {
           <button
             type="button"
             onClick={() => setShowComparison(!showComparison)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-[#E8E5E0] text-[13px] font-bold text-[#1C1C1C] shadow-xs hover:border-[#1C1C1C] hover:bg-[#F5F5DC] transition-all duration-200 cursor-pointer group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-[#E8E5E0] text-[13px] font-bold text-[#1C1C1C] shadow-xs hover:border-[#087F5B] hover:bg-[#E6F5EF] hover:text-[#087F5B] transition-all duration-200 cursor-pointer group"
           >
             <span>{showComparison ? "Masquer le comparatif détaillé" : "Comparer tous les forfaits en détail"}</span>
             {showComparison ? (
@@ -359,10 +359,10 @@ export default function Pricing() {
                         Découverte
                         <span className="block text-[11px] font-normal text-[#64635F]">0 FCFA</span>
                       </th>
-                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center bg-[#F5F5DC]/40 border-x border-[#E8E5E0]">
+                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center bg-[#087F5B]/[0.03] border-x border-[#E8E5E0]">
                         <span className="inline-flex items-center gap-1 justify-center">
                           Bailleur Pro
-                          <SparklesIcon className="h-3.5 w-3.5 text-[#C5A880]" />
+                          <SparklesIcon className="h-3.5 w-3.5 text-[#087F5B]" />
                         </span>
                         <span className="block text-[11px] font-bold text-[#1C1C1C]">
                           {isAnnual ? "4 200 FCFA" : "5 000 FCFA"}
@@ -408,7 +408,7 @@ export default function Pricing() {
                         </td>
 
                         {/* Bailleur Pro (Highlighted Column) */}
-                        <td className="py-3.5 px-4 text-center bg-[#F5F5DC]/25 border-x border-[#E8E5E0]">
+                        <td className="py-3.5 px-4 text-center bg-[#087F5B]/[0.02] border-x border-[#E8E5E0]">
                           {typeof feat.pro === "boolean" ? (
                             feat.pro ? (
                               <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />

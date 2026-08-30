@@ -1380,9 +1380,13 @@ function OnboardingContent() {
           loop
           muted
           playsInline
+          preload="auto"
+          poster="/videos/login-poster.jpg"
           className="absolute inset-0 w-full h-full object-cover opacity-90 scale-[1.02]"
-          src="/videos/login.mp4"
-        />
+        >
+          <source src="/videos/login.webm" type="video/webm" />
+          <source src="/videos/login.mp4" type="video/mp4" />
+        </video>
 
         {/* Subtle Bottom Vignette with Elegant Caption */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none flex flex-col justify-end p-10 xl:p-12 text-white">

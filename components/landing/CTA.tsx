@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRightIcon, CheckCircleIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { handleError } from "@/lib/errors";
 
 export default function CTA() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -18,33 +19,41 @@ export default function CTA() {
 
     setIsSubmitting(true);
     try {
-      if (isSupabaseConfigured()) {
-        const supabase = createClient();
-        await supabase.from("leads_waitlist").insert([
-          {
-            email,
-            source: "landing_cta",
-            profile_type: "bailleur",
-            city: "Cotonou",
-          },
-        ]);
-
-        await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-            shouldCreateUser: true,
-          },
-        });
+      if (!isSupabaseConfigured()) {
+        handleError(
+          new Error("Configuration Supabase manquante"),
+          "Service momentanément indisponible. Réessayez dans un instant.",
+          "cta:otp"
+        );
+        setIsSubmitting(false);
+        return;
       }
+
+      const supabase = createClient();
+      await supabase.from("leads_waitlist").insert([
+        {
+          email,
+          source: "landing_cta",
+          profile_type: "bailleur",
+          city: "Cotonou",
+        },
+      ]);
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+          shouldCreateUser: true,
+        },
+      });
+      if (error) throw error;
+
       setIsSuccess(true);
       setTimeout(() => {
         window.location.href = `/auth/verify?email=${encodeURIComponent(email)}`;
       }, 1000);
     } catch (err) {
-      console.error("Erreur enregistrement lead:", err);
-      window.location.href = `/auth/verify?email=${encodeURIComponent(email)}`;
-    } finally {
+      handleError(err, "Impossible d'envoyer le code. Vérifiez votre email et réessayez.", "cta:otp");
       setIsSubmitting(false);
     }
   };

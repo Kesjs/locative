@@ -1,30 +1,49 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import {
   CheckCircleIcon,
   BellAlertIcon,
   DocumentDuplicateIcon,
   GlobeAltIcon,
-  ShieldCheckIcon,
-  ArrowDownTrayIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
   QrCodeIcon,
+  HomeModernIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  ArrowTrendingUpIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  EyeIcon,
+  BuildingOffice2Icon,
+  WrenchScrewdriverIcon,
+  ExclamationTriangleIcon,
+  LockClosedIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
-// Bento Card Component with Magic UI Glow Effect on Hover
+// Bento Card Component with Magic UI Radial Glow Effect on Hover
 interface BentoCardProps {
   title: string;
   badge?: string;
   description: string;
+  pills: string[];
   className?: string;
   delay: number;
   children?: React.ReactNode;
 }
 
-function BentoCard({ title, badge, description, className = "", delay, children }: BentoCardProps) {
+function BentoCard({
+  title,
+  badge,
+  description,
+  pills,
+  className = "",
+  delay,
+  children,
+}: BentoCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(cardRef, { once: true, margin: "-50px" });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -38,32 +57,45 @@ function BentoCard({ title, badge, description, className = "", delay, children 
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay }}
       onMouseMove={handleMouseMove}
-      className={`group relative overflow-hidden rounded-[10px] bg-white border border-[#E8E5E0] transition-all duration-300 hover:border-[#1C1C1C] hover:shadow-[0_12px_36px_rgba(0,0,0,0.06)] hover:-translate-y-1 flex flex-col justify-between p-7 sm:p-8 ${className}`}
+      className={`group relative overflow-hidden rounded-[14px] bg-white border border-[#E8E5E0] transition-all duration-300 hover:border-[#087F5B]/50 hover:shadow-[0_16px_40px_rgba(8,127,91,0.06)] flex flex-col justify-between p-6 sm:p-8 ${className}`}
     >
       {/* Magic UI Subtle Radial Glow Effect */}
       <div
-        className="pointer-events-none absolute -inset-px rounded-[10px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute -inset-px rounded-[14px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(28,28,28,0.03), transparent 40%)`,
+          background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(8,127,91,0.04), transparent 45%)`,
         }}
       />
 
       <div className="z-10 mb-6">
         {badge && (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#1C1C1C] bg-[#F3F2EE] border border-[#E8E5E0] px-2.5 py-0.5 rounded-full mb-3">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#087F5B] bg-[#E6F5EF] border border-[#087F5B]/20 px-3 py-1 rounded-full mb-3.5">
             {badge}
           </span>
         )}
-        <h3 className="text-[20px] sm:text-[22px] font-bold text-[#1C1C1C] tracking-tight mb-2">
+        <h3 className="text-[20px] sm:text-[23px] font-bold text-[#1C1C1C] tracking-tight mb-2.5 leading-snug">
           {title}
         </h3>
-        <p className="text-[14px] text-[#64635F] leading-relaxed">
+        <p className="text-[13.5px] sm:text-[14px] text-[#64635F] leading-relaxed mb-4">
           {description}
         </p>
+
+        {/* Feature Tags / Pills */}
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {pills.map((pill, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#1C1C1C] bg-[#FAF9F6] border border-[#E8E5E0] px-2.5 py-1 rounded-[6px] transition-colors group-hover:border-[#087F5B]/30"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[#087F5B]" />
+              {pill}
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="relative w-full z-10">{children}</div>
@@ -71,61 +103,56 @@ function BentoCard({ title, badge, description, className = "", delay, children 
   );
 }
 
-// Simulated Live Notification Feed with Continuous Motion
-function NotificationFeed() {
-  const notifications = [
-    { name: "Koudjo Dossou", amount: "350 000 FCFA", time: "À l'instant", type: "MTN MoMo", prop: "Villa Fidjrossè" },
-    { name: "Bérénice Agossou", amount: "120 000 FCFA", time: "Il y a 4 min", type: "Moov Money", prop: "Studio Haie Vive" },
-    { name: "Estelle Houndété", amount: "450 000 FCFA", time: "Il y a 22 min", type: "Virement BOA", prop: "Cadjehoun" },
-    { name: "Gérard Bio", amount: "220 000 FCFA", time: "Il y a 1h", type: "MTN MoMo", prop: "Ganhi" },
-  ];
-
-  return (
-    <div className="relative h-60 w-full overflow-hidden mask-image-bottom">
-      <motion.div
-        animate={{ y: [0, -230] }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 11,
-          ease: "linear",
-        }}
-        className="flex flex-col gap-2.5"
-      >
-        {[...notifications, ...notifications, ...notifications].map((notif, idx) => (
-          <div
-            key={idx}
-            className="flex items-center justify-between gap-3 rounded-[6px] border border-[#E8E5E0] bg-[#FAF9F6] p-3 transition-colors hover:bg-white"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3F2EE] border border-[#E8E5E0]">
-                <BellAlertIcon className="h-4 w-4 text-[#1C1C1C]" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-[13px] font-bold text-[#1C1C1C]">
-                  {notif.amount} reçu
-                </p>
-                <p className="text-[11px] text-[#64635F]">
-                  {notif.name} · {notif.prop}
-                </p>
-              </div>
-            </div>
-            <div className="text-right shrink-0">
-              <span className="text-[10px] font-bold text-[#1C1C1C] bg-white border border-[#E8E5E0] px-1.5 py-0.5 rounded block mb-0.5">
-                {notif.type}
-              </span>
-              <span className="text-[10px] text-[#9C9A95]">{notif.time}</span>
-            </div>
-          </div>
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
 export default function Features() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  // State for Card 1: Interactive Payment Filter
+  const [paymentFilter, setPaymentFilter] = useState<"all" | "paid" | "late">("all");
+
+  // State for Card 2: View Switcher (Owner vs Tenant Portal)
+  const [managementTab, setManagementTab] = useState<"owner" | "tenant">("owner");
+
+  // State for Card 4: Interactive Showcase Style Switcher
+  const [showcaseTheme, setShowcaseTheme] = useState<"emerald" | "dark" | "luxury">("emerald");
+
+  const transactions = [
+    {
+      name: "Koudjo Dossou",
+      prop: "Villa 5P · Fidjrossè Plage",
+      amount: "350 000 FCFA",
+      method: "MTN MoMo",
+      status: "paid",
+      statusLabel: "Encaissé ✓",
+      time: "À l'instant",
+      receipt: "Quittance #LOK-2026-08 générée",
+    },
+    {
+      name: "Bérénice Agossou",
+      prop: "Studio Meublé · Haie Vive",
+      amount: "120 000 FCFA",
+      method: "Moov Money",
+      status: "paid",
+      statusLabel: "Encaissé ✓",
+      time: "Il y a 14 min",
+      receipt: "Quittance #LOK-2026-09 générée",
+    },
+    {
+      name: "Gérard Bio",
+      prop: "Appartement 3P · Ganhi",
+      amount: "220 000 FCFA",
+      method: "MTN MoMo",
+      status: "late",
+      statusLabel: "Retard J+4 ⚠️",
+      time: "Échéance dépassée",
+      receipt: "Rappel WhatsApp automatique envoyé",
+    },
+  ];
+
+  const filteredTransactions = transactions.filter((t) => {
+    if (paymentFilter === "all") return true;
+    return t.status === paymentFilter;
+  });
 
   return (
     <section
@@ -143,194 +170,461 @@ export default function Features() {
         }}
       />
 
-      <div className="container relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6">
+      <div className="container relative z-10 mx-auto max-w-[1240px] px-4 sm:px-6">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto mb-16 max-w-2xl text-center sm:mb-20"
+          className="mx-auto mb-16 max-w-3xl text-center sm:mb-20"
         >
-          <div className="section-label mb-3 text-[#1C1C1C]">Fonctionnalités Animées</div>
-          <h2 className="heading-2 mb-4 text-[#1C1C1C]">
-            Votre tranquillité d&apos;esprit, automatisée
+          <div className="section-label mb-3 text-[#1C1C1C] flex items-center justify-center gap-1.5">
+            <SparklesIcon className="h-4 w-4 text-[#087F5B]" />
+            <span>Plateforme Complète Tout-en-un</span>
+          </div>
+          <h2 className="heading-2 mb-4 text-[#1C1C1C] text-[clamp(2rem,4vw,3.2rem)] leading-tight">
+            Tout votre écosystème locatif,{" "}
+            <span className="font-serif italic font-normal text-[#087F5B]">
+              automatisé
+            </span>
           </h2>
-          <p className="body-text text-base sm:text-lg text-[#64635F]">
-            Ne perdez plus votre temps à chasser les loyers ou à rédiger des reçus papier. Lokka gère les encaissements, vos quittances et vos locataires en continu.
+          <p className="body-text text-base sm:text-lg text-[#64635F] max-w-2xl mx-auto">
+            De la commercialisation à la quittance certifiée, pilotez l&apos;intégralité de votre portefeuille en toute conformité avec la Loi n° 2022-30.
           </p>
         </motion.div>
 
-        {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* ========================================================================= */}
+        {/* ASYMMETRIC BENTO GRID (TEMPLATE A1)                                       */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           {/* ========================================================================= */}
-          {/* CARTE 1 (2 cols) : ENCAISSEMENTS MOMO AUTOMATISÉS & FLUX EN DIRECT        */}
+          {/* CARTE 1 (Col 7) : FINANCES & ENCAISSEMENTS MOMO AUTOMATISÉS               */}
           {/* ========================================================================= */}
           <BentoCard
-            title="Zéro loyer oublié."
-            badge="01 · Encaissements MoMo"
-            description="Laissez vos locataires payer via MTN MoMo ou Moov Money. L'argent arrive, le statut se met à jour et la quittance est émise instantanément."
-            className="md:col-span-2"
+            badge="01 · Encaissements & Finances"
+            title="Paiements Mobile Money & Quittances instantanées"
+            description="Encaissez directement par MTN MoMo et Moov Money. Chaque règlement met à jour votre trésorerie et génère automatiquement une quittance PDF officielle avec QR Code."
+            pills={[
+              "Paiements MTN & Moov Money",
+              "Suivi loyers (encaissés, retards, impayés)",
+              "Quittances PDF avec QR Code",
+              "Notifications & rappels WhatsApp",
+            ]}
+            className="lg:col-span-7"
             delay={0.1}
           >
-            <div className="rounded-[8px] border border-[#E8E5E0] bg-white p-5 shadow-2xs">
-              <div className="mb-4 flex items-center justify-between border-b border-[#E8E5E0] pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1C1C1C]">
-                    <CheckCircleIcon className="h-5 w-5 text-white" />
+            <div className="rounded-[10px] border border-[#E8E5E0] bg-white p-4 sm:p-5 shadow-xs">
+              {/* Header with KPI and Filter Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E8E5E0] pb-4 mb-4">
+                <div>
+                  <div className="text-[11px] font-bold text-[#64635F] uppercase tracking-wider">
+                    Total Encaissé ce mois
                   </div>
-                  <div>
-                    <div className="text-[13px] font-bold text-[#1C1C1C]">Statut des collectes</div>
-                    <div className="text-[11px] text-[#64635F] font-semibold">100% à jour ce mois-ci</div>
+                  <div className="text-[22px] font-extrabold text-[#1C1C1C] flex items-center gap-2">
+                    <span>4 850 000 FCFA</span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#E6F5EF] text-[#087F5B]">
+                      100% collecté
+                    </span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-[18px] font-extrabold text-[#1C1C1C]">4 850 000 FCFA</div>
-                  <div className="text-[11px] text-[#64635F]">Total encaissé en direct</div>
+
+                {/* Filter Switcher */}
+                <div className="flex items-center gap-1 p-1 bg-[#FAF9F6] border border-[#E8E5E0] rounded-lg self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentFilter("all")}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+                      paymentFilter === "all"
+                        ? "bg-white text-[#1C1C1C] shadow-2xs"
+                        : "text-[#64635F] hover:text-[#1C1C1C]"
+                    }`}
+                  >
+                    Tous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentFilter("paid")}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+                      paymentFilter === "paid"
+                        ? "bg-[#E6F5EF] text-[#087F5B] shadow-2xs"
+                        : "text-[#64635F] hover:text-[#1C1C1C]"
+                    }`}
+                  >
+                    Encaissés
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentFilter("late")}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
+                      paymentFilter === "late"
+                        ? "bg-[#FEE2E2] text-[#B91C1C] shadow-2xs"
+                        : "text-[#64635F] hover:text-[#1C1C1C]"
+                    }`}
+                  >
+                    Retards
+                  </button>
                 </div>
               </div>
 
-              <NotificationFeed />
+              {/* Transactions List */}
+              <div className="space-y-2.5">
+                <AnimatePresence mode="popLayout">
+                  {filteredTransactions.map((tx, idx) => (
+                    <motion.div
+                      key={tx.name + idx}
+                      layout
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-[8px] border transition-colors ${
+                        tx.status === "paid"
+                          ? "bg-[#FAF9F6] border-[#E8E5E0] hover:bg-white"
+                          : "bg-[#FEF2F2]/60 border-[#FECACA]"
+                      }`}
+                    >
+                      <div className="flex items-start sm:items-center gap-3">
+                        <div
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                            tx.status === "paid"
+                              ? "bg-[#E6F5EF] text-[#087F5B]"
+                              : "bg-[#FEE2E2] text-[#DC2626]"
+                          }`}
+                        >
+                          {tx.status === "paid" ? (
+                            <CheckCircleIcon className="h-5 w-5" />
+                          ) : (
+                            <BellAlertIcon className="h-5 w-5" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-bold text-[#1C1C1C]">
+                              {tx.name}
+                            </span>
+                            <span className="text-[10px] font-semibold text-[#64635F] px-1.5 py-0.2 rounded bg-white border border-[#E8E5E0]">
+                              {tx.method}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-[#64635F]">{tx.prop}</div>
+                        </div>
+                      </div>
+
+                      <div className="text-left sm:text-right flex sm:flex-col justify-between items-center sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E8E5E0]/60">
+                        <div className="text-[13px] font-extrabold text-[#1C1C1C]">
+                          {tx.amount}
+                        </div>
+                        <div className="text-[10px] font-medium flex items-center gap-1 text-[#087F5B]">
+                          {tx.status === "paid" ? (
+                            <>
+                              <DocumentDuplicateIcon className="h-3 w-3" />
+                              <span>{tx.receipt}</span>
+                            </>
+                          ) : (
+                            <span className="text-[#DC2626] font-semibold">{tx.receipt}</span>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
             </div>
           </BentoCard>
 
           {/* ========================================================================= */}
-          {/* CARTE 2 (1 col) : ANIMATION DES QUITTANCES EMPILÉES 3D                   */}
+          {/* CARTE 2 (Col 5) : GESTION LOCATIVE & PORTAIL LOCATAIRE                    */}
           {/* ========================================================================= */}
           <BentoCard
-            title="Ne rédigez plus jamais de quittances."
-            badge="02 · Quittances PDF Web"
-            description="Chaque paiement génère une quittance PDF certifiée avec QR Code et mentions obligatoires Loi n° 2022-30."
-            className="md:col-span-1"
+            badge="02 · Gestion Locative & Baux"
+            title="Biens, baux légaux & portail locataire"
+            description="Centralisez vos lots, fiches locataires et contrats conformes à la loi béninoise. Offrez à chaque locataire son espace sans mot de passe."
+            pills={[
+              "Gestion des biens & occupation",
+              "Fiches locataires 360°",
+              "Baux Loi n° 2022-30",
+              "Portail locataire OTP & incidents",
+            ]}
+            className="lg:col-span-5"
             delay={0.2}
           >
-            <div className="relative mt-4 flex justify-center py-4">
-              {/* Backing Receipt Shadow Card */}
-              <div className="absolute h-32 w-44 rounded-[8px] border border-[#E8E5E0] bg-[#FAF9F6] shadow-xs rotate-6 opacity-60" />
-
-              {/* Front Interactive Animated Receipt */}
-              <div className="relative z-10 flex h-32 w-44 flex-col justify-between rounded-[8px] border border-[#1C1C1C] bg-white p-3.5 shadow-md -rotate-3 transition-transform duration-300 group-hover:rotate-0">
-                <div className="flex items-center justify-between border-b border-[#E8E5E0] pb-1.5">
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#1C1C1C]">
-                    <DocumentDuplicateIcon className="h-3.5 w-3.5 text-[#1C1C1C]" />
-                    <span>LOK-2026</span>
-                  </div>
-                  <span className="text-[9px] font-bold text-[#1C1C1C] bg-[#F3F2EE] px-1.5 py-0.5 rounded border border-[#E8E5E0]">
-                    Payé ✓
-                  </span>
-                </div>
-
-                <div className="text-center my-auto">
-                  <span className="text-[14px] font-extrabold text-[#1C1C1C]">250 000 F</span>
-                  <span className="text-[9px] text-[#64635F] block">Fidjrossè Plage</span>
-                </div>
-
-                <div className="flex items-center justify-between text-[8px] text-[#9C9A95] pt-1 border-t border-[#E8E5E0]">
-                  <span>Loi n° 2022-30</span>
-                  <QrCodeIcon className="h-3.5 w-3.5 text-[#1C1C1C]" />
-                </div>
+            <div className="rounded-[10px] border border-[#E8E5E0] bg-white p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+              {/* Tab Selector */}
+              <div className="flex border-b border-[#E8E5E0] mb-4 pb-2.5 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setManagementTab("owner")}
+                  className={`flex items-center gap-1.5 pb-1 px-2 text-[12px] font-bold border-b-2 transition-all ${
+                    managementTab === "owner"
+                      ? "border-[#087F5B] text-[#087F5B]"
+                      : "border-transparent text-[#64635F] hover:text-[#1C1C1C]"
+                  }`}
+                >
+                  <HomeModernIcon className="h-3.5 w-3.5" />
+                  <span>Vue Bailleur (Contrats)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setManagementTab("tenant")}
+                  className={`flex items-center gap-1.5 pb-1 px-2 text-[12px] font-bold border-b-2 transition-all ${
+                    managementTab === "tenant"
+                      ? "border-[#087F5B] text-[#087F5B]"
+                      : "border-transparent text-[#64635F] hover:text-[#1C1C1C]"
+                  }`}
+                >
+                  <UserGroupIcon className="h-3.5 w-3.5" />
+                  <span>Espace Locataire (OTP)</span>
+                </button>
               </div>
+
+              {/* Dynamic Content based on Tab */}
+              {managementTab === "owner" ? (
+                <motion.div
+                  key="owner-view"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-3"
+                >
+                  <div className="p-3.5 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0]">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-[#64635F] mb-1.5">
+                      <span>Bail Numérique #B-2026-44</span>
+                      <span className="text-[#087F5B] bg-[#E6F5EF] px-2 py-0.5 rounded-full font-bold">
+                        Loi 2022-30 ✓
+                      </span>
+                    </div>
+                    <div className="text-[14px] font-extrabold text-[#1C1C1C]">
+                      Amina Touré · Apt 4B (Cotonou)
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-[#64635F] mt-2 pt-2 border-t border-[#E8E5E0]">
+                      <span>Loyer : <strong>180 000 F/mois</strong></span>
+                      <span>Caution : <strong>3 mois max</strong></span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2.5 rounded-[6px] bg-[#FAF9F6] border border-[#E8E5E0] text-[11px] text-[#1C1C1C] font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheckIcon className="h-4 w-4 text-[#087F5B]" />
+                      Clause résolutoire &amp; État des lieux
+                    </span>
+                    <span className="text-[#087F5B]">Verrouillé 🔒</span>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="tenant-view"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-2.5"
+                >
+                  <div className="p-3 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] text-center">
+                    <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#087F5B] bg-[#E6F5EF] px-2 py-0.5 rounded mb-1.5">
+                      <LockClosedIcon className="h-3 w-3" />
+                      Connexion Sécurisée sans mot de passe
+                    </div>
+                    <div className="text-[12px] font-bold text-[#1C1C1C]">
+                      Espace Locataire · Code OTP WhatsApp/SMS
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2.5 rounded-[6px] border border-[#E8E5E0] bg-white text-center">
+                      <DocumentDuplicateIcon className="h-4 w-4 mx-auto text-[#087F5B] mb-1" />
+                      <span className="text-[11px] font-bold text-[#1C1C1C] block">
+                        Mes Quittances
+                      </span>
+                      <span className="text-[9px] text-[#64635F]">Téléchargement PDF</span>
+                    </div>
+                    <div className="p-2.5 rounded-[6px] border border-[#E8E5E0] bg-white text-center">
+                      <WrenchScrewdriverIcon className="h-4 w-4 mx-auto text-[#1C1C1C] mb-1" />
+                      <span className="text-[11px] font-bold text-[#1C1C1C] block">
+                        Signaler Incident
+                      </span>
+                      <span className="text-[9px] text-[#64635F]">Suivi des travaux</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </div>
           </BentoCard>
 
           {/* ========================================================================= */}
-          {/* CARTE 3 (1 col) : STATISTIQUES ANIMÉES (3 COULEURS : NOIR, GRIS & SABLE) */}
+          {/* CARTE 3 (Col 5) : PILOTAGE, KPIS & ANALYSE FINANCIÈRE                     */}
           {/* ========================================================================= */}
           <BentoCard
-            title="Une vue claire sur vos revenus."
-            badge="03 · Rentabilité &amp; TFU"
-            description="Visualisez vos encaissements et votre taux d'occupation mensuel en un coup d'œil sans tableur Excel."
-            className="md:col-span-1"
+            badge="03 · Pilotage & Rentabilité"
+            title="Indicateurs de performance & Bilan fiscal"
+            description="Suivez vos revenus, taux de recouvrement et d'occupation en temps réel. Préparez votre déclaration fiscale TFU sans calculs fastidieux."
+            pills={[
+              "Revenus réels & loyers attendus",
+              "Taux de recouvrement & occupation",
+              "Statistiques vues vitrine",
+              "Calculateur fiscal TFU (DGI)",
+            ]}
+            className="lg:col-span-5"
             delay={0.3}
           >
-            <div className="mt-4 bg-[#FAF9F6] border border-[#E8E5E0] rounded-[8px] p-3">
-              <div className="flex h-28 items-end gap-2 px-1">
+            <div className="rounded-[10px] border border-[#E8E5E0] bg-[#FAF9F6] p-4 sm:p-5">
+              {/* 3 Mini KPI Counters */}
+              <div className="grid grid-cols-3 gap-2 mb-4 pb-3 border-b border-[#E8E5E0] text-center">
+                <div className="bg-white p-2 rounded-[6px] border border-[#E8E5E0]">
+                  <div className="text-[16px] font-extrabold text-[#087F5B]">98.5%</div>
+                  <div className="text-[9px] font-bold text-[#64635F] uppercase">Recouvrement</div>
+                </div>
+                <div className="bg-white p-2 rounded-[6px] border border-[#E8E5E0]">
+                  <div className="text-[16px] font-extrabold text-[#1C1C1C]">100%</div>
+                  <div className="text-[9px] font-bold text-[#64635F] uppercase">Occupation</div>
+                </div>
+                <div className="bg-white p-2 rounded-[6px] border border-[#E8E5E0]">
+                  <div className="text-[16px] font-extrabold text-[#1C1C1C]">1.4k</div>
+                  <div className="text-[9px] font-bold text-[#64635F] uppercase">Vues Annonces</div>
+                </div>
+              </div>
+
+              {/* Animated Mini Bar Chart */}
+              <div className="flex h-24 items-end gap-2 px-1">
                 {[
-                  { h: 40, color: "bg-[#9C9A95]" },              // M1 Gris
-                  { h: 65, color: "bg-[#C5A880]" },              // M2 Sable Doré (Sélection)
-                  { h: 45, color: "bg-[#9C9A95]" },              // M3 Gris
-                  { h: 80, color: "bg-[#C5A880]" },              // M4 Sable Doré (Sélection)
-                  { h: 55, color: "bg-[#9C9A95]" },              // M5 Gris
-                  { h: 100, color: "bg-[#1C1C1C]" },             // M6 Noir (Pic Maximum)
-                  { h: 85, color: "bg-[#C5A880]" },              // M7 Sable Doré (Sélection)
-                ].map((item, i) => (
+                  { h: 45, label: "M1", color: "bg-[#9C9A95]" },
+                  { h: 65, label: "M2", color: "bg-[#087F5B]" },
+                  { h: 55, label: "M3", color: "bg-[#9C9A95]" },
+                  { h: 85, label: "M4", color: "bg-[#087F5B]" },
+                  { h: 70, label: "M5", color: "bg-[#9C9A95]" },
+                  { h: 100, label: "M6", color: "bg-[#1C1C1C]" },
+                ].map((bar, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                     <motion.div
                       initial={{ height: 0 }}
-                      whileInView={{ height: `${item.h}%` }}
+                      whileInView={{ height: `${bar.h}%` }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.8, delay: 0.2 + i * 0.08, ease: "easeOut" }}
-                      className={`w-full rounded-t-[3px] shadow-2xs ${item.color}`}
+                      className={`w-full rounded-t-[3px] shadow-2xs ${bar.color}`}
                     />
-                    <span className="text-[9px] font-mono text-[#9C9A95]">M{i + 1}</span>
+                    <span className="text-[9px] font-mono text-[#9C9A95]">{bar.label}</span>
                   </div>
                 ))}
               </div>
 
-              {/* 3-Color Legend: Noir, Gris, Sable Doré */}
+              {/* Chart Legend */}
               <div className="flex items-center justify-between gap-1 pt-2.5 mt-2 border-t border-[#E8E5E0] text-[10px] text-[#64635F]">
                 <div className="flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-[#1C1C1C]" />
-                  <span>Max</span>
+                  <span>Pic Maximal</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-[#C5A880]" />
-                  <span>TFU Optimisé</span>
+                  <span className="h-2 w-2 rounded-full bg-[#087F5B]" />
+                  <span>Objectif Atteint</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-[#9C9A95]" />
-                  <span>Mensuel</span>
+                  <span>Moyenne</span>
                 </div>
               </div>
             </div>
           </BentoCard>
 
           {/* ========================================================================= */}
-          {/* CARTE 4 (2 cols) : SITE VITRINE PUBLIC EN 1 CLIC                           */}
+          {/* CARTE 4 (Col 7) : ACQUISITION, MARKETPLACE & VITRINE CLÉ EN MAIN          */}
           {/* ========================================================================= */}
           <BentoCard
-            title="Votre Site Vitrine Public en 1 Clic."
-            badge="04 · Trouver des locataires"
-            description="Publiez vos logements vacants sur votre propre mini-site ou domaine personnalisé (.bj) pour recevoir des demandes de visite en direct."
-            className="md:col-span-2"
+            badge="04 · Acquisition & Visibilité"
+            title="Vitrine personnalisée, Marketplace & Demandes de visite"
+            description="Publiez vos logements vacants sur votre propre mini-site ou sur la marketplace globale Lokka. Recevez des demandes de visite directement par WhatsApp et optimisez votre SEO Google."
+            pills={[
+              "Vitrine personnalisée multi-styles",
+              "Marketplace & diffusion d'annonces",
+              "Module de demande de visite en ligne",
+              "Nom de domaine propre & SEO Google",
+            ]}
+            className="lg:col-span-7"
             delay={0.4}
           >
-            <div className="rounded-[8px] border border-[#E8E5E0] bg-[#FAF9F6] p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-1 text-left w-full sm:w-auto">
-                <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#64635F]">
-                  <GlobeAltIcon className="h-3.5 w-3.5 text-[#1C1C1C]" />
-                  <span className="font-bold text-[#1C1C1C]">votre-nom.lokka.bj</span>
+            <div className="rounded-[10px] border border-[#E8E5E0] bg-white p-4 sm:p-5 shadow-xs">
+              {/* Browser Header Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-[#E8E5E0]">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
+                  </div>
+                  <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] text-[11px] font-mono text-[#64635F]">
+                    <GlobeAltIcon className="h-3 w-3 text-[#087F5B]" />
+                    <span>agence-prestige.lokka.bj</span>
+                  </div>
                 </div>
-                <div className="text-[12px] text-[#64635F]">
-                  Réservations en ligne &amp; contact direct WhatsApp
+
+                {/* Style Switcher */}
+                <div className="flex items-center gap-1 self-start sm:self-auto">
+                  <span className="text-[10px] text-[#9C9A95] font-semibold mr-1">Thème :</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowcaseTheme("emerald")}
+                    className={`h-5 px-2 rounded text-[10px] font-bold transition-all ${
+                      showcaseTheme === "emerald"
+                        ? "bg-[#087F5B] text-white"
+                        : "bg-[#FAF9F6] text-[#64635F] hover:bg-[#E8E5E0]"
+                    }`}
+                  >
+                    Émeraude
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowcaseTheme("dark")}
+                    className={`h-5 px-2 rounded text-[10px] font-bold transition-all ${
+                      showcaseTheme === "dark"
+                        ? "bg-[#1C1C1C] text-white"
+                        : "bg-[#FAF9F6] text-[#64635F] hover:bg-[#E8E5E0]"
+                    }`}
+                  >
+                    Sombre
+                  </button>
                 </div>
               </div>
 
-              <div className="flex gap-2 w-full sm:w-auto">
-                <div className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-[#E8E5E0] text-[#1C1C1C] text-[11px] font-bold rounded flex items-center gap-1 shadow-2xs">
-                  <CalendarDaysIcon className="h-3.5 w-3.5" />
-                  <span>Visites</span>
+              {/* Mock Property Card */}
+              <div className="p-3.5 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E6F5EF] text-[#087F5B] px-2 py-0.5 rounded">
+                      Disponible
+                    </span>
+                    <span className="text-[10px] text-[#64635F] flex items-center gap-0.5">
+                      <EyeIcon className="h-3 w-3" /> 384 visites
+                    </span>
+                  </div>
+                  <div className="text-[13.5px] font-extrabold text-[#1C1C1C]">
+                    Villa Moderne 4 Pièces avec Jardin
+                  </div>
+                  <div className="text-[11px] text-[#64635F]">
+                    Cotonou · Haie Vive · <strong>450 000 FCFA/mois</strong>
+                  </div>
                 </div>
-                <div className="flex-1 sm:flex-initial py-2 px-3 bg-[#1C1C1C] text-white text-[11px] font-bold rounded flex items-center gap-1 shadow-2xs">
-                  <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />
-                  <span>WhatsApp direct</span>
+
+                {/* Direct Actions (WhatsApp & Booking) */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-[#E8E5E0] text-[#1C1C1C] hover:border-[#1C1C1C] text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                  >
+                    <CalendarDaysIcon className="h-3.5 w-3.5 text-[#64635F]" />
+                    <span>Visite</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 sm:flex-initial py-2 px-3 text-white text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors ${
+                      showcaseTheme === "emerald"
+                        ? "bg-[#087F5B] hover:bg-[#066347]"
+                        : "bg-[#1C1C1C] hover:bg-[#333333]"
+                    }`}
+                  >
+                    <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />
+                    <span>WhatsApp</span>
+                  </button>
                 </div>
               </div>
             </div>
           </BentoCard>
         </div>
       </div>
-
-      {/* CSS for mask image gradient */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .mask-image-bottom {
-          mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
-          -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
-        }
-      `,
-        }}
-      />
     </section>
   );
 }

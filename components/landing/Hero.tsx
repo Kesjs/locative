@@ -8,6 +8,7 @@ import SideRays from "@/components/ui/side-rays";
 import { LiquidButton } from "@/components/ui/liquid-button";
 import { cn } from "@/lib/utils";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { handleError } from "@/lib/errors";
 
 export default function Hero() {
   const [email, setEmail] = useState("");
@@ -19,29 +20,39 @@ export default function Hero() {
 
     setIsSubmitting(true);
     try {
-      if (isSupabaseConfigured()) {
-        const supabase = createClient();
-        await supabase.from("leads_waitlist").insert([
-          {
-            email,
-            source: "hero_landing",
-            profile_type: "bailleur",
-            city: "Cotonou",
-          },
-        ]);
-
-        await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-            shouldCreateUser: true,
-          },
-        });
+      if (!isSupabaseConfigured()) {
+        handleError(
+          new Error("Configuration Supabase manquante"),
+          "Service momentanément indisponible. Réessayez dans un instant.",
+          "hero:otp"
+        );
+        setIsSubmitting(false);
+        return;
       }
-    } catch (err) {
-      console.warn("Hero OTP send notice:", err);
-    } finally {
+
+      const supabase = createClient();
+      await supabase.from("leads_waitlist").insert([
+        {
+          email,
+          source: "hero_landing",
+          profile_type: "bailleur",
+          city: "Cotonou",
+        },
+      ]);
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+          shouldCreateUser: true,
+        },
+      });
+      if (error) throw error;
+
       window.location.href = `/auth/verify?email=${encodeURIComponent(email)}`;
+    } catch (err) {
+      handleError(err, "Impossible d'envoyer le code. Vérifiez votre email et réessayez.", "hero:otp");
+      setIsSubmitting(false);
     }
   };
 
@@ -90,13 +101,13 @@ export default function Hero() {
               className="absolute -inset-[150%] animate-[spin_3.5s_linear_infinite] opacity-85 pointer-events-none"
               style={{
                 background:
-                  "conic-gradient(from 0deg at 50% 50%, transparent 0%, transparent 65%, #C5A880 80%, #F5F5DC 90%, transparent 100%)",
+                  "conic-gradient(from 0deg at 50% 50%, transparent 0%, transparent 65%, #087F5B 80%, #E6F5EF 90%, transparent 100%)",
               }}
             />
             <div className="absolute inset-[1.5px] bg-white rounded-full pointer-events-none z-0" />
 
             {/* Badge Content */}
-            <span className="relative z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-[#1C1C1C] text-white text-[10px] font-bold uppercase tracking-wider">
+            <span className="relative z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-[#087F5B] text-white text-[10px] font-bold uppercase tracking-wider">
               NEW
             </span>
             <span className="relative z-10 font-semibold text-[#1C1C1C]">
@@ -150,10 +161,10 @@ export default function Hero() {
             <LiquidButton
               type="submit"
               disabled={isSubmitting}
-              baseColor="#1C1C1C"
-              liquidColor="#F5F5DC"
+              baseColor="#087F5B"
+              liquidColor="#E6F5EF"
               textColor="#FFFFFF"
-              textHoverColor="#1C1C1C"
+              textHoverColor="#087F5B"
               className="shrink-0 rounded-[6px] px-5 py-2.5 text-[13px] font-semibold border border-transparent hover:border-[#E8E5E0]"
             >
               {isSubmitting ? "Envoi..." : "Commencer"}
