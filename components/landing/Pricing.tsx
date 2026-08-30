@@ -43,13 +43,13 @@ const PLANS: Plan[] = [
     annualPrice: "0 FCFA",
     period: "",
     annualDetail: "Gratuit pour démarrer",
-    description: "Pour découvrir Lokka avec 1 ou 2 logements, sans engagement.",
+    description: "Pour découvrir Lokka.",
     bienLabel: "Jusqu'à 2 biens",
     features: [
-      "Gestion des locataires",
-      "Gestion des baux",
-      "Quittances PDF",
-      "Accès portail locataire",
+      "Gestion de base",
+      "Baux",
+      "Quittances PDF certifiées",
+      "Accès aux fonctionnalités essentielles",
     ],
     cta: "Créer mon compte gratuit",
     popular: false,
@@ -60,17 +60,15 @@ const PLANS: Plan[] = [
     annualPrice: "4 200 FCFA",
     period: "/mois",
     annualDetail: "50 000 FCFA facturés par an (2 mois offerts)",
-    description: "Pour les bailleurs indépendants qui gèrent leur propre patrimoine.",
+    description: "Pour les bailleurs indépendants.",
     bienLabel: "Jusqu'à 10 biens",
     features: [
       "Quittances illimitées",
       "Mobile Money",
-      "Suivi des paiements",
-      "Publication sur la vitrine Lokka",
-      "Vitrine dédiée",
-      "Relances",
+      "Portail locataire",
+      "Vitrine web dédiée",
+      "Distribution des biens",
       "Statistiques",
-      "Partage WhatsApp",
     ],
     cta: "Démarrer l'essai 14 jours",
     popular: true,
@@ -82,17 +80,14 @@ const PLANS: Plan[] = [
     annualPrice: "10 000 FCFA",
     period: "/mois",
     annualDetail: "120 000 FCFA facturés par an (2 mois offerts)",
-    description: "Pour les propriétaires vivant à l'étranger qui suivent leur patrimoine à distance.",
+    description: "Pour les propriétaires qui gèrent leur patrimoine à distance.",
     bienLabel: "Jusqu'à 30 biens",
     features: [
-      "Dashboard patrimoine",
       "Suivi à distance",
-      "Alertes",
-      "Suivi des encaissements",
-      "Gestion des visites",
-      "États des lieux",
-      "Rapports",
+      "Alertes WhatsApp",
+      "Suivi patrimonial",
       "Export fiscal",
+      "Fonctionnalités Pro",
     ],
     cta: "Choisir Diaspora & Patrimoine",
     popular: false,
@@ -103,23 +98,23 @@ const PLANS: Plan[] = [
     annualPrice: "20 800 FCFA",
     period: "/mois",
     annualDetail: "250 000 FCFA facturés par an (2 mois offerts)",
-    description: "Pour les agences immobilières et gestionnaires multi-mandants.",
+    description: "Pour les agences et gestionnaires.",
     bienLabel: "Biens illimités",
     features: [
       "Multi-propriétaires",
       "Mandats",
-      "Équipe",
-      "Rôles et permissions",
       "Commissions",
-      "Reporting",
-      "Vitrine professionnelle",
+      "Reversements",
+      "Jusqu'à 5 agents",
       "Domaine personnalisé",
-      "Support prioritaire",
+      "Fonctionnalités avancées",
     ],
     cta: "Choisir le Plan Agence",
     popular: false,
   },
 ];
+
+const CARD_FEATURE_CAP = 4; // + bienLabel = 5 lignes max visibles par card
 
 // Le tableau comparatif est dérivé de PLANS : union ordonnée de tous les
 // libellés (bienLabel + features), un seul passage, aucune donnée ajoutée.
@@ -280,12 +275,7 @@ export default function Pricing() {
                       />
                       <span>{plan.bienLabel}</span>
                     </li>
-                    {i > 0 && (
-                      <li className="text-[12px] italic opacity-60 pl-[26px]">
-                        Tout {PLANS[i - 1].name}, plus :
-                      </li>
-                    )}
-                    {plan.features.map((feature, j) => (
+                    {plan.features.slice(0, CARD_FEATURE_CAP).map((feature, j) => (
                       <li key={j} className="flex items-start gap-2.5 text-[13px]">
                         <CheckIcon
                           className="h-4 w-4 shrink-0 mt-0.5"
@@ -294,6 +284,18 @@ export default function Pricing() {
                         <span className="opacity-90">{feature}</span>
                       </li>
                     ))}
+                    {plan.features.length > CARD_FEATURE_CAP && (
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => setShowComparison(true)}
+                          className="text-[12px] font-bold underline decoration-dotted underline-offset-2 pl-[26px] cursor-pointer"
+                          style={{ color: plan.popular ? "rgba(255,255,255,0.85)" : "#1C1C1C" }}
+                        >
+                          +{plan.features.length - CARD_FEATURE_CAP} autres fonctionnalités
+                        </button>
+                      </li>
+                    )}
                   </ul>
                 </div>
               </div>
