@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { getErrorMessage, logError } from "@/lib/errors";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
@@ -92,11 +93,11 @@ export default function OtpVerification({
           }
         }, 800);
       } catch (err: any) {
-        console.error("Erreur vérification OTP:", err);
+        logError(err, "otp:verify");
         setIsShaking(true);
         setTimeout(() => setIsShaking(false), 500);
         setErrorMessage(
-          err.message || "Code incorrect ou expiré. Veuillez vérifier et réessayer."
+          getErrorMessage(err, "Code incorrect ou expiré. Veuillez vérifier et réessayer.")
         );
         // Réinitialiser les champs et refocaliser
         setDigits(Array(length).fill(""));
@@ -183,8 +184,8 @@ export default function OtpVerification({
       setTimeout(() => setResendSuccess(false), 4000);
       inputRefs.current[0]?.focus();
     } catch (err: any) {
-      console.error("Erreur renvoi code:", err);
-      setErrorMessage("Impossible de renvoyer le code. Veuillez patienter.");
+      logError(err, "otp:resend");
+      setErrorMessage(getErrorMessage(err, "Impossible de renvoyer le code. Veuillez patienter."));
     } finally {
       setResending(false);
     }
