@@ -42,7 +42,7 @@ const PLANS: Plan[] = [
     monthlyPrice: "0 FCFA",
     annualPrice: "0 FCFA",
     period: "",
-    annualDetail: "Gratuit pour démarrer",
+    annualDetail: "Gratuit et sans engagement",
     description: "Pour découvrir Lokka.",
     bienLabel: "Jusqu'à 2 biens",
     features: [
@@ -59,7 +59,7 @@ const PLANS: Plan[] = [
     monthlyPrice: "5 000 FCFA",
     annualPrice: "4 200 FCFA",
     period: "/mois",
-    annualDetail: "50 000 FCFA facturés par an (2 mois offerts)",
+    annualDetail: "50 000 FCFA facturés par an (-20%)",
     description: "Pour les bailleurs indépendants.",
     bienLabel: "Jusqu'à 10 biens",
     features: [
@@ -79,7 +79,7 @@ const PLANS: Plan[] = [
     monthlyPrice: "12 000 FCFA",
     annualPrice: "10 000 FCFA",
     period: "/mois",
-    annualDetail: "120 000 FCFA facturés par an (2 mois offerts)",
+    annualDetail: "120 000 FCFA facturés par an (-20%)",
     description: "Pour les propriétaires qui gèrent leur patrimoine à distance.",
     bienLabel: "Jusqu'à 30 biens",
     features: [
@@ -97,7 +97,7 @@ const PLANS: Plan[] = [
     monthlyPrice: "25 000 FCFA",
     annualPrice: "20 800 FCFA",
     period: "/mois",
-    annualDetail: "250 000 FCFA facturés par an (2 mois offerts)",
+    annualDetail: "250 000 FCFA facturés par an (-20%)",
     description: "Pour les agences et gestionnaires.",
     bienLabel: "Biens illimités",
     features: [
@@ -194,7 +194,7 @@ export default function Pricing() {
                 Annuel
               </span>
               <span className="inline-flex items-center rounded-full bg-[#E6F5EF] px-2.5 py-0.5 text-[11px] font-bold text-[#087F5B]">
-                Jusqu&apos;à 2 mois offerts
+                -20% de remise
               </span>
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function Pricing() {
                     )}
                   </div>
 
-                  <div className="h-4 mt-1.5">
+                  <div className="min-h-[20px] mt-1.5">
                     {plan.annualDetail && (
                       <span
                         className="text-[12px] font-medium"
