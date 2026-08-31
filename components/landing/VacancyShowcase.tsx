@@ -1,15 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useInView } from "framer-motion";
 import { CalendarDays, Check, Eye, Globe2, MessageCircle, Send } from "lucide-react";
 import { VACANT_LISTING, formatFcfa } from "./landing-data";
 
 export default function VacancyShowcase() {
-  const [isPublished, setIsPublished] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+
+  const [step, setStep] = useState(0);
   const [isRequested, setIsRequested] = useState(false);
 
+  useEffect(() => {
+    if (!isInView) return;
+    
+    let timeouts: NodeJS.Timeout[] = [];
+    
+    timeouts.push(setTimeout(() => setStep(1), 800));  // Titre
+    timeouts.push(setTimeout(() => setStep(2), 1600)); // Localisation & Loyer
+    timeouts.push(setTimeout(() => setStep(3), 2400)); // Caractéristiques
+    timeouts.push(setTimeout(() => setStep(4), 3200)); // Clic bouton
+    timeouts.push(setTimeout(() => setStep(5), 3500)); // Publié
+
+    return () => timeouts.forEach(clearTimeout);
+  }, [isInView]);
+
+  const isPublished = step >= 5;
+
   return (
-    <section id="vitrine" className="landing-section bg-bg-canvas py-20 sm:py-28">
+    <section id="vitrine" className="landing-section bg-bg-canvas py-20 sm:py-28" ref={containerRef}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-reveal className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div><p className="landing-label">Vitrine &amp; acquisition</p><h2 className="mt-4 max-w-[760px] text-[clamp(2rem,4vw,3.25rem)] font-semibold leading-[1] tracking-[-0.06em] text-text-primary">Un bien vacant devient visible.</h2></div>
@@ -22,22 +42,28 @@ export default function VacancyShowcase() {
             <div className="pt-5 space-y-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-medium text-text-muted">Titre de l'annonce</label>
-                <div className="rounded-md border border-border-default bg-bg-canvas px-3 py-2 text-[13px] text-text-primary">{VACANT_LISTING.title}</div>
+                <div className="flex h-[38px] items-center rounded-md border border-border-default bg-bg-canvas px-3 text-[13px] text-text-primary">
+                  <span className={`transition-opacity duration-500 ${step >= 1 ? "opacity-100" : "opacity-0"}`}>{VACANT_LISTING.title}</span>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-medium text-text-muted">Localisation</label>
-                  <div className="rounded-md border border-border-default bg-bg-canvas px-3 py-2 text-[13px] text-text-primary">{VACANT_LISTING.location}</div>
+                  <div className="flex h-[38px] items-center rounded-md border border-border-default bg-bg-canvas px-3 text-[13px] text-text-primary">
+                    <span className={`transition-opacity duration-500 ${step >= 2 ? "opacity-100" : "opacity-0"}`}>{VACANT_LISTING.location}</span>
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-medium text-text-muted">Loyer mensuel</label>
-                  <div className="rounded-md border border-border-default bg-bg-canvas px-3 py-2 text-[13px] text-text-primary">{formatFcfa(VACANT_LISTING.rentFcfa)}</div>
+                  <div className="flex h-[38px] items-center rounded-md border border-border-default bg-bg-canvas px-3 text-[13px] text-text-primary">
+                    <span className={`transition-opacity duration-500 ${step >= 2 ? "opacity-100" : "opacity-0"}`}>{formatFcfa(VACANT_LISTING.rentFcfa)}</span>
+                  </div>
                 </div>
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-medium text-text-muted">Équipements & Caractéristiques</label>
-                <div className="rounded-md border border-border-default bg-bg-canvas p-3">
-                  <ul className="grid gap-2 text-[11px] text-text-secondary sm:grid-cols-2">
+                <div className="rounded-md border border-border-default bg-bg-canvas p-3 min-h-[76px]">
+                  <ul className={`grid gap-2 text-[11px] text-text-secondary sm:grid-cols-2 transition-opacity duration-500 ${step >= 3 ? "opacity-100" : "opacity-0"}`}>
                     {VACANT_LISTING.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2">
                         <Check size={12} className="text-success-strong"/>{feature}
@@ -48,7 +74,17 @@ export default function VacancyShowcase() {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center border-y border-border-default bg-bg-subtle/60 py-4 lg:border-x lg:border-y-0"><button type="button" onClick={() => setIsPublished((current) => !current)} aria-pressed={isPublished} className="inline-flex items-center gap-2 rounded-sm bg-brand-primary px-3 py-2 text-[11px] font-semibold text-white hover:bg-brand-hover lg:[writing-mode:vertical-rl]">{isPublished ? "Annonce publiée" : "Publier l’annonce"}<Send aria-hidden="true" size={13} /></button></div>
+          <div className="flex items-center justify-center border-y border-border-default bg-bg-subtle/60 py-4 lg:border-x lg:border-y-0">
+            <button 
+              type="button" 
+              onClick={() => { if(step < 5) setStep(5); else setStep(0); }} 
+              aria-pressed={isPublished} 
+              className={`inline-flex items-center gap-2 rounded-sm bg-brand-primary px-3 py-2 text-[11px] font-semibold text-white transition-all duration-200 hover:bg-brand-hover lg:[writing-mode:vertical-rl] ${step === 4 ? "scale-90 bg-brand-hover" : "scale-100"}`}
+            >
+              {isPublished ? "Annonce publiée" : "Publier l’annonce"}
+              <Send aria-hidden="true" size={13} className={`transition-transform ${isPublished ? "-translate-y-1 lg:translate-x-1 lg:-translate-y-0 opacity-80" : ""}`} />
+            </button>
+          </div>
           <div className={`p-5 sm:p-7 transition-all duration-700 ease-out ${isPublished ? "opacity-100 blur-none translate-y-0" : "opacity-30 blur-[4px] translate-y-4 pointer-events-none select-none"}`}>
             <div className="flex items-center justify-between gap-3 border-b border-border-default pb-4"><p className="text-[12px] font-semibold text-text-primary">Sur votre vitrine</p><span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success-strong"><Globe2 aria-hidden="true" size={13} /> {isPublished ? "En ligne" : "Prêt"}</span></div>
             <div className="pt-5">
