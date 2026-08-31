@@ -15,7 +15,6 @@ interface FeatureRow {
   name: string;
   decouverte: string | boolean;
   pro: string | boolean;
-  diaspora: string | boolean;
   agence: string | boolean;
 }
 
@@ -44,11 +43,10 @@ const PLANS: Plan[] = [
     period: "",
     annualDetail: "Gratuit et sans engagement",
     description: "Pour découvrir Lokka.",
-    bienLabel: "Jusqu'à 2 biens",
+    bienLabel: "1 seul bien",
     features: [
-      "Gestion de base",
-      "Baux",
-      "Quittances PDF certifiées",
+      "Gestion basique (baux, locataires)",
+      "Paiements & quittances PDF manuels",
       "Accès aux fonctionnalités essentielles",
     ],
     cta: "Créer mon compte gratuit",
@@ -57,61 +55,49 @@ const PLANS: Plan[] = [
   {
     name: "Bailleur Pro",
     monthlyPrice: "5 000 FCFA",
-    annualPrice: "4 200 FCFA",
+    annualPrice: "4 000 FCFA",
     period: "/mois",
-    annualDetail: "50 000 FCFA facturés par an (-20%)",
+    annualDetail: "48 000 FCFA facturés par an (-20%)",
     description: "Pour les bailleurs indépendants.",
-    bienLabel: "Jusqu'à 10 biens",
+    bienLabel: "Jusqu'à 15 biens",
     features: [
-      "Quittances illimitées",
-      "Mobile Money",
+      "Gestion complète en autonomie",
+      "Paiements Mobile Money",
       "Portail locataire",
-      "Vitrine web dédiée",
-      "Distribution des biens",
-      "Statistiques",
+      "Marketplace Lokka (annonces)",
+      "Frais de visite Mobile Money",
+      "Vitrine web (lien standard)",
     ],
     cta: "Démarrer l'essai 14 jours",
     popular: true,
     badgeLabel: "Le Plus Populaire",
   },
   {
-    name: "Diaspora & Patrimoine",
-    monthlyPrice: "12 000 FCFA",
-    annualPrice: "10 000 FCFA",
-    period: "/mois",
-    annualDetail: "120 000 FCFA facturés par an (-20%)",
-    description: "Pour les propriétaires qui gèrent leur patrimoine à distance.",
-    bienLabel: "Jusqu'à 30 biens",
-    features: [
-      "Suivi à distance",
-      "Alertes WhatsApp",
-      "Suivi patrimonial",
-      "Export fiscal",
-      "Fonctionnalités Pro",
-    ],
-    cta: "Choisir Diaspora & Patrimoine",
-    popular: false,
-  },
-  {
-    name: "Agence & Conciergerie",
+    name: "Agence Pro",
     monthlyPrice: "25 000 FCFA",
-    annualPrice: "20 800 FCFA",
+    annualPrice: "20 000 FCFA",
     period: "/mois",
-    annualDetail: "250 000 FCFA facturés par an (-20%)",
+    annualDetail: "240 000 FCFA facturés par an (-20%)",
     description: "Pour les agences et gestionnaires.",
-    bienLabel: "Biens illimités",
+    bienLabel: "50 biens inclus",
     features: [
-      "Multi-propriétaires",
-      "Mandats",
-      "Commissions",
-      "Reversements",
-      "Jusqu'à 5 agents",
-      "Domaine personnalisé",
-      "Fonctionnalités avancées",
+      "Multi-propriétaires & mandats",
+      "Reversements automatiques aux bailleurs",
+      "Marketplace Lokka (annonces)",
+      "Frais de visite avancés",
+      "Domaine personnalisé + thèmes",
+      "SEO & Blog inclus",
     ],
     cta: "Choisir le Plan Agence",
     popular: false,
   },
+];
+
+// Add-ons de scaling (doc archi §1) — affichés sous la grille, pas dans les
+// cards, pour ne pas surcharger la comparaison des 3 paliers de base.
+const ADDONS = [
+  "Bailleur Pro : +5 biens pour 2 000 FCFA/mois (jusqu'à 35 biens max)",
+  "Agence Pro : pack +100 biens pour 5 000 FCFA/mois",
 ];
 
 const CARD_FEATURE_CAP = 4; // + bienLabel = 5 lignes max visibles par card
@@ -124,8 +110,7 @@ function buildComparisonRows(): FeatureRow[] {
       name: "Nombre de biens",
       decouverte: PLANS[0].bienLabel,
       pro: PLANS[1].bienLabel,
-      diaspora: PLANS[2].bienLabel,
-      agence: PLANS[3].bienLabel,
+      agence: PLANS[2].bienLabel,
     },
   ];
 
@@ -138,8 +123,7 @@ function buildComparisonRows(): FeatureRow[] {
         name: label,
         decouverte: PLANS[0].features.includes(label),
         pro: PLANS[1].features.includes(label),
-        diaspora: PLANS[2].features.includes(label),
-        agence: PLANS[3].features.includes(label),
+        agence: PLANS[2].features.includes(label),
       });
     });
   });
@@ -201,7 +185,7 @@ export default function Pricing() {
         </motion.div>
 
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch mb-12">
           {PLANS.map((plan, i) => (
             <motion.div
               key={i}
@@ -317,6 +301,15 @@ export default function Pricing() {
           ))}
         </div>
 
+        {/* Add-ons de scaling — un seul palier de plus n'existant pas dans les cards */}
+        <div className="text-center mb-8">
+          {ADDONS.map((addon, i) => (
+            <p key={i} className="text-[12px] text-[#64635F]">
+              {addon}
+            </p>
+          ))}
+        </div>
+
         {/* ========================================================================= */}
         {/* BOUTON DÉPLIABLE DU TABLEAU COMPARATIF COMPLET                             */}
         {/* ========================================================================= */}
@@ -365,19 +358,13 @@ export default function Pricing() {
                           <SparklesIcon className="h-3.5 w-3.5 text-[#087F5B]" />
                         </span>
                         <span className="block text-[11px] font-bold text-[#1C1C1C]">
-                          {isAnnual ? "4 200 FCFA" : "5 000 FCFA"}
+                          {isAnnual ? "4 000 FCFA" : "5 000 FCFA"}
                         </span>
                       </th>
                       <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
-                        Diaspora
+                        Agence Pro
                         <span className="block text-[11px] font-normal text-[#64635F]">
-                          {isAnnual ? "10 000 FCFA" : "12 000 FCFA"}
-                        </span>
-                      </th>
-                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
-                        Agence
-                        <span className="block text-[11px] font-normal text-[#64635F]">
-                          {isAnnual ? "20 800 FCFA" : "25 000 FCFA"}
+                          {isAnnual ? "20 000 FCFA" : "25 000 FCFA"}
                         </span>
                       </th>
                     </tr>
@@ -420,20 +407,7 @@ export default function Pricing() {
                           )}
                         </td>
 
-                        {/* Diaspora & Patrimoine */}
-                        <td className="py-3.5 px-4 text-center">
-                          {typeof feat.diaspora === "boolean" ? (
-                            feat.diaspora ? (
-                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                            ) : (
-                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                            )
-                          ) : (
-                            <span className="font-bold text-[#1C1C1C]">{feat.diaspora}</span>
-                          )}
-                        </td>
-
-                        {/* Agence & Conciergerie */}
+                        {/* Agence Pro */}
                         <td className="py-3.5 px-4 text-center">
                           {typeof feat.agence === "boolean" ? (
                             feat.agence ? (
@@ -453,7 +427,7 @@ export default function Pricing() {
                 {/* Table Footer Action */}
                 <div className="p-4 bg-[#FAF9F6] border-t border-[#E8E5E0] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                   <span className="text-[12px] text-[#64635F]">
-                    Besoin d&apos;une formule personnalisée pour un parc de plus de 50 biens ?
+                    Besoin de dépasser 150 biens sous gestion ?
                   </span>
                   <Link
                     href="/auth/register"
