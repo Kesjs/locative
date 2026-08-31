@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useTheme } from "next-themes";
 
 export default function FluidFlowGrid() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { resolvedTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -56,7 +54,7 @@ export default function FluidFlowGrid() {
     window.addEventListener("mouseleave", handleMouseLeave);
 
     let time = 0;
-    const isDarkMode = resolvedTheme === "dark";
+    const isDarkMode = false;
 
     const render = () => {
       time += 0.008;
@@ -127,7 +125,7 @@ export default function FluidFlowGrid() {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [resolvedTheme, isMounted]);
+  }, [isMounted]);
 
   return (
     <canvas

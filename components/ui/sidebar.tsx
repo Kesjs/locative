@@ -9,9 +9,11 @@ const SIDEBAR_WIDTH = "240px";
 const SIDEBAR_WIDTH_ICON = "68px";
 
 export type SidebarVariant = "sidebar" | "floating" | "inset";
-export type LayoutMode = "default" | "compact" | "full";
+export type LayoutMode = "default" | "compact" | "full" | "push";
 export type ThemeMode = "system" | "light" | "dark";
 export type CurrencyMode = "fcfa" | "eur";
+export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
+export const SIDEBAR_COOKIE_NAME = "lokka:sidebar";
 export type ColorTheme = "zinc" | "emerald" | "amber" | "blue" | "violet" | "rose";
 export type MobileNavVariant = "island" | "dynamic" | "fullscreen";
 

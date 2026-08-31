@@ -3,7 +3,7 @@ import { NumberTicker } from "@/components/ui/number-ticker";
 
 interface KpiCardProps {
   title: string;
-  value: number;
+  value: number | string;
   currency?: "FCFA" | "€";
   valueSuffix?: string;
   delta?: { value: string; trend: "up" | "down" | "neutral" };

@@ -41,7 +41,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setVariant(variant);
   };
 
-  const handleLayoutChange = (layout: "default" | "compact" | "full") => {
+  const handleLayoutChange = (layout: "default" | "compact" | "full" | "push") => {
     setLayoutMode(layout);
   };
 
