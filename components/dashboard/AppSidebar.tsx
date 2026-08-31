@@ -35,8 +35,6 @@ import {
   Building2,
   Users,
   CreditCard,
-  Calculator,
-  Globe,
   Settings,
   ChevronRight,
   ChevronsUpDown,
@@ -46,6 +44,12 @@ import {
   Plus,
   Building,
   ShieldCheck,
+  Megaphone,
+  Wrench,
+  Briefcase,
+  Wallet,
+  Globe,
+  Users2
 } from "lucide-react";
 
 interface SubItem {
@@ -75,60 +79,33 @@ const SIDEBAR_DATA = {
       plan: "4 Biens · Diaspora",
     },
   ],
-  navMain: [
-    {
-      title: "Tableau de bord",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "Biens",
-      url: "/dashboard/biens",
-      icon: Building2,
-      badge: "12",
-    },
-    {
-      title: "Locataires",
-      url: "/dashboard/locataires",
-      icon: Users,
-      badge: "12",
-    },
-    {
-      title: "Loyers",
-      url: "/dashboard/loyers",
-      icon: CreditCard,
-      badge: "1 retard",
-      badgeType: "danger",
-    },
-  ] as NavItem[],
-  navManagement: [
-    {
-      title: "Comptabilité",
-      url: "/dashboard/comptabilite",
-      icon: Calculator,
-      badge: "DGI 2026",
-    },
-  ] as NavItem[],
-  navSecondary: [
-    {
-      title: "Vitrine",
-      url: "/vitrine",
-      icon: Globe,
-      badge: "Actif",
-    },
-    {
-      title: "Paramètres",
-      url: "/dashboard/parametres",
-      icon: Settings,
-    },
-  ] as NavItem[],
-  user: {
-    name: "Alexandre K.",
-    email: "alexandre@lokka.bj",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    role: "Propriétaire Bailleur",
-  },
 };
+
+function getNavItems(profileType: string): NavItem[] {
+  if (profileType === "agence") {
+    return [
+      { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Mandats & Propriétaires", url: "/dashboard/mandats", icon: Briefcase },
+      { title: "Portefeuille Biens", url: "/dashboard/patrimoine", icon: Building2 },
+      { title: "Baux & Locataires", url: "/dashboard/baux", icon: Users },
+      { title: "Trésorerie & Reversements", url: "/dashboard/tresorerie", icon: Wallet },
+      { title: "Vitrine & Acquisition", url: "/dashboard/vitrine", icon: Globe },
+      { title: "Maintenance & Artisans", url: "/dashboard/maintenance", icon: Wrench },
+      { title: "Équipe", url: "/dashboard/equipe", icon: Users2 },
+      { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
+    ];
+  }
+  // Default to Bailleur
+  return [
+    { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Mon Patrimoine", url: "/dashboard/patrimoine", icon: Building2 },
+    { title: "Locataires & Baux", url: "/dashboard/locataires", icon: Users },
+    { title: "Loyers & Quittances", url: "/dashboard/loyers", icon: CreditCard },
+    { title: "Annonces & Visites", url: "/dashboard/annonces", icon: Megaphone },
+    { title: "Maintenance", url: "/dashboard/maintenance", icon: Wrench },
+    { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
+  ];
+}
 
 /**
  * Composant de sous-menu rétractable pour économiser l'espace et clarifier la navigation
@@ -256,6 +233,10 @@ export function AppSidebar() {
 
   const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
   const userProfile = useUserProfile();
+  
+  // Here we derive the nav items based on the user's actual profileType
+  // For safety we fall back to bailleur
+  const navItems = getNavItems(userProfile.profileType || "bailleur");
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -341,7 +322,7 @@ export function AppSidebar() {
 
       {/* ─── 2. NAV GROUPS (WITH DISCREET SCROLLBAR & WORKING COLLAPSIBLE SUBMENUS) ─── */}
       <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-3 space-y-4">
-        {/* A. Menu Principal */}
+        {/* Navigation */}
         <SidebarGroup>
           {!isCollapsed && (
             <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">
@@ -349,7 +330,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
           )}
           <SidebarMenu className="gap-1 mt-1">
-            {SIDEBAR_DATA.navMain.map((item) => {
+            {navItems.map((item) => {
               const active = isLinkActive(item.url);
 
               if (item.items && item.items.length > 0) {
@@ -397,102 +378,6 @@ export function AppSidebar() {
                               : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-default)]"
                           }`}
                         >
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* B. Gestion & Finances */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">
-              Gestion &amp; Finances
-            </SidebarGroupLabel>
-          )}
-          <SidebarMenu className="gap-1 mt-1">
-            {SIDEBAR_DATA.navManagement.map((item) => {
-              const active = isLinkActive(item.url);
-              return (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={active}
-                    style={
-                      active
-                        ? {
-                            backgroundColor: "var(--color-brand-primary, #18181B)",
-                            color: "var(--color-brand-text, #FFFFFF)",
-                          }
-                        : undefined
-                    }
-                    className={`w-full flex items-center ${
-                      isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
-                    } rounded-[8px] text-[13px] font-medium transition-colors ${
-                      active
-                        ? "text-white font-semibold shadow-xs"
-                        : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <Link href={item.url} className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}>
-                      <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
-                      {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
-                      {item.badge && !isCollapsed && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--bg-subtle)] border border-[var(--border-default)] text-[var(--text-primary)]">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* C. Outils & Vitrine */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">
-              Outils &amp; Paramètres
-            </SidebarGroupLabel>
-          )}
-          <SidebarMenu className="gap-1 mt-1">
-            {SIDEBAR_DATA.navSecondary.map((item) => {
-              const active = isLinkActive(item.url);
-              return (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={active}
-                    style={
-                      active
-                        ? {
-                            backgroundColor: "var(--color-brand-primary, #18181B)",
-                            color: "var(--color-brand-text, #FFFFFF)",
-                          }
-                        : undefined
-                    }
-                    className={`w-full flex items-center ${
-                      isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
-                    } rounded-[8px] text-[13px] font-medium transition-colors ${
-                      active
-                        ? "text-white font-semibold shadow-xs"
-                        : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <Link href={item.url} className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}>
-                      <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
-                      {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
-                      {item.badge && !isCollapsed && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                           {item.badge}
                         </span>
                       )}
