@@ -122,11 +122,18 @@ export default function DashboardPreview() {
                     <div className="min-w-0">
                       <div className="grid grid-cols-2 border-b border-border-default sm:grid-cols-4">
                         {DASHBOARD_KPIS.map((kpi, index) => (
-                          <div key={kpi.label} className={`group border-border-default px-4 py-4 hover:bg-bg-canvas sm:px-5 ${index < 3 ? "border-b sm:border-b-0 sm:border-r" : ""} ${index === 1 ? "sm:border-r" : ""}`}>
+                          <motion.div 
+                            key={kpi.label} 
+                            initial={{ opacity: 0, y: 10 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.4, delay: index * 0.1 }}
+                            className={`group border-border-default px-4 py-4 hover:bg-bg-canvas sm:px-5 ${index < 3 ? "border-b sm:border-b-0 sm:border-r" : ""} ${index === 1 ? "sm:border-r" : ""}`}
+                          >
                             <p className="text-[10px] font-medium text-text-muted">{kpi.label}</p>
                             <p className="tabular-nums mt-2 text-[17px] font-semibold tracking-[-0.04em] text-text-primary sm:text-[19px]">{kpi.value}</p>
                             <p className={`mt-1 text-[10px] font-semibold ${kpi.status === "danger" ? "text-danger" : "text-success-strong"}`}>{kpi.helper}</p>
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
 
@@ -142,7 +149,14 @@ export default function DashboardPreview() {
                           <div className="flex h-[150px] items-end gap-2 border-b border-border-default px-1 pt-4 sm:gap-4">
                             {revenueBars.map((height, index) => (
                               <div key={index} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
-                                <div data-dashboard-bar className={`w-full max-w-[34px] origin-bottom rounded-t-[3px] ${index > 3 ? "bg-success-strong" : index === 3 ? "bg-brand-primary" : "bg-border-strong"}`} style={{ height: `${height}%` }} />
+                                <motion.div 
+                                  initial={{ height: 0 }}
+                                  whileInView={{ height: `${height}%` }}
+                                  viewport={{ once: true }}
+                                  transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
+                                  data-dashboard-bar 
+                                  className={`w-full max-w-[34px] origin-bottom rounded-t-[3px] ${index > 3 ? "bg-success-strong" : index === 3 ? "bg-brand-primary" : "bg-border-strong"}`} 
+                                />
                                 <span className="text-[9px] text-text-muted">{["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"][index]}</span>
                               </div>
                             ))}

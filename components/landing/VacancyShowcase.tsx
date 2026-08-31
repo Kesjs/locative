@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useInView } from "framer-motion";
+import Image from "next/image";
 import { CalendarDays, Check, Eye, Globe2, MessageCircle, Send } from "lucide-react";
 import { VACANT_LISTING, formatFcfa } from "./landing-data";
 
@@ -88,8 +89,13 @@ export default function VacancyShowcase() {
           <div className={`p-5 sm:p-7 transition-all duration-700 ease-out ${isPublished ? "opacity-100 blur-none translate-y-0" : "opacity-30 blur-[4px] translate-y-4 pointer-events-none select-none"}`}>
             <div className="flex items-center justify-between gap-3 border-b border-border-default pb-4"><p className="text-[12px] font-semibold text-text-primary">Sur votre vitrine</p><span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success-strong"><Globe2 aria-hidden="true" size={13} /> {isPublished ? "En ligne" : "Prêt"}</span></div>
             <div className="pt-5">
-              <div className="mb-4 aspect-[16/10] w-full overflow-hidden rounded-md bg-border-default shadow-sm">
-                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=600" alt="Appartement F3 Standing" className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
+              <div className="mb-4 aspect-[16/10] w-full overflow-hidden rounded-md bg-border-default shadow-sm relative">
+                <Image 
+                  src="/vitrine-appartement.jpg" 
+                  alt="Appartement F3 Standing" 
+                  fill
+                  className="object-cover transition-transform duration-700 hover:scale-105" 
+                />
               </div>
               <p className="font-mono text-[10px] text-text-muted">{VACANT_LISTING.domain}</p>
               <h3 className="mt-2 text-[18px] font-semibold tracking-[-0.04em] text-text-primary">{VACANT_LISTING.title}</h3>
