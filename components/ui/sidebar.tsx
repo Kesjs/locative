@@ -389,6 +389,10 @@ export const Sidebar = React.forwardRef<
     // In Full Layout mode, when collapsed, the sidebar is completely hidden offscreen (0px footprint)
     const isHiddenOffscreen = layoutMode === "full" && isCollapsed;
 
+    // En mode Overlay, la sidebar ouverte flotte au-dessus du contenu (le contenu ne bouge pas) :
+    // on la fait ressortir avec un z-index/ombre plus marqués.
+    const isOverlayFloating = layoutMode === "default" && !isCollapsed;
+
     // Sur mobile, la sidebar est gérée par notre composant custom MobileNavigation.tsx
     if (isMobile) {
       return null;
@@ -407,7 +411,7 @@ export const Sidebar = React.forwardRef<
           position: "fixed",
           top: isFloating ? 12 : 0,
           left: isFloating ? 12 : 0,
-          zIndex: 40,
+          zIndex: isOverlayFloating ? 60 : 40,
           transform: isHiddenOffscreen ? "translateX(-130%)" : "translateX(0)",
           opacity: isHiddenOffscreen ? 0 : 1,
           pointerEvents: isHiddenOffscreen ? "none" : "auto",
@@ -419,9 +423,11 @@ export const Sidebar = React.forwardRef<
             ? "1px solid var(--sidebar-border, var(--border-default))"
             : undefined,
           borderRadius: isFloating ? 14 : 0,
-          boxShadow: isFloating
-            ? "var(--shadow-card)"
-            : "none",
+          boxShadow: isOverlayFloating
+            ? "0 12px 32px rgba(0,0,0,0.18)"
+            : isFloating
+              ? "var(--shadow-card)"
+              : "none",
           display: "flex",
           flexDirection: "column",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -541,21 +547,23 @@ export const SidebarInset = React.forwardRef<
   // In Full Layout mode, when collapsed, the margin is strictly 0px (100% full screen)
   const isFullLayoutActive = layoutMode === "full" && isCollapsed;
 
+  // "Overlay" (default) : la sidebar flotte au-dessus du contenu quand elle est ouverte,
+  // le contenu garde toujours la marge "collapsed" et ne bouge pas.
+  // "Push" : la sidebar pousse le contenu, la marge grandit quand elle s'ouvre.
+  const isOverlayMode = layoutMode === "default";
+
+  const collapsedMargin = isFloating ? "88px" : isInset ? "76px" : SIDEBAR_WIDTH_ICON;
+  const expandedMargin = isFloating ? "260px" : isInset ? "248px" : SIDEBAR_WIDTH;
+
   const marginLeft = isMobile
     ? "0px"
     : isFullLayoutActive
     ? "0px"
-    : isFloating
-      ? isCollapsed
-        ? "88px"
-        : "260px"
-      : isInset
-        ? isCollapsed
-          ? "76px"
-          : "248px"
-        : isCollapsed
-          ? SIDEBAR_WIDTH_ICON
-          : SIDEBAR_WIDTH;
+    : isOverlayMode
+      ? collapsedMargin
+      : isCollapsed
+        ? collapsedMargin
+        : expandedMargin;
 
   return (
     <main
