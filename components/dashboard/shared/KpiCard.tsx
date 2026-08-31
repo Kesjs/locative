@@ -7,15 +7,25 @@ interface KpiCardProps {
   currency?: "FCFA" | "€";
   valueSuffix?: string;
   delta?: { value: string; trend: "up" | "down" | "neutral" };
-  subtitle?: string;
-  icon?: React.ElementType;
+  /** Raccourci hérité : équivaut à delta={{ value: trend, trend: trendUp ? "up" : "down" }} */
   trend?: string;
   trendUp?: boolean;
+  subtitle?: string;
+  icon?: React.ElementType;
 }
 
-export function KpiCard({ title, value, currency, valueSuffix, delta, subtitle, icon: Icon, trend, trendUp }: KpiCardProps) {
-  const displayDelta = delta || (trend ? { value: trend, trend: trendUp ? "up" : "down" } : undefined);
-
+export function KpiCard({
+  title,
+  value,
+  currency,
+  valueSuffix,
+  delta,
+  trend,
+  trendUp,
+  subtitle,
+  icon: Icon,
+}: KpiCardProps) {
+  const resolvedDelta = delta ?? (trend ? { value: trend, trend: trendUp ? ("up" as const) : ("down" as const) } : undefined);
   return (
     <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs hover:border-[#1C1C1C] transition-all flex flex-col justify-between">
       <div>
@@ -24,25 +34,25 @@ export function KpiCard({ title, value, currency, valueSuffix, delta, subtitle, 
             {Icon && <Icon className="w-4 h-4 text-[var(--text-primary)]" />}
             <span>{title}</span>
           </div>
-          {displayDelta && (
+          {resolvedDelta && (
             <span
               className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
-                displayDelta.trend === "up"
+                resolvedDelta.trend === "up"
                   ? "bg-[#F0FDF4] text-[#16A34A] border-green-200"
-                  : displayDelta.trend === "down"
+                  : resolvedDelta.trend === "down"
                   ? "bg-[#FEF2F2] text-[#DC2626] border-red-200"
                   : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border-[var(--border-default)]"
               }`}
             >
-              {displayDelta.trend === "up" ? "↑ " : displayDelta.trend === "down" ? "↓ " : ""}
-              {displayDelta.value}
+              {resolvedDelta.trend === "up" ? "↑ " : resolvedDelta.trend === "down" ? "↓ " : ""}
+              {resolvedDelta.value}
             </span>
           )}
         </div>
         <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-1 flex items-baseline gap-1">
           {currency ? (
             <>
-              <NumberTicker value={typeof value === "string" ? parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0 : value} className="font-extrabold" />
+              <NumberTicker value={typeof value === "number" ? value : Number(value) || 0} className="font-extrabold" />
               <span className="text-[14px] font-semibold text-[var(--text-secondary)]">
                 {currency}
               </span>
