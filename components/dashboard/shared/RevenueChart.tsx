@@ -28,7 +28,7 @@ export function RevenueChart({
   type = "area",
   xAxisKey = "month",
   dataKeys,
-  colors = ["#1C1C1C", "#C5A880", "#E8E5E0"],
+  colors = ["#4f46e5", "#3b82f6", "#10b981"],
   formatter = (val) => `${Number(val).toLocaleString("fr-FR")} FCFA`,
 }: RevenueChartProps) {
   

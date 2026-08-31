@@ -12,6 +12,10 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
+  let strokeColor = "#10b981"; // emerald-500
+  if (percentage < 50) strokeColor = "#ef4444"; // red-500
+  else if (percentage <= 80) strokeColor = "#f59e0b"; // amber-500
+
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="relative w-[120px] h-[120px]">
@@ -31,7 +35,7 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
             cy="60"
             r={radius}
             fill="transparent"
-            stroke="#1C1C1C"
+            stroke={strokeColor}
             strokeWidth="10"
             strokeLinecap="round"
             strokeDasharray={circumference}

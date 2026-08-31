@@ -8,6 +8,7 @@ import { RecoveryGauge } from "@/components/dashboard/shared/RecoveryGauge";
 import { RevenueChart } from "@/components/dashboard/shared/RevenueChart";
 import { UrgentActionsList } from "@/components/dashboard/shared/UrgentActionsList";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { Wallet, AlertCircle, PieChart, Landmark, HandCoins, FileCheck } from "lucide-react";
 
 export default function DashboardPage() {
   const { role } = useUserProfile();
@@ -84,19 +85,19 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         {/* CTA Banner Agence */}
-        <div className="flex items-center justify-between p-4 bg-[#1C1C1C] text-white rounded-[8px] shadow-sm">
-          <span className="font-semibold text-[14px]">Créer un nouveau mandat propriétaire</span>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1C1C1C] rounded-[6px] text-[13px] font-bold hover:bg-gray-100 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white rounded-[12px] shadow-md border border-blue-500/20">
+          <span className="font-semibold text-[15px] sm:text-[16px]">Créer un nouveau mandat propriétaire</span>
+          <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-900 rounded-[8px] text-[13px] font-bold hover:bg-blue-50 transition-colors shadow-sm">
             Commencer <ArrowRightIcon className="w-4 h-4" />
           </button>
         </div>
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard title="Commissions" value={data.agence.kpi.commissionsBrutes} currency="FCFA" />
-          <KpiCard title="Volume Géré" value={data.agence.kpi.volumeLoyers} currency="FCFA" />
-          <KpiCard title="Reversements Attente" value={data.agence.kpi.attenteReversement} currency="FCFA" />
-          <KpiCard title="Mandats Actifs" value={data.agence.kpi.mandatsActifs} />
+          <KpiCard title="Commissions" value={data.agence.kpi.commissionsBrutes} currency="FCFA" icon={HandCoins} iconColor="blue" />
+          <KpiCard title="Volume Géré" value={data.agence.kpi.volumeLoyers} currency="FCFA" icon={Landmark} iconColor="emerald" />
+          <KpiCard title="Reversements Attente" value={data.agence.kpi.attenteReversement} currency="FCFA" icon={AlertCircle} iconColor="amber" />
+          <KpiCard title="Mandats Actifs" value={data.agence.kpi.mandatsActifs} icon={FileCheck} iconColor="blue" />
         </div>
 
         {/* Revenue Chart */}
@@ -112,18 +113,18 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* CTA Banner Bailleur */}
-      <div className="flex items-center justify-between p-4 bg-[#1C1C1C] text-white rounded-[8px] shadow-sm">
-        <span className="font-semibold text-[14px]">Inviter mon locataire sur le portail</span>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#1C1C1C] rounded-[6px] text-[13px] font-bold hover:bg-gray-100 transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white rounded-[12px] shadow-md border border-blue-500/20">
+        <span className="font-semibold text-[15px] sm:text-[16px]">Inviter mon locataire sur le portail</span>
+        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-900 rounded-[8px] text-[13px] font-bold hover:bg-blue-50 transition-colors shadow-sm">
           Inviter <ArrowRightIcon className="w-4 h-4" />
         </button>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiCard title="Encaissé ce mois" value={data.bailleur.kpi.totalEncasse} currency="FCFA" delta={{ value: "+5%", trend: "up" }} />
-        <KpiCard title="Reste à recouvrer" value={data.bailleur.kpi.resteRecouvrer} currency="FCFA" delta={{ value: "-2%", trend: "down" }} />
-        <KpiCard title="Occupation" value={data.bailleur.kpi.tauxOccupationPct} valueSuffix="%" subtitle={data.bailleur.kpi.tauxOccupationStr} />
+        <KpiCard title="Encaissé ce mois" value={data.bailleur.kpi.totalEncasse} currency="FCFA" delta={{ value: "+5%", trend: "up" }} icon={Wallet} iconColor="emerald" />
+        <KpiCard title="Reste à recouvrer" value={data.bailleur.kpi.resteRecouvrer} currency="FCFA" delta={{ value: "-2%", trend: "down" }} icon={AlertCircle} iconColor="amber" />
+        <KpiCard title="Occupation" value={data.bailleur.kpi.tauxOccupationPct} valueSuffix="%" subtitle={data.bailleur.kpi.tauxOccupationStr} icon={PieChart} iconColor="blue" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

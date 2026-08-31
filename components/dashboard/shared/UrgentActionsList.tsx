@@ -29,18 +29,24 @@ export function UrgentActionsList({ items, onRelance, currency = "FCFA" }: Urgen
       {items.map((item) => (
         <div
           key={item.id}
-          className="bg-white border border-[#E8E5E0] rounded-[8px] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:border-[#1C1C1C] transition-all"
+          className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs hover:border-[var(--border-strong)] transition-all group"
         >
           <div>
-            <div className="text-[14px] font-bold text-[#1C1C1C]">{item.name}</div>
-            <div className="text-[12px] text-[#C92A2A] font-semibold mt-0.5">
-              Retard de {item.daysLate} jours · {item.amountDue.toLocaleString("fr-FR")} {currency}
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                Loyer en retard
+              </span>
+            </div>
+            <div className="text-[14px] font-bold text-[var(--text-primary)]">{item.name}</div>
+            <div className="text-[13px] text-[var(--text-secondary)] mt-0.5">
+              <span className="font-semibold text-rose-600 dark:text-rose-400">{item.amountDue.toLocaleString("fr-FR")} {currency}</span> · Retard de {item.daysLate} jours
             </div>
           </div>
           <button
             type="button"
             onClick={() => onRelance(item)}
-            className="w-full sm:w-auto min-h-[44px] sm:min-h-0 px-4 py-2 bg-[#25D366] text-white rounded-[6px] text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-[#1EBE5A] transition-colors shadow-sm"
+            className="w-full sm:w-auto px-3 py-1.5 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-default)] rounded-[6px] text-[12px] font-bold flex items-center justify-center gap-2 hover:bg-[var(--hover-bg)] hover:text-blue-600 transition-colors shadow-sm group-hover:border-blue-200"
           >
             <ChatBubbleLeftRightIcon className="w-4 h-4" />
             <span>Relancer</span>

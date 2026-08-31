@@ -251,7 +251,7 @@ export default function Header({
             onThemeChange={(newTheme) => setTheme(newTheme)}
             variant="circle"
             duration={450}
-            className="h-8.5 w-8.5 bg-[var(--bg-surface)] border-[var(--border-default)]"
+            className="h-8.5 w-8.5"
           />
 
           {/* 4. LAYOUT & SIDEBAR CUSTOMIZER BUTTON */}
