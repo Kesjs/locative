@@ -1,41 +1,37 @@
 "use client";
 
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { CreditCardIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useLoyers } from "@/lib/hooks/useLoyers";
+import { AddPaiementModal } from "./_components/AddPaiementModal";
 
 export default function LoyersPage() {
   const [filterMonth, setFilterMonth] = useState("09");
   const [filterYear, setFilterYear] = useState("2026");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: loyers = [], isLoading } = useQuery({
-    queryKey: ["loyers", filterMonth, filterYear],
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400));
-      return [
-        { id: 1, locataire: "Koudjo Dossou", montant: 150000, statut: "Payé (MoMo)", date: "03/09/2026" },
-        { id: 2, locataire: "Rachidi Saka", montant: 180000, statut: "En attente", date: "-" },
-      ];
-    },
-  });
+  const { data: loyers = [], isLoading } = useLoyers();
+
+  // On client side filtering, you could use filterMonth/filterYear, 
+  // but for now we'll just display all returned from the hook as it's a demo.
 
   const columns = [
-    { key: "locataire", header: "Locataire", renderCell: (row: any) => <span className="font-bold">{row.locataire}</span> },
+    { key: "locataire_nom", header: "Locataire", renderCell: (row: any) => <span className="font-bold">{row.locataire_nom}</span> },
     { key: "montant", header: "Montant", renderCell: (row: any) => `${row.montant.toLocaleString()} FCFA` },
-    { key: "date", header: "Date", renderCell: (row: any) => row.date },
+    { key: "date", header: "Date", renderCell: (row: any) => row.date_reglement || "-" },
     { key: "statut", header: "Statut", renderCell: (row: any) => {
       let colorClass = "bg-[#F0FDF4] text-[#16A34A]";
-      if (row.statut === "En attente") colorClass = "bg-[#FFF7ED] text-[#EA580C]";
-      if (row.statut === "Retard") colorClass = "bg-[#FEF2F2] text-[#DC2626]";
+      if (row.statut === "en_attente") colorClass = "bg-[#FFF7ED] text-[#EA580C]";
+      if (row.statut === "retard") colorClass = "bg-[#FEF2F2] text-[#DC2626]";
       return (
         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${colorClass}`}>
-          {row.statut}
+          {row.statut === "payé" && row.methode ? `Payé (${row.methode})` : row.statut.replace("_", " ")}
         </span>
       );
     }},
     { key: "quittance", header: "Quittance", renderCell: (row: any) => (
-      row.statut.includes("Payé") ? <button className="text-[#1C1C1C] font-semibold text-[12px] underline">PDF</button> : <span className="text-[#9C9A95] text-[12px]">-</span>
+      row.statut === "payé" ? <button className="text-[#1C1C1C] font-semibold text-[12px] underline hover:text-[#C5A880]">PDF</button> : <span className="text-[#9C9A95] text-[12px]">-</span>
     )},
   ];
 
@@ -65,13 +61,18 @@ export default function LoyersPage() {
             <option value="2025">2025</option>
             <option value="2026">2026</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
+          >
             <PlusIcon className="w-4 h-4" /> Paiement manuel
           </button>
         </div>
       </div>
 
       <DataTable data={loyers} columns={columns} keyExtractor={(r) => r.id} />
+
+      <AddPaiementModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} transactions={loyers} />
     </div>
   );
 }

@@ -1,21 +1,15 @@
 "use client";
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { EmptyState } from "@/components/dashboard/shared/EmptyState";
+import { PlusIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { useBaux } from "@/lib/hooks/useBaux";
+import { AddBailModal } from "./_components/AddBailModal";
 
 export default function BauxPage() {
-  const { data: baux = [], isLoading } = useQuery({
-    queryKey: ["baux"],
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400));
-      return [
-        { id: 1, locataire: "Koudjo Dossou", mandat: "Jean Dupont", bien: "Villa Cocotiers", loyer: 150000, caution: "Séquestrée" },
-        { id: 2, locataire: "Rachidi Saka", mandat: "SCI Les Cocotiers", bien: "Résidence Le Manguier", loyer: 180000, caution: "Séquestrée" },
-      ];
-    },
-  });
+  const { data: baux = [], isLoading } = useBaux();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns = [
     { key: "locataire", header: "Locataire", renderCell: (row: any) => <span className="font-bold">{row.locataire}</span> },
@@ -27,6 +21,9 @@ export default function BauxPage() {
         {row.caution}
       </span>
     )},
+    { key: "actions", header: "Actions", renderCell: () => (
+      <button className="text-[#1C1C1C] font-semibold text-[12px] underline hover:text-[#C5A880]">Détails</button>
+    )},
   ];
 
   if (isLoading) {
@@ -37,11 +34,27 @@ export default function BauxPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-[20px] font-extrabold text-[var(--text-primary)]">Baux & Locataires</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
+        >
           <PlusIcon className="w-4 h-4" /> Nouveau Bail
         </button>
       </div>
-      <DataTable data={baux} columns={columns} keyExtractor={(r) => r.id} />
+      
+      {baux.length === 0 ? (
+        <EmptyState
+          icon={DocumentTextIcon}
+          title="Aucun bail"
+          description="Vous n'avez pas encore enregistré de bail. Ajoutez-en un pour suivre vos cautions et locataires."
+          actionLabel="Créer un bail"
+          onAction={() => setIsModalOpen(true)}
+        />
+      ) : (
+        <DataTable data={baux} columns={columns} keyExtractor={(r) => r.id} />
+      )}
+
+      <AddBailModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

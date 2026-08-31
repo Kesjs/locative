@@ -1,35 +1,31 @@
 "use client";
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { MegaphoneIcon, PlusIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { useAnnonces } from "@/lib/hooks/useAnnonces";
+import { AddAnnonceModal } from "./_components/AddAnnonceModal";
 
 export default function AnnoncesPage() {
-  const { data: annonces = [], isLoading } = useQuery({
-    queryKey: ["annonces"],
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400));
-      return [
-        { id: 1, bien: "Villa Les Cocotiers", vues: 45, demandes: 3, statut: "Active" },
-        { id: 2, bien: "Résidence Le Manguier (Apt 3)", vues: 12, demandes: 0, statut: "Suspendue" },
-      ];
-    },
-  });
+  const { data: annonces = [], isLoading } = useAnnonces();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns = [
     { key: "bien", header: "Bien", renderCell: (row: any) => <span className="font-bold">{row.bien}</span> },
     { key: "vues", header: "Vues", renderCell: (row: any) => row.vues },
     { key: "demandes", header: "Demandes Visite", renderCell: (row: any) => row.demandes },
-    { key: "statut", header: "Statut", renderCell: (row: any) => (
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-        row.statut === "Active" ? "bg-[#F0FDF4] text-[#16A34A]" : "bg-[#F3F4F6] text-[#6B7280]"
-      }`}>
-        {row.statut}
-      </span>
-    )},
+    { key: "statut", header: "Statut", renderCell: (row: any) => {
+      let colorClass = "bg-[#F0FDF4] text-[#16A34A]"; // Active
+      if (row.statut === "Suspendue") colorClass = "bg-[#F3F4F6] text-[#6B7280]";
+      if (row.statut === "Brouillon") colorClass = "bg-[#FFF7ED] text-[#EA580C]";
+      return (
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${colorClass}`}>
+          {row.statut}
+        </span>
+      );
+    }},
     { key: "actions", header: "Actions", renderCell: () => (
-      <button className="text-[#1C1C1C] font-semibold text-[12px] underline">Gérer</button>
+      <button className="text-[#1C1C1C] font-semibold text-[12px] underline hover:text-[#C5A880]">Gérer</button>
     )},
   ];
 
@@ -41,7 +37,10 @@ export default function AnnoncesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-[20px] font-extrabold text-[var(--text-primary)]">Annonces & Visites</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
+        >
           <PlusIcon className="w-4 h-4" /> Créer une annonce
         </button>
       </div>
@@ -62,7 +61,18 @@ export default function AnnoncesPage() {
         </div>
       </div>
 
-      <DataTable data={annonces} columns={columns} keyExtractor={(r) => r.id} />
+      {annonces.length === 0 ? (
+        <div className="text-center py-10 border border-[#E8E5E0] rounded-[12px] bg-white">
+          <MegaphoneIcon className="w-10 h-10 mx-auto text-[#64635F] mb-3" />
+          <h3 className="text-[14px] font-bold text-[#1C1C1C] mb-1">Aucune annonce</h3>
+          <p className="text-[13px] text-[#64635F] mb-4">Créez votre première annonce pour trouver des locataires.</p>
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold">Créer une annonce</button>
+        </div>
+      ) : (
+        <DataTable data={annonces} columns={columns} keyExtractor={(r) => r.id} />
+      )}
+
+      <AddAnnonceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
