@@ -27,6 +27,10 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setCurrency,
     colorTheme,
     setColorTheme,
+    mobileNavVariant,
+    setMobileNavVariant,
+    devRole,
+    setDevRole,
   } = useSidebar();
 
   const handleThemeChange = (newTheme: "system" | "light" | "dark") => {
@@ -51,6 +55,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setLayoutMode("default");
     setCurrency("fcfa");
     setColorTheme("zinc");
+    setMobileNavVariant("dynamic");
     setOpen(true);
   };
 
@@ -341,100 +346,185 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 3: LAYOUT */}
+              {/* SECTION 3: MODE D'AFFICHAGE (DEFAULT / PUSH / FULL) */}
               <div>
                 <div className="flex items-center gap-1.5 mb-2.5">
-                  <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[13px] font-bold">Layout</span>
+                  <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[13px] font-bold">Mode d'affichage</span>
                   <button
                     type="button"
-                    onClick={() => handleLayoutChange("default")}
+                    onClick={() => setLayoutMode("default")}
                     className="text-[#9C9A95] hover:text-[#1C1C1C] dark:hover:text-[#FAFAFA] cursor-pointer"
-                    title="Réinitialiser le layout"
+                    title="Réinitialiser l'affichage"
+                  >
+                    <ArrowPathIcon className="h-3 w-3" />
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2.5">
+                  {/* Default (Overlay) */}
+                  <div
+                    onClick={() => handleLayoutChange("default")}
+                    className="cursor-pointer group flex flex-col items-center"
+                  >
+                    <div
+                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
+                        layoutMode === "default"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
+                          : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
+                      }`}
+                      style={{ backgroundColor: isDark ? "#18181B" : "#F4F4F5" }}
+                    >
+                      {layoutMode === "default" && (
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
+                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                      <div className="flex w-full h-full p-1 gap-1">
+                        <div className="w-1/3 h-full rounded shadow-sm border z-10" style={{ backgroundColor: isDark ? "#27272A" : "#FFFFFF", borderColor: isDark ? "#3F3F46" : "#E4E4E7" }} />
+                        <div className="w-2/3 h-full rounded opacity-30" style={{ backgroundColor: isDark ? "#3F3F46" : "#D4D4D8" }} />
+                      </div>
+                    </div>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5 text-center">Overlay</span>
+                  </div>
+
+                  {/* Push Layout */}
+                  <div
+                    onClick={() => handleLayoutChange("push")}
+                    className="cursor-pointer group flex flex-col items-center"
+                  >
+                    <div
+                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
+                        layoutMode === "push"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
+                          : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
+                      }`}
+                      style={{ backgroundColor: isDark ? "#18181B" : "#F4F4F5" }}
+                    >
+                      {layoutMode === "push" && (
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
+                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                      <div className="flex w-full h-full p-1 gap-1">
+                        <div className="w-1/3 h-full rounded shadow-sm border z-10 translate-x-1" style={{ backgroundColor: isDark ? "#27272A" : "#FFFFFF", borderColor: isDark ? "#3F3F46" : "#E4E4E7" }} />
+                        <div className="w-2/3 h-full rounded opacity-30 translate-x-1" style={{ backgroundColor: isDark ? "#3F3F46" : "#D4D4D8" }} />
+                      </div>
+                    </div>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5 text-center">Push</span>
+                  </div>
+
+                  {/* Full Layout */}
+                  <div
+                    onClick={() => handleLayoutChange("full")}
+                    className="cursor-pointer group flex flex-col items-center"
+                  >
+                    <div
+                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
+                        layoutMode === "full"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
+                          : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
+                      }`}
+                      style={{ backgroundColor: isDark ? "#18181B" : "#F4F4F5" }}
+                    >
+                      {layoutMode === "full" && (
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
+                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                      <div className="flex w-full h-full p-1 gap-1">
+                        <div className="w-0 h-full rounded opacity-0" />
+                        <div className="w-full h-full rounded opacity-100 shadow-sm border" style={{ backgroundColor: isDark ? "#27272A" : "#FFFFFF", borderColor: isDark ? "#3F3F46" : "#E4E4E7" }} />
+                      </div>
+                    </div>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5 text-center">Full</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3.5: MOBILE NAVIGATION */}
+              <div className="md:hidden">
+                <div className="flex items-center gap-1.5 mb-2.5">
+                  <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[13px] font-bold">Mobile Nav</span>
+                  <button
+                    type="button"
+                    onClick={() => setMobileNavVariant("dynamic")}
+                    className="text-[#9C9A95] hover:text-[#1C1C1C] dark:hover:text-[#FAFAFA] cursor-pointer"
+                    title="Réinitialiser la navigation mobile"
                   >
                     <ArrowPathIcon className="h-3 w-3" />
                   </button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2.5">
-                  {/* Default */}
+                  {/* Island */}
                   <div
-                    onClick={() => handleLayoutChange("default")}
+                    onClick={() => setMobileNavVariant("island")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex gap-1.5 ${
-                        layoutMode === "default"
-                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent shadow-xs"
+                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex items-end justify-start ${
+                        mobileNavVariant === "island"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
                           : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
                       }`}
-                      style={{ backgroundColor: "#FFFFFF" }}
+                      style={{ backgroundColor: "#F4F4F5" }}
                     >
-                      {layoutMode === "default" && (
+                      {mobileNavVariant === "island" && (
                         <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-4 h-full rounded-xs" style={{ backgroundColor: "#18181B" }} />
-                      <div className="flex-1 flex flex-col gap-1">
-                        <div className="w-full h-3 rounded-xs" style={{ backgroundColor: "#E4E4E7" }} />
-                        <div className="flex-1 flex gap-1">
-                          <div className="flex-1 rounded-xs border" style={{ backgroundColor: "#F4F4F5", borderColor: "#E4E4E7" }} />
-                          <div className="w-5 rounded-xs border" style={{ backgroundColor: "#F4F4F5", borderColor: "#E4E4E7" }} />
-                        </div>
-                      </div>
+                      <div className="w-8 h-10 rounded-[6px] shadow-sm ml-1 mb-1 border" style={{ backgroundColor: "#FFFFFF", borderColor: "#E4E4E7" }} />
                     </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5">Default</span>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5">Island</span>
                   </div>
 
-                  {/* Compact */}
+                  {/* Dynamic */}
                   <div
-                    onClick={() => handleLayoutChange("compact")}
+                    onClick={() => setMobileNavVariant("dynamic")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex flex-col gap-1 ${
-                        layoutMode === "compact"
-                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent shadow-xs"
+                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex flex-col items-center justify-start ${
+                        mobileNavVariant === "dynamic"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
                           : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
                       }`}
-                      style={{ backgroundColor: "#FFFFFF" }}
+                      style={{ backgroundColor: "#F4F4F5" }}
                     >
-                      {layoutMode === "compact" && (
+                      {mobileNavVariant === "dynamic" && (
                         <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-full h-2.5 rounded-xs" style={{ backgroundColor: "#18181B" }} />
-                      <div className="flex-1 grid grid-cols-2 gap-1">
-                        <div className="rounded-xs border" style={{ backgroundColor: "#F4F4F5", borderColor: "#E4E4E7" }} />
-                        <div className="rounded-xs border" style={{ backgroundColor: "#F4F4F5", borderColor: "#E4E4E7" }} />
-                      </div>
+                      <div className="w-[80%] h-4 rounded-full shadow-sm mt-1 border" style={{ backgroundColor: "#FFFFFF", borderColor: "#E4E4E7" }} />
                     </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5">Compact</span>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5">Dynamic</span>
                   </div>
 
-                  {/* Full layout */}
+                  {/* Fullscreen */}
                   <div
-                    onClick={() => handleLayoutChange("full")}
+                    onClick={() => setMobileNavVariant("fullscreen")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex flex-col gap-1 ${
-                        layoutMode === "full"
-                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent shadow-xs"
+                      className={`relative w-full h-[66px] rounded-[8px] overflow-hidden p-1.5 transition-all flex flex-col items-center justify-center gap-1 ${
+                        mobileNavVariant === "fullscreen"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
                           : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
                       }`}
-                      style={{ backgroundColor: "#FFFFFF" }}
+                      style={{ backgroundColor: "#18181B" }}
                     >
-                      {layoutMode === "full" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
+                      {mobileNavVariant === "fullscreen" && (
+                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-white text-black flex items-center justify-center text-[10px] shadow-xs z-20">
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-full h-2 rounded-xs" style={{ backgroundColor: "#E4E4E7" }} />
-                      <div className="flex-1 rounded-xs border" style={{ backgroundColor: "#F4F4F5", borderColor: "#E4E4E7" }} />
+                      <div className="w-10 h-1.5 rounded-full bg-white/50" />
+                      <div className="w-14 h-1.5 rounded-full bg-white/50" />
+                      <div className="w-12 h-1.5 rounded-full bg-white/50" />
                     </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5">Full layout</span>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5">Fullscreen</span>
                   </div>
                 </div>
               </div>
@@ -482,6 +572,38 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       </button>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* DEV MODE PROFILE SWITCHER */}
+              <div className="pt-4 border-t" style={{ borderColor: isDark ? "#27272A" : "#E8E5E0" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500">
+                    Mode Dev : Changer de profil
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["agence", "bailleur", "locataire", "admin"] as const).map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => {
+                        setDevRole(role);
+                        window.location.href = role === "locataire" 
+                          ? "/dashboard/locataire" 
+                          : role === "admin" 
+                          ? "/dashboard/admin" 
+                          : "/dashboard";
+                      }}
+                      className={`px-3 py-2 rounded-[8px] text-[12px] font-bold border transition-colors cursor-pointer ${
+                        devRole === role
+                          ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700"
+                          : "bg-transparent text-[inherit] border-[#E4E4E7] dark:border-[#3F3F46] hover:border-amber-400"
+                      }`}
+                    >
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </button>
+                  ))}
                 </div>
               </div>
 

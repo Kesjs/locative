@@ -13,6 +13,7 @@ export type LayoutMode = "default" | "compact" | "full";
 export type ThemeMode = "system" | "light" | "dark";
 export type CurrencyMode = "fcfa" | "eur";
 export type ColorTheme = "zinc" | "emerald" | "amber" | "blue" | "violet" | "rose";
+export type MobileNavVariant = "island" | "dynamic" | "fullscreen";
 
 export const COLOR_THEMES: Record<
   ColorTheme,
@@ -86,6 +87,10 @@ type SidebarContext = {
   setCurrency: (c: CurrencyMode) => void;
   colorTheme: ColorTheme;
   setColorTheme: (c: ColorTheme) => void;
+  mobileNavVariant: MobileNavVariant;
+  setMobileNavVariant: (v: MobileNavVariant) => void;
+  devRole: DevRole;
+  setDevRole: (role: DevRole) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -142,7 +147,9 @@ export const SidebarProvider = React.forwardRef<
     const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("default");
     const [theme, setThemeState] = React.useState<ThemeMode>("light");
     const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
-    const [colorTheme, setColorThemeState] = React.useState<ColorTheme>("zinc");
+    const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("zinc");
+    const [mobileNavVariant, _setMobileNavVariant] = React.useState<MobileNavVariant>("dynamic");
+    const [devRole, _setDevRole] = React.useState<DevRole>("bailleur");
 
     const applyColor = (c: ColorTheme) => {
       const pal = COLOR_THEMES[c] || COLOR_THEMES.zinc;
@@ -195,8 +202,18 @@ export const SidebarProvider = React.forwardRef<
 
         const co = localStorage.getItem("lokka_pref_color") as ColorTheme;
         if (co && COLOR_THEMES[co]) {
-          setColorThemeState(co);
+          _setColorTheme(co);
           applyColor(co);
+        }
+
+        const mnv = localStorage.getItem(`${SIDEBAR_COOKIE_NAME}_mobileNavVariant`) as MobileNavVariant;
+        if (mnv === "island" || mnv === "dynamic" || mnv === "fullscreen") {
+          _setMobileNavVariant(mnv);
+        }
+
+        const dr = localStorage.getItem(`${SIDEBAR_COOKIE_NAME}_devRole`) as DevRole;
+        if (dr) {
+            _setDevRole(dr);
         }
       } catch (_) { }
     }, []);
@@ -248,12 +265,26 @@ export const SidebarProvider = React.forwardRef<
     };
 
     const setColorTheme = (c: ColorTheme) => {
-      setColorThemeState(c);
+      _setColorTheme(c);
       try {
         localStorage.setItem("lokka_pref_color", c);
         applyColor(c);
       } catch (_) { }
     };
+
+    const setMobileNavVariant = React.useCallback((v: MobileNavVariant) => {
+        _setMobileNavVariant(v);
+        try {
+            localStorage.setItem(`${SIDEBAR_COOKIE_NAME}_mobileNavVariant`, v);
+        } catch (_) { }
+    }, []);
+
+    const setDevRole = React.useCallback((r: DevRole) => {
+        _setDevRole(r);
+        try {
+            localStorage.setItem(`${SIDEBAR_COOKIE_NAME}_devRole`, r);
+        } catch (_) { }
+    }, []);
 
     const toggleSidebar = React.useCallback(() => {
       if (isMobile) {
@@ -284,6 +315,10 @@ export const SidebarProvider = React.forwardRef<
         setCurrency,
         colorTheme,
         setColorTheme,
+        mobileNavVariant,
+        setMobileNavVariant,
+        devRole,
+        setDevRole,
       }),
       [
         state,
@@ -298,6 +333,7 @@ export const SidebarProvider = React.forwardRef<
         theme,
         currency,
         colorTheme,
+        mobileNavVariant,
       ]
     );
 
@@ -351,52 +387,9 @@ export const Sidebar = React.forwardRef<
     // In Full Layout mode, when collapsed, the sidebar is completely hidden offscreen (0px footprint)
     const isHiddenOffscreen = layoutMode === "full" && isCollapsed;
 
-    // Sur mobile, la sidebar n'est jamais "collapsed en icônes" — c'est un tiroir
-    // plein écran qui glisse par-dessus le contenu (jamais en layout poussé).
+    // Sur mobile, la sidebar est gérée par notre composant custom MobileNavigation.tsx
     if (isMobile) {
-      return (
-        <>
-          {openMobile && (
-            <div
-              onClick={() => setOpenMobile(false)}
-              style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 45,
-                background: "rgba(0,0,0,0.4)",
-              }}
-            />
-          )}
-          <aside
-            ref={ref}
-            data-state={openMobile ? "expanded" : "collapsed"}
-            data-variant={variant}
-            data-layout={layoutMode}
-            style={{
-              width: SIDEBAR_WIDTH,
-              height: "100vh",
-              position: "fixed",
-              top: 0,
-              left: 0,
-              zIndex: 50,
-              transform: openMobile ? "translateX(0)" : "translateX(-100%)",
-              background: "var(--bg-sidebar, #FFFFFF)",
-              borderRight: "1px solid var(--sidebar-border, var(--border-default))",
-              display: "flex",
-              flexDirection: "column",
-              transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              overflow: "hidden",
-              boxSizing: "border-box",
-              padding: "16px 12px",
-              ...style,
-            }}
-            className={cn("sidebar-container group/sidebar text-[var(--text-primary)]", className)}
-            {...props}
-          >
-            {children}
-          </aside>
-        </>
-      );
+      return null;
     }
 
     return (

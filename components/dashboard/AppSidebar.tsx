@@ -66,7 +66,7 @@ interface NavItem {
   items?: SubItem[];
 }
 
-const SIDEBAR_DATA = {
+export const SIDEBAR_DATA = {
   teams: [
     {
       name: "Patrimoine Lokka",
@@ -81,7 +81,7 @@ const SIDEBAR_DATA = {
   ],
 };
 
-function getNavItems(profileType: string): NavItem[] {
+export function getNavItems(profileType: string): NavItem[] {
   if (profileType === "agence") {
     return [
       { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
@@ -95,6 +95,25 @@ function getNavItems(profileType: string): NavItem[] {
       { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
     ];
   }
+  if (profileType === "admin") {
+    return [
+      { title: "Vue Globale", url: "/dashboard/admin", icon: LayoutDashboard },
+      { title: "Utilisateurs", url: "/dashboard/admin/utilisateurs", icon: Users },
+      { title: "Abonnements", url: "/dashboard/admin/abonnements", icon: CreditCard },
+      { title: "Système & Logs", url: "/dashboard/admin/systeme", icon: Settings },
+    ];
+  }
+  
+  if (profileType === "locataire") {
+    return [
+      { title: "Mon Résumé", url: "/dashboard/locataire", icon: LayoutDashboard },
+      { title: "Loyers & Paiements", url: "/dashboard/locataire/loyers", icon: CreditCard },
+      { title: "Documents", url: "/dashboard/locataire/documents", icon: Globe }, // Reusing an icon for now or DocumentText
+      { title: "Maintenance", url: "/dashboard/locataire/maintenance", icon: Wrench },
+      { title: "Paramètres", url: "/dashboard/locataire/parametres", icon: Settings },
+    ];
+  }
+
   // Default to Bailleur
   return [
     { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
@@ -237,15 +256,15 @@ function CollapsibleNavItem({
 export function AppSidebar() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const { state, setOpenMobile } = useSidebar();
+  const { state, setOpenMobile, devRole } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
   const userProfile = useUserProfile();
   
-  // Here we derive the nav items based on the user's actual profileType
-  // For safety we fall back to bailleur
-  const navItems = getNavItems(userProfile.role || "bailleur");
+  const currentRole = devRole || userProfile.role || "bailleur";
+  // Here we derive the nav items based on the user's actual profileType or devRole
+  const navItems = getNavItems(currentRole);
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -254,79 +273,97 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-[var(--border-default)] bg-[var(--bg-sidebar)] text-[var(--text-primary)]">
-      {/* ─── 1. TEAM / PATRIMOINE SWITCHER (Header) ─── */}
+      {/* ─── 1. HEADER : TEAM SWITCHER OU LOGO SIMPLE ─── */}
       <SidebarHeader className="border-b border-[var(--border-subtle)] p-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className={`w-full flex items-center ${
-                    isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                  } rounded-[8px] data-[state=open]:bg-[var(--hover-bg)] transition-colors`}
-                >
-                  <div
-                    style={{
-                      backgroundColor: "var(--color-brand-primary, #18181B)",
-                      color: "var(--color-brand-text, #FFFFFF)",
-                    }}
-                    className="flex aspect-square size-8 items-center justify-center rounded-[8px] text-white shrink-0 shadow-xs"
+        {(currentRole === "admin" || currentRole === "locataire") ? (
+          <div className="flex items-center gap-3 px-3 py-2 h-[48px] rounded-[8px]">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-[8px] bg-[var(--color-brand-primary, #18181B)] text-white shrink-0 shadow-xs">
+              <Building className="size-4" />
+            </div>
+            {!isCollapsed && (
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-bold text-[var(--text-primary)] text-[15px]">
+                  Lokka
+                </span>
+                <span className="truncate text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
+                  {currentRole === "admin" ? "Administration HQ" : "Espace Locataire"}
+                </span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    className={`w-full flex items-center ${
+                      isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
+                    } rounded-[8px] data-[state=open]:bg-[var(--hover-bg)] transition-colors`}
                   >
-                    <activeTeam.logo className="size-4" />
-                  </div>
-                  {!isCollapsed && (
-                    <>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-bold text-[var(--text-primary)] text-[13px]">
-                          {activeTeam.name}
-                        </span>
-                        <span className="truncate text-[11px] text-[var(--text-muted)]">
-                          {activeTeam.plan}
-                        </span>
-                      </div>
-                      <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
-                    </>
-                  )}
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                className="w-56 rounded-[10px] p-1.5 shadow-xl border-[var(--border-default)] bg-[var(--bg-surface-elevated)]"
-                align="start"
-                side={isMobile ? "bottom" : "right"}
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="text-xs text-[var(--text-muted)] px-2 py-1.5 font-bold uppercase tracking-wider">
-                  Patrimoines &amp; SCI
-                </DropdownMenuLabel>
-                {SIDEBAR_DATA.teams.map((team, index) => (
-                  <DropdownMenuItem
-                    key={team.name}
-                    onClick={() => setActiveTeam(team)}
-                    className="gap-2.5 p-2 rounded-[6px] text-[12px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
-                  >
-                    <div className="flex size-6 items-center justify-center rounded-[4px] border border-[var(--border-default)] bg-[var(--bg-subtle)]">
-                      <team.logo className="size-3.5" />
+                    <div
+                      style={{
+                        backgroundColor: "var(--color-brand-primary, #18181B)",
+                        color: "var(--color-brand-text, #FFFFFF)",
+                      }}
+                      className="flex aspect-square size-8 items-center justify-center rounded-[8px] text-white shrink-0 shadow-xs"
+                    >
+                      <activeTeam.logo className="size-4" />
                     </div>
-                    <span className="truncate flex-1 font-semibold">{team.name}</span>
-                    <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator className="bg-[var(--border-default)]" />
-                <DropdownMenuItem
-                  onClick={() => alert("Ajout d'un nouveau patrimoine / SCI...")}
-                  className="gap-2 p-2 rounded-[6px] text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] cursor-pointer"
+                    {!isCollapsed && (
+                      <>
+                        <div className="grid flex-1 text-left text-sm leading-tight">
+                          <span className="truncate font-bold text-[var(--text-primary)] text-[13px]">
+                            {activeTeam.name}
+                          </span>
+                          <span className="truncate text-[11px] text-[var(--text-muted)]">
+                            {activeTeam.plan}
+                          </span>
+                        </div>
+                        <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className="w-56 rounded-[10px] p-1.5 shadow-xl border-[var(--border-default)] bg-[var(--bg-surface-elevated)]"
+                  align="start"
+                  side={isMobile ? "bottom" : "right"}
+                  sideOffset={4}
                 >
-                  <div className="flex size-6 items-center justify-center rounded-[4px] border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)]">
-                    <Plus className="size-3.5" />
-                  </div>
-                  <span>Ajouter une SCI / Bien</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+                  <DropdownMenuLabel className="text-xs text-[var(--text-muted)] px-2 py-1.5 font-bold uppercase tracking-wider">
+                    {currentRole === "agence" ? "Agences & Filiales" : "Patrimoines & SCI"}
+                  </DropdownMenuLabel>
+                  {SIDEBAR_DATA.teams.map((team, index) => (
+                    <DropdownMenuItem
+                      key={team.name}
+                      onClick={() => setActiveTeam(team)}
+                      className="gap-2.5 p-2 rounded-[6px] text-[12px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
+                    >
+                      <div className="flex size-6 items-center justify-center rounded-[4px] border border-[var(--border-default)] bg-[var(--bg-subtle)]">
+                        <team.logo className="size-3.5" />
+                      </div>
+                      <span className="truncate flex-1 font-semibold">{team.name}</span>
+                      <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator className="bg-[var(--border-default)]" />
+                  <DropdownMenuItem
+                    onClick={() => alert(currentRole === "agence" ? "Ajout d'une filiale..." : "Ajout d'un nouveau patrimoine / SCI...")}
+                    className="gap-2 p-2 rounded-[6px] text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] cursor-pointer"
+                  >
+                    <div className="flex size-6 items-center justify-center rounded-[4px] border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)]">
+                      <Plus className="size-3.5" />
+                    </div>
+                    <span>{currentRole === "agence" ? "Ajouter une filiale" : "Ajouter une SCI / Bien"}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
       </SidebarHeader>
 
       {/* ─── 2. NAV GROUPS (WITH DISCREET SCROLLBAR & WORKING COLLAPSIBLE SUBMENUS) ─── */}

@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LayoutCustomizer } from "@/components/dashboard/LayoutCustomizer";
+import { MobileNavigation } from "@/components/dashboard/MobileNavigation";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import {
@@ -425,6 +426,9 @@ export default function Header({
         isOpen={isCustomizerOpen}
         onClose={() => setIsCustomizerOpen(false)}
       />
+
+      {/* ─── MOBILE NAVIGATION (3 VARIANTS) ─── */}
+      <MobileNavigation />
     </header>
   );
 }
