@@ -33,7 +33,7 @@ export default function Pricing() {
           <div className="max-w-[720px]">
             <p className="landing-label">Tarifs clairs &amp; adaptés</p>
             <h2 className="mt-4 text-[clamp(2rem,4vw,3.25rem)] font-semibold leading-[1] tracking-[-0.06em] text-text-primary">
-              Une tarification transparente en FCFA
+              Une tarification transparente
             </h2>
             <p className="mt-5 max-w-[620px] text-[14px] leading-relaxed text-text-secondary">
               Rentabilisé dès le premier mois grâce aux retards éliminés et à votre site vitrine clé en main.
@@ -71,7 +71,7 @@ export default function Pricing() {
               }`}
             >
               {plan.badgeLabel && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-success-strong px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
+                <div className="absolute -top-3 right-6 rounded-full bg-success-strong px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
                   {plan.badgeLabel}
                 </div>
               )}
@@ -154,7 +154,7 @@ export default function Pricing() {
                       }`}
                     >
                       {plan.badgeLabel && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-success-strong px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
+                        <div className="absolute -top-3 right-4 rounded-full bg-success-strong px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
                           {plan.badgeLabel}
                         </div>
                       )}

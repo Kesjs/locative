@@ -202,7 +202,7 @@ export const PLANS: PricingPlan[] = [
     popular: false,
   },
   {
-    name: "Bailleur Pro",
+    name: "Bailleur",
     monthlyPriceFcfa: 5000,
     annualPriceFcfa: 4000,
     period: "/mois",
@@ -222,7 +222,7 @@ export const PLANS: PricingPlan[] = [
     badgeLabel: "Le Plus Populaire",
   },
   {
-    name: "Agence Pro",
+    name: "Agence",
     monthlyPriceFcfa: 25000,
     annualPriceFcfa: 20000,
     period: "/mois",
@@ -243,20 +243,20 @@ export const PLANS: PricingPlan[] = [
 ];
 
 export const ADDONS = [
-  "Bailleur Pro : +5 biens pour 2 000 FCFA/mois (jusqu'à 35 biens max)",
-  "Agence Pro : pack +100 biens pour 5 000 FCFA/mois",
+  "Bailleur : +5 biens pour 2 000 FCFA/mois (jusqu'à 35 biens max)",
+  "Agence : pack +100 biens pour 5 000 FCFA/mois",
 ] as const;
 
 export const FAQS: FaqItem[] = [
   {
-    question: "Quelle est la différence entre les formules Découverte, Bailleur Pro et Agence Pro ?",
+    question: "Quelle est la différence entre les formules Découverte, Bailleur et Agence ?",
     answer:
-      "Découverte est gratuit à vie pour 1 bien avec une gestion basique et des quittances PDF manuelles. Bailleur Pro (5 000 FCFA/mois, jusqu'à 15 biens) débloque le Mobile Money, le portail locataire et la Marketplace Lokka. Agence Pro (25 000 FCFA/mois, 50 biens inclus) ajoute la gestion multi-propriétaires avec mandats, les reversements automatiques, un domaine personnalisé et le SEO/blog.",
+      "Découverte est gratuit à vie pour 1 bien avec une gestion basique et des quittances PDF manuelles. Bailleur (5 000 FCFA/mois, jusqu'à 15 biens) débloque le Mobile Money, le portail locataire et la Marketplace Lokka. Agence (25 000 FCFA/mois, 50 biens inclus) ajoute la gestion multi-propriétaires avec mandats, les reversements automatiques, un domaine personnalisé et le SEO/blog.",
   },
   {
     question: "Que se passe-t-il si je dépasse le plafond de biens de mon forfait ?",
     answer:
-      "Vous pouvez étendre votre forfait avec un pack additionnel plutôt que de changer de plan : +5 biens pour 2 000 FCFA/mois en Bailleur Pro (jusqu'à 35 biens max), ou un pack +100 biens pour 5 000 FCFA/mois en Agence Pro. Au-delà, contactez l'équipe Lokka pour une formule personnalisée.",
+      "Vous pouvez étendre votre forfait avec un pack additionnel plutôt que de changer de plan : +5 biens pour 2 000 FCFA/mois en Bailleur (jusqu'à 35 biens max), ou un pack +100 biens pour 5 000 FCFA/mois en Agence. Au-delà, contactez l'équipe Lokka pour une formule personnalisée.",
   },
   {
     question: "Comment mes locataires accèdent-ils à leurs quittances PDF et à leur espace ?",
@@ -276,17 +276,17 @@ export const FAQS: FaqItem[] = [
   {
     question: "Comment fonctionne mon site vitrine public et le nom de domaine personnalisé ?",
     answer:
-      "Chaque compte Bailleur Pro ou Agence Pro dispose d'un mini-site public (ex: agence-littoral.lokka.bj). Il vous suffit de cocher 'Publier' sur vos logements vacants pour qu'ils apparaissent instantanément avec leurs photos, loyers et bouton de réservation de visite. Avec Agence Pro, vous pouvez connecter votre propre nom de domaine (ex: www.monagence.bj) avec votre logo et bénéficier du SEO/blog inclus.",
+      "Chaque compte Bailleur ou Agence dispose d'un mini-site public (ex: agence-littoral.lokka.bj). Il vous suffit de cocher 'Publier' sur vos logements vacants pour qu'ils apparaissent instantanément avec leurs photos, loyers et bouton de réservation de visite. Avec Agence, vous pouvez connecter votre propre nom de domaine (ex: www.monagence.bj) avec votre logo et bénéficier du SEO/blog inclus.",
   },
   {
     question: "Qu'est-ce que la Marketplace Lokka et les frais de visite Mobile Money ?",
     answer:
-      "La Marketplace Lokka permet de publier vos annonces de biens vacants pour trouver des locataires sans passer par une agence tierce (disponible à partir de Bailleur Pro). Vous pouvez fixer des frais de visite payables en ligne par Mobile Money, intégralement acquis, pour filtrer les demandes non sérieuses.",
+      "La Marketplace Lokka permet de publier vos annonces de biens vacants pour trouver des locataires sans passer par une agence tierce (disponible à partir de Bailleur). Vous pouvez fixer des frais de visite payables en ligne par Mobile Money, intégralement acquis, pour filtrer les demandes non sérieuses.",
   },
   {
     question: "Je vis à l'étranger, Lokka est-il adapté pour gérer mes biens au Bénin ?",
     answer:
-      "Absolument. En configurant votre profil Bailleur Pro, vous choisissez simplement votre zone (Bénin ou Diaspora) : vous suivez en direct vos loyers avec double conversion FCFA / Euros (€) ou Dollars ($), échangez directement avec vos locataires pour éviter les intermédiaires opaques, et bénéficiez d'un archivage infalsifiable de tous les paiements.",
+      "Absolument. En configurant votre profil Bailleur, vous choisissez simplement votre zone (Bénin ou Diaspora) : vous suivez en direct vos loyers avec double conversion FCFA / Euros (€) ou Dollars ($), échangez directement avec vos locataires pour éviter les intermédiaires opaques, et bénéficiez d'un archivage infalsifiable de tous les paiements.",
   },
   {
     question: "Mes locataires doivent-ils payer pour utiliser Lokka ?",
@@ -301,7 +301,7 @@ export const FAQS: FaqItem[] = [
 ];
 
 export function formatFcfa(value: number): string {
-  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
+  return `${new Intl.NumberFormat("fr-FR").format(value)}`;
 }
 
 export function formatPlanPrice(plan: PricingPlan, cycle: "monthly" | "annual"): string {

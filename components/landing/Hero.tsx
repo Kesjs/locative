@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Star } from "lucide-react";
 import EmailOtpForm from "./EmailOtpForm";
 import DashboardPreview from "./DashboardPreview";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 export default function Hero() {
   return (
@@ -13,7 +14,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[760px] flex-col items-center text-center">
           <div className="relative mb-6 inline-flex items-center gap-2 overflow-hidden rounded-full border border-border-default bg-white px-3 py-1.5 text-[12px] font-semibold text-text-primary shadow-xs">
-            <span className="landing-badge-beam" aria-hidden="true" />
+            <BorderBeam size={32} duration={4} delay={0} />
             <span className="relative z-10 inline-flex items-center gap-1.5">
               <span className="rounded-[4px] bg-success-strong px-1.5 py-0.5 text-[9px] font-bold tracking-[0.12em] text-white">NEW</span>
               <span>Une nouvelle façon de gérer vos biens</span>
@@ -39,12 +40,33 @@ export default function Hero() {
             />
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] font-medium text-text-secondary">
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 aria-hidden="true" size={14} className="text-success-strong" />
-              +100 bailleurs &amp; gestionnaires
-            </span>
-            <span className="hidden h-4 w-px bg-border-default sm:block" />
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[12px] font-medium text-text-secondary">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {[...Array(5)].map((_, i) => (
+                  <img
+                    key={i}
+                    className="inline-block h-7 w-7 rounded-full border-2 border-white"
+                    src={`https://i.pravatar.cc/100?img=${i + 10}`}
+                    alt="Avatar bailleur"
+                  />
+                ))}
+              </div>
+              <div className="flex flex-col items-start">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <span className="mt-0.5 inline-flex items-center gap-1.5 text-[11.5px]">
+                  <CheckCircle2 aria-hidden="true" size={13} className="text-success-strong" />
+                  +100 bailleurs &amp; gestionnaires
+                </span>
+              </div>
+            </div>
+
+            <span className="hidden h-5 w-px bg-border-default sm:block" />
+
             <span className="inline-flex items-center gap-1.5">
               <span className="rounded-[4px] border border-border-default bg-white px-1.5 py-0.5 text-[10px] font-bold text-text-primary">FCFA</span>
               100% adapté à l&apos;Afrique francophone

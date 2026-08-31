@@ -88,9 +88,7 @@ export default function EmailOtpForm({
 
   return (
     <form onSubmit={handleSubmit} className={`landing-email-form ${dark ? "landing-email-form-dark" : ""} ${className}`}>
-      <label htmlFor={inputId} className="mb-2 block text-[12px] font-semibold">
-        Adresse email
-      </label>
+
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
           id={inputId}
