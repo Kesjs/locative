@@ -236,7 +236,7 @@ export function AppSidebar() {
   
   // Here we derive the nav items based on the user's actual profileType
   // For safety we fall back to bailleur
-  const navItems = getNavItems(userProfile.profileType || "bailleur");
+  const navItems = getNavItems(userProfile.role || "bailleur");
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";

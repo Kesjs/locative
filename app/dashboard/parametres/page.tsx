@@ -5,7 +5,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 export default function ParametresPage() {
-  const { profileType } = useUserProfile();
+  const { role } = useUserProfile();
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -57,10 +57,10 @@ export default function ParametresPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[#FAF9F6] border border-[#E8E5E0] rounded-[8px]">
           <div>
             <div className="font-bold text-[14px] text-[#1C1C1C]">
-              {profileType === "agence" ? "Plan Agence" : "Plan Pro Bailleur"}
+              {role === "Agence" ? "Plan Agence" : "Plan Pro Bailleur"}
             </div>
             <div className="text-[12px] text-[#64635F]">
-              {profileType === "agence" ? "25 000 FCFA / mois" : "5 000 FCFA / mois"}
+              {role === "Agence" ? "25 000 FCFA / mois" : "5 000 FCFA / mois"}
             </div>
           </div>
           <button 

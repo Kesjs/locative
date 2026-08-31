@@ -10,11 +10,11 @@ import { UrgentActionsList } from "@/components/dashboard/shared/UrgentActionsLi
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 export default function DashboardPage() {
-  const { profileType } = useUserProfile();
+  const { role } = useUserProfile();
   
   // Fake query
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["dashboardStats", profileType],
+    queryKey: ["dashboardStats", role],
     queryFn: async () => {
       // Simulate network
       await new Promise((resolve) => setTimeout(resolve, 600));
@@ -80,7 +80,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (profileType === "agence") {
+  if (role === "Agence") {
     return (
       <div className="space-y-6">
         {/* CTA Banner Agence */}

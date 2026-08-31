@@ -8,7 +8,7 @@ import { useBiens } from "@/lib/hooks/useBiens";
 import { AddBienModal } from "./_components/AddBienModal";
 
 export default function PatrimoinePage() {
-  const { profileType } = useUserProfile();
+  const { role } = useUserProfile();
   const { data: biens = [], isLoading } = useBiens();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -20,7 +20,7 @@ export default function PatrimoinePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-[20px] font-extrabold text-[var(--text-primary)]">
-          {profileType === "agence" ? "Portefeuille Biens" : "Mon Patrimoine"}
+          {role === "Agence" ? "Portefeuille Biens" : "Mon Patrimoine"}
         </h1>
         <button 
           onClick={() => setIsModalOpen(true)}

@@ -10,7 +10,7 @@ import { AddTicketModal } from "./_components/AddTicketModal";
 import { AddArtisanModal } from "./_components/AddArtisanModal";
 
 export default function MaintenancePage() {
-  const { profileType } = useUserProfile();
+  const { role } = useUserProfile();
   const [activeTab, setActiveTab] = useState<"tickets" | "artisans">("tickets");
 
   const { data: tickets = [], isLoading: isLoadingTickets } = useTickets();
@@ -61,7 +61,7 @@ export default function MaintenancePage() {
         </button>
       </div>
 
-      {profileType === "agence" && (
+      {role === "Agence" && (
         <div className="flex items-center gap-4 border-b border-[#E8E5E0]">
           <button 
             className={`pb-2 text-[14px] font-bold ${activeTab === "tickets" ? "text-[#1C1C1C] border-b-2 border-[#1C1C1C]" : "text-[#9C9A95]"}`}
