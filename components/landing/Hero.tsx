@@ -52,13 +52,13 @@ export default function Hero() {
                   />
                 ))}
               </div>
-              <div className="flex flex-col items-start">
+              <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <span className="mt-0.5 inline-flex items-center gap-1.5 text-[11.5px]">
+                <span className="inline-flex items-center gap-1.5 text-[11.5px]">
                   <CheckCircle2 aria-hidden="true" size={13} className="text-success-strong" />
                   +100 bailleurs &amp; gestionnaires
                 </span>
