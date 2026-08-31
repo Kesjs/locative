@@ -114,13 +114,13 @@ export default function DashboardPage() {
               <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Rapides</h3>
               <div className="flex flex-col gap-2">
                 <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                  <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
+                  <div className="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
                     <Wallet className="w-4 h-4" />
                   </div>
                   Encaisser un loyer
                 </button>
                 <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                  <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
+                  <div className="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
                     <FileCheck className="w-4 h-4" />
                   </div>
                   Nouveau mandat
@@ -175,19 +175,19 @@ export default function DashboardPage() {
             <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Rapides</h3>
             <div className="flex flex-col gap-2">
               <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
+                <div className="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
                   <Landmark className="w-4 h-4" />
                 </div>
                 Ajouter un nouveau bien
               </button>
               <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
+                <div className="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
                   <Wallet className="w-4 h-4" />
                 </div>
                 Enregistrer un paiement
               </button>
               <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-rose-600 dark:text-rose-400 p-1.5 rounded-[6px]">
+                <div className="bg-rose-50/50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 p-1.5 rounded-[6px]">
                   <Wrench className="w-4 h-4" />
                 </div>
                 Créer un ticket travaux
