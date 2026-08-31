@@ -360,7 +360,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-4 gap-2">
                   {/* Default (Overlay) */}
                   <div
                     onClick={() => handleLayoutChange("default")}
@@ -437,6 +437,32 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       </div>
                     </div>
                     <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5 text-center">Full</span>
+                  </div>
+
+                  {/* Compact */}
+                  <div
+                    onClick={() => handleLayoutChange("compact")}
+                    className="cursor-pointer group flex flex-col items-center"
+                  >
+                    <div
+                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
+                        layoutMode === "compact"
+                          ? "ring-2 ring-[#1C1C1C] dark:ring-white border-2 border-transparent"
+                          : "border border-[#E4E4E7] dark:border-[#3F3F46] hover:border-[#1C1C1C]/40"
+                      }`}
+                      style={{ backgroundColor: isDark ? "#18181B" : "#F4F4F5" }}
+                    >
+                      {layoutMode === "compact" && (
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#1C1C1C] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
+                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                      <div className="flex w-full h-full p-1 gap-1 justify-center">
+                        <div className="w-1/4 h-full rounded shadow-sm border z-10" style={{ backgroundColor: isDark ? "#27272A" : "#FFFFFF", borderColor: isDark ? "#3F3F46" : "#E4E4E7" }} />
+                        <div className="w-1/2 h-full rounded shadow-sm border" style={{ backgroundColor: isDark ? "#3F3F46" : "#FFFFFF", borderColor: isDark ? "#52525B" : "#E4E4E7" }} />
+                      </div>
+                    </div>
+                    <span style={{ color: isDark ? "#FAFAFA" : "#1C1C1C" }} className="text-[11px] font-medium mt-1.5 text-center">Compact</span>
                   </div>
                 </div>
               </div>
