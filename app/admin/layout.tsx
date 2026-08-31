@@ -11,7 +11,6 @@ import {
   GlobeAltIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import QueryProvider from "@/components/providers/QueryProvider";
 
 const NAV_ITEMS = [
   { name: "Vue d'ensemble", href: "/admin", icon: Squares2X2Icon },
@@ -26,7 +25,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   return (
-    <QueryProvider>
     <div className="min-h-screen bg-[#FAF9F6] flex">
       {/* Sidebar Admin */}
       <aside className="hidden md:flex w-64 flex-col bg-[#1C1C1C] text-white min-h-screen sticky top-0">
@@ -65,6 +63,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </main>
     </div>
-    </QueryProvider>
   );
 }
