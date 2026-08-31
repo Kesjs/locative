@@ -9,9 +9,13 @@ interface KpiCardProps {
   delta?: { value: string; trend: "up" | "down" | "neutral" };
   subtitle?: string;
   icon?: React.ElementType;
+  trend?: string;
+  trendUp?: boolean;
 }
 
-export function KpiCard({ title, value, currency, valueSuffix, delta, subtitle, icon: Icon }: KpiCardProps) {
+export function KpiCard({ title, value, currency, valueSuffix, delta, subtitle, icon: Icon, trend, trendUp }: KpiCardProps) {
+  const displayDelta = delta || (trend ? { value: trend, trend: trendUp ? "up" : "down" } : undefined);
+
   return (
     <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs hover:border-[#1C1C1C] transition-all flex flex-col justify-between">
       <div>
@@ -20,25 +24,25 @@ export function KpiCard({ title, value, currency, valueSuffix, delta, subtitle, 
             {Icon && <Icon className="w-4 h-4 text-[var(--text-primary)]" />}
             <span>{title}</span>
           </div>
-          {delta && (
+          {displayDelta && (
             <span
               className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
-                delta.trend === "up"
+                displayDelta.trend === "up"
                   ? "bg-[#F0FDF4] text-[#16A34A] border-green-200"
-                  : delta.trend === "down"
+                  : displayDelta.trend === "down"
                   ? "bg-[#FEF2F2] text-[#DC2626] border-red-200"
                   : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border-[var(--border-default)]"
               }`}
             >
-              {delta.trend === "up" ? "↑ " : delta.trend === "down" ? "↓ " : ""}
-              {delta.value}
+              {displayDelta.trend === "up" ? "↑ " : displayDelta.trend === "down" ? "↓ " : ""}
+              {displayDelta.value}
             </span>
           )}
         </div>
         <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-1 flex items-baseline gap-1">
           {currency ? (
             <>
-              <NumberTicker value={value} className="font-extrabold" />
+              <NumberTicker value={typeof value === "string" ? parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0 : value} className="font-extrabold" />
               <span className="text-[14px] font-semibold text-[var(--text-secondary)]">
                 {currency}
               </span>
