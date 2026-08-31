@@ -115,11 +115,15 @@ function CollapsibleNavItem({
   isActive,
   pathname,
   isCollapsed,
+  isMobile,
+  setOpenMobile,
 }: {
   item: NavItem;
   isActive: boolean;
   pathname: string;
   isCollapsed: boolean;
+  isMobile: boolean;
+  setOpenMobile: (open: boolean) => void;
 }) {
   const [isOpen, setIsOpen] = React.useState(isActive);
 
@@ -145,7 +149,11 @@ function CollapsibleNavItem({
           }
           className="w-full flex items-center justify-center p-0 h-9 rounded-[8px] transition-colors"
         >
-          <Link href={item.url} className="flex items-center justify-center w-full h-full">
+          <Link
+            href={item.url}
+            className="flex items-center justify-center w-full h-full"
+            onClick={() => isMobile && setOpenMobile(false)}
+          >
             <item.icon className="size-4 shrink-0" />
           </Link>
         </SidebarMenuButton>
@@ -208,6 +216,7 @@ function CollapsibleNavItem({
                 <Link
                   key={subItem.title}
                   href={subItem.url}
+                  onClick={() => isMobile && setOpenMobile(false)}
                   className={`block text-[12px] py-1.5 px-2 rounded-[6px] transition-colors ${
                     isSubActive
                       ? "font-semibold text-[var(--text-primary)] bg-[var(--hover-bg)]"
@@ -228,7 +237,7 @@ function CollapsibleNavItem({
 export function AppSidebar() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const { state } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
@@ -341,6 +350,8 @@ export function AppSidebar() {
                     isActive={active}
                     pathname={pathname}
                     isCollapsed={isCollapsed}
+                    isMobile={isMobile}
+                    setOpenMobile={setOpenMobile}
                   />
                 );
               }
@@ -367,7 +378,11 @@ export function AppSidebar() {
                         : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
                     }`}
                   >
-                    <Link href={item.url} className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}>
+                    <Link
+                      href={item.url}
+                      className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}
+                      onClick={() => isMobile && setOpenMobile(false)}
+                    >
                       <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
                       {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
                       {item.badge && !isCollapsed && (
