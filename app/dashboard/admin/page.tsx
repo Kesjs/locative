@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  UsersIcon,
-  CurrencyDollarIcon,
-  BuildingOfficeIcon,
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
 import { useAdminStats, useAdminAbonnements } from "@/lib/hooks/useAdmin";
+import { Building2, Users, DollarSign, Activity } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import Header from "@/components/dashboard/Header";
@@ -35,50 +30,46 @@ export default function AdminOverviewPage() {
     <div className="p-4 sm:p-6 lg:p-8 pt-4">
       <Header breadcrumbs={["Tableau de bord Admin", "Vue Globale"]} />
 
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 text-white rounded-[12px] shadow-md border border-indigo-500/20 mb-6">
         <div>
-          <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
-            Plateforme Lokka HQ
-          </h1>
-          <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-            Indicateurs clés et métriques globales du système.
-          </p>
+          <h1 className="text-[20px] font-extrabold tracking-tight">Supervision Plateforme Lokka</h1>
+          <p className="text-[13px] text-indigo-100 mt-1">Gérez les agences, surveillez le MRR et les métriques système.</p>
         </div>
-        <button className="bg-[#1C1C1C] dark:bg-white text-white dark:text-black hover:opacity-90 px-5 py-2.5 rounded-[8px] font-bold text-[13px] shadow-sm transition-all">
-          Générer Rapport
+        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-indigo-900 rounded-[8px] text-[13px] font-bold hover:bg-indigo-50 transition-colors shadow-sm">
+          Générer Rapport Global
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <KpiCard
-          title="Agences & Bailleurs"
-          value={`${((stats?.totalAgences || 0) + (stats?.totalBailleurs || 0)).toLocaleString("fr-FR")}`}
+          title="Agences Actives"
+          value={(stats?.totalAgences || 0) + (stats?.totalBailleurs || 0)}
           subtitle={`${stats?.totalAgences} Agences / ${stats?.totalBailleurs} Bailleurs`}
-          icon={BuildingOfficeIcon}
+          icon={Building2} iconColor="blue"
           trend="+12% ce mois"
           trendUp={true}
         />
         <KpiCard
-          title="Total Locataires"
-          value={stats?.totalLocataires.toLocaleString("fr-FR") || "0"}
+          title="Nouveaux Utilisateurs"
+          value={stats?.totalLocataires || 0}
           subtitle="Utilisateurs actifs"
-          icon={UsersIcon}
+          icon={Users} iconColor="emerald"
           trend="+5% ce mois"
           trendUp={true}
         />
         <KpiCard
           title="Volume Transactions"
-          value={`${stats?.transactionsMois.toLocaleString("fr-FR")} FCFA`}
+          value={stats?.transactionsMois || 0} currency="FCFA"
           subtitle="Loyers perçus via MoMo/Virement"
-          icon={CurrencyDollarIcon}
+          icon={DollarSign} iconColor="blue"
           trend="+18% vs mois préc."
           trendUp={true}
         />
         <KpiCard
-          title="Revenus Lokka"
-          value={`${stats?.revenusLokka.toLocaleString("fr-FR")} FCFA`}
+          title="MRR (Abonnements)"
+          value={stats?.revenusLokka || 0} currency="FCFA"
           subtitle="Frais et abonnements (Estimation)"
-          icon={ChartBarIcon}
+          icon={Activity} iconColor="amber"
           trend="+22% ce mois"
           trendUp={true}
         />

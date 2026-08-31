@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  BanknotesIcon,
-  DocumentTextIcon,
-  WrenchScrewdriverIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
 import { useContratLocataire, useQuittances, useTicketsMaintenance } from "@/lib/hooks/useLocataire";
+import { Wallet, CalendarClock, Wrench } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import Header from "@/components/dashboard/Header";
@@ -47,28 +42,23 @@ export default function LocataireOverviewPage() {
         breadcrumbs={["Tableau de bord", "Mon Résumé"]}
       />
 
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-teal-500 to-emerald-600 dark:from-teal-600 dark:to-emerald-700 text-white rounded-[12px] shadow-md border border-teal-500/20 mb-6">
         <div>
-          <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
-            Bonjour ! 👋
-          </h1>
-          <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-            Bienvenue dans votre espace locataire Lokka.
-          </p>
+          <h1 className="text-[20px] font-extrabold tracking-tight">Bonjour ! 👋</h1>
+          <p className="text-[13px] text-teal-50 mt-1">Bienvenue dans votre espace locataire Lokka.</p>
         </div>
-        <button
-          className="bg-[#059669] hover:bg-[#047857] text-white px-5 py-2.5 rounded-[8px] font-bold text-[13px] shadow-sm transition-all"
-        >
-          Payer le loyer (MoMo)
+        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-teal-900 rounded-[8px] text-[13px] font-bold hover:bg-teal-50 transition-colors shadow-sm">
+          Payer mon loyer de {new Date().toLocaleString('fr-FR', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <KpiCard
           title="Loyer actuel & Charges"
-          value={`${((contrat?.loyerMensuel || 0) + (contrat?.chargesMensuelles || 0)).toLocaleString("fr-FR")} FCFA`}
+          value={((contrat?.loyerMensuel || 0) + (contrat?.chargesMensuelles || 0))}
+          currency="FCFA"
           subtitle={`Prochain paiement : ${contrat?.prochainPaiement}`}
-          icon={BanknotesIcon}
+          icon={Wallet} iconColor="blue"
           trend={dernierPaiement?.statut === "Payé" ? "+ À jour" : "- En attente"}
           trendUp={dernierPaiement?.statut === "Payé"}
         />
@@ -76,7 +66,7 @@ export default function LocataireOverviewPage() {
           title="Statut du Bail"
           value="Actif"
           subtitle={`Depuis le ${contrat?.dateDebut}`}
-          icon={ShieldCheckIcon}
+          icon={CalendarClock} iconColor="emerald"
           trend="+ Conforme"
           trendUp={true}
         />
@@ -84,7 +74,7 @@ export default function LocataireOverviewPage() {
           title="Maintenance"
           value={`${ticketEnCours} en cours`}
           subtitle={ticketEnCours > 0 ? "Intervention planifiée" : "Aucun incident signalé"}
-          icon={WrenchScrewdriverIcon}
+          icon={Wrench} iconColor="amber"
           trend={ticketEnCours > 0 ? "- Action requise" : "+ Tout va bien"}
           trendUp={ticketEnCours === 0}
         />

@@ -8,7 +8,7 @@ import { RecoveryGauge } from "@/components/dashboard/shared/RecoveryGauge";
 import { RevenueChart } from "@/components/dashboard/shared/RevenueChart";
 import { UrgentActionsList } from "@/components/dashboard/shared/UrgentActionsList";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { Wallet, AlertCircle, PieChart, Landmark, HandCoins, FileCheck } from "lucide-react";
+import { Wallet, AlertCircle, PieChart, Landmark, HandCoins, FileCheck, Wrench } from "lucide-react";
 
 export default function DashboardPage() {
   const { role } = useUserProfile();
@@ -85,9 +85,9 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         {/* CTA Banner Agence */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white rounded-[12px] shadow-md border border-blue-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-slate-900 dark:bg-black text-white rounded-[12px] shadow-sm border border-slate-800">
           <span className="font-semibold text-[15px] sm:text-[16px]">Créer un nouveau mandat propriétaire</span>
-          <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-900 rounded-[8px] text-[13px] font-bold hover:bg-blue-50 transition-colors shadow-sm">
+          <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-[8px] text-[13px] font-bold hover:bg-slate-100 transition-colors shadow-sm">
             Commencer <ArrowRightIcon className="w-4 h-4" />
           </button>
         </div>
@@ -100,10 +100,34 @@ export default function DashboardPage() {
           <KpiCard title="Mandats Actifs" value={data.agence.kpi.mandatsActifs} icon={FileCheck} iconColor="blue" />
         </div>
 
-        {/* Revenue Chart */}
-        <div className="bg-white border border-[#E8E5E0] rounded-[12px] p-5 shadow-xs">
-          <h3 className="text-[14px] font-bold text-[#1C1C1C] mb-4">Ventilation des Revenus</h3>
-          <RevenueChart data={data.agence.revenueData} type="bar" dataKeys={["commissions", "frais"]} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Revenue Chart */}
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
+              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Ventilation des Revenus</h3>
+              <RevenueChart data={data.agence.revenueData} type="bar" dataKeys={["commissions", "frais"]} />
+            </div>
+          </div>
+          <div className="space-y-6">
+            {/* Quick Actions Component/Section */}
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
+              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Rapides</h3>
+              <div className="flex flex-col gap-2">
+                <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
+                  <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
+                    <Wallet className="w-4 h-4" />
+                  </div>
+                  Encaisser un loyer
+                </button>
+                <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
+                  <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
+                    <FileCheck className="w-4 h-4" />
+                  </div>
+                  Nouveau mandat
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -113,35 +137,64 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* CTA Banner Bailleur */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white rounded-[12px] shadow-md border border-blue-500/20">
-        <span className="font-semibold text-[15px] sm:text-[16px]">Inviter mon locataire sur le portail</span>
-        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-900 rounded-[8px] text-[13px] font-bold hover:bg-blue-50 transition-colors shadow-sm">
-          Inviter <ArrowRightIcon className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-slate-900 dark:bg-black text-white rounded-[12px] shadow-sm border border-slate-800">
+        <span className="font-semibold text-[15px] sm:text-[16px]">Performances de votre patrimoine</span>
+        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-[8px] text-[13px] font-bold hover:bg-slate-100 transition-colors shadow-sm">
+          Voir le rapport détaillé <ArrowRightIcon className="w-4 h-4" />
         </button>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiCard title="Encaissé ce mois" value={data.bailleur.kpi.totalEncasse} currency="FCFA" delta={{ value: "+5%", trend: "up" }} icon={Wallet} iconColor="emerald" />
-        <KpiCard title="Reste à recouvrer" value={data.bailleur.kpi.resteRecouvrer} currency="FCFA" delta={{ value: "-2%", trend: "down" }} icon={AlertCircle} iconColor="amber" />
-        <KpiCard title="Occupation" value={data.bailleur.kpi.tauxOccupationPct} valueSuffix="%" subtitle={data.bailleur.kpi.tauxOccupationStr} icon={PieChart} iconColor="blue" />
+        <KpiCard title="Revenus nets reversés" value={data.bailleur.kpi.totalEncasse} currency="FCFA" delta={{ value: "+5%", trend: "up" }} icon={Wallet} iconColor="emerald" />
+        <KpiCard title="Taux d'occupation" value={data.bailleur.kpi.tauxOccupationPct} valueSuffix="%" subtitle={data.bailleur.kpi.tauxOccupationStr} icon={PieChart} iconColor="blue" />
+        <KpiCard title="Dépenses (Travaux & Frais)" value={150000} currency="FCFA" delta={{ value: "-2%", trend: "down" }} icon={Wrench} iconColor="rose" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recovery & Chart */}
-        <div className="bg-white border border-[#E8E5E0] rounded-[12px] p-5 shadow-xs flex flex-col items-center justify-center">
-          <RecoveryGauge percentage={90} label="Taux de recouvrement" />
-        </div>
-        <div className="bg-white border border-[#E8E5E0] rounded-[12px] p-5 shadow-xs">
-          <h3 className="text-[14px] font-bold text-[#1C1C1C] mb-4">Évolution des Loyers</h3>
-          <RevenueChart data={data.bailleur.revenueData} type="area" dataKeys={["revenus"]} />
-        </div>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
+            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Évolution des Loyers</h3>
+            <RevenueChart data={data.bailleur.revenueData} type="bar" dataKeys={["revenus"]} />
+          </div>
 
-      {/* Urgent Actions */}
-      <div className="bg-[#FAF9F6] border border-[#E8E5E0] rounded-[12px] p-5 shadow-xs">
-        <h3 className="text-[14px] font-bold text-[#1C1C1C] mb-4">Actions Urgentes</h3>
-        <UrgentActionsList items={data.bailleur.urgentActions} onRelance={() => {}} />
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
+            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Urgentes</h3>
+            <UrgentActionsList items={data.bailleur.urgentActions} onRelance={() => {}} />
+          </div>
+        </div>
+
+        {/* Right Column / Quick Actions */}
+        <div className="space-y-6">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col items-center justify-center min-h-[220px]">
+            <RecoveryGauge percentage={90} label="Taux de recouvrement" />
+          </div>
+
+          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
+            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Rapides</h3>
+            <div className="flex flex-col gap-2">
+              <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
+                <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
+                  <Landmark className="w-4 h-4" />
+                </div>
+                Ajouter un nouveau bien
+              </button>
+              <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
+                <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
+                  <Wallet className="w-4 h-4" />
+                </div>
+                Enregistrer un paiement
+              </button>
+              <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
+                <div className="bg-white dark:bg-black border border-slate-100 dark:border-slate-800 shadow-sm text-rose-600 dark:text-rose-400 p-1.5 rounded-[6px]">
+                  <Wrench className="w-4 h-4" />
+                </div>
+                Créer un ticket travaux
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
