@@ -9,17 +9,19 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const { layoutMode } = useSidebar();
 
   return (
-    <SidebarInset
-      className={`min-h-screen bg-[var(--bg-canvas)] transition-all duration-300 ${
-        layoutMode === "compact"
-          ? "p-3 sm:p-4 lg:p-5 max-w-[1350px] mx-auto w-full"
-          : layoutMode === "full"
-          ? "p-4 sm:p-6 lg:p-8 w-full max-w-none"
-          : "p-4 sm:p-6 lg:p-8 max-w-[1500px] mx-auto w-full"
-      }`}
-    >
-      <Header />
-      {children}
+    <SidebarInset className="min-h-screen bg-[var(--bg-canvas)] transition-all duration-300 w-full">
+      <div
+        className={`w-full mx-auto ${
+          layoutMode === "compact"
+            ? "p-3 sm:p-4 lg:p-5 max-w-[1350px]"
+            : layoutMode === "full"
+            ? "p-4 sm:p-6 lg:p-8 max-w-none"
+            : "p-4 sm:p-6 lg:p-8 max-w-[1500px]"
+        }`}
+      >
+        <Header />
+        {children}
+      </div>
     </SidebarInset>
   );
 }
