@@ -12,9 +12,9 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
-  let strokeColor = "#10b981"; // emerald-500
-  if (percentage < 50) strokeColor = "#ef4444"; // red-500
-  else if (percentage <= 80) strokeColor = "#f59e0b"; // amber-500
+  let strokeColor = "hsl(var(--success))"; // Emerald
+  if (percentage < 50) strokeColor = "hsl(var(--destructive))"; // Rose
+  else if (percentage <= 80) strokeColor = "hsl(var(--warning))"; // Amber
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -26,7 +26,7 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
             cy="60"
             r={radius}
             fill="transparent"
-            stroke="#E8E5E0"
+            stroke="hsl(var(--muted))"
             strokeWidth="10"
           />
           {/* Progress Ring */}
@@ -45,12 +45,12 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[24px] font-extrabold text-[var(--text-primary)]">
+          <span className="text-[24px] font-extrabold text-foreground">
             {Math.round(percentage)}%
           </span>
         </div>
       </div>
-      <div className="mt-2 text-[10.5px] text-[#64635F] uppercase tracking-wider font-bold">
+      <div className="mt-2 text-[10.5px] text-muted-foreground uppercase tracking-wider font-bold">
         {label}
       </div>
     </div>

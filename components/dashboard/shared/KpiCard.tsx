@@ -30,33 +30,33 @@ export function KpiCard({
   const resolvedDelta = delta ?? (trend ? { value: trend, trend: trendUp ? ("up" as const) : ("down" as const) } : undefined);
   
   const iconColorStyles = {
-    emerald: "bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    amber: "bg-amber-50/50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    rose: "bg-rose-50/50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400",
-    blue: "bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",
-    default: "bg-[var(--bg-subtle)] text-[var(--text-primary)]",
+    emerald: "bg-success/10 text-success",
+    amber: "bg-warning/10 text-warning",
+    rose: "bg-destructive/10 text-destructive",
+    blue: "bg-primary/10 text-primary",
+    default: "bg-muted text-foreground",
   };
 
   return (
-    <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs hover:border-[var(--border-strong)] transition-all flex flex-col justify-between group">
+    <div className="bg-card border border-border rounded-xl p-5 shadow-xs hover:border-primary/30 transition-all flex flex-col justify-between group">
       <div>
-        <div className="flex items-center justify-between text-[13px] text-[var(--text-secondary)] font-medium mb-3">
+        <div className="flex items-center justify-between text-[13px] text-muted-foreground font-medium mb-3">
           <div className="flex items-center gap-2">
             {Icon && (
-              <div className={`p-2 rounded-[8px] ${iconColorStyles[iconColor]} transition-colors`}>
+              <div className={`p-2 rounded-lg ${iconColorStyles[iconColor]} transition-colors`}>
                 <Icon className="w-4 h-4" />
               </div>
             )}
-            <span className="font-semibold">{title}</span>
+            <span className="font-semibold text-card-foreground">{title}</span>
           </div>
           {resolvedDelta && (
             <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11.5px] font-bold ${
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11.5px] font-bold border ${
                 resolvedDelta.trend === "up"
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                  ? "bg-success/10 text-success border-success/20"
                   : resolvedDelta.trend === "down"
-                  ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400"
-                  : "bg-[var(--bg-subtle)] text-[var(--text-primary)]"
+                  ? "bg-destructive/10 text-destructive border-destructive/20"
+                  : "bg-muted text-muted-foreground border-border"
               }`}
             >
               {resolvedDelta.trend === "up" ? "↑" : resolvedDelta.trend === "down" ? "↓" : ""}
@@ -64,24 +64,24 @@ export function KpiCard({
             </span>
           )}
         </div>
-        <div className="text-[28px] font-extrabold text-[var(--text-primary)] tracking-tight mb-1 flex items-baseline gap-1.5">
+        <div className="text-[28px] font-extrabold text-card-foreground tracking-tight mb-1 flex items-baseline gap-1.5">
           {currency ? (
             <>
-              <NumberTicker value={typeof value === "number" ? value : Number(value) || 0} className="font-extrabold" />
-              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">
+              <NumberTicker value={typeof value === "number" ? value : Number(value) || 0} className="font-extrabold text-card-foreground" />
+              <span className="text-[14px] font-semibold text-muted-foreground">
                 {currency}
               </span>
             </>
           ) : (
             <>
               {value}
-              {valueSuffix && <span className="text-[14px] font-semibold text-[var(--text-secondary)] ml-1">{valueSuffix}</span>}
+              {valueSuffix && <span className="text-[14px] font-semibold text-muted-foreground ml-1">{valueSuffix}</span>}
             </>
           )}
         </div>
       </div>
       {subtitle && (
-        <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-muted)]">
+        <div className="pt-2 border-t border-border/50 text-[11px] text-muted-foreground">
           {subtitle}
         </div>
       )}

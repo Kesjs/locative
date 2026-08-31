@@ -25,10 +25,14 @@ interface RevenueChartProps {
 
 export function RevenueChart({
   data,
-  type = "area",
+  type = "bar",
   xAxisKey = "month",
   dataKeys,
-  colors = ["#4f46e5", "#3b82f6", "#10b981"],
+  colors = [
+    "hsl(243, 75%, 59%)", // Lokka Primary (Indigo)
+    "hsl(142.1, 76.2%, 36.3%)", // Lokka Success (Emerald)
+    "hsl(38, 92%, 50%)", // Lokka Warning (Amber)
+  ],
   formatter = (val) => `${Number(val).toLocaleString("fr-FR")} FCFA`,
 }: RevenueChartProps) {
   
@@ -52,25 +56,26 @@ export function RevenueChart({
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#4A4945", fontSize: 12, fontWeight: 600 }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12, fontWeight: 600 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#4A4945", fontSize: 11, fontWeight: 500 }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
               width={48}
               tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1C1C1C",
-                border: "none",
-                borderRadius: 8,
+                backgroundColor: "hsl(var(--popover))",
+                borderColor: "hsl(var(--border))",
+                borderRadius: "var(--radius)",
                 padding: "8px 12px",
+                boxShadow: "var(--shadow-modal)",
               }}
-              labelStyle={{ color: "#FAF9F6", fontSize: 11, fontWeight: 600, marginBottom: 4 }}
-              itemStyle={{ color: "#FAF9F6", fontSize: 12, fontWeight: 600 }}
-              cursor={{ stroke: "#E8E5E0", strokeWidth: 1 }}
+              labelStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 12, fontWeight: 600 }}
+              cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
               formatter={(val: any, name: any) => [formatter(val), name]}
             />
             {dataKeys.map((key, i) => (
@@ -93,25 +98,26 @@ export function RevenueChart({
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#4A4945", fontSize: 12, fontWeight: 600 }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12, fontWeight: 600 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#4A4945", fontSize: 11, fontWeight: 500 }}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
               width={48}
               tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1C1C1C",
-                border: "none",
-                borderRadius: 8,
+                backgroundColor: "hsl(var(--popover))",
+                borderColor: "hsl(var(--border))",
+                borderRadius: "var(--radius)",
                 padding: "8px 12px",
+                boxShadow: "var(--shadow-modal)",
               }}
-              labelStyle={{ color: "#FAF9F6", fontSize: 11, fontWeight: 600, marginBottom: 4 }}
-              itemStyle={{ color: "#FAF9F6", fontSize: 12, fontWeight: 600 }}
-              cursor={{ fill: "#F5F5DC" }}
+              labelStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 12, fontWeight: 600 }}
+              cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
               formatter={(val: any, name: any) => [formatter(val), name]}
             />
             {dataKeys.map((key, i) => (

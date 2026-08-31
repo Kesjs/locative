@@ -14,9 +14,10 @@ export default function AdminOverviewPage() {
 
   if (loadingStats || loadingAbos) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6 lg:p-8 pt-4 space-y-6">
         <Header breadcrumbs={["Tableau de bord Admin", "Vue Globale"]} />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="h-20 bg-muted/60 animate-pulse rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-[120px] rounded-xl" />
           ))}
@@ -30,12 +31,12 @@ export default function AdminOverviewPage() {
     <div className="p-4 sm:p-6 lg:p-8 pt-4">
       <Header breadcrumbs={["Tableau de bord Admin", "Vue Globale"]} />
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 text-white rounded-[12px] shadow-md border border-indigo-500/20 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs mb-6">
         <div>
-          <h1 className="text-[20px] font-extrabold tracking-tight">Supervision Plateforme Lokka</h1>
-          <p className="text-[13px] text-indigo-100 mt-1">Gérez les agences, surveillez le MRR et les métriques système.</p>
+          <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">Supervision Plateforme Lokka</h1>
+          <p className="text-[13px] text-muted-foreground mt-1">Gérez les agences, surveillez le MRR et les métriques système en temps réel.</p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-indigo-900 rounded-[8px] text-[13px] font-bold hover:bg-indigo-50 transition-colors shadow-sm">
+        <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           Générer Rapport Global
         </button>
       </div>
@@ -44,40 +45,46 @@ export default function AdminOverviewPage() {
         <KpiCard
           title="Agences Actives"
           value={(stats?.totalAgences || 0) + (stats?.totalBailleurs || 0)}
-          subtitle={`${stats?.totalAgences} Agences / ${stats?.totalBailleurs} Bailleurs`}
-          icon={Building2} iconColor="blue"
+          subtitle={`${stats?.totalAgences || 0} Agences / ${stats?.totalBailleurs || 0} Bailleurs`}
+          icon={Building2}
+          iconColor="blue"
           trend="+12% ce mois"
           trendUp={true}
         />
         <KpiCard
           title="Nouveaux Utilisateurs"
           value={stats?.totalLocataires || 0}
-          subtitle="Utilisateurs actifs"
-          icon={Users} iconColor="emerald"
+          subtitle="Utilisateurs actifs plateforme"
+          icon={Users}
+          iconColor="emerald"
           trend="+5% ce mois"
           trendUp={true}
         />
         <KpiCard
           title="Volume Transactions"
-          value={stats?.transactionsMois || 0} currency="FCFA"
+          value={stats?.transactionsMois || 0}
+          currency="FCFA"
           subtitle="Loyers perçus via MoMo/Virement"
-          icon={DollarSign} iconColor="blue"
+          icon={DollarSign}
+          iconColor="blue"
           trend="+18% vs mois préc."
           trendUp={true}
         />
         <KpiCard
           title="MRR (Abonnements)"
-          value={stats?.revenusLokka || 0} currency="FCFA"
+          value={stats?.revenusLokka || 0}
+          currency="FCFA"
           subtitle="Frais et abonnements (Estimation)"
-          icon={Activity} iconColor="amber"
+          icon={Activity}
+          iconColor="amber"
           trend="+22% ce mois"
           trendUp={true}
         />
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-2xs">
+      <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[15px] font-bold text-[var(--text-primary)]">Abonnements Récents (Agences)</h3>
+          <h3 className="text-[15px] font-bold text-card-foreground">Abonnements Récents (Agences)</h3>
         </div>
         <DataTable
           data={abonnements?.slice(0, 5) || []}
@@ -87,17 +94,17 @@ export default function AdminOverviewPage() {
               header: "Plan",
               accessorKey: "plan",
               cell: (row) => (
-                <span className="font-semibold text-[var(--text-primary)]">{row.plan}</span>
+                <span className="font-semibold text-card-foreground">{row.plan}</span>
               ),
             },
             {
               header: "Statut",
               accessorKey: "statut",
               cell: (row) => (
-                <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                  row.statut === "Actif" ? "bg-emerald-100 text-emerald-700" :
-                  row.statut === "Impayé" ? "bg-red-100 text-red-700" :
-                  "bg-amber-100 text-amber-700"
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                  row.statut === "Actif" ? "bg-success/10 text-success border-success/20" :
+                  row.statut === "Impayé" ? "bg-destructive/10 text-destructive border-destructive/20" :
+                  "bg-warning/10 text-warning border-warning/20"
                 }`}>
                   {row.statut}
                 </span>

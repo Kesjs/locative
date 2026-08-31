@@ -63,11 +63,11 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-20 bg-[var(--bg-surface)] animate-pulse rounded-[8px]" />
+        <div className="h-20 bg-muted/60 animate-pulse rounded-xl" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="h-32 bg-[var(--bg-surface)] animate-pulse rounded-[12px]" />
-          <div className="h-32 bg-[var(--bg-surface)] animate-pulse rounded-[12px]" />
-          <div className="h-32 bg-[var(--bg-surface)] animate-pulse rounded-[12px]" />
+          <div className="h-32 bg-muted/60 animate-pulse rounded-xl" />
+          <div className="h-32 bg-muted/60 animate-pulse rounded-xl" />
+          <div className="h-32 bg-muted/60 animate-pulse rounded-xl" />
         </div>
       </div>
     );
@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
   if (isError || !data) {
     return (
-      <div className="p-6 bg-red-50 text-red-600 rounded-[8px]">
+      <div className="p-6 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-[14px] font-medium">
         Une erreur est survenue lors du chargement des statistiques.
       </div>
     );
@@ -85,10 +85,13 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         {/* CTA Banner Agence */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-slate-900 dark:bg-black text-white rounded-[12px] shadow-sm border border-slate-800">
-          <span className="font-semibold text-[15px] sm:text-[16px]">Créer un nouveau mandat propriétaire</span>
-          <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-[8px] text-[13px] font-bold hover:bg-slate-100 transition-colors shadow-sm">
-            Commencer <ArrowRightIcon className="w-4 h-4" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
+          <div>
+            <h2 className="font-bold text-[16px] text-card-foreground">Développez votre portefeuille</h2>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Créez un mandat de gestion ou invitez un nouveau propriétaire.</p>
+          </div>
+          <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            Nouveau Mandat <ArrowRightIcon className="w-4 h-4" />
           </button>
         </div>
 
@@ -103,24 +106,24 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {/* Revenue Chart */}
-            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
-              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Ventilation des Revenus</h3>
+            <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
+              <h3 className="text-[15px] font-bold text-card-foreground mb-4">Ventilation des Revenus</h3>
               <RevenueChart data={data.agence.revenueData} type="bar" dataKeys={["commissions", "frais"]} />
             </div>
           </div>
           <div className="space-y-6">
             {/* Quick Actions Component/Section */}
-            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
-              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Rapides</h3>
+            <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
+              <h3 className="text-[15px] font-bold text-card-foreground mb-4">Actions Rapides</h3>
               <div className="flex flex-col gap-2">
-                <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                  <div className="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
+                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted border border-border transition-colors text-[13px] font-semibold text-card-foreground text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  <div className="bg-success/10 text-success p-1.5 rounded-md">
                     <Wallet className="w-4 h-4" />
                   </div>
                   Encaisser un loyer
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                  <div className="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
+                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted border border-border transition-colors text-[13px] font-semibold text-card-foreground text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  <div className="bg-primary/10 text-primary p-1.5 rounded-md">
                     <FileCheck className="w-4 h-4" />
                   </div>
                   Nouveau mandat
@@ -137,10 +140,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* CTA Banner Bailleur */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-slate-900 dark:bg-black text-white rounded-[12px] shadow-sm border border-slate-800">
-        <span className="font-semibold text-[15px] sm:text-[16px]">Performances de votre patrimoine</span>
-        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-slate-900 rounded-[8px] text-[13px] font-bold hover:bg-slate-100 transition-colors shadow-sm">
-          Voir le rapport détaillé <ArrowRightIcon className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
+        <div>
+          <h2 className="font-bold text-[16px] text-card-foreground">Performances de votre patrimoine</h2>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Suivi de rentabilité, états locatifs et reversements mensuels.</p>
+        </div>
+        <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          Rapport Détaillé <ArrowRightIcon className="w-4 h-4" />
         </button>
       </div>
 
@@ -154,40 +160,40 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
-            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Évolution des Loyers</h3>
+          <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
+            <h3 className="text-[15px] font-bold text-card-foreground mb-4">Évolution des Loyers</h3>
             <RevenueChart data={data.bailleur.revenueData} type="bar" dataKeys={["revenus"]} />
           </div>
 
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
-            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Urgentes</h3>
+          <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
+            <h3 className="text-[15px] font-bold text-card-foreground mb-4">Actions Urgentes</h3>
             <UrgentActionsList items={data.bailleur.urgentActions} onRelance={() => {}} />
           </div>
         </div>
 
         {/* Right Column / Quick Actions */}
         <div className="space-y-6">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col items-center justify-center min-h-[220px]">
+          <div className="bg-card border border-border rounded-xl p-5 shadow-xs flex flex-col items-center justify-center min-h-[220px]">
             <RecoveryGauge percentage={90} label="Taux de recouvrement" />
           </div>
 
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs">
-            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-4">Actions Rapides</h3>
+          <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
+            <h3 className="text-[15px] font-bold text-card-foreground mb-4">Actions Rapides</h3>
             <div className="flex flex-col gap-2">
-              <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                <div className="bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 p-1.5 rounded-[6px]">
+              <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted border border-border transition-colors text-[13px] font-semibold text-card-foreground text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <div className="bg-primary/10 text-primary p-1.5 rounded-md">
                   <Landmark className="w-4 h-4" />
                 </div>
                 Ajouter un nouveau bien
               </button>
-              <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                <div className="bg-emerald-50/50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-[6px]">
+              <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted border border-border transition-colors text-[13px] font-semibold text-card-foreground text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <div className="bg-success/10 text-success p-1.5 rounded-md">
                   <Wallet className="w-4 h-4" />
                 </div>
                 Enregistrer un paiement
               </button>
-              <button className="w-full flex items-center gap-3 p-3 rounded-[8px] bg-[var(--bg-subtle)] hover:bg-[var(--hover-bg)] border border-[var(--border-default)] transition-colors text-[13px] font-semibold text-[var(--text-primary)] text-left">
-                <div className="bg-rose-50/50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 p-1.5 rounded-[6px]">
+              <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted border border-border transition-colors text-[13px] font-semibold text-card-foreground text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <div className="bg-destructive/10 text-destructive p-1.5 rounded-md">
                   <Wrench className="w-4 h-4" />
                 </div>
                 Créer un ticket travaux
