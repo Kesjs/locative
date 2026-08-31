@@ -1,5 +1,6 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
+import StickyFeatures from "@/components/landing/StickyFeatures";
 import Features from "@/components/landing/Features";
 import DashboardPreview from "@/components/landing/DashboardPreview";
 import Stats from "@/components/landing/Stats";
@@ -18,6 +19,7 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
+        <StickyFeatures />
         <Features />
         <DashboardPreview />
         <Stats />
