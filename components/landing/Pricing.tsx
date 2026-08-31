@@ -1,446 +1,232 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, useInView } from "framer-motion";
-import {
-  CheckIcon,
-  SparklesIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  MinusIcon,
-} from "@heroicons/react/24/outline";
+import { Check, Minus } from "lucide-react";
+import { Switch } from "radix-ui";
+import { ADDONS, PLANS, buildComparisonRows, formatPlanPrice } from "./landing-data";
+import type { BillingCycle } from "./types";
 
-interface FeatureRow {
-  name: string;
-  decouverte: string | boolean;
-  pro: string | boolean;
-  agence: string | boolean;
-}
-
-interface Plan {
-  name: string;
-  monthlyPrice: string;
-  annualPrice: string;
-  period: string;
-  annualDetail: string;
-  description: string;
-  bienLabel: string;
-  features: string[];
-  cta: string;
-  popular: boolean;
-  badgeLabel?: string;
-}
-
-// SOURCE UNIQUE DE DONNÉES — cards ET tableau comparatif sont générés à partir
-// de ce seul tableau (spec section 19 : "il ne doit jamais exister deux
-// sources différentes pour les prix ou fonctionnalités").
-const PLANS: Plan[] = [
-  {
-    name: "Découverte",
-    monthlyPrice: "0 FCFA",
-    annualPrice: "0 FCFA",
-    period: "",
-    annualDetail: "Gratuit et sans engagement",
-    description: "Pour découvrir Lokka.",
-    bienLabel: "1 seul bien",
-    features: [
-      "Gestion basique (baux, locataires)",
-      "Paiements & quittances PDF manuels",
-      "Accès aux fonctionnalités essentielles",
-    ],
-    cta: "Créer mon compte gratuit",
-    popular: false,
-  },
-  {
-    name: "Bailleur Pro",
-    monthlyPrice: "5 000 FCFA",
-    annualPrice: "4 000 FCFA",
-    period: "/mois",
-    annualDetail: "48 000 FCFA facturés par an (-20%)",
-    description: "Pour les bailleurs indépendants.",
-    bienLabel: "Jusqu'à 15 biens",
-    features: [
-      "Gestion complète en autonomie",
-      "Paiements Mobile Money",
-      "Portail locataire",
-      "Marketplace Lokka (annonces)",
-      "Frais de visite Mobile Money",
-      "Vitrine web (lien standard)",
-    ],
-    cta: "Démarrer l'essai 14 jours",
-    popular: true,
-    badgeLabel: "Le Plus Populaire",
-  },
-  {
-    name: "Agence Pro",
-    monthlyPrice: "25 000 FCFA",
-    annualPrice: "20 000 FCFA",
-    period: "/mois",
-    annualDetail: "240 000 FCFA facturés par an (-20%)",
-    description: "Pour les agences et gestionnaires.",
-    bienLabel: "50 biens inclus",
-    features: [
-      "Multi-propriétaires & mandats",
-      "Reversements automatiques aux bailleurs",
-      "Marketplace Lokka (annonces)",
-      "Frais de visite avancés",
-      "Domaine personnalisé + thèmes",
-      "SEO & Blog inclus",
-    ],
-    cta: "Choisir le Plan Agence",
-    popular: false,
-  },
-];
-
-// Add-ons de scaling (doc archi §1) — affichés sous la grille, pas dans les
-// cards, pour ne pas surcharger la comparaison des 3 paliers de base.
-const ADDONS = [
-  "Bailleur Pro : +5 biens pour 2 000 FCFA/mois (jusqu'à 35 biens max)",
-  "Agence Pro : pack +100 biens pour 5 000 FCFA/mois",
-];
-
-const CARD_FEATURE_CAP = 4; // + bienLabel = 5 lignes max visibles par card
-
-// Le tableau comparatif est dérivé de PLANS : union ordonnée de tous les
-// libellés (bienLabel + features), un seul passage, aucune donnée ajoutée.
-function buildComparisonRows(): FeatureRow[] {
-  const rows: FeatureRow[] = [
-    {
-      name: "Nombre de biens",
-      decouverte: PLANS[0].bienLabel,
-      pro: PLANS[1].bienLabel,
-      agence: PLANS[2].bienLabel,
-    },
-  ];
-
-  const seen = new Set<string>();
-  PLANS.forEach((plan) => {
-    plan.features.forEach((label) => {
-      if (seen.has(label)) return;
-      seen.add(label);
-      rows.push({
-        name: label,
-        decouverte: PLANS[0].features.includes(label),
-        pro: PLANS[1].features.includes(label),
-        agence: PLANS[2].features.includes(label),
-      });
-    });
-  });
-
-  return rows;
-}
+const GROUP_LABELS = new Map<string, string>([
+  ["Nombre de biens", "Gérer le dossier"],
+  ["Gestion basique (baux, locataires)", "Gérer le dossier"],
+  ["Multi-propriétaires & mandats", "Gérer le dossier"],
+  ["Paiements & quittances PDF manuels", "Encaisser & remettre les documents"],
+  ["Paiements Mobile Money", "Encaisser & remettre les documents"],
+  ["Portail locataire", "Encaisser & remettre les documents"],
+  ["Reversements automatiques aux bailleurs", "Encaisser & remettre les documents"],
+  ["Marketplace Lokka (annonces)", "Publier & trouver des locataires"],
+  ["Vitrine web (lien standard)", "Publier & trouver des locataires"],
+  ["Domaine personnalisé + thèmes", "Publier & trouver des locataires"],
+  ["SEO & Blog inclus", "Publier & trouver des locataires"],
+]);
 
 export default function Pricing() {
-  const [isAnnual, setIsAnnual] = useState(true);
-  const [showComparison, setShowComparison] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const comparisonRows = React.useMemo(() => buildComparisonRows(), []);
+  const [cycle, setCycle] = useState<BillingCycle>("annual");
+  const rows = useMemo(() => buildComparisonRows(), []);
+  const isAnnual = cycle === "annual";
 
   return (
-    <section ref={sectionRef} id="pricing" className="py-24 sm:py-32 bg-[#FAF9F6] border-t border-[#E8E5E0]">
-      <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-16 max-w-2xl mx-auto"
-        >
-          <div className="section-label mb-3 text-[#1C1C1C]">Tarifs Clairs &amp; Adaptés</div>
-          <h2 className="heading-2 mb-4 text-[#1C1C1C]">Une tarification transparente en FCFA</h2>
-          <p className="body-text text-base sm:text-lg text-[#64635F]">
-            Rentabilisé dès le premier mois grâce aux retards éliminés et à votre site vitrine clé en main.
-          </p>
-
-          {/* Billing Cycle Toggle Switch */}
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <span className={`text-[13px] font-bold ${!isAnnual ? "text-[#1C1C1C]" : "text-[#9C9A95]"}`}>
-              Mensuel
-            </span>
-
-            <button
-              type="button"
-              onClick={() => setIsAnnual(!isAnnual)}
-              className="relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none cursor-pointer"
-              style={{ backgroundColor: isAnnual ? "#1C1C1C" : "#E8E5E0" }}
-            >
-              <motion.span
-                animate={{ x: isAnnual ? 30 : 2 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="inline-block h-6 w-6 rounded-full bg-white shadow-xs"
-              />
-            </button>
-
-            <div className="flex items-center gap-2">
-              <span className={`text-[13px] font-bold ${isAnnual ? "text-[#1C1C1C]" : "text-[#9C9A95]"}`}>
-                Annuel
-              </span>
-              <span className="inline-flex items-center rounded-full bg-[#E6F5EF] px-2.5 py-0.5 text-[11px] font-bold text-[#087F5B]">
-                -20% de remise
-              </span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Pricing Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch mb-12">
-          {PLANS.map((plan, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              className="relative flex flex-col justify-between p-6 sm:p-7 rounded-[10px] transition-all duration-300 group hover:-translate-y-1"
-              style={{
-                backgroundColor: plan.popular ? "#1C1C1C" : "#FFFFFF",
-                border: plan.popular ? "1px solid #1C1C1C" : "1px solid #E8E5E0",
-                boxShadow: plan.popular
-                  ? "0 20px 40px rgba(28,28,28,0.15)"
-                  : "0 4px 12px rgba(0,0,0,0.03)",
-                color: plan.popular ? "#FFFFFF" : "#1C1C1C",
-              }}
-            >
-              {plan.popular && (
-                <span className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#087F5B] text-white shadow-xs">
-                  {plan.badgeLabel}
-                </span>
-              )}
-
-              <div>
-                <div className="mb-6">
-                  <div className="text-[18px] font-bold mb-2 text-inherit flex items-center justify-between">
-                    <span>{plan.name}</span>
-                    {plan.popular && <SparklesIcon className="h-5 w-5 text-white/70" />}
-                  </div>
-
-                  <div className="flex items-baseline gap-1.5 mt-2">
-                    <span
-                      className="font-extrabold text-[24px] sm:text-[28px] tracking-tight"
-                      style={{ color: "inherit" }}
-                    >
-                      {isAnnual ? plan.annualPrice : plan.monthlyPrice}
-                    </span>
-                    {plan.period && (
-                      <span className="text-[13px] font-medium opacity-70">{plan.period}</span>
-                    )}
-                  </div>
-
-                  <div className="min-h-[20px] mt-1.5">
-                    {plan.annualDetail && (
-                      <span
-                        className="text-[12px] font-medium"
-                        style={{ color: plan.popular ? "rgba(255,255,255,0.7)" : "#64635F" }}
-                      >
-                        {isAnnual ? plan.annualDetail : "Facturation mensuelle sans engagement"}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-[13px] mt-4 leading-relaxed opacity-80 min-h-[40px]">
-                    {plan.description}
-                  </p>
-                </div>
-
-                <div
-                  className="pt-5 mb-8"
-                  style={{
-                    borderTop: plan.popular
-                      ? "1px solid rgba(255,255,255,0.15)"
-                      : "1px solid #E8E5E0",
-                  }}
-                >
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2.5 text-[13px] font-bold">
-                      <CheckIcon
-                        className="h-4 w-4 shrink-0 mt-0.5"
-                        style={{ color: plan.popular ? "#FFFFFF" : "#1C1C1C" }}
-                      />
-                      <span>{plan.bienLabel}</span>
-                    </li>
-                    {plan.features.slice(0, CARD_FEATURE_CAP).map((feature, j) => (
-                      <li key={j} className="flex items-start gap-2.5 text-[13px]">
-                        <CheckIcon
-                          className="h-4 w-4 shrink-0 mt-0.5"
-                          style={{ color: plan.popular ? "#FFFFFF" : "#1C1C1C" }}
-                        />
-                        <span className="opacity-90">{feature}</span>
-                      </li>
-                    ))}
-                    {plan.features.length > CARD_FEATURE_CAP && (
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => setShowComparison(true)}
-                          className="text-[12px] font-bold underline decoration-dotted underline-offset-2 pl-[26px] cursor-pointer"
-                          style={{ color: plan.popular ? "rgba(255,255,255,0.85)" : "#1C1C1C" }}
-                        >
-                          +{plan.features.length - CARD_FEATURE_CAP} autres fonctionnalités
-                        </button>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Boutons CTA : Milieu en blanc, Découverte & Agence en vert pastel (#E6F5EF) */}
-              <Link href="/auth/register" className="w-full block mt-auto">
-                <button
-                  type="button"
-                  className={`w-full py-3 px-4 rounded-[6px] text-[13px] font-bold transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.98] border ${
-                    plan.popular
-                      ? "bg-white text-[#1C1C1C] border-white/30 hover:bg-[#E6F5EF] hover:text-[#087F5B] hover:border-[#087F5B]"
-                      : "bg-[#E6F5EF] text-[#087F5B] border-[#E6F5EF] hover:bg-[#087F5B] hover:text-white hover:border-[#087F5B]"
-                  }`}
-                >
-                  {plan.cta}
-                </button>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Add-ons de scaling — un seul palier de plus n'existant pas dans les cards */}
-        <div className="text-center mb-8">
-          {ADDONS.map((addon, i) => (
-            <p key={i} className="text-[12px] text-[#64635F]">
-              {addon}
+    <section id="pricing" className="landing-section bg-bg-canvas py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div data-landing-reveal className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+          <div className="max-w-[720px]">
+            <p className="landing-label">Tarifs clairs &amp; adaptés</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3.25rem)] font-semibold leading-[1] tracking-[-0.06em] text-text-primary">
+              Une tarification transparente en FCFA
+            </h2>
+            <p className="mt-5 max-w-[620px] text-[14px] leading-relaxed text-text-secondary">
+              Rentabilisé dès le premier mois grâce aux retards éliminés et à votre site vitrine clé en main.
             </p>
-          ))}
-        </div>
-
-        {/* ========================================================================= */}
-        {/* BOUTON DÉPLIABLE DU TABLEAU COMPARATIF COMPLET                             */}
-        {/* ========================================================================= */}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setShowComparison(!showComparison)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-[#E8E5E0] text-[13px] font-bold text-[#1C1C1C] shadow-xs hover:border-[#087F5B] hover:bg-[#E6F5EF] hover:text-[#087F5B] transition-all duration-200 cursor-pointer group"
-          >
-            <span>{showComparison ? "Masquer le comparatif détaillé" : "Comparer tous les forfaits en détail"}</span>
-            {showComparison ? (
-              <ChevronUpIcon className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
-            ) : (
-              <ChevronDownIcon className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
-            )}
-          </button>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* TABLEAU COMPARATEUR DÉPLIABLE (ACCORDÉON SOUS LE PRICING)                  */}
-        {/* ========================================================================= */}
-        <AnimatePresence>
-          {showComparison && (
-            <motion.div
-              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: "auto", marginTop: 32 }}
-              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden"
+          </div>
+          <div className="flex items-center gap-3 text-[12px] font-semibold text-text-secondary">
+            <span className={!isAnnual ? "text-text-primary" : "text-text-muted"}>Mensuel</span>
+            <Switch.Root 
+              checked={isAnnual} 
+              onCheckedChange={(checked) => setCycle(checked ? "annual" : "monthly")} 
+              asChild
             >
-              <div className="bg-white border border-[#E8E5E0] rounded-[12px] shadow-sm overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                  {/* Table Header */}
-                  <thead>
-                    <tr className="border-b border-[#E8E5E0] bg-[#FAF9F6]">
-                      <th className="py-4 px-6 text-[13px] font-extrabold text-[#1C1C1C] w-1/3">
-                        Fonctionnalités &amp; Services
-                      </th>
-                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
-                        Découverte
-                        <span className="block text-[11px] font-normal text-[#64635F]">0 FCFA</span>
-                      </th>
-                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center bg-[#087F5B]/[0.03] border-x border-[#E8E5E0]">
-                        <span className="inline-flex items-center gap-1 justify-center">
-                          Bailleur Pro
-                          <SparklesIcon className="h-3.5 w-3.5 text-[#087F5B]" />
-                        </span>
-                        <span className="block text-[11px] font-bold text-[#1C1C1C]">
-                          {isAnnual ? "4 000 FCFA" : "5 000 FCFA"}
-                        </span>
-                      </th>
-                      <th className="py-4 px-4 text-[13px] font-bold text-[#1C1C1C] text-center">
-                        Agence Pro
-                        <span className="block text-[11px] font-normal text-[#64635F]">
-                          {isAnnual ? "20 000 FCFA" : "25 000 FCFA"}
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
+              <button 
+                type="button" 
+                aria-label="Basculer entre facturation mensuelle et annuelle" 
+                className="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border-strong bg-border-strong p-0.5 data-[state=checked]:bg-brand-primary transition-colors"
+              >
+                <Switch.Thumb className="block h-5 w-5 rounded-full bg-white shadow-xs transition-transform duration-200 data-[state=checked]:translate-x-5" />
+              </button>
+            </Switch.Root>
+            <span className={isAnnual ? "text-text-primary" : "text-text-muted"}>Annuel</span>
+            <span className="border-l border-border-default pl-3 text-[10px] font-bold text-success-strong">
+              -20% de remise
+            </span>
+          </div>
+        </div>
 
-                  {/* Table Body — dérivé de PLANS, aucune donnée additionnelle */}
-                  <tbody className="divide-y divide-[#E8E5E0]">
-                    {comparisonRows.map((feat, fIdx) => (
-                      <tr
-                        key={fIdx}
-                        className="hover:bg-[#FAF9F6]/50 transition-colors text-[13px]"
-                      >
-                        <td className="py-3.5 px-6">
-                          <div className="font-bold text-[#1C1C1C]">{feat.name}</div>
-                        </td>
-
-                        {/* Découverte */}
-                        <td className="py-3.5 px-4 text-center">
-                          {typeof feat.decouverte === "boolean" ? (
-                            feat.decouverte ? (
-                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                            ) : (
-                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                            )
-                          ) : (
-                            <span className="font-bold text-[#1C1C1C]">{feat.decouverte}</span>
-                          )}
-                        </td>
-
-                        {/* Bailleur Pro (Highlighted Column) */}
-                        <td className="py-3.5 px-4 text-center bg-[#087F5B]/[0.02] border-x border-[#E8E5E0]">
-                          {typeof feat.pro === "boolean" ? (
-                            feat.pro ? (
-                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                            ) : (
-                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                            )
-                          ) : (
-                            <span className="font-bold text-[#1C1C1C]">{feat.pro}</span>
-                          )}
-                        </td>
-
-                        {/* Agence Pro */}
-                        <td className="py-3.5 px-4 text-center">
-                          {typeof feat.agence === "boolean" ? (
-                            feat.agence ? (
-                              <CheckIcon className="h-4 w-4 mx-auto text-[#1C1C1C] stroke-[2.5]" />
-                            ) : (
-                              <MinusIcon className="h-4 w-4 mx-auto text-[#9C9A95]" />
-                            )
-                          ) : (
-                            <span className="font-bold text-[#1C1C1C]">{feat.agence}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Table Footer Action */}
-                <div className="p-4 bg-[#FAF9F6] border-t border-[#E8E5E0] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-                  <span className="text-[12px] text-[#64635F]">
-                    Besoin de dépasser 150 biens sous gestion ?
-                  </span>
-                  <Link
-                    href="/auth/register"
-                    className="text-[12px] font-bold text-[#1C1C1C] hover:underline"
-                  >
-                    Contactez l&apos;équipe Lokka à Cotonou →
-                  </Link>
+        {/* Mobile View: Stacked Cards (visible on screens smaller than lg) */}
+        <div className="mt-10 grid gap-6 lg:hidden" data-landing-reveal>
+          {PLANS.map((plan) => (
+            <div 
+              key={plan.name} 
+              className={`relative flex flex-col rounded-[16px] border bg-white p-6 shadow-sm ${
+                plan.popular ? "border-brand-primary ring-1 ring-brand-primary" : "border-border-default"
+              }`}
+            >
+              {plan.badgeLabel && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-success-strong px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
+                  {plan.badgeLabel}
                 </div>
+              )}
+              
+              <div className="mb-4">
+                <h3 className="text-[18px] font-semibold text-text-primary">{plan.name}</h3>
+                <p className="mt-2 text-[13px] text-text-secondary">{plan.description}</p>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              
+              <div className="mb-6 border-b border-border-subtle pb-6">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[28px] font-bold tracking-tight text-text-primary">
+                    {formatPlanPrice(plan, cycle)}
+                  </span>
+                  {plan.period && <span className="text-[12px] font-medium text-text-muted">{plan.period}</span>}
+                </div>
+                <p className="mt-1 text-[11px] font-medium text-text-muted">
+                  {isAnnual ? plan.annualDetail : "Facturation mensuelle sans engagement"}
+                </p>
+              </div>
+              
+              <ul className="mb-8 flex-1 space-y-3">
+                <li className="flex items-start gap-3">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-success-strong" />
+                  <span className="text-[13px] font-semibold text-text-primary">
+                    {plan.propertyLimit}
+                  </span>
+                </li>
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-success-strong" />
+                    <span className="text-[13px] text-text-secondary">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <Link 
+                href="/auth/register" 
+                className={`flex w-full items-center justify-center rounded-[8px] py-2.5 text-[13px] font-semibold transition-colors ${
+                  plan.popular 
+                    ? "bg-brand-primary text-white hover:bg-brand-hover" 
+                    : "bg-bg-subtle text-text-primary hover:bg-border-default"
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            </div>
+          ))}
+          
+          <div className="rounded-[12px] border border-border-default bg-bg-subtle/60 p-4 text-[12px] text-text-secondary">
+            <p className="mb-2">
+              <span className="font-semibold text-text-primary">{ADDONS[0].split(" :")[0]} :</span>
+              {ADDONS[0].substring(ADDONS[0].indexOf(" :") + 2)}
+            </p>
+            <p>
+              <span className="font-semibold text-text-primary">{ADDONS[1].split(" :")[0]} :</span>
+              {ADDONS[1].substring(ADDONS[1].indexOf(" :") + 2)}
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop View: Detailed Comparison Table (hidden on screens smaller than lg) */}
+        <div data-landing-reveal className="mt-10 hidden overflow-hidden border border-border-default bg-white lg:block">
+          <div className="landing-table-scroll overflow-x-auto">
+            <table className="w-full min-w-[820px] border-collapse text-left">
+              <caption className="sr-only">
+                Comparaison des plans Lokka en {isAnnual ? "facturation annuelle" : "facturation mensuelle"}
+              </caption>
+              <thead>
+                <tr className="border-b border-border-default bg-bg-subtle/70">
+                  <th scope="col" className="sticky left-0 z-20 min-w-[220px] bg-bg-subtle/95 px-4 py-5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted sm:px-6">
+                    Opérations
+                  </th>
+                  {PLANS.map((plan) => (
+                    <th 
+                      key={plan.name} 
+                      scope="col" 
+                      className={`min-w-[195px] border-l border-border-default px-4 py-5 align-top sm:px-6 relative ${
+                        plan.popular ? "border-t-2 border-t-brand-primary bg-white" : ""
+                      }`}
+                    >
+                      {plan.badgeLabel && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-success-strong px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
+                          {plan.badgeLabel}
+                        </div>
+                      )}
+                      <div className="text-[14px] font-semibold text-text-primary">{plan.name}</div>
+                      <div className="tabular-nums mt-4 text-[22px] font-semibold tracking-[-0.05em] text-text-primary">
+                        {formatPlanPrice(plan, cycle)}
+                        {plan.period ? <span className="ml-1 text-[10px] font-medium tracking-normal text-text-muted">{plan.period}</span> : null}
+                      </div>
+                      <div className="mt-1 text-[10px] font-medium leading-relaxed text-text-muted">
+                        {isAnnual ? plan.annualDetail : "Facturation mensuelle sans engagement"}
+                      </div>
+                      <p className="mt-3 max-w-[22ch] text-[11px] font-medium leading-relaxed text-text-secondary">
+                        {plan.description}
+                      </p>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, index) => {
+                  const group = GROUP_LABELS.get(row.name);
+                  const previousGroup = index > 0 ? GROUP_LABELS.get(rows[index - 1].name) : undefined;
+                  return (
+                    <React.Fragment key={row.name}>
+                      {group && group !== previousGroup ? (
+                        <tr>
+                          <th scope="rowgroup" colSpan={4} className="border-y border-border-default bg-bg-canvas px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted sm:px-6">
+                            {group}
+                          </th>
+                        </tr>
+                      ) : null}
+                      <tr className="group border-b border-border-subtle text-[12px] hover:bg-bg-canvas/70">
+                        <th scope="row" className="sticky left-0 z-10 bg-white px-4 py-3.5 font-semibold text-text-primary group-hover:bg-bg-canvas sm:px-6">
+                          {row.name}
+                        </th>
+                        <ComparisonCell value={row.decouverte} />
+                        <ComparisonCell value={row.pro} highlighted />
+                        <ComparisonCell value={row.agence} />
+                      </tr>
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="grid gap-2 border-t border-border-default bg-bg-subtle/60 px-4 py-4 text-[11px] text-text-secondary sm:grid-cols-2 sm:px-6">
+            <p><span className="font-semibold text-text-primary">{ADDONS[0].split(" :")[0]} :</span>{ADDONS[0].substring(ADDONS[0].indexOf(" :") + 2)}</p>
+            <p><span className="font-semibold text-text-primary">{ADDONS[1].split(" :")[0]} :</span>{ADDONS[1].substring(ADDONS[1].indexOf(" :") + 2)}</p>
+          </div>
+        </div>
+
+        <div data-landing-reveal className="mt-5 flex flex-col justify-between gap-3 border-b border-border-default pb-5 text-[12px] text-text-secondary sm:flex-row sm:items-center">
+          <p>Les montants et fonctionnalités reprennent la grille actuelle de Lokka.</p>
+          <Link href="/auth/register" className="font-semibold text-text-primary underline underline-offset-4 hover:text-success-strong">
+            Choisir mon forfait <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </div>
     </section>
+  );
+}
+
+function ComparisonCell({ value, highlighted = false }: { value: string | boolean; highlighted?: boolean }) {
+  return (
+    <td className={`border-l border-border-subtle px-4 py-3.5 align-middle sm:px-6 ${highlighted ? "bg-success-soft/25" : ""}`}>
+      {typeof value === "string" ? (
+        <span className="font-semibold text-text-primary">{value}</span>
+      ) : value ? (
+        <Check aria-label="Inclus" size={15} className="text-success-strong" />
+      ) : (
+        <Minus aria-label="Non inclus" size={15} className="text-text-muted" />
+      )}
+    </td>
   );
 }

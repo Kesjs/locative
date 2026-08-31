@@ -1,21 +1,15 @@
 "use client";
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { EmptyState } from "@/components/dashboard/shared/EmptyState";
+import { PlusIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
+import { useMandats } from "@/lib/hooks/useMandats";
+import { AddMandatModal } from "./_components/AddMandatModal";
 
 export default function MandatsPage() {
-  const { data: mandats = [], isLoading } = useQuery({
-    queryKey: ["mandats"],
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400));
-      return [
-        { id: 1, proprietaire: "Jean Dupont", biens: 3, commission: "8%", solde: 1250000 },
-        { id: 2, proprietaire: "SCI Les Cocotiers", biens: 12, commission: "7%", solde: 4500000 },
-      ];
-    },
-  });
+  const { data: mandats = [], isLoading } = useMandats();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns = [
     { key: "proprietaire", header: "Propriétaire", renderCell: (row: any) => <span className="font-bold">{row.proprietaire}</span> },
@@ -23,7 +17,7 @@ export default function MandatsPage() {
     { key: "commission", header: "Commission", renderCell: (row: any) => row.commission },
     { key: "solde", header: "Solde Net", renderCell: (row: any) => `${row.solde.toLocaleString()} FCFA` },
     { key: "actions", header: "Actions", renderCell: () => (
-      <button className="text-[#1C1C1C] font-semibold text-[12px] underline">Voir mandat</button>
+      <button className="text-[#1C1C1C] font-semibold text-[12px] underline hover:text-[#087F5B]">Voir mandat</button>
     )},
   ];
 
@@ -35,11 +29,27 @@ export default function MandatsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-[20px] font-extrabold text-[var(--text-primary)]">Mandats & Propriétaires</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
+        >
           <PlusIcon className="w-4 h-4" /> Nouveau Mandat
         </button>
       </div>
-      <DataTable data={mandats} columns={columns} keyExtractor={(r) => r.id} />
+
+      {mandats.length === 0 ? (
+        <EmptyState
+          icon={BriefcaseIcon}
+          title="Aucun mandat actif"
+          description="Vous n'avez pas encore enregistré de mandat de gestion. Ajoutez un propriétaire pour commencer."
+          actionLabel="Créer un mandat"
+          onAction={() => setIsModalOpen(true)}
+        />
+      ) : (
+        <DataTable data={mandats} columns={columns} keyExtractor={(r) => r.id} />
+      )}
+
+      <AddMandatModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

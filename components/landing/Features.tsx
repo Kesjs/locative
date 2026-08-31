@@ -61,7 +61,7 @@ function BentoCard({
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay }}
       onMouseMove={handleMouseMove}
-      className={`group relative overflow-hidden rounded-[14px] bg-white border border-[#E8E5E0] transition-all duration-300 hover:border-[#087F5B]/50 hover:shadow-[0_16px_40px_rgba(8,127,91,0.06)] flex flex-col justify-between p-6 sm:p-8 ${className}`}
+      className={`group relative overflow-hidden rounded-[14px] bg-white border border-border-default transition-all duration-300 hover:border-[#087F5B]/50 hover:shadow-[0_16px_40px_rgba(8,127,91,0.06)] flex flex-col justify-between p-6 sm:p-8 ${className}`}
     >
       {/* Magic UI Subtle Radial Glow Effect */}
       <div
@@ -73,14 +73,14 @@ function BentoCard({
 
       <div className="z-10 mb-6">
         {badge && (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#087F5B] bg-[#E6F5EF] border border-[#087F5B]/20 px-3 py-1 rounded-full mb-3.5">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-success-strong bg-success-soft border border-[#087F5B]/20 px-3 py-1 rounded-full mb-3.5">
             {badge}
           </span>
         )}
-        <h3 className="text-[20px] sm:text-[23px] font-bold text-[#1C1C1C] tracking-tight mb-2.5 leading-snug">
+        <h3 className="text-[20px] sm:text-[23px] font-bold text-text-primary tracking-tight mb-2.5 leading-snug">
           {title}
         </h3>
-        <p className="text-[13.5px] sm:text-[14px] text-[#64635F] leading-relaxed mb-4">
+        <p className="text-[13.5px] sm:text-[14px] text-text-secondary leading-relaxed mb-4">
           {description}
         </p>
 
@@ -89,7 +89,7 @@ function BentoCard({
           {pills.map((pill, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#1C1C1C] bg-[#FAF9F6] border border-[#E8E5E0] px-2.5 py-1 rounded-[6px] transition-colors group-hover:border-[#087F5B]/30"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-primary bg-bg-canvas border border-border-default px-2.5 py-1 rounded-[6px] transition-colors group-hover:border-[#087F5B]/30"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-[#087F5B]" />
               {pill}
@@ -158,7 +158,7 @@ export default function Features() {
     <section
       id="features"
       ref={sectionRef}
-      className="relative overflow-hidden py-24 sm:py-32 bg-[#FAF9F6] border-t border-[#E8E5E0]"
+      className="relative overflow-hidden py-24 sm:py-32 bg-bg-canvas border-t border-border-default"
     >
       {/* Background Architectural Grid (Subtle) */}
       <div
@@ -178,17 +178,17 @@ export default function Features() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mb-16 max-w-3xl text-center sm:mb-20"
         >
-          <div className="section-label mb-3 text-[#1C1C1C] flex items-center justify-center gap-1.5">
-            <SparklesIcon className="h-4 w-4 text-[#087F5B]" />
+          <div className="section-label mb-3 text-text-primary flex items-center justify-center gap-1.5">
+            <SparklesIcon className="h-4 w-4 text-success-strong" />
             <span>Plateforme Complète Tout-en-un</span>
           </div>
-          <h2 className="heading-2 mb-4 text-[#1C1C1C] text-[clamp(2rem,4vw,3.2rem)] leading-tight">
+          <h2 className="heading-2 mb-4 text-text-primary text-[clamp(2rem,4vw,3.2rem)] leading-tight">
             Tout votre écosystème locatif,{" "}
-            <span className="font-serif italic font-normal text-[#087F5B]">
+            <span className="font-serif italic font-normal text-success-strong">
               automatisé
             </span>
           </h2>
-          <p className="body-text text-base sm:text-lg text-[#64635F] max-w-2xl mx-auto">
+          <p className="body-text text-base sm:text-lg text-text-secondary max-w-2xl mx-auto">
             De la commercialisation à la quittance certifiée, pilotez l&apos;intégralité de votre portefeuille en toute conformité avec la Loi n° 2022-30.
           </p>
         </motion.div>
@@ -213,30 +213,30 @@ export default function Features() {
             className="lg:col-span-7"
             delay={0.1}
           >
-            <div className="rounded-[10px] border border-[#E8E5E0] bg-white p-4 sm:p-5 shadow-xs">
+            <div className="rounded-[10px] border border-border-default bg-white p-4 sm:p-5 shadow-xs">
               {/* Header with KPI and Filter Switcher */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E8E5E0] pb-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-default pb-4 mb-4">
                 <div>
-                  <div className="text-[11px] font-bold text-[#64635F] uppercase tracking-wider">
+                  <div className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
                     Total Encaissé ce mois
                   </div>
-                  <div className="text-[22px] font-extrabold text-[#1C1C1C] flex items-center gap-2">
+                  <div className="text-[22px] font-extrabold text-text-primary flex items-center gap-2">
                     <span>4 850 000 FCFA</span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#E6F5EF] text-[#087F5B]">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-soft text-success-strong">
                       100% collecté
                     </span>
                   </div>
                 </div>
 
                 {/* Filter Switcher */}
-                <div className="flex items-center gap-1 p-1 bg-[#FAF9F6] border border-[#E8E5E0] rounded-lg self-start sm:self-auto">
+                <div className="flex items-center gap-1 p-1 bg-bg-canvas border border-border-default rounded-lg self-start sm:self-auto">
                   <button
                     type="button"
                     onClick={() => setPaymentFilter("all")}
                     className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
                       paymentFilter === "all"
-                        ? "bg-white text-[#1C1C1C] shadow-2xs"
-                        : "text-[#64635F] hover:text-[#1C1C1C]"
+                        ? "bg-white text-text-primary shadow-2xs"
+                        : "text-text-secondary hover:text-text-primary"
                     }`}
                   >
                     Tous
@@ -246,8 +246,8 @@ export default function Features() {
                     onClick={() => setPaymentFilter("paid")}
                     className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
                       paymentFilter === "paid"
-                        ? "bg-[#E6F5EF] text-[#087F5B] shadow-2xs"
-                        : "text-[#64635F] hover:text-[#1C1C1C]"
+                        ? "bg-success-soft text-success-strong shadow-2xs"
+                        : "text-text-secondary hover:text-text-primary"
                     }`}
                   >
                     Encaissés
@@ -258,7 +258,7 @@ export default function Features() {
                     className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all ${
                       paymentFilter === "late"
                         ? "bg-[#FEE2E2] text-[#B91C1C] shadow-2xs"
-                        : "text-[#64635F] hover:text-[#1C1C1C]"
+                        : "text-text-secondary hover:text-text-primary"
                     }`}
                   >
                     Retards
@@ -279,7 +279,7 @@ export default function Features() {
                       transition={{ duration: 0.2 }}
                       className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-[8px] border transition-colors ${
                         tx.status === "paid"
-                          ? "bg-[#FAF9F6] border-[#E8E5E0] hover:bg-white"
+                          ? "bg-bg-canvas border-border-default hover:bg-white"
                           : "bg-[#FEF2F2]/60 border-[#FECACA]"
                       }`}
                     >
@@ -287,7 +287,7 @@ export default function Features() {
                         <div
                           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
                             tx.status === "paid"
-                              ? "bg-[#E6F5EF] text-[#087F5B]"
+                              ? "bg-success-soft text-success-strong"
                               : "bg-[#FEE2E2] text-[#DC2626]"
                           }`}
                         >
@@ -299,22 +299,22 @@ export default function Features() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-[13px] font-bold text-[#1C1C1C]">
+                            <span className="text-[13px] font-bold text-text-primary">
                               {tx.name}
                             </span>
-                            <span className="text-[10px] font-semibold text-[#64635F] px-1.5 py-0.2 rounded bg-white border border-[#E8E5E0]">
+                            <span className="text-[10px] font-semibold text-text-secondary px-1.5 py-0.2 rounded bg-white border border-border-default">
                               {tx.method}
                             </span>
                           </div>
-                          <div className="text-[11px] text-[#64635F]">{tx.prop}</div>
+                          <div className="text-[11px] text-text-secondary">{tx.prop}</div>
                         </div>
                       </div>
 
-                      <div className="text-left sm:text-right flex sm:flex-col justify-between items-center sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E8E5E0]/60">
-                        <div className="text-[13px] font-extrabold text-[#1C1C1C]">
+                      <div className="text-left sm:text-right flex sm:flex-col justify-between items-center sm:items-end border-t sm:border-t-0 pt-2 sm:pt-0 border-border-default/60">
+                        <div className="text-[13px] font-extrabold text-text-primary">
                           {tx.amount}
                         </div>
-                        <div className="text-[10px] font-medium flex items-center gap-1 text-[#087F5B]">
+                        <div className="text-[10px] font-medium flex items-center gap-1 text-success-strong">
                           {tx.status === "paid" ? (
                             <>
                               <DocumentDuplicateIcon className="h-3 w-3" />
@@ -348,16 +348,16 @@ export default function Features() {
             className="lg:col-span-5"
             delay={0.2}
           >
-            <div className="rounded-[10px] border border-[#E8E5E0] bg-white p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+            <div className="rounded-[10px] border border-border-default bg-white p-4 sm:p-5 shadow-xs flex flex-col justify-between">
               {/* Tab Selector */}
-              <div className="flex border-b border-[#E8E5E0] mb-4 pb-2.5 gap-2">
+              <div className="flex border-b border-border-default mb-4 pb-2.5 gap-2">
                 <button
                   type="button"
                   onClick={() => setManagementTab("owner")}
                   className={`flex items-center gap-1.5 pb-1 px-2 text-[12px] font-bold border-b-2 transition-all ${
                     managementTab === "owner"
-                      ? "border-[#087F5B] text-[#087F5B]"
-                      : "border-transparent text-[#64635F] hover:text-[#1C1C1C]"
+                      ? "border-[#087F5B] text-success-strong"
+                      : "border-transparent text-text-secondary hover:text-text-primary"
                   }`}
                 >
                   <HomeModernIcon className="h-3.5 w-3.5" />
@@ -368,8 +368,8 @@ export default function Features() {
                   onClick={() => setManagementTab("tenant")}
                   className={`flex items-center gap-1.5 pb-1 px-2 text-[12px] font-bold border-b-2 transition-all ${
                     managementTab === "tenant"
-                      ? "border-[#087F5B] text-[#087F5B]"
-                      : "border-transparent text-[#64635F] hover:text-[#1C1C1C]"
+                      ? "border-[#087F5B] text-success-strong"
+                      : "border-transparent text-text-secondary hover:text-text-primary"
                   }`}
                 >
                   <UserGroupIcon className="h-3.5 w-3.5" />
@@ -385,28 +385,28 @@ export default function Features() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3"
                 >
-                  <div className="p-3.5 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0]">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-[#64635F] mb-1.5">
+                  <div className="p-3.5 rounded-[8px] bg-bg-canvas border border-border-default">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-text-secondary mb-1.5">
                       <span>Bail Numérique #B-2026-44</span>
-                      <span className="text-[#087F5B] bg-[#E6F5EF] px-2 py-0.5 rounded-full font-bold">
+                      <span className="text-success-strong bg-success-soft px-2 py-0.5 rounded-full font-bold">
                         Loi 2022-30 ✓
                       </span>
                     </div>
-                    <div className="text-[14px] font-extrabold text-[#1C1C1C]">
+                    <div className="text-[14px] font-extrabold text-text-primary">
                       Amina Touré · Apt 4B (Cotonou)
                     </div>
-                    <div className="flex items-center justify-between text-[11px] text-[#64635F] mt-2 pt-2 border-t border-[#E8E5E0]">
+                    <div className="flex items-center justify-between text-[11px] text-text-secondary mt-2 pt-2 border-t border-border-default">
                       <span>Loyer : <strong>180 000 F/mois</strong></span>
                       <span>Caution : <strong>3 mois max</strong></span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-2.5 rounded-[6px] bg-[#FAF9F6] border border-[#E8E5E0] text-[11px] text-[#1C1C1C] font-semibold">
+                  <div className="flex items-center justify-between p-2.5 rounded-[6px] bg-bg-canvas border border-border-default text-[11px] text-text-primary font-semibold">
                     <span className="flex items-center gap-1.5">
-                      <ShieldCheckIcon className="h-4 w-4 text-[#087F5B]" />
+                      <ShieldCheckIcon className="h-4 w-4 text-success-strong" />
                       Clause résolutoire &amp; État des lieux
                     </span>
-                    <span className="text-[#087F5B]">Verrouillé 🔒</span>
+                    <span className="text-success-strong">Verrouillé 🔒</span>
                   </div>
                 </motion.div>
               ) : (
@@ -416,30 +416,30 @@ export default function Features() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-2.5"
                 >
-                  <div className="p-3 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] text-center">
-                    <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#087F5B] bg-[#E6F5EF] px-2 py-0.5 rounded mb-1.5">
+                  <div className="p-3 rounded-[8px] bg-bg-canvas border border-border-default text-center">
+                    <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-success-strong bg-success-soft px-2 py-0.5 rounded mb-1.5">
                       <LockClosedIcon className="h-3 w-3" />
                       Connexion Sécurisée sans mot de passe
                     </div>
-                    <div className="text-[12px] font-bold text-[#1C1C1C]">
+                    <div className="text-[12px] font-bold text-text-primary">
                       Espace Locataire · Code OTP WhatsApp/SMS
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2.5 rounded-[6px] border border-[#E8E5E0] bg-white text-center">
-                      <DocumentDuplicateIcon className="h-4 w-4 mx-auto text-[#087F5B] mb-1" />
-                      <span className="text-[11px] font-bold text-[#1C1C1C] block">
+                    <div className="p-2.5 rounded-[6px] border border-border-default bg-white text-center">
+                      <DocumentDuplicateIcon className="h-4 w-4 mx-auto text-success-strong mb-1" />
+                      <span className="text-[11px] font-bold text-text-primary block">
                         Mes Quittances
                       </span>
-                      <span className="text-[9px] text-[#64635F]">Téléchargement PDF</span>
+                      <span className="text-[9px] text-text-secondary">Téléchargement PDF</span>
                     </div>
-                    <div className="p-2.5 rounded-[6px] border border-[#E8E5E0] bg-white text-center">
-                      <WrenchScrewdriverIcon className="h-4 w-4 mx-auto text-[#1C1C1C] mb-1" />
-                      <span className="text-[11px] font-bold text-[#1C1C1C] block">
+                    <div className="p-2.5 rounded-[6px] border border-border-default bg-white text-center">
+                      <WrenchScrewdriverIcon className="h-4 w-4 mx-auto text-text-primary mb-1" />
+                      <span className="text-[11px] font-bold text-text-primary block">
                         Signaler Incident
                       </span>
-                      <span className="text-[9px] text-[#64635F]">Suivi des travaux</span>
+                      <span className="text-[9px] text-text-secondary">Suivi des travaux</span>
                     </div>
                   </div>
                 </motion.div>
@@ -463,20 +463,20 @@ export default function Features() {
             className="lg:col-span-5"
             delay={0.3}
           >
-            <div className="rounded-[10px] border border-[#E8E5E0] bg-[#FAF9F6] p-4 sm:p-5">
+            <div className="rounded-[10px] border border-border-default bg-bg-canvas p-4 sm:p-5">
               {/* 3 Mini KPI Counters */}
-              <div className="grid grid-cols-3 gap-2 mb-4 pb-3 border-b border-[#E8E5E0] text-center">
-                <div className="bg-white p-2 rounded-[6px] border border-[#E8E5E0]">
-                  <div className="text-[16px] font-extrabold text-[#087F5B]">98.5%</div>
-                  <div className="text-[9px] font-bold text-[#64635F] uppercase">Recouvrement</div>
+              <div className="grid grid-cols-3 gap-2 mb-4 pb-3 border-b border-border-default text-center">
+                <div className="bg-white p-2 rounded-[6px] border border-border-default">
+                  <div className="text-[16px] font-extrabold text-success-strong">98.5%</div>
+                  <div className="text-[9px] font-bold text-text-secondary uppercase">Recouvrement</div>
                 </div>
-                <div className="bg-white p-2 rounded-[6px] border border-[#E8E5E0]">
-                  <div className="text-[16px] font-extrabold text-[#1C1C1C]">100%</div>
-                  <div className="text-[9px] font-bold text-[#64635F] uppercase">Occupation</div>
+                <div className="bg-white p-2 rounded-[6px] border border-border-default">
+                  <div className="text-[16px] font-extrabold text-text-primary">100%</div>
+                  <div className="text-[9px] font-bold text-text-secondary uppercase">Occupation</div>
                 </div>
-                <div className="bg-white p-2 rounded-[6px] border border-[#E8E5E0]">
-                  <div className="text-[16px] font-extrabold text-[#1C1C1C]">1.4k</div>
-                  <div className="text-[9px] font-bold text-[#64635F] uppercase">Vues Annonces</div>
+                <div className="bg-white p-2 rounded-[6px] border border-border-default">
+                  <div className="text-[16px] font-extrabold text-text-primary">1.4k</div>
+                  <div className="text-[9px] font-bold text-text-secondary uppercase">Vues Annonces</div>
                 </div>
               </div>
 
@@ -498,13 +498,13 @@ export default function Features() {
                       transition={{ duration: 0.8, delay: 0.2 + i * 0.08, ease: "easeOut" }}
                       className={`w-full rounded-t-[3px] shadow-2xs ${bar.color}`}
                     />
-                    <span className="text-[9px] font-mono text-[#9C9A95]">{bar.label}</span>
+                    <span className="text-[9px] font-mono text-text-muted">{bar.label}</span>
                   </div>
                 ))}
               </div>
 
               {/* Chart Legend */}
-              <div className="flex items-center justify-between gap-1 pt-2.5 mt-2 border-t border-[#E8E5E0] text-[10px] text-[#64635F]">
+              <div className="flex items-center justify-between gap-1 pt-2.5 mt-2 border-t border-border-default text-[10px] text-text-secondary">
                 <div className="flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-[#1C1C1C]" />
                   <span>Pic Maximal</span>
@@ -537,31 +537,31 @@ export default function Features() {
             className="lg:col-span-7"
             delay={0.4}
           >
-            <div className="rounded-[10px] border border-[#E8E5E0] bg-white p-4 sm:p-5 shadow-xs">
+            <div className="rounded-[10px] border border-border-default bg-white p-4 sm:p-5 shadow-xs">
               {/* Browser Header Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-[#E8E5E0]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-border-default">
                 <div className="flex items-center gap-2">
                   <div className="flex gap-1">
                     <span className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
                     <span className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
                     <span className="h-2.5 w-2.5 rounded-full bg-[#E8E5E0]" />
                   </div>
-                  <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] text-[11px] font-mono text-[#64635F]">
-                    <GlobeAltIcon className="h-3 w-3 text-[#087F5B]" />
+                  <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-bg-canvas border border-border-default text-[11px] font-mono text-text-secondary">
+                    <GlobeAltIcon className="h-3 w-3 text-success-strong" />
                     <span>agence-prestige.lokka.bj</span>
                   </div>
                 </div>
 
                 {/* Style Switcher */}
                 <div className="flex items-center gap-1 self-start sm:self-auto">
-                  <span className="text-[10px] text-[#9C9A95] font-semibold mr-1">Thème :</span>
+                  <span className="text-[10px] text-text-muted font-semibold mr-1">Thème :</span>
                   <button
                     type="button"
                     onClick={() => setShowcaseTheme("emerald")}
                     className={`h-5 px-2 rounded text-[10px] font-bold transition-all ${
                       showcaseTheme === "emerald"
                         ? "bg-[#087F5B] text-white"
-                        : "bg-[#FAF9F6] text-[#64635F] hover:bg-[#E8E5E0]"
+                        : "bg-bg-canvas text-text-secondary hover:bg-[#E8E5E0]"
                     }`}
                   >
                     Émeraude
@@ -572,7 +572,7 @@ export default function Features() {
                     className={`h-5 px-2 rounded text-[10px] font-bold transition-all ${
                       showcaseTheme === "dark"
                         ? "bg-[#1C1C1C] text-white"
-                        : "bg-[#FAF9F6] text-[#64635F] hover:bg-[#E8E5E0]"
+                        : "bg-bg-canvas text-text-secondary hover:bg-[#E8E5E0]"
                     }`}
                   >
                     Sombre
@@ -581,20 +581,20 @@ export default function Features() {
               </div>
 
               {/* Mock Property Card */}
-              <div className="p-3.5 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="p-3.5 rounded-[8px] bg-bg-canvas border border-border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E6F5EF] text-[#087F5B] px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-success-soft text-success-strong px-2 py-0.5 rounded">
                       Disponible
                     </span>
-                    <span className="text-[10px] text-[#64635F] flex items-center gap-0.5">
+                    <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
                       <EyeIcon className="h-3 w-3" /> 384 visites
                     </span>
                   </div>
-                  <div className="text-[13.5px] font-extrabold text-[#1C1C1C]">
+                  <div className="text-[13.5px] font-extrabold text-text-primary">
                     Villa Moderne 4 Pièces avec Jardin
                   </div>
-                  <div className="text-[11px] text-[#64635F]">
+                  <div className="text-[11px] text-text-secondary">
                     Cotonou · Haie Vive · <strong>450 000 FCFA/mois</strong>
                   </div>
                 </div>
@@ -603,9 +603,9 @@ export default function Features() {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     type="button"
-                    className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-[#E8E5E0] text-[#1C1C1C] hover:border-[#1C1C1C] text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                    className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-border-default text-text-primary hover:border-[#1C1C1C] text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
                   >
-                    <CalendarDaysIcon className="h-3.5 w-3.5 text-[#64635F]" />
+                    <CalendarDaysIcon className="h-3.5 w-3.5 text-text-secondary" />
                     <span>Visite</span>
                   </button>
                   <button

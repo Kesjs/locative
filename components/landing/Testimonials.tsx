@@ -1,80 +1,15 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-
-const testimonials = [
-  {
-    quote:
-      "Lokka a révolutionné ma gestion locative. Mes locataires téléchargent leurs quittances PDF certifiées directement depuis leur espace web, et je n'ai plus jamais à rédiger de reçus papier manuscrits.",
-    name: "Aïcha Houndété",
-    role: "Propriétaire Bailleur · Calavi · 8 logements",
-    avatar: "https://i.pravatar.cc/80?img=12",
-  },
-  {
-    quote:
-      "Grâce au site vitrine généré en 1 clic et aux Comptes-Rendus de Gestion (CRG) édités pour nos propriétaires mandants avec les 10% de commission Loi 2022-30, notre agence a gagné une crédibilité exceptionnelle.",
-    name: "Aristide Gbaguidi",
-    role: "Directeur d'Agence Immobilière · Cotonou Haie Vive · 24 lots",
-    avatar: "https://i.pravatar.cc/80?img=68",
-  },
-  {
-    quote:
-      "Gérant mes biens à Cotonou depuis Paris, le double affichage FCFA / Euros et les notifications de paiement MoMo en direct me procurent une totale tranquillité d'esprit sans intermédiaire douteux.",
-    name: "Dr. Fabrice Tossou",
-    role: "Investisseur Diaspora · Paris & Cotonou · 6 biens",
-    avatar: "https://i.pravatar.cc/80?img=47",
-  },
-];
+import { Quote } from "lucide-react";
+import { TESTIMONIALS } from "./landing-data";
 
 export default function Testimonials() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-
   return (
-    <section
-      ref={sectionRef}
-      id="testimonials"
-      className="py-24 sm:py-32 bg-[#FAF9F6] border-t border-[#E8E5E0]"
-    >
-      <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-xl mb-16 text-center mx-auto sm:text-left sm:mx-0"
-        >
-          <div className="section-label mb-3 text-[#1C1C1C]">Témoignages</div>
-          <h2 className="heading-2 text-[#1C1C1C]">Ils gèrent et louent avec Lokka</h2>
-        </motion.div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col justify-between p-7 sm:p-8 rounded-[10px] bg-white border border-[#E8E5E0] shadow-xs group hover:-translate-y-1 hover:border-[#1C1C1C] transition-all duration-300"
-            >
-              <p className="text-[15px] sm:text-[16px] leading-relaxed text-[#1C1C1C] mb-8 font-medium">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <div className="flex items-center gap-3.5 pt-4 border-t border-[#FAF9F6]">
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="h-11 w-11 rounded-full object-cover border border-[#E8E5E0] shrink-0"
-                />
-                <div>
-                  <div className="text-[14px] font-bold text-[#1C1C1C]">{t.name}</div>
-                  <div className="text-[12px] font-medium text-[#64635F]">{t.role}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+    <section id="testimonials" className="landing-section bg-white py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div data-landing-reveal className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
+          <div className="max-w-[350px]"><p className="landing-label">Notes de terrain</p><h2 className="mt-4 text-[clamp(2rem,4vw,3.25rem)] font-semibold leading-[1] tracking-[-0.06em] text-text-primary">Des traces qui parlent<span className="mt-1 block font-serif font-normal italic text-text-secondary">à chaque métier.</span></h2></div>
+          <div className="divide-y divide-border-default border-y border-border-default">{TESTIMONIALS.map((testimonial, index) => <figure key={testimonial.name} data-landing-reveal className={`py-6 sm:py-7 ${index === 0 ? "border-l-2 border-success-strong pl-4 sm:pl-6" : "pl-4 sm:pl-6"}`}><Quote aria-hidden="true" size={17} className="mb-3 text-text-muted" /><blockquote className="max-w-[760px] text-[15px] leading-[1.65] text-text-primary sm:text-[16px]">“{testimonial.quote}”</blockquote><figcaption className="mt-4 text-[11px] font-medium text-text-secondary"><span className="font-semibold text-text-primary">{testimonial.name}</span> · {testimonial.role}</figcaption></figure>)}</div>
         </div>
       </div>
     </section>

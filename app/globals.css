@@ -10,6 +10,9 @@
   --color-brand-hover: #27272A;
   --color-brand-light: #F4F2EC;
   --color-brand-text: #FFFFFF;
+  --color-success-strong: #087F5B;
+  --color-success-soft: #E6F5EF;
+  --shadow-product-stage: 0 28px 72px rgba(24, 24, 27, 0.16), 0 8px 20px rgba(24, 24, 27, 0.08);
 
   /* ─── Semantic Surfaces ─── */
   --color-bg-canvas: var(--bg-canvas);
@@ -321,5 +324,230 @@ html[data-magicui-theme-vt="active"]::view-transition-group(root) {
   to {
     opacity: 1;
     transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes lokka-border-beam {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@layer components {
+  .landing-root {
+    overflow: hidden;
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+  }
+
+  .landing-grid {
+    background-image:
+      linear-gradient(rgba(24, 24, 27, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(24, 24, 27, 0.035) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .landing-section {
+    border-top: 1px solid var(--border-default);
+  }
+
+  .landing-label {
+    color: var(--text-muted);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .landing-dashboard-stage {
+    position: relative;
+    perspective: 1600px;
+    transform-style: preserve-3d;
+  }
+
+  .landing-dashboard-scroll {
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .landing-dashboard-hover {
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .landing-dashboard-depth {
+    position: absolute;
+    inset: 18px 12px -18px 24px;
+    border: 1px solid rgba(24, 24, 27, 0.12);
+    border-radius: var(--radius-md);
+    background: #dedbd3;
+    transform: translateZ(-30px);
+  }
+
+  .landing-dashboard-surface {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-product-stage);
+    transform-style: preserve-3d;
+  }
+
+  .landing-dashboard-surface::before {
+    position: absolute;
+    inset: 8px;
+    z-index: 0;
+    border: 1px solid rgba(24, 24, 27, 0.06);
+    border-radius: calc(var(--radius-md) - 2px);
+    content: "";
+    pointer-events: none;
+    transform: translateZ(-1px);
+  }
+
+  .landing-dashboard-beam,
+  .landing-badge-beam {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .landing-dashboard-beam {
+    inset: -1px;
+    z-index: 2;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .landing-dashboard-beam::after,
+  .landing-badge-beam::after {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    width: 28%;
+    background: linear-gradient(90deg, transparent, rgba(8, 127, 91, 0.62), transparent);
+    content: "";
+    animation: lokka-border-beam 8s ease-in-out infinite;
+  }
+
+  .landing-badge-beam {
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid transparent;
+    mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .landing-badge-beam::after {
+    width: 38%;
+    background: linear-gradient(90deg, transparent, rgba(8, 127, 91, 0.8), transparent);
+    animation-duration: 6.5s;
+  }
+
+  .landing-proof-line {
+    transform-origin: left center;
+  }
+
+  .landing-table-scroll {
+    scrollbar-color: var(--border-strong) transparent;
+    scrollbar-width: thin;
+  }
+
+  .landing-table-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .landing-table-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: var(--border-strong);
+    background-clip: content-box;
+  }
+
+  .receipt-slip {
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    padding: 1.25rem;
+  }
+
+  .receipt-slip dl {
+    margin-top: 1rem;
+  }
+
+  .receipt-slip-compact {
+    padding: 1rem;
+  }
+
+  .receipt-slip-compact dl {
+    margin-top: 0.85rem;
+  }
+
+  .faq-content[data-state="open"] {
+    animation: accordion-down 180ms ease-out;
+  }
+
+  .faq-content[data-state="closed"] {
+    animation: accordion-up 160ms ease-in;
+  }
+
+  .landing-role-content[data-state="active"] {
+    animation: landing-role-enter 200ms ease-out;
+  }
+
+  .landing-email-form-dark label {
+    color: var(--text-inverse);
+  }
+
+  .landing-email-form-dark button {
+    background: var(--text-inverse);
+    color: var(--color-brand-primary);
+  }
+
+  .landing-email-form-dark button:hover {
+    background: var(--color-success-soft);
+    color: var(--color-success-strong);
+  }
+}
+
+@keyframes landing-role-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-dashboard-beam::after,
+  .landing-badge-beam::after {
+    animation: none;
   }
 }

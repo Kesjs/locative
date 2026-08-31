@@ -1,37 +1,36 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
-import StickyFeatures from "@/components/landing/StickyFeatures";
-import Features from "@/components/landing/Features";
-import DashboardPreview from "@/components/landing/DashboardPreview";
+import PaymentProof from "@/components/landing/PaymentProof";
+import ControlRoom from "@/components/landing/ControlRoom";
+import RoleViews from "@/components/landing/RoleViews";
+import VacancyShowcase from "@/components/landing/VacancyShowcase";
 import Stats from "@/components/landing/Stats";
-import ConversionSection from "@/components/landing/ConversionSection";
-import HowItWorks from "@/components/landing/HowItWorks";
-import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
+import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
 import CTA from "@/components/landing/CTA";
 import Footer from "@/components/landing/Footer";
+import LandingMotion from "@/components/landing/LandingMotion";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 
 export default function Home() {
   return (
-    <>
+    <LandingMotion>
       <Navbar />
       <main>
         <Hero />
-        <StickyFeatures />
-        <Features />
-        <DashboardPreview />
+        <PaymentProof />
+        <ControlRoom />
+        <RoleViews />
+        <VacancyShowcase />
         <Stats />
-        <ConversionSection />
-        <HowItWorks />
+        <Testimonials />
         <Pricing />
         <FAQ />
-        <Testimonials />
         <CTA />
       </main>
       <Footer />
       <ScrollToTop />
-    </>
+    </LandingMotion>
   );
 }
