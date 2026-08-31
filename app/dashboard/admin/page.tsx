@@ -8,8 +8,8 @@ import {
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useAdminStats, useAdminAbonnements } from "@/lib/hooks/useAdmin";
-import { KpiCard } from "@/components/dashboard/KpiCard";
-import { DataTable } from "@/components/dashboard/DataTable";
+import { KpiCard } from "@/components/dashboard/shared/KpiCard";
+import { DataTable } from "@/components/dashboard/shared/DataTable";
 import Header from "@/components/dashboard/Header";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -120,3 +120,4 @@ export default function AdminOverviewPage() {
     </div>
   );
 }
+

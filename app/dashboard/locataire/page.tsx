@@ -8,8 +8,8 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import { useContratLocataire, useQuittances, useTicketsMaintenance } from "@/lib/hooks/useLocataire";
-import { KpiCard } from "@/components/dashboard/KpiCard";
-import { DataTable } from "@/components/dashboard/DataTable";
+import { KpiCard } from "@/components/dashboard/shared/KpiCard";
+import { DataTable } from "@/components/dashboard/shared/DataTable";
 import Header from "@/components/dashboard/Header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -145,3 +145,4 @@ export default function LocataireOverviewPage() {
     </div>
   );
 }
+

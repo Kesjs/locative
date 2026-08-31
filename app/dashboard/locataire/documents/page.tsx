@@ -2,7 +2,7 @@
 
 import React from "react";
 import Header from "@/components/dashboard/Header";
-import { DataTable } from "@/components/dashboard/DataTable";
+import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { useDocumentsLocataire } from "@/lib/hooks/useLocataire";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocumentIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
@@ -73,3 +73,4 @@ export default function LocataireDocumentsPage() {
     </div>
   );
 }
+

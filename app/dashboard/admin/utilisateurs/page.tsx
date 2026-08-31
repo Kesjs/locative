@@ -2,7 +2,7 @@
 
 import React from "react";
 import Header from "@/components/dashboard/Header";
-import { DataTable } from "@/components/dashboard/DataTable";
+import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { useAdminUtilisateurs } from "@/lib/hooks/useAdmin";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldExclamationIcon, CheckCircleIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
@@ -96,3 +96,4 @@ export default function AdminUtilisateursPage() {
     </div>
   );
 }
+
