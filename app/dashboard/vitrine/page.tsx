@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { GlobeIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { GlobeAltIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 export default function VitrinePage() {
   return (
@@ -10,7 +10,7 @@ export default function VitrinePage() {
 
       <div className="bg-white border border-[#E8E5E0] rounded-[12px] p-6 shadow-xs">
         <h2 className="text-[16px] font-bold text-[#1C1C1C] mb-4 flex items-center gap-2">
-          <GlobeIcon className="w-5 h-5 text-[#64635F]" />
+          <GlobeAltIcon className="w-5 h-5 text-[#64635F]" />
           Domaine & SEO
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboardIcon,
+  Squares2X2Icon,
   UsersIcon,
   CreditCardIcon,
   ShoppingBagIcon,
@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 const NAV_ITEMS = [
-  { name: "Vue d'ensemble", href: "/admin", icon: LayoutDashboardIcon },
+  { name: "Vue d'ensemble", href: "/admin", icon: Squares2X2Icon },
   { name: "Gestion Comptes", href: "/admin/utilisateurs", icon: UsersIcon },
   { name: "Facturation", href: "/admin/facturation", icon: CreditCardIcon },
   { name: "Marketplace", href: "/admin/marketplace", icon: ShoppingBagIcon },
