@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import SideRays from "@/components/ui/side-rays";
+import FluidFlowGrid from "@/components/ui/fluid-flow-grid";
 import { LiquidButton } from "@/components/ui/liquid-button";
 import { cn } from "@/lib/utils";
 
@@ -30,30 +31,8 @@ export default function HeroSection() {
 
   return (
     <section className="relative overflow-hidden bg-bg-canvas py-20 sm:py-28 lg:py-32">
-      {/* Fond ambiant — reprend le vocabulaire déjà établi sur le Hero existant
-          (SideRays + grille animée + glow monochrome très discret) plutôt que
-          les blobs colorés / le glassmorphism du brief d'origine. */}
-      <div className="pointer-events-none absolute -right-24 top-[-4%] h-[520px] w-[520px] opacity-[0.28] sm:opacity-40">
-        <SideRays
-          origin="top-right"
-          rayColor1="#D4D0C8"
-          rayColor2="#FAF9F6"
-          intensity={0.8}
-          spread={1.6}
-          speed={0.7}
-          opacity={0.3}
-        />
-      </div>
-      <AnimatedGridPattern
-        numSquares={24}
-        maxOpacity={0.035}
-        duration={4.5}
-        repeatDelay={0.8}
-        className={cn(
-          "inset-x-0 inset-y-[-15%] h-[130%]",
-          "[mask-image:radial-gradient(650px_circle_at_72%_35%,white,transparent_85%)]"
-        )}
-      />
+      {/* Background interactif Fluid Flow */}
+      <FluidFlowGrid />
       <div className="pointer-events-none absolute right-[6%] top-1/3 h-[280px] w-[380px] -translate-y-1/2 rounded-full bg-brand-primary/[0.03] blur-[110px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
