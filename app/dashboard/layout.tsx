@@ -4,7 +4,6 @@ import * as React from "react";
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import Header from "@/components/dashboard/Header";
-import QueryProvider from "@/components/providers/QueryProvider";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { layoutMode } = useSidebar();
@@ -31,11 +30,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <QueryProvider>
-      <SidebarProvider defaultOpen={true}>
-        <AppSidebar />
-        <DashboardContent>{children}</DashboardContent>
-      </SidebarProvider>
-    </QueryProvider>
+    <SidebarProvider defaultOpen={true}>
+      <AppSidebar />
+      <DashboardContent>{children}</DashboardContent>
+    </SidebarProvider>
   );
 }
