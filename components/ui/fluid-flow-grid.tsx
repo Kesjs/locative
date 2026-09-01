@@ -2,17 +2,40 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-export default function FluidFlowGrid() {
+export interface FluidFlowGridProps {
+  className?: string;
+  children?: React.ReactNode;
+  lineBaseColor?: string; // e.g. "15, 23, 42" (anthracite)
+  accentColor?: string; // e.g. "8, 127, 91" (émeraude)
+  backgroundColor?: string;
+  transparent?: boolean;
+  spacing?: number;
+  interactiveRadius?: number;
+}
+
+export default function FluidFlowGrid({
+  className = "",
+  children,
+  lineBaseColor = "30, 41, 59",
+  accentColor = "8, 127, 91",
+  backgroundColor,
+  transparent = true,
+  spacing = 32,
+  interactiveRadius = 260,
+}: FluidFlowGridProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setIsDarkMode(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
-
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -23,22 +46,30 @@ export default function FluidFlowGrid() {
     let width = 0;
     let height = 0;
 
-    const mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
+    const mouse = {
+      x: -1000,
+      y: -1000,
+      targetX: -1000,
+      targetY: -1000,
+    };
 
     const handleResize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      const parent = containerRef.current || canvas.parentElement;
+      width = parent && parent.clientWidth > 0 ? parent.clientWidth : window.innerWidth;
+      height = parent && parent.clientHeight > 0 ? parent.clientHeight : window.innerHeight;
+
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scale
       ctx.scale(dpr, dpr);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      // Adjust if canvas is offset, but usually window coordinates work for fixed/absolute fullscreen
-      const rect = canvas.getBoundingClientRect();
+      if (!canvasRef.current) return;
+      const rect = canvasRef.current.getBoundingClientRect();
       mouse.targetX = e.clientX - rect.left;
       mouse.targetY = e.clientY - rect.top;
     };
@@ -51,47 +82,47 @@ export default function FluidFlowGrid() {
     handleResize();
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
+    document.addEventListener("mouseleave", handleMouseLeave);
 
     let time = 0;
-    const isDarkMode = false;
 
     const render = () => {
-      time += 0.008;
+      time += 0.009;
 
       // Mouse smooth interpolation
-      mouse.x += (mouse.targetX - mouse.x) * 0.08;
-      mouse.y += (mouse.targetY - mouse.y) * 0.08;
+      mouse.x += (mouse.targetX - mouse.x) * 0.1;
+      mouse.y += (mouse.targetY - mouse.y) * 0.1;
 
-      const lineBaseColor = isDarkMode ? "100, 116, 139" : "203, 213, 225"; // Slate-500 or Slate-300
-      const accentBlue = isDarkMode ? "56, 189, 248" : "2, 132, 199"; // Sky-400 or Sky-700
+      const activeLine = isDarkMode ? "148, 163, 184" : lineBaseColor;
+      const activeAccent = isDarkMode ? "52, 211, 153" : accentColor;
 
       ctx.clearRect(0, 0, width, height);
 
-      const spacing = 35;
-      const cols = Math.ceil(width / spacing) + 1;
-      const rows = Math.ceil(height / spacing) + 1;
+      const gridSpacing = spacing;
+      const cols = Math.ceil(width / gridSpacing) + 2;
+      const rows = Math.ceil(height / gridSpacing) + 2;
 
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.35;
+      ctx.lineCap = "round";
 
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-          const x = i * spacing;
-          const y = j * spacing;
+          const x = i * gridSpacing;
+          const y = j * gridSpacing;
 
-          // Trigonometric fluid turbulence angle
-          let angle = Math.sin(x * 0.003 + time) + Math.cos(y * 0.003 + time);
+          // Smooth fluid turbulence wave
+          let angle = Math.sin(x * 0.004 + time) + Math.cos(y * 0.004 + time);
 
-          // Distance to mouse force field
+          // Force field interaction with cursor
           const dx = mouse.x - x;
           const dy = mouse.y - y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           let isNear = false;
-          if (dist < 220 && dist > 0) {
+          if (dist < interactiveRadius && dist > 0) {
             isNear = true;
             const pushAngle = Math.atan2(dy, dx) + Math.PI;
-            const force = 1 - dist / 220;
+            const force = 1 - dist / interactiveRadius;
             angle = angle * (1 - force) + pushAngle * force;
           }
 
@@ -100,12 +131,12 @@ export default function FluidFlowGrid() {
           const y2 = y + Math.sin(angle) * lineLen;
 
           const alpha = isNear
-            ? 0.8
-            : 0.15 + Math.sin(x * 0.01 + y * 0.01 + time) * 0.1;
+            ? 0.85
+            : 0.16 + Math.sin(x * 0.01 + y * 0.01 + time) * 0.09;
 
           ctx.strokeStyle = isNear
-            ? `rgba(${accentBlue}, ${alpha})`
-            : `rgba(${lineBaseColor}, ${alpha})`;
+            ? `rgba(${activeAccent}, ${alpha})`
+            : `rgba(${activeLine}, ${alpha})`;
 
           ctx.beginPath();
           ctx.moveTo(x, y);
@@ -123,15 +154,17 @@ export default function FluidFlowGrid() {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
+      document.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [isMounted]);
+  }, [isDarkMode, lineBaseColor, accentColor, spacing, interactiveRadius]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 block cursor-default opacity-80"
-      style={{ pointerEvents: "none" }}
-    />
+    <div ref={containerRef} className={`relative w-full h-full ${className}`}>
+      <canvas
+        ref={canvasRef}
+        className="pointer-events-none absolute inset-0 block h-full w-full z-0 select-none"
+      />
+      {children && <div className="relative z-10">{children}</div>}
+    </div>
   );
 }
