@@ -12,6 +12,7 @@ import {
   ArrowUpTrayIcon,
   PlusIcon,
   MapPinIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import {
@@ -27,10 +28,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Building2,
+  Home,
+  Store,
+  Briefcase,
+  Warehouse,
+  Sparkles,
+  MapPinned,
+  Zap,
+  Droplets,
+  RotateCcw,
+} from "lucide-react";
 
 const STEPS = ["Identité & Localisation", "Finances & Compteurs", "Photos", "Équipements"] as const;
 type StepIndex = 0 | 1 | 2 | 3;
+
+const DRAFT_STORAGE_KEY = "lokka_add_bien_draft";
 
 interface FormState {
   nom: string;
@@ -109,6 +132,7 @@ export function AddBienModal({
 
   const [step, setStep] = useState<StepIndex>(0);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [hasDraftRestored, setHasDraftRestored] = useState(false);
   const [customEquipement, setCustomEquipement] = useState("");
   const [uploading, setUploading] = useState(false);
   const [isGeolocating, setIsGeolocating] = useState(false);
@@ -116,16 +140,62 @@ export function AddBienModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragFromIndex = useRef<number | null>(null);
 
+  // Initialisation du formulaire & Restauration automatique du brouillon
   useEffect(() => {
     if (isOpen) {
-      setForm(editBien ? bienToForm(editBien) : EMPTY_FORM);
+      if (editBien) {
+        setForm(bienToForm(editBien));
+        setHasDraftRestored(false);
+      } else {
+        try {
+          const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+          if (savedDraft) {
+            const parsed = JSON.parse(savedDraft);
+            setForm(parsed);
+            setHasDraftRestored(true);
+          } else {
+            setForm(EMPTY_FORM);
+            setHasDraftRestored(false);
+          }
+        } catch (_) {
+          setForm(EMPTY_FORM);
+          setHasDraftRestored(false);
+        }
+      }
       setStep(0);
     }
   }, [isOpen, editBien]);
 
+  // Sauvegarde automatique du brouillon lors de la saisie (hors mode édition)
+  useEffect(() => {
+    if (!isOpen || editBien) return;
+    try {
+      const isDirty =
+        form.nom !== "" ||
+        form.quartier !== "" ||
+        form.loyer_mensuel !== "" ||
+        form.repere !== "" ||
+        form.photos.length > 0 ||
+        form.equipements.length > 0;
+
+      if (isDirty) {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(form));
+      }
+    } catch (_) {}
+  }, [form, isOpen, editBien]);
+
   if (!isOpen) return null;
 
   const update = (patch: Partial<FormState>) => setForm((f) => ({ ...f, ...patch }));
+
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (_) {}
+    setForm(EMPTY_FORM);
+    setHasDraftRestored(false);
+    toast.info("Brouillon effacé");
+  };
 
   const loyerNum = Number(form.loyer_mensuel) || 0;
   const plafond = plafondCaution(loyerNum);
@@ -138,30 +208,82 @@ export function AddBienModal({
     return true;
   };
 
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("La géolocalisation n'est pas supportée par votre navigateur");
+  // Géolocalisation robuste avec Reverse-Geocoding OpenStreetMap
+  const handleDetectLocation = async () => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      toast.error("La géolocalisation n'est pas supportée par votre navigateur.");
       return;
     }
 
     setIsGeolocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        setIsGeolocating(false);
-        const { latitude, longitude } = pos.coords;
-        toast.success("Position GPS détectée avec succès");
-        // Enrichit le champ repère avec les coordonnées
-        if (!form.repere) {
-          update({ repere: `Coordonnées GPS: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}` });
+
+    const getPosition = (options: PositionOptions) =>
+      new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
+
+    try {
+      // Tentative avec haute précision puis standard
+      let position: GeolocationPosition;
+      try {
+        position = await getPosition({ enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+      } catch {
+        position = await getPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+      }
+
+      const { latitude, longitude } = position.coords;
+
+      // Reverse geocoding via OpenStreetMap Nominatim
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=fr`,
+          { headers: { "User-Agent": "LokkaApp/1.0" } }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const addr = data.address || {};
+
+          // Détection de la ville béninoise la plus proche
+          const detectedCity = addr.city || addr.town || addr.municipality || addr.county || "";
+          const matchedVille = VILLES_BENIN.find(
+            (v) => detectedCity.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(detectedCity.toLowerCase())
+          );
+
+          // Détection du quartier / banlieue
+          const detectedQuartier =
+            addr.suburb || addr.quarter || addr.neighbourhood || addr.residential || addr.road || "";
+
+          update({
+            ville: matchedVille || form.ville || "Cotonou",
+            quartier: detectedQuartier || form.quartier,
+            repere: form.repere
+              ? form.repere
+              : `Position GPS : ${latitude.toFixed(5)}, ${longitude.toFixed(5)}${addr.road ? ` (${addr.road})` : ""}`,
+          });
+
+          toast.success("Position et quartier localisés avec succès !");
+          return;
         }
-      },
-      (err) => {
-        setIsGeolocating(false);
-        console.warn("Geolocation error:", err);
-        toast.error("Impossible de détecter la position GPS automatique. Veuillez renseigner le quartier manuellement.");
-      },
-      { timeout: 10000, enableHighAccuracy: true }
-    );
+      } catch (geoErr) {
+        console.warn("Reverse geocode fallback:", geoErr);
+      }
+
+      // Fallback si reverse-geocoding échoue : enregistre les coordonnées
+      update({
+        repere: `Position GPS : ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+      });
+      toast.success("Coordonnées GPS capturées avec succès.");
+    } catch (err: any) {
+      console.warn("Geolocation failed:", err);
+      if (err.code === 1) {
+        toast.error("Veuillez autoriser l'accès à votre position dans votre navigateur.");
+      } else {
+        toast.error("Impossible de détecter la position. Veuillez saisir le quartier manuellement.");
+      }
+    } finally {
+      setIsGeolocating(false);
+    }
   };
 
   const handleFiles = async (files: FileList | File[]) => {
@@ -242,6 +364,10 @@ export function AddBienModal({
       } else {
         await addBien(payload as Omit<Bien, "id">);
         toast.success("Logement / local ajouté avec succès");
+        // Nettoyer le brouillon après création réussie
+        try {
+          localStorage.removeItem(DRAFT_STORAGE_KEY);
+        } catch (_) {}
       }
       onClose();
     } catch (err) {
@@ -257,12 +383,13 @@ export function AddBienModal({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl border border-border"
+        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl border border-border overflow-hidden"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+        {/* ─── 1. HEADER ─── */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border shrink-0 bg-card">
           <div>
-            <h3 className="text-[16px] font-bold text-card-foreground">
+            <h3 className="text-[16px] font-bold text-card-foreground flex items-center gap-2">
+              <Building2 className="w-4.5 h-4.5 text-[var(--brand-accent)]" />
               {editBien ? "Modifier le logement / local" : "Ajouter un logement ou un local"}
             </h3>
             <p className="text-[11.5px] text-muted-foreground mt-0.5">
@@ -273,13 +400,32 @@ export function AddBienModal({
             type="button"
             onClick={onClose}
             className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition cursor-pointer"
+            aria-label="Fermer"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Progress Bar */}
-        <div className="px-5 pt-3 shrink-0">
+        {/* ─── BANNIÈRE RESTAURATION BROUILLON ─── */}
+        {hasDraftRestored && !editBien && (
+          <div className="px-5 py-2 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-between text-[11.5px] text-amber-700 dark:text-amber-300">
+            <span className="flex items-center gap-1.5 font-medium">
+              <Sparkles className="w-3.5 h-3.5" />
+              Brouillon de saisie restauré automatiquement
+            </span>
+            <button
+              type="button"
+              onClick={clearDraft}
+              className="text-amber-800 dark:text-amber-200 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Recommencer à zéro
+            </button>
+          </div>
+        )}
+
+        {/* ─── 2. PROGRESS BAR ─── */}
+        <div className="px-5 pt-3.5 shrink-0 bg-card">
           <div className="flex items-center gap-1.5 mb-1.5">
             {STEPS.map((label, i) => (
               <div key={label} className="flex-1">
@@ -297,8 +443,8 @@ export function AddBienModal({
           </p>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-3">
+        {/* ─── 3. CONTENU DES ÉTAPES ─── */}
+        <div className="flex-1 overflow-y-auto px-5 py-3.5">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -306,7 +452,7 @@ export function AddBienModal({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -12 }}
               transition={{ duration: 0.15 }}
-              className="space-y-3.5"
+              className="space-y-4"
             >
               {/* ─── ÉTAPE 1 : IDENTITÉ & LOCALISATION ─── */}
               {step === 0 && (
@@ -371,17 +517,26 @@ export function AddBienModal({
                     </Field>
                   </div>
 
-                  {/* Bouton Détecter GPS + Champ Repère Local */}
+                  {/* Bouton Détecter GPS Professionnel */}
                   <Field label="Repère & Indication de localisation">
-                    <div className="flex gap-2 mb-1.5">
+                    <div className="flex gap-2 mb-2">
                       <button
                         type="button"
                         onClick={handleDetectLocation}
                         disabled={isGeolocating}
-                        className="w-full py-1.5 px-3 rounded-lg border border-border hover:bg-muted/70 text-[12px] font-semibold text-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        className="w-full py-2 px-3 rounded-lg border border-border hover:bg-muted/70 text-[12px] font-semibold text-foreground flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:border-[var(--brand-accent)]/50"
                       >
-                        <MapPinIcon className="w-4 h-4 text-emerald-600" />
-                        <span>{isGeolocating ? "Détection GPS..." : "📍 Détecter ma position actuelle (GPS)"}</span>
+                        {isGeolocating ? (
+                          <>
+                            <Spinner className="w-3.5 h-3.5 text-[var(--brand-accent)]" />
+                            <span>Détection et géolocalisation en cours...</span>
+                          </>
+                        ) : (
+                          <>
+                            <MapPinned className="w-4 h-4 text-[var(--brand-accent)]" />
+                            <span>Détecter ma position actuelle (GPS)</span>
+                          </>
+                        )}
                       </button>
                     </div>
                     <Input
@@ -445,21 +600,29 @@ export function AddBienModal({
                   </div>
 
                   <Field label="Statut initial">
-                    <div className="flex gap-1.5">
-                      {(["vacant", "loué", "travaux"] as Bien["statut"][]).map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => update({ statut: s })}
-                          className={`flex-1 px-3 py-2 rounded-lg text-[12.5px] font-semibold capitalize border transition-all cursor-pointer ${
-                            form.statut === s
-                              ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-xs"
-                              : "border-border text-muted-foreground hover:bg-muted/50"
-                          }`}
-                        >
-                          {s === "loué" ? "🟢 Loué" : s === "vacant" ? "⚪ Vacant" : "🟡 Travaux"}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: "vacant", label: "Vacant", dotColor: "bg-slate-400" },
+                        { id: "loué", label: "Loué", dotColor: "bg-emerald-500" },
+                        { id: "travaux", label: "En travaux", dotColor: "bg-amber-500" },
+                      ].map((s) => {
+                        const isSelected = form.statut === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => update({ statut: s.id as any })}
+                            className={`px-3 py-2 rounded-lg text-[12.5px] font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                              isSelected
+                                ? "bg-card border-slate-900 dark:border-white ring-2 ring-slate-900/10 dark:ring-white/20 text-foreground font-bold shadow-2xs"
+                                : "border-border text-muted-foreground hover:bg-muted/40"
+                            }`}
+                          >
+                            <span className={`w-2 h-2 rounded-full ${s.dotColor} shrink-0`} />
+                            <span>{s.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </Field>
 
@@ -487,34 +650,40 @@ export function AddBienModal({
                       <span>
                         Plafond légal Loi 2022-30 (3 mois de loyer max) :{" "}
                         <strong>{plafond.toLocaleString("fr-FR")} FCFA</strong>
-                        {cautionDepasse && " — Attention, votre montant dépasse le plafond légal béninois."}
+                        {cautionDepasse && " — Attention, ce montant dépasse le plafond légal béninois."}
                       </span>
                     </div>
                   </Field>
 
-                  {/* Compteurs SBEE & SONEB (Facultatifs) */}
+                  {/* Compteurs SBEE & SONEB */}
                   <div className="pt-2 border-t border-border/80">
                     <span className="text-[11.5px] font-bold text-foreground block mb-2">
                       Compteurs &amp; Références (Optionnel)
                     </span>
                     <div className="grid grid-cols-2 gap-2.5">
                       <Field label="N° Compteur SBEE (Énergie)">
-                        <Input
-                          type="text"
-                          value={form.compteur_sbee}
-                          onChange={(e) => update({ compteur_sbee: e.target.value })}
-                          placeholder="Ex. 1428590123"
-                          className="rounded-lg text-[12.5px]"
-                        />
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            value={form.compteur_sbee}
+                            onChange={(e) => update({ compteur_sbee: e.target.value })}
+                            placeholder="Ex. 1428590123"
+                            className="rounded-lg text-[12.5px] pl-8 font-mono"
+                          />
+                          <Zap className="w-3.5 h-3.5 text-amber-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
                       </Field>
                       <Field label="N° Police SONEB (Eau)">
-                        <Input
-                          type="text"
-                          value={form.compteur_soneb}
-                          onChange={(e) => update({ compteur_soneb: e.target.value })}
-                          placeholder="Ex. 450982-A"
-                          className="rounded-lg text-[12.5px]"
-                        />
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            value={form.compteur_soneb}
+                            onChange={(e) => update({ compteur_soneb: e.target.value })}
+                            placeholder="Ex. 450982-A"
+                            className="rounded-lg text-[12.5px] pl-8 font-mono"
+                          />
+                          <Droplets className="w-3.5 h-3.5 text-blue-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
                       </Field>
                     </div>
                   </div>
@@ -537,7 +706,7 @@ export function AddBienModal({
                     }}
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-                      dragOver ? "border-emerald-600 bg-emerald-500/5" : "border-border hover:bg-muted/30"
+                      dragOver ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/5" : "border-border hover:bg-muted/30"
                     }`}
                   >
                     <ArrowUpTrayIcon className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
@@ -616,14 +785,14 @@ export function AddBienModal({
                             key={eq}
                             type="button"
                             onClick={() => toggleEquipement(eq)}
-                            className={`px-2.5 py-1.5 rounded-lg text-[12px] font-medium border transition-all cursor-pointer ${
+                            className={`px-2.5 py-1.5 rounded-lg text-[12px] font-medium border flex items-center gap-1.5 transition-all cursor-pointer ${
                               isSelected
-                                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent font-semibold shadow-2xs"
+                                ? "bg-card border-slate-900 dark:border-white ring-1 ring-slate-900/10 dark:ring-white/20 text-foreground font-semibold shadow-2xs"
                                 : "border-border text-muted-foreground hover:bg-muted/50"
                             }`}
                           >
-                            {isSelected && "✓ "}
-                            {eq}
+                            {isSelected && <CheckIcon className="w-3 h-3 text-[var(--brand-accent)] stroke-[3]" />}
+                            <span>{eq}</span>
                           </button>
                         );
                       })}
@@ -661,7 +830,7 @@ export function AddBienModal({
           </AnimatePresence>
         </div>
 
-        {/* Footer Navigation */}
+        {/* ─── 4. FOOTER NAVIGATION ─── */}
         <div className="px-5 py-3 border-t border-border flex items-center justify-between shrink-0 bg-muted/20">
           {step > 0 ? (
             <button
