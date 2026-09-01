@@ -74,7 +74,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
             data-landing-hero-form
-            className="mt-8 w-full max-w-[480px]"
+            className="mt-8 w-full max-w-[520px]"
           >
             <EmailOtpForm
               source="hero_landing"

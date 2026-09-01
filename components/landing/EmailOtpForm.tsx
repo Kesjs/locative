@@ -89,16 +89,16 @@ export default function EmailOtpForm({
   return (
     <form onSubmit={handleSubmit} className={`w-full ${className}`}>
       <div
-        className={`relative flex flex-col gap-2 rounded-xl p-1.5 transition-all sm:flex-row sm:items-center ${
+        className={`relative flex flex-col gap-2 rounded-xl p-2 transition-all sm:flex-row sm:items-center ${
           dark
-            ? "border border-white/20 bg-white/10 shadow-lg backdrop-blur-md focus-within:border-[#9D6B3C] focus-within:ring-2 focus-within:ring-[#9D6B3C]/30"
-            : "border-2 border-[#E8E3DC] bg-white shadow-sm focus-within:border-[#9D6B3C] focus-within:ring-4 focus-within:ring-[#9D6B3C]/10"
+            ? "border border-white/20 bg-zinc-900/90 shadow-xl backdrop-blur-md focus-within:border-[#9D6B3C] focus-within:ring-2 focus-within:ring-[#9D6B3C]/30"
+            : "border-2 border-[#18181B] bg-white shadow-[0_12px_36px_rgba(24,24,27,0.08)] focus-within:border-[#9D6B3C] focus-within:ring-4 focus-within:ring-[#9D6B3C]/15"
         }`}
       >
         <div className="flex flex-1 items-center gap-3 px-3">
           <Mail
-            size={18}
-            className={`shrink-0 ${dark ? "text-white/60" : "text-[#71717A]"}`}
+            size={20}
+            className={`shrink-0 ${dark ? "text-white/70" : "text-[#18181B]"}`}
           />
           <input
             id={inputId}
@@ -111,7 +111,7 @@ export default function EmailOtpForm({
             placeholder="Entrez votre adresse email..."
             required
             aria-describedby={feedbackId}
-            className={`h-11 w-full bg-transparent text-[14.5px] font-medium outline-none ${
+            className={`h-11 w-full bg-transparent text-[15px] font-semibold outline-none ${
               dark
                 ? "text-white placeholder:text-white/50"
                 : "text-[#18181B] placeholder:text-[#71717A]"
@@ -122,7 +122,7 @@ export default function EmailOtpForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg px-6 text-[13.5px] font-bold text-white transition-all duration-200 shadow-sm cursor-pointer disabled:cursor-wait disabled:opacity-75 ${
+          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-lg px-6 text-[14px] font-bold text-white transition-all duration-200 shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-75 ${
             dark
               ? "bg-[#9D6B3C] hover:bg-[#85572E]"
               : "bg-[#18181B] hover:bg-[#9D6B3C]"

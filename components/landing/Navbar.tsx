@@ -60,13 +60,19 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Desktop Right Action: "Se connecter" button */}
+        {/* Desktop Right Action: Swiss Modernist Dual Actions */}
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/auth/login"
-            className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#18181B] bg-[#F6EFE7] hover:bg-[#18181B] hover:text-white border border-[#E8E3DC] hover:border-[#18181B] px-4 py-2 rounded-[6px] transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
+            className="text-[13px] font-semibold text-[#18181B] hover:text-[#9D6B3C] px-3 py-1.5 transition-colors cursor-pointer"
           >
-            <span>Se connecter</span>
+            Se connecter
+          </Link>
+          <Link
+            href="/auth/register"
+            className="group inline-flex items-center gap-1.5 text-[13px] font-bold text-white bg-[#18181B] hover:bg-[#9D6B3C] border border-[#18181B] hover:border-[#9D6B3C] px-4 py-2 rounded-[7px] transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
+          >
+            <span>Démarrer</span>
             <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </div>
