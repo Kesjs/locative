@@ -143,6 +143,42 @@ export function useUpdateBien() {
   });
 }
 
+export function useUpdateBienStatut() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, statut }: { id: string; statut: Bien["statut"] }) => {
+      if (!isSupabaseConfigured()) {
+        return { id, statut };
+      }
+      const supabase = createClient();
+      const { data, error } = await supabase.from("biens").update({ statut }).eq("id", id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["biens"] });
+    },
+  });
+}
+
+export function useArchiveBien() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!isSupabaseConfigured()) {
+        return true;
+      }
+      const supabase = createClient();
+      const { error } = await supabase.from("biens").update({ archive: true }).eq("id", id);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["biens"] });
+    },
+  });
+}
+
 export function useDeleteBien() {
   const queryClient = useQueryClient();
   return useMutation({
