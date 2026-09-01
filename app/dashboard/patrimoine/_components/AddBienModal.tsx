@@ -6,6 +6,10 @@ import { toast } from "sonner";
 import { XMarkIcon, CheckIcon, ExclamationTriangleIcon, StarIcon, TrashIcon, ArrowUpTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { useAddBien, useUpdateBien, uploadBienPhoto, EQUIPEMENTS_PREDEFINIS, plafondCaution, type Bien } from "@/lib/hooks/useBiens";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const STEPS = ["Identité", "Financier", "Photos", "Équipements"] as const;
 type StepIndex = 0 | 1 | 2 | 3;
@@ -229,63 +233,57 @@ export function AddBienModal({
               {step === 0 && (
                 <>
                   <Field label="Nom du bien">
-                    <input
+                    <Input
                       autoFocus
                       type="text"
                       value={form.nom}
                       onChange={(e) => update({ nom: e.target.value })}
                       placeholder="Ex. Villa Fidjrossè Plage"
-                      className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                     />
                   </Field>
                   <Field label="Type de bien">
-                    <select
-                      value={form.type}
-                      onChange={(e) => update({ type: e.target.value })}
-                      className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
-                    >
-                      {TYPES_BIEN.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
+                    <Select value={form.type} onValueChange={(v) => update({ type: v })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TYPES_BIEN.map((t) => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                   <Field label="Adresse">
-                    <input
+                    <Input
                       type="text"
                       value={form.adresse}
                       onChange={(e) => update({ adresse: e.target.value })}
                       placeholder="Ex. Rue 440, Fidjrossè"
-                      className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                     />
                   </Field>
                   <div className="grid grid-cols-3 gap-3">
                     <Field label="Ville" className="col-span-1">
-                      <input
+                      <Input
                         type="text"
                         value={form.ville}
                         onChange={(e) => update({ ville: e.target.value })}
                         placeholder="Cotonou"
-                        className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                       />
                     </Field>
                     <Field label="Surface (m²)" className="col-span-1">
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         value={form.surface_m2}
                         onChange={(e) => update({ surface_m2: e.target.value })}
-                        className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                       />
                     </Field>
                     <Field label="Pièces" className="col-span-1">
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         value={form.nb_pieces}
                         onChange={(e) => update({ nb_pieces: e.target.value })}
-                        className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                       />
                     </Field>
                   </div>
@@ -296,21 +294,19 @@ export function AddBienModal({
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Loyer mensuel (FCFA)">
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         value={form.loyer_mensuel}
                         onChange={(e) => update({ loyer_mensuel: e.target.value })}
-                        className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                       />
                     </Field>
                     <Field label="Charges (FCFA)">
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         value={form.charges}
                         onChange={(e) => update({ charges: e.target.value })}
-                        className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                       />
                     </Field>
                   </div>
@@ -331,12 +327,11 @@ export function AddBienModal({
                     </div>
                   </Field>
                   <Field label="Caution demandée (FCFA)">
-                    <input
+                    <Input
                       type="number"
                       min={0}
                       value={form.caution_montant}
                       onChange={(e) => update({ caution_montant: e.target.value })}
-                      className="w-full border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                     />
                     <div className={`mt-2 rounded-lg p-2.5 text-[12px] flex items-start gap-1.5 ${cautionDepasse ? "bg-destructive/10 text-destructive" : "bg-muted/40 text-muted-foreground"}`}>
                       {cautionDepasse && <ExclamationTriangleIcon className="w-4 h-4 shrink-0 mt-0.5" />}
@@ -449,7 +444,7 @@ export function AddBienModal({
                   </div>
                   <Field label="Ajouter un équipement libre">
                     <div className="flex gap-2">
-                      <input
+                      <Input
                         type="text"
                         value={customEquipement}
                         onChange={(e) => setCustomEquipement(e.target.value)}
@@ -460,7 +455,7 @@ export function AddBienModal({
                           }
                         }}
                         placeholder="Ex. Bassine collective"
-                        className="flex-1 border border-border rounded-lg px-3 py-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
+                        className="flex-1"
                       />
                       <button
                         type="button"

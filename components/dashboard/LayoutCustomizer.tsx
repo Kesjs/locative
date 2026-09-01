@@ -78,40 +78,22 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 26, stiffness: 240 }}
-            style={{
-              backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-              borderColor: isDark ? "#334155" : "#E8E5E0",
-              color: isDark ? "#FAFAFA" : "#0F172A",
-            }}
-            className="w-full max-w-[380px] border-l shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
+            className="w-full max-w-[380px] bg-card text-card-foreground border-l border-border shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
           >
             {/* ─── 1. HEADER ─── */}
-            <div
-              style={{
-                borderColor: isDark ? "#334155" : "#E8E5E0",
-                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-              }}
-              className="p-5 pb-4 border-b flex items-start justify-between"
-            >
+            <div className="p-5 pb-4 border-b border-border bg-card flex items-start justify-between">
               <div>
-                <h2
-                  style={{ color: isDark ? "#FAFAFA" : "#0F172A" }}
-                  className="text-[17px] font-bold tracking-tight"
-                >
-                  Theme Settings
+                <h2 className="text-[17px] font-bold tracking-tight text-foreground">
+                  Personnalisation de l'affichage
                 </h2>
-                <p
-                  style={{ color: isDark ? "#A1A1AA" : "#64635F" }}
-                  className="text-[12px] mt-0.5 leading-snug"
-                >
-                  Adjust the appearance and layout to suit your preferences.
+                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
+                  Ajustez l'apparence, les couleurs et la disposition selon vos préférences.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                style={{ color: isDark ? "#A1A1AA" : "#9C9A95" }}
-                className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition cursor-pointer shrink-0"
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer shrink-0"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
@@ -122,11 +104,11 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
               {/* SECTION 1: THEME */}
               <div>
                 <div className="flex items-center gap-1.5 mb-2.5">
-                  <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[13px] font-bold">Theme</span>
+                  <span className="text-[13px] font-bold text-foreground">Mode de thème</span>
                   <button
                     type="button"
                     onClick={() => handleThemeChange("light")}
-                    className="text-[#9C9A95] hover:text-[#0F172A] dark:hover:text-[#FAFAFA] cursor-pointer"
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
                     title="Réinitialiser le thème"
                   >
                     <ArrowPathIcon className="h-3 w-3" />

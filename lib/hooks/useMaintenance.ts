@@ -19,29 +19,23 @@ export interface Artisan {
   created_at?: string;
 }
 
-const DEMO_TICKETS: Ticket[] = [
-  { id: "1", titre: "Fuite d'eau robinet cuisine", bien: "Villa Cocotiers Apt 2B", urgence: "Haute", statut: "En cours" },
-  { id: "2", titre: "Prise électrique défectueuse", bien: "Résidence Le Manguier", urgence: "Basse", statut: "Nouveau" },
-];
-
-const DEMO_ARTISANS: Artisan[] = [
-  { id: "1", nom: "Plomberie Express", specialite: "Plombier", telephone: "+229 97 00 11 22", note: "4.8/5" },
-];
-
 export function useTickets() {
   return useQuery({
     queryKey: ["maintenance-tickets"],
     queryFn: async (): Promise<Ticket[]> => {
       if (!isSupabaseConfigured()) {
-        return DEMO_TICKETS;
+        return [];
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("maintenance_tickets").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("maintenance_tickets")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) {
-        console.warn("Supabase fetch error, fallback to demo:", error);
-        return DEMO_TICKETS;
+        console.error("Supabase fetch error (tickets):", error.message);
+        return [];
       }
-      return (data as Ticket[]) || DEMO_TICKETS;
+      return (data as Ticket[]) || [];
     },
   });
 }
@@ -69,15 +63,18 @@ export function useArtisans() {
     queryKey: ["maintenance-artisans"],
     queryFn: async (): Promise<Artisan[]> => {
       if (!isSupabaseConfigured()) {
-        return DEMO_ARTISANS;
+        return [];
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("maintenance_artisans").select("*").order("nom");
+      const { data, error } = await supabase
+        .from("maintenance_artisans")
+        .select("*")
+        .order("nom");
       if (error) {
-        console.warn("Supabase fetch error, fallback to demo:", error);
-        return DEMO_ARTISANS;
+        console.error("Supabase fetch error (artisans):", error.message);
+        return [];
       }
-      return (data as Artisan[]) || DEMO_ARTISANS;
+      return (data as Artisan[]) || [];
     },
   });
 }

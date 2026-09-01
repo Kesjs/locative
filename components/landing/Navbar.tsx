@@ -29,29 +29,29 @@ export default function Navbar() {
   return (
     <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       <nav
-        className={`pointer-events-auto w-full max-w-[980px] rounded-[10px] transition-all duration-300 flex items-center justify-between px-4 sm:px-6 py-2.5 ${
+        className={`pointer-events-auto w-full max-w-[980px] rounded-2xl transition-all duration-300 flex items-center justify-between px-4 sm:px-6 py-2.5 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-xl border border-[#E8E3DC] shadow-[0_12px_40px_rgba(24,24,27,0.06)]"
-            : "bg-[#FAF9F6]/90 backdrop-blur-md border border-[#E8E3DC] shadow-[0_4px_20px_rgba(24,24,27,0.03)]"
+            ? "bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-[0_12px_32px_rgba(15,23,42,0.06)]"
+            : "bg-[#F8FAF9]/90 backdrop-blur-md border border-slate-200/60 shadow-[0_4px_16px_rgba(15,23,42,0.03)]"
         }`}
       >
-        {/* Brand Logo with Dark Monogram Icon */}
+        {/* Brand Logo */}
         <div className="flex items-center">
           <Logo size="sm" variant="dark" />
         </div>
 
         {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-1 bg-[#18181B]/[0.03] p-1 rounded-[8px] border border-[#18181B]/[0.04]">
+        <div className="hidden md:flex items-center gap-1 bg-slate-900/[0.03] p-1 rounded-xl border border-slate-900/[0.04]">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-[13px] rounded-[6px] px-3.5 py-1.5 transition-all duration-200 ${
+                className={`text-[13px] rounded-lg px-3.5 py-1.5 transition-all duration-200 ${
                   isActive
-                    ? "font-semibold text-[#18181B] bg-white shadow-xs"
-                    : "font-medium text-[#71717A] hover:text-[#18181B] hover:bg-[#F6EFE7]/80 shadow-none"
+                    ? "font-semibold text-slate-900 bg-white shadow-xs"
+                    : "font-medium text-slate-500 hover:text-slate-900 hover:bg-white/50 shadow-none"
                 }`}
               >
                 {link.label}
@@ -60,17 +60,17 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Desktop Right Action: Swiss Modernist Dual Actions */}
+        {/* Desktop Right Actions */}
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/auth/login"
-            className="text-[13px] font-semibold text-[#18181B] hover:text-[#9D6B3C] px-3 py-1.5 transition-colors cursor-pointer"
+            className="text-[13px] font-semibold text-slate-700 hover:text-emerald-700 px-3 py-1.5 transition-colors cursor-pointer"
           >
             Se connecter
           </Link>
           <Link
             href="/auth/register"
-            className="group inline-flex items-center gap-1.5 text-[13px] font-bold text-white bg-[#18181B] hover:bg-[#9D6B3C] border border-[#18181B] hover:border-[#9D6B3C] px-4 py-2 rounded-[7px] transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
+            className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-slate-900 hover:bg-emerald-700 px-4 py-2 rounded-xl transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
           >
             <span>Démarrer</span>
             <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -81,7 +81,7 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-1.5 text-[#18181B] hover:text-[#18181B] hover:bg-[#F6EFE7] transition-colors rounded-[6px]"
+          className="md:hidden p-1.5 text-slate-800 hover:bg-slate-100 transition-colors rounded-lg"
           aria-label="Toggle Navigation Menu"
         >
           {mobileMenuOpen ? (
@@ -94,12 +94,12 @@ export default function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="pointer-events-auto fixed top-20 left-4 right-4 max-w-[420px] mx-auto bg-[#FAF9F6] border border-[#E8E3DC] rounded-[12px] px-6 py-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-200 z-50">
+        <div className="pointer-events-auto fixed top-20 left-4 right-4 max-w-[420px] mx-auto bg-white border border-slate-200 rounded-2xl px-6 py-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-200 z-50">
           <div className="flex flex-col gap-3">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-[15px] font-medium text-[#18181B] py-2 border-b border-[#E8E3DC] hover:bg-[#F6EFE7] px-2 rounded transition-colors"
+              className="text-[15px] font-medium text-slate-900 py-2 border-b border-slate-100 hover:bg-slate-50 px-2 rounded-lg transition-colors"
             >
               Accueil
             </Link>
@@ -108,7 +108,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-[15px] font-medium text-[#71717A] hover:text-[#18181B] hover:bg-[#F6EFE7] px-2 rounded py-2 border-b border-[#E8E3DC] transition-colors"
+                className="text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-2 rounded-lg py-2 border-b border-slate-100 transition-colors"
               >
                 {link.label}
               </Link>
@@ -117,14 +117,14 @@ export default function Navbar() {
               <Link
                 href="/auth/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-[6px] border border-[#E8E3DC] text-[14px] font-semibold text-[#18181B] bg-[#F6EFE7] hover:bg-[#18181B] hover:text-white transition-colors shadow-xs"
+                className="w-full text-center py-2.5 rounded-xl border border-slate-200 text-[14px] font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 transition-colors shadow-xs"
               >
                 Se connecter
               </Link>
               <Link
                 href="/auth/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-[6px] text-[14px] font-medium text-white bg-[#18181B] hover:bg-[#9D6B3C] border border-transparent transition-colors flex items-center justify-center gap-2 shadow-xs"
+                className="w-full text-center py-2.5 rounded-xl text-[14px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-xs"
               >
                 Commencer <ArrowRightIcon className="h-4 w-4" />
               </Link>

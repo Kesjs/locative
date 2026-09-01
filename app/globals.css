@@ -62,19 +62,19 @@
 
 /* ─── ROOT DESIGN TOKENS (LIGHT THEME - VARIANTE 3: ÉMERAUDE TROPICALE & SAUGE) ─── */
 :root {
-  --background: 0 0% 100%; /* #FFFFFF Blanc Pur pour le fond du Dashboard */
-  --foreground: 222 47% 11%; /* #0F172A Ardoise Sombre pour le texte */
+  --background: 0 0% 100%; /* #FFFFFF Blanc Pur */
+  --foreground: 222 47% 11%; /* #0F172A Ardoise Sombre */
   --card: 0 0% 100%; /* #FFFFFF Blanc Pur pour les cartes */
   --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
-  --primary: 160 84% 39%; /* #059669 Vert Émeraude (Boutons, onglet actif, accents) */
+  --primary: 160 84% 39%; /* #059669 Vert Émeraude */
   --primary-foreground: 0 0% 100%;
   --secondary: 150 30% 96%; /* #EFF7F2 */
   --secondary-foreground: 160 84% 28%;
-  --muted: 220 9% 46%; /* #64748B */
-  --muted-foreground: 220 9% 46%;
-  --accent: 150 60% 96%; /* #ECFDF5 Sauge douce (Badges & sélections) */
+  --muted: 210 20% 96%; /* #F1F5F9 Gris très doux */
+  --muted-foreground: 215 16% 47%; /* #64748B */
+  --accent: 150 60% 96%; /* #ECFDF5 Sauge douce */
   --accent-foreground: 160 84% 28%; /* #065F46 */
   --success: 160 84% 39%; /* #059669 */
   --success-foreground: 0 0% 100%;
@@ -87,21 +87,21 @@
   --ring: 160 84% 39%;
   --radius: 0.5rem;
 
-  /* Surfaces & Fallback Aliases */
-  --bg-canvas: #FFFFFF;
-  --bg-surface: #FFFFFF;
-  --bg-surface-elevated: #FFFFFF;
+  /* Surfaces & Dynamic Aliases */
+  --bg-canvas: hsl(var(--background));
+  --bg-surface: hsl(var(--card));
+  --bg-surface-elevated: hsl(var(--card));
   --bg-subtle: hsl(var(--accent));
-  --bg-muted: hsl(var(--secondary));
-  --bg-sidebar: #FFFFFF;
-  --bg-header: #FFFFFF;
+  --bg-muted: hsl(var(--muted));
+  --bg-sidebar: hsl(var(--card));
+  --bg-header: hsl(var(--background));
   --bg-input: hsl(var(--input));
 
   /* Typography Aliases */
   --text-primary: hsl(var(--foreground));
   --text-secondary: hsl(var(--muted-foreground));
   --text-muted: hsl(var(--muted-foreground));
-  --text-inverse: #FFFFFF;
+  --text-inverse: hsl(var(--background));
 
   /* Borders & Dividers */
   --border-subtle: hsl(var(--border));
@@ -115,15 +115,15 @@
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 
   /* Interactive States */
-  --hover-bg: hsl(var(--accent));
+  --hover-bg: hsl(var(--muted));
   --active-bg: hsl(var(--accent));
 }
 
 /* ─── DARK THEME (VARIANTE 3: NOCTURNE ÉMERAUDE PROFONDE) ─── */
 .dark {
   --background: 160 30% 6%; /* #0A1310 Nuit Végétale */
-  --foreground: 150 20% 96%; /* #F0FDF4 */
-  --card: 160 25% 10%; /* #121F1B */
+  --foreground: 150 20% 96%; /* #F0FDF4 Texte clair lisible */
+  --card: 160 25% 10%; /* #121F1B Carte sombre élégante */
   --card-foreground: 150 20% 96%;
   --popover: 160 25% 10%;
   --popover-foreground: 150 20% 96%;
@@ -131,8 +131,8 @@
   --primary-foreground: 160 30% 6%;
   --secondary: 160 25% 14%;
   --secondary-foreground: 150 20% 96%;
-  --muted: 150 15% 65%;
-  --muted-foreground: 150 15% 65%;
+  --muted: 160 20% 16%; /* #152721 Fond muted sombre */
+  --muted-foreground: 150 15% 65%; /* #8FA89C Texte secondaire clair */
   --accent: 160 35% 16%;
   --accent-foreground: 160 70% 55%;
   --success: 160 70% 45%;
@@ -141,9 +141,31 @@
   --warning-foreground: 0 0% 100%;
   --destructive: 347 77% 50%;
   --destructive-foreground: 0 0% 100%;
-  --border: 160 20% 18%; /* #1E352E */
+  --border: 160 20% 18%; /* #1E352E Bordure sombre */
   --input: 160 20% 18%;
   --ring: 160 70% 45%;
+
+  /* Surfaces & Dynamic Aliases for Dark Mode */
+  --bg-canvas: hsl(var(--background));
+  --bg-surface: hsl(var(--card));
+  --bg-surface-elevated: hsl(var(--card));
+  --bg-subtle: hsl(var(--accent));
+  --bg-muted: hsl(var(--muted));
+  --bg-sidebar: hsl(var(--card));
+  --bg-header: hsl(var(--background));
+  --bg-input: hsl(var(--input));
+
+  /* Typography Aliases */
+  --text-primary: hsl(var(--foreground));
+  --text-secondary: hsl(var(--muted-foreground));
+  --text-muted: hsl(var(--muted-foreground));
+  --text-inverse: hsl(var(--background));
+
+  /* Borders & Dividers */
+  --border-subtle: hsl(var(--border));
+  --border-default: hsl(var(--border));
+  --border-strong: hsl(var(--border));
+  --sidebar-border: hsl(var(--border));
 
   /* Shadows */
   --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
@@ -151,7 +173,7 @@
   --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
 
   /* Interactive States */
-  --hover-bg: hsl(var(--secondary));
+  --hover-bg: hsl(var(--muted));
   --active-bg: hsl(var(--accent));
 }
 

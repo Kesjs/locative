@@ -26,7 +26,7 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
             cy="60"
             r={radius}
             fill="transparent"
-            stroke="hsl(var(--muted))"
+            stroke="hsl(var(--border))"
             strokeWidth="10"
           />
           {/* Progress Ring */}

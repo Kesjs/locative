@@ -29,9 +29,9 @@ export function RevenueChart({
   xAxisKey = "month",
   dataKeys,
   colors = [
-    "#9D6B3C", // Lokka Primary (Caramel Feutré)
-    "#15803D", // Lokka Success (Émeraude Feutré)
-    "#9D6B3C", // Lokka Warning (Caramel)
+    "#059669", // Lokka Primary (Émeraude Dense)
+    "#10B981", // Lokka Secondary (Émeraude Claire)
+    "#34D399", // Lokka Accent
   ],
   formatter = (val) => `${Number(val).toLocaleString("fr-FR")} FCFA`,
 }: RevenueChartProps) {
@@ -47,7 +47,7 @@ export function RevenueChart({
             <defs>
               {dataKeys.map((key, i) => (
                 <linearGradient key={`grad-${key}`} id={`color-${key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={colors[i % colors.length]} stopOpacity={0.25} />
+                  <stop offset="5%" stopColor={colors[i % colors.length]} stopOpacity={0.35} />
                   <stop offset="95%" stopColor={colors[i % colors.length]} stopOpacity={0.0} />
                 </linearGradient>
               ))}
@@ -67,14 +67,15 @@ export function RevenueChart({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--popover))",
+                backgroundColor: "hsl(var(--card))",
                 borderColor: "hsl(var(--border))",
-                borderRadius: "var(--radius)",
+                borderRadius: 12,
                 padding: "8px 12px",
                 boxShadow: "var(--shadow-modal)",
+                color: "hsl(var(--card-foreground))",
               }}
-              labelStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
-              itemStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 12, fontWeight: 600 }}
+              labelStyle={{ color: "hsl(var(--card-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: "hsl(var(--card-foreground))", fontSize: 12, fontWeight: 600 }}
               cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
               formatter={(val: any, name: any) => [formatter(val), name]}
             />
@@ -109,15 +110,16 @@ export function RevenueChart({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--popover))",
+                backgroundColor: "hsl(var(--card))",
                 borderColor: "hsl(var(--border))",
-                borderRadius: "var(--radius)",
+                borderRadius: 12,
                 padding: "8px 12px",
                 boxShadow: "var(--shadow-modal)",
+                color: "hsl(var(--card-foreground))",
               }}
-              labelStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
-              itemStyle={{ color: "hsl(var(--popover-foreground))", fontSize: 12, fontWeight: 600 }}
-              cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+              labelStyle={{ color: "hsl(var(--card-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: "hsl(var(--card-foreground))", fontSize: 12, fontWeight: 600 }}
+              cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
               formatter={(val: any, name: any) => [formatter(val), name]}
             />
             {dataKeys.map((key, i) => (

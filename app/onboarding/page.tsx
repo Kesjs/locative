@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "@/components/ui/Logo";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   UserCircleIcon,
   CheckCircleIcon,
@@ -28,6 +30,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<0 | 1 | 2>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
 
   const [state, setState] = useState<OnboardingState>({
     profil: {
@@ -46,115 +49,142 @@ export default function OnboardingPage() {
       const savedUser = localStorage.getItem("lokka_user_profile");
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           profil: {
             ...prev.profil,
             nom: parsed.name || "",
             profileType: parsed.accountType === "agence" ? "agence" : "bailleur",
-          }
+          },
         }));
       }
     } catch (_) {}
   }, []);
 
   const handleNext = () => {
+    setDirection("forward");
     if (currentStep < 2) setCurrentStep((prev) => (prev + 1) as 0 | 1 | 2);
   };
 
   const handleBack = () => {
+    setDirection("back");
     if (currentStep > 0) setCurrentStep((prev) => (prev - 1) as 0 | 1 | 2);
   };
 
   const isStepValid = () => {
     if (currentStep === 0) return state.profil.nom.trim().length > 0;
     if (currentStep === 1) return state.objectifs.length > 0;
-    return true; // Étape 3 optionnelle selon les champs
+    return true;
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-
     try {
       if (isSupabaseConfigured()) {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
-          // TODO: RPC `complete_onboarding` ne persiste potentiellement pas profil_type comme attendu par le schéma strict, 
-          // ou l'enum `role_interne_type` ne correspond pas. Mise à jour de la table profile.
           await supabase
             .from("profiles")
             .update({
               full_name: state.profil.nom,
               role: state.profil.profileType,
               onboarding_completed: true,
-              // Sauvegarde du state complet d'onboarding dans raw_user_meta_data ou dans une autre colonne JSON si disponible
-              // ou sauvegarde des objectifs localement pour le dashboard.
             })
             .eq("id", user.id);
-            
-          // Sauvegarde locale pour affichage contextuel du Dashboard
-          localStorage.setItem("lokka_onboarding_objectifs", JSON.stringify(state.objectifs));
+          localStorage.setItem(
+            "lokka_onboarding_objectifs",
+            JSON.stringify(state.objectifs)
+          );
         }
       }
     } catch (err) {
       console.warn("Supabase onboarding sync notice:", err);
     }
-
     setTimeout(() => {
       router.push("/dashboard");
     }, 900);
   };
 
+  // Animation variants inspired by 21st.dev multistep pattern
+  const variants = {
+    enter: (dir: "forward" | "back") => ({
+      x: dir === "forward" ? 32 : -32,
+      opacity: 0,
+    }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: "forward" | "back") => ({
+      x: dir === "forward" ? -32 : 32,
+      opacity: 0,
+    }),
+  };
+
+  const progressPct = Math.round(((currentStep) / (STEPS.length - 1)) * 100);
+
   return (
-    <div className="min-h-screen w-full flex flex-col items-center py-8 px-4 bg-[#FAF9F6]">
-      <div className="w-full max-w-xl flex flex-col justify-between p-4 mb-4 z-10 bg-[#FAF9F6]">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center py-8 px-4 bg-background">
+      <div className="w-full max-w-lg flex flex-col gap-8">
+
         {/* Header */}
-        <div className="w-full flex items-center justify-between pb-6 border-b border-[#E8E3DC]">
+        <div className="flex items-center justify-between pb-5 border-b border-border">
           <Logo size="sm" variant="dark" />
-          <span className="text-[12px] font-bold text-[#52525B]">
+          <span className="text-[12px] font-bold text-muted-foreground">
             Configuration de votre espace
           </span>
         </div>
 
-        {/* Stepper Progress Bar */}
-        <div className="w-full max-w-sm mx-auto my-8">
-          <div className="flex items-center justify-between px-2">
+        {/* Stepper — style 21st.dev with animated progress bar */}
+        <div className="space-y-4">
+          {/* Progress bar */}
+          <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 left-0 bg-primary rounded-full"
+              initial={false}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            />
+          </div>
+
+          {/* Step dots */}
+          <div className="flex items-start justify-between px-0">
             {STEPS.map((s, index) => {
               const isCompleted = index < currentStep;
               const isCurrent = index === currentStep;
+              const Icon = s.icon;
 
               return (
-                <div key={index} className="flex-1 flex flex-col items-center relative">
-                  {index > 0 && (
-                    <div
-                      className={`absolute top-4 -left-1/2 w-full h-[2px] -z-0 transition-colors duration-300 ${
-                        index <= currentStep ? "bg-[#18181B]" : "bg-[#E8E3DC]"
-                      }`}
-                    />
-                  )}
-
-                  <div
-                    className={`relative z-10 h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 ${
+                <div key={index} className="flex flex-col items-center gap-1.5 flex-1">
+                  <motion.div
+                    className={[
+                      "h-9 w-9 rounded-full flex items-center justify-center transition-all border-2",
                       isCompleted
-                        ? "bg-[#18181B] text-white shadow-xs"
+                        ? "bg-primary border-primary text-primary-foreground"
                         : isCurrent
-                        ? "bg-[#18181B] text-white ring-4 ring-[#9D6B3C]/20 shadow-xs"
-                        : "bg-[#FAF9F6] text-[#71717A] border-2 border-[#E8E3DC]"
-                    }`}
+                        ? "border-primary bg-card text-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]"
+                        : "border-border bg-card text-muted-foreground",
+                    ].join(" ")}
+                    animate={{
+                      scale: isCurrent ? 1.08 : 1,
+                    }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   >
-                    {isCompleted ? <CheckIcon className="h-4 w-4 stroke-[2.5]" /> : index + 1}
-                  </div>
-
+                    {isCompleted ? (
+                      <CheckIcon className="h-4 w-4 stroke-[2.5]" />
+                    ) : (
+                      <Icon className="h-4 w-4" />
+                    )}
+                  </motion.div>
                   <span
-                    className={`mt-2 text-[11px] font-bold hidden sm:block ${
+                    className={[
+                      "text-[11px] font-bold hidden sm:block transition-colors",
                       isCurrent
-                        ? "text-[#18181B]"
+                        ? "text-foreground"
                         : isCompleted
-                        ? "text-[#52525B]"
-                        : "text-[#71717A]"
-                    }`}
+                        ? "text-muted-foreground"
+                        : "text-muted-foreground/60",
+                    ].join(" ")}
                   >
                     {s.label}
                   </span>
@@ -164,98 +194,86 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Card Content Form */}
-        <div className="w-full bg-white border border-[#E8E3DC] rounded-2xl p-6 sm:p-8 shadow-xs">
-          <AnimatePresence mode="wait">
-            {currentStep === 0 && (
-              <motion.div
-                key="step-0"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-              >
+        {/* Card */}
+        <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentStep}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.22, ease: "easeInOut" }}
+            >
+              {currentStep === 0 && (
                 <StepProfil
                   data={state.profil}
                   onChange={(profil) => setState({ ...state, profil })}
                 />
-              </motion.div>
-            )}
-
-            {currentStep === 1 && (
-              <motion.div
-                key="step-1"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-              >
+              )}
+              {currentStep === 1 && (
                 <StepObjectifs
                   selected={state.objectifs}
                   onChange={(objectifs) => setState({ ...state, objectifs })}
                 />
-              </motion.div>
-            )}
-
-            {currentStep === 2 && (
-              <motion.div
-                key="step-2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-              >
+              )}
+              {currentStep === 2 && (
                 <StepSaisieExpress
                   profileType={state.profil.profileType}
                   objectifs={state.objectifs}
                   data={state.saisieExpress}
-                  onChange={(saisieExpress) => setState({ ...state, saisieExpress })}
+                  onChange={(saisieExpress) =>
+                    setState({ ...state, saisieExpress })
+                  }
                 />
-              </motion.div>
-            )}
+              )}
+            </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between mt-6">
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
           {currentStep > 0 ? (
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="px-5 py-2.5 text-[13px] font-bold text-[#52525B] hover:text-[#18181B] transition-colors disabled:opacity-50"
             >
               Retour
-            </button>
+            </Button>
           ) : (
-            <div></div> // Spacer
+            <div />
           )}
 
-          <button
+          <Button
             type="button"
             disabled={!isStepValid() || isSubmitting}
             onClick={currentStep === 2 ? handleSubmit : handleNext}
-            className={`px-8 py-3 text-[13.5px] font-bold rounded-xl shadow-sm transition-all flex items-center gap-2 ${
-              !isStepValid() || isSubmitting
-                ? "bg-[#E8E3DC] text-[#71717A] cursor-not-allowed"
-                : "bg-[#18181B] text-white hover:bg-[#9D6B3C] hover:shadow-md cursor-pointer"
-            }`}
+            size="lg"
+            className="px-8"
           >
             {isSubmitting ? (
               <>
-                <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span>Configuration...</span>
+                <Spinner size="sm" className="mr-2" />
+                Configuration…
               </>
             ) : currentStep === 2 ? (
               <>
-                <span>Terminer la configuration</span>
-                <CheckCircleIcon className="w-4 h-4" />
+                Terminer la configuration
+                <CheckCircleIcon className="w-4 h-4 ml-2" />
               </>
             ) : (
-              <span>Continuer</span>
+              "Continuer"
             )}
-          </button>
+          </Button>
         </div>
+
+        {/* Footer */}
+        <p className="text-center text-[11px] text-muted-foreground">
+          Étape {currentStep + 1} sur {STEPS.length} · Vous pourrez modifier ces informations plus tard
+        </p>
       </div>
     </div>
   );

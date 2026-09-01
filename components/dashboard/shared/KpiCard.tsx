@@ -30,10 +30,10 @@ export function KpiCard({
   const resolvedDelta = delta ?? (trend ? { value: trend, trend: trendUp ? ("up" as const) : ("down" as const) } : undefined);
   
   const iconColorStyles = {
-    emerald: "bg-success/10 text-success",
-    amber: "bg-warning/10 text-warning",
-    rose: "bg-destructive/10 text-destructive",
-    blue: "bg-primary/10 text-primary",
+    emerald: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+    amber: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+    rose: "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+    blue: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
     default: "bg-muted text-foreground",
   };
 

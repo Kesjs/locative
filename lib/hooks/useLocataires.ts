@@ -61,43 +61,6 @@ export interface Receipt {
 
 const JOUR_MS = 1000 * 60 * 60 * 24;
 
-// ─── Demo data (fallback si Supabase non configuré) ──────────────
-
-const DEMO_TENANTS: Tenant[] = [
-  {
-    id: "t1",
-    full_name: "Koudjo Dossou",
-    phone_number: "+229 97 12 34 56",
-    whatsapp_number: "+229 97 12 34 56",
-    email: "koudjo.dossou@example.com",
-    id_card_type: "CIP",
-    id_card_number: "BJ-CIP-00123456",
-    profession: "Commerçant",
-    emergency_contact_name: "Alice Dossou",
-    emergency_contact_phone: "+229 96 55 44 33",
-  },
-];
-
-const DEMO_LEASES: LeaseWithDetails[] = [
-  {
-    id: "l1",
-    bien_id: "1",
-    tenant_id: "t1",
-    start_date: "2025-11-01",
-    end_date: null,
-    rent_amount: 350000,
-    charges_amount: 25000,
-    deposit_months: 3,
-    deposit_amount: 1050000,
-    due_day: 5,
-    is_active: true,
-    lease_contract_url: null,
-    balance_due: 0,
-    tenant: DEMO_TENANTS[0],
-    bien: null,
-  },
-];
-
 // ─── Baux (avec locataire + bien joints) ─────────────────────────
 
 export function useLeases() {
@@ -105,7 +68,7 @@ export function useLeases() {
     queryKey: ["leases"],
     queryFn: async (): Promise<LeaseWithDetails[]> => {
       if (!isSupabaseConfigured()) {
-        return DEMO_LEASES;
+        return [];
       }
       const supabase = createClient();
       const { data, error } = await supabase
@@ -113,10 +76,10 @@ export function useLeases() {
         .select("*, tenant:tenants(*), bien:biens(*)")
         .order("created_at", { ascending: false });
       if (error) {
-        console.warn("Supabase fetch error, fallback to demo:", error);
-        return DEMO_LEASES;
+        console.error("Supabase fetch error (leases):", error.message);
+        return [];
       }
-      return (data as LeaseWithDetails[]) || DEMO_LEASES;
+      return (data as LeaseWithDetails[]) || [];
     },
   });
 }

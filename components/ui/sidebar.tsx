@@ -347,7 +347,7 @@ export const SidebarProvider = React.forwardRef<
             display: "flex",
             minHeight: "100vh",
             width: "100%",
-            background: "var(--color-surface-primary)",
+            background: "hsl(var(--background))",
             ...style,
           }}
           className={cn("group/sidebar-wrapper", className)}
@@ -411,12 +411,12 @@ export const Sidebar = React.forwardRef<
           transform: isHiddenOffscreen ? "translateX(-130%)" : "translateX(0)",
           opacity: isHiddenOffscreen ? 0 : 1,
           pointerEvents: isHiddenOffscreen ? "none" : "auto",
-          background: "var(--bg-sidebar, #FFFFFF)",
+          background: "hsl(var(--card))",
           border: isFloating
-            ? "1px solid var(--sidebar-border, var(--border-default))"
+            ? "1px solid hsl(var(--border))"
             : undefined,
           borderRight: !isFloating
-            ? "1px solid var(--sidebar-border, var(--border-default))"
+            ? "1px solid hsl(var(--border))"
             : undefined,
           borderRadius: isFloating ? 14 : 0,
           boxShadow: isFloating
@@ -430,7 +430,7 @@ export const Sidebar = React.forwardRef<
           padding: "16px 12px",
           ...style,
         }}
-        className={cn("sidebar-container group/sidebar text-[var(--text-primary)]", className)}
+        className={cn("sidebar-container group/sidebar text-foreground bg-card border-border", className)}
         {...props}
       >
         {children}
@@ -460,12 +460,12 @@ export const SidebarTrigger = React.forwardRef<
         }
       }}
       style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border-default)",
+        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border))",
         borderRadius: 8,
         padding: "6px 8px",
         cursor: "pointer",
-        color: "var(--text-primary)",
+        color: "hsl(var(--foreground))",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -570,8 +570,8 @@ export const SidebarInset = React.forwardRef<
         marginTop: isInset && !isFullLayoutActive ? 12 : 0,
         marginBottom: isInset && !isFullLayoutActive ? 12 : 0,
         borderRadius: isInset && !isFullLayoutActive ? 14 : 0,
-        border: isInset && !isFullLayoutActive ? "1px solid var(--color-border-primary)" : "none",
-        backgroundColor: isInset ? "var(--color-surface-secondary)" : undefined,
+        border: isInset && !isFullLayoutActive ? "1px solid hsl(var(--border))" : "none",
+        backgroundColor: isInset ? "hsl(var(--card))" : undefined,
         boxShadow: isInset && !isFullLayoutActive ? "0 4px 20px rgba(0,0,0,0.03)" : "none",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         ...style,

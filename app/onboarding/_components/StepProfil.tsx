@@ -2,6 +2,10 @@ import React from "react";
 import { type ProfilStepData } from "../_types";
 import { ProfileCard } from "./ProfileCard";
 import { HomeModernIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface StepProfilProps {
   data: ProfilStepData;
@@ -9,7 +13,6 @@ interface StepProfilProps {
 }
 
 const COUNTRIES = [
-  { code: "BJ", name: "Bénin" },
   { code: "FR", name: "France" },
   { code: "CI", name: "Côte d'Ivoire" },
   { code: "TG", name: "Togo" },
@@ -28,6 +31,63 @@ const COUNTRIES = [
   { code: "IT", name: "Italie" },
 ];
 
+/** Pill-style toggle buttons (Mobile Money / Banque, zone géo, provider) */
+function ToggleGroup({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex gap-1.5 p-1 bg-muted/50 border border-border rounded-xl">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={cn(
+            "flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all",
+            value === opt.value
+              ? "bg-card text-foreground shadow-sm ring-1 ring-border"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Pill-button pour Mobile provider */
+function PillButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex-1 py-2 text-[13px] font-semibold rounded-xl border transition-all capitalize",
+        active
+          ? "bg-primary/10 text-primary border-primary/40"
+          : "bg-card text-muted-foreground border-border hover:border-primary/40"
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
 export function StepProfil({ data, onChange }: StepProfilProps) {
   const updateData = (updates: Partial<ProfilStepData>) => {
     onChange({ ...data, ...updates });
@@ -35,15 +95,17 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
 
   return (
     <div className="space-y-6">
+      {/* Heading */}
       <div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#0F172A] tracking-tight">
+        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-foreground tracking-tight">
           Quel est votre profil ?
         </h2>
-        <p className="text-[13px] text-[#64635F] mt-1">
+        <p className="text-[13px] text-muted-foreground mt-1">
           Lokka s'adapte à votre mode de gestion.
         </p>
       </div>
 
+      {/* Type de profil */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <ProfileCard
           id="bailleur"
@@ -63,128 +125,96 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
         />
       </div>
 
-      <div>
-        <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-          {data.profileType === "bailleur" ? "Nom" : "Raison sociale du cabinet"}
-        </label>
-        <input
+      {/* Nom */}
+      <FormField
+        label={data.profileType === "bailleur" ? "Votre nom" : "Raison sociale du cabinet"}
+        htmlFor="onboarding-nom"
+        required
+      >
+        <Input
+          id="onboarding-nom"
           type="text"
+          autoComplete="name"
           value={data.nom}
           onChange={(e) => updateData({ nom: e.target.value })}
-          className="w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]/10 shadow-sm transition-shadow"
-          placeholder={data.profileType === "bailleur" ? "Ex: Koudjo Dossou" : "Ex: Agence Immobilière du Golfe"}
+          placeholder={
+            data.profileType === "bailleur"
+              ? "Ex: Koudjo Dossou"
+              : "Ex: Agence Immobilière du Golfe"
+          }
         />
-      </div>
+      </FormField>
 
-      <div>
-        <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-          Moyen de réception des fonds privilégié
-        </label>
-        <div className="flex gap-2 p-1 bg-[#FAF9F6] border border-[#E8E5E0] rounded-lg">
-          <button
-            type="button"
-            onClick={() => updateData({ moyenReception: "mobile_money", mobileProvider: "mtn" })}
-            className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
-              data.moyenReception === "mobile_money"
-                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#0F172A]"
-            }`}
-          >
-            Mobile Money
-          </button>
-          <button
-            type="button"
-            onClick={() => updateData({ moyenReception: "banque", mobileProvider: undefined })}
-            className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
-              data.moyenReception === "banque"
-                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#0F172A]"
-            }`}
-          >
-            Virement Bancaire
-          </button>
-        </div>
-      </div>
+      {/* Moyen de réception */}
+      <FormField label="Moyen de réception des fonds privilégié" htmlFor="moyen-reception">
+        <ToggleGroup
+          value={data.moyenReception}
+          onChange={(v) =>
+            updateData({
+              moyenReception: v as "mobile_money" | "banque",
+              mobileProvider: v === "mobile_money" ? "mtn" : undefined,
+            })
+          }
+          options={[
+            { value: "mobile_money", label: "📱 Mobile Money" },
+            { value: "banque", label: "🏦 Virement Bancaire" },
+          ]}
+        />
+      </FormField>
 
+      {/* Réseau mobile */}
       {data.moyenReception === "mobile_money" && (
-        <div>
-          <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-            Réseau mobile
-          </label>
+        <FormField label="Réseau mobile" htmlFor="mobile-provider">
           <div className="flex gap-2">
             {(["mtn", "moov", "celtiis"] as const).map((provider) => (
-              <button
+              <PillButton
                 key={provider}
-                type="button"
+                label={provider.toUpperCase()}
+                active={data.mobileProvider === provider}
                 onClick={() => updateData({ mobileProvider: provider })}
-                className={`flex-1 py-2 text-[13px] font-semibold rounded-lg border transition-all capitalize ${
-                  data.mobileProvider === provider
-                    ? "bg-[#F5F5DC] text-[#0F172A] border-[#0F172A]"
-                    : "bg-white text-[#64635F] border-[#E8E5E0] hover:border-[#0F172A]"
-                }`}
-              >
-                {provider}
-              </button>
+              />
             ))}
           </div>
-        </div>
+        </FormField>
       )}
 
-      <div>
-        <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-          Zone géographique actuelle
-        </label>
-        <div className="flex gap-2 p-1 bg-[#FAF9F6] border border-[#E8E5E0] rounded-lg">
-          <button
-            type="button"
-            onClick={() => updateData({ zoneGeo: "benin", paysDiaspora: undefined })}
-            className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
-              data.zoneGeo === "benin"
-                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#0F172A]"
-            }`}
-          >
-            Au Bénin 🇧🇯
-          </button>
-          <button
-            type="button"
-            onClick={() => updateData({ zoneGeo: "diaspora", paysDiaspora: "France" })}
-            className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
-              data.zoneGeo === "diaspora"
-                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#0F172A]"
-            }`}
-          >
-            Diaspora 🌍
-          </button>
-        </div>
-      </div>
+      {/* Zone géographique */}
+      <FormField label="Zone géographique actuelle" htmlFor="zone-geo">
+        <ToggleGroup
+          value={data.zoneGeo}
+          onChange={(v) =>
+            updateData({
+              zoneGeo: v as "benin" | "diaspora",
+              paysDiaspora: v === "diaspora" ? "France" : undefined,
+            })
+          }
+          options={[
+            { value: "benin", label: "Au Bénin 🇧🇯" },
+            { value: "diaspora", label: "Diaspora 🌍" },
+          ]}
+        />
+      </FormField>
 
+      {/* Pays diaspora */}
       {data.zoneGeo === "diaspora" && (
-        <div>
-          <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-            Pays de résidence
-          </label>
-          <div className="relative">
-            <select
-              value={data.paysDiaspora || ""}
-              onChange={(e) => updateData({ paysDiaspora: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]/10 shadow-sm transition-shadow appearance-none cursor-pointer"
-            >
-              {COUNTRIES.filter(c => c.code !== "BJ").map((c) => (
-                <option key={c.code} value={c.name}>
+        <FormField label="Pays de résidence" htmlFor="pays-diaspora">
+          <Select
+            value={data.paysDiaspora || "France"}
+            onValueChange={(v) => updateData({ paysDiaspora: v })}
+          >
+            <SelectTrigger id="pays-diaspora">
+              <SelectValue placeholder="Sélectionner un pays..." />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTRIES.map((c) => (
+                <SelectItem key={c.code} value={c.name}>
                   {c.name}
-                </option>
+                </SelectItem>
               ))}
-              <option value="Autre">Autre pays</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg className="w-4 h-4 text-[#64635F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-        </div>
+              <SelectItem value="Autre">Autre pays</SelectItem>
+            </SelectContent>
+          </Select>
+        </FormField>
       )}
     </div>
   );

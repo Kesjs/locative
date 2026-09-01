@@ -89,16 +89,16 @@ export default function EmailOtpForm({
   return (
     <form onSubmit={handleSubmit} className={`w-full ${className}`}>
       <div
-        className={`relative flex flex-col gap-2 rounded-xl p-2 transition-all sm:flex-row sm:items-center ${
+        className={`relative flex flex-col gap-2 rounded-xl p-1.5 transition-all sm:flex-row sm:items-center ${
           dark
-            ? "border border-white/20 bg-zinc-900/90 shadow-xl backdrop-blur-md focus-within:border-[#9D6B3C] focus-within:ring-2 focus-within:ring-[#9D6B3C]/30"
-            : "border-2 border-[#18181B] bg-white shadow-[0_12px_36px_rgba(24,24,27,0.08)] focus-within:border-[#9D6B3C] focus-within:ring-4 focus-within:ring-[#9D6B3C]/15"
+            ? "border border-slate-700 bg-slate-900/90 shadow-xl backdrop-blur-md focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20"
+            : "border border-slate-200 bg-white shadow-md shadow-slate-900/5 focus-within:border-emerald-600 focus-within:ring-3 focus-within:ring-emerald-500/15"
         }`}
       >
-        <div className="flex flex-1 items-center gap-3 px-3">
+        <div className="flex flex-1 items-center gap-2.5 px-3">
           <Mail
-            size={20}
-            className={`shrink-0 ${dark ? "text-white/70" : "text-[#18181B]"}`}
+            size={18}
+            className={`shrink-0 ${dark ? "text-slate-400" : "text-slate-400"}`}
           />
           <input
             id={inputId}
@@ -111,10 +111,10 @@ export default function EmailOtpForm({
             placeholder="Entrez votre adresse email..."
             required
             aria-describedby={feedbackId}
-            className={`h-11 w-full bg-transparent text-[15px] font-semibold outline-none ${
+            className={`h-10 w-full bg-transparent text-[14.5px] font-medium outline-none ${
               dark
-                ? "text-white placeholder:text-white/50"
-                : "text-[#18181B] placeholder:text-[#71717A]"
+                ? "text-white placeholder:text-slate-400"
+                : "text-slate-900 placeholder:text-slate-400"
             }`}
           />
         </div>
@@ -122,17 +122,13 @@ export default function EmailOtpForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`inline-flex min-h-[48px] items-center justify-center gap-2 rounded-lg px-6 text-[14px] font-bold text-white transition-all duration-200 shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-75 ${
-            dark
-              ? "bg-[#9D6B3C] hover:bg-[#85572E]"
-              : "bg-[#18181B] hover:bg-[#9D6B3C]"
-          }`}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-5 text-[13.5px] font-semibold text-white transition-all duration-200 shadow-sm cursor-pointer disabled:cursor-wait disabled:opacity-75 shrink-0"
         >
           <span>{isSubmitting ? "Envoi du code…" : isSuccess ? "Code envoyé" : buttonLabel}</span>
           {isSuccess ? (
-            <CheckCircle2 aria-hidden="true" size={16} className="text-white" />
+            <CheckCircle2 aria-hidden="true" size={15} className="text-white" />
           ) : (
-            <ArrowRight aria-hidden="true" size={16} className="transition-transform group-hover:translate-x-1" />
+            <ArrowRight aria-hidden="true" size={15} className="transition-transform group-hover:translate-x-0.5" />
           )}
         </button>
       </div>
@@ -140,14 +136,14 @@ export default function EmailOtpForm({
       <p
         id={feedbackId}
         aria-live="polite"
-        className={`mt-2.5 text-center text-[12px] font-medium leading-relaxed sm:text-left ${
+        className={`mt-2.5 text-center text-[11.5px] font-medium leading-relaxed sm:text-left ${
           isSuccess
-            ? "text-[#15803D] font-bold"
+            ? "text-emerald-400 font-semibold"
             : status === "error"
-            ? "text-[#E11D48] font-bold"
+            ? "text-rose-400 font-semibold"
             : dark
-            ? "text-white/70"
-            : "text-[#52525B]"
+            ? "text-slate-400"
+            : "text-slate-500"
         }`}
       >
         {feedback}

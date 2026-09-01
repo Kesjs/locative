@@ -2,61 +2,63 @@
 
 import React, { useState } from "react";
 import { useAddArtisan } from "@/lib/hooks/useMaintenance";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export function AddArtisanModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { mutateAsync: addArtisan, isPending } = useAddArtisan();
-  const [formData, setFormData] = useState({
-    nom: "",
-    specialite: "",
-    telephone: "",
-    note: "Nouveau",
-  });
+  const [formData, setFormData] = useState({ nom: "", specialite: "", telephone: "", note: "Nouveau" });
 
-  if (!isOpen) return null;
+  const handleOpenChange = (open: boolean) => {
+    if (!open) { setFormData({ nom: "", specialite: "", telephone: "", note: "Nouveau" }); onClose(); }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await addArtisan(formData);
-      onClose();
+      toast.success("Artisan ajouté au carnet !");
+      handleOpenChange(false);
     } catch (error) {
+      toast.error("Erreur lors de l'ajout de l'artisan.");
       console.error(error);
     }
   };
 
+  const isValid = formData.nom.trim() !== "" && formData.specialite.trim() !== "";
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-[12px] p-6 max-w-md w-full shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[18px] font-bold text-[#0F172A]">Ajouter un artisan</h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
-            <XMarkIcon className="w-5 h-5 text-[#64635F]" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent size="md">
+        <DialogHeader>
+          <DialogTitle>Ajouter un artisan</DialogTitle>
+          <DialogDescription>Enregistrez un prestataire dans votre carnet d'adresses.</DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[12px] font-bold text-[#64635F] mb-1">Nom ou Entreprise</label>
-            <input required type="text" value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} className="w-full border border-[#E8E5E0] rounded-[6px] px-3 py-2 text-[13px] outline-none" />
+          <div className="space-y-1.5">
+            <Label htmlFor="artisan-nom">Nom ou Entreprise</Label>
+            <Input id="artisan-nom" required autoFocus value={formData.nom} onChange={e => setFormData({ ...formData, nom: e.target.value })} placeholder="Ex. Plomberie Express" />
           </div>
-          <div>
-            <label className="block text-[12px] font-bold text-[#64635F] mb-1">Spécialité</label>
-            <input required type="text" value={formData.specialite} onChange={e => setFormData({...formData, specialite: e.target.value})} className="w-full border border-[#E8E5E0] rounded-[6px] px-3 py-2 text-[13px] outline-none" placeholder="Ex: Plomberie" />
+          <div className="space-y-1.5">
+            <Label htmlFor="artisan-specialite">Spécialité</Label>
+            <Input id="artisan-specialite" required value={formData.specialite} onChange={e => setFormData({ ...formData, specialite: e.target.value })} placeholder="Ex. Plomberie, Électricité..." />
           </div>
-          <div>
-            <label className="block text-[12px] font-bold text-[#64635F] mb-1">Téléphone</label>
-            <input required type="tel" value={formData.telephone} onChange={e => setFormData({...formData, telephone: e.target.value})} className="w-full border border-[#E8E5E0] rounded-[6px] px-3 py-2 text-[13px] outline-none" />
+          <div className="space-y-1.5">
+            <Label htmlFor="artisan-tel">Téléphone</Label>
+            <Input id="artisan-tel" required type="tel" value={formData.telephone} onChange={e => setFormData({ ...formData, telephone: e.target.value })} placeholder="+229 97 00 11 22" />
           </div>
-          <div className="flex justify-end gap-3 mt-6">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] font-bold text-[#64635F] hover:bg-gray-100 rounded-[6px]">
-              Annuler
-            </button>
-            <button type="submit" disabled={isPending || !formData.nom || !formData.specialite} className="px-4 py-2 bg-[#0F172A] text-white text-[13px] font-bold rounded-[6px] disabled:opacity-50">
-              {isPending ? "Ajout..." : "Ajouter au carnet"}
-            </button>
-          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>Annuler</Button>
+            <Button type="submit" disabled={isPending || !isValid}>
+              {isPending ? <><Spinner size="sm" className="mr-2" />Ajout...</> : "Ajouter au carnet"}
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -198,36 +198,30 @@ function CollapsibleNavItem({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        style={
-          isActive
-            ? {
-                backgroundColor: "var(--color-brand-primary, #0F172A)",
-                color: "var(--color-brand-text, #FFFFFF)",
-              }
-            : undefined
-        }
         className={`w-full flex items-center gap-3 px-3 py-2 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer select-none ${
           isActive
-            ? "text-white font-semibold shadow-xs"
-            : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
+            ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+            : "text-foreground hover:bg-muted hover:text-foreground"
         }`}
       >
-        <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
+        <item.icon className={`size-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`} />
         <span className="truncate flex-1 text-left font-medium">{item.title}</span>
         {item.badge && (
           <span
             className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
               item.badgeType === "danger"
                 ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
-                : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-default)]"
+                : isActive
+                ? "bg-primary-foreground/20 text-primary-foreground"
+                : "bg-muted text-foreground border border-border"
             }`}
           >
             {item.badge}
           </span>
         )}
         <ChevronRight
-          className={`size-4 text-[var(--text-muted)] transition-transform duration-200 ${
-            isOpen ? "rotate-90 text-[var(--text-primary)]" : ""
+          className={`size-4 ${isActive ? "text-primary-foreground" : "text-muted-foreground"} transition-transform duration-200 ${
+            isOpen ? "rotate-90" : ""
           }`}
         />
       </button>
@@ -443,20 +437,12 @@ export function AppSidebar() {
                       asChild
                       tooltip={item.title}
                       isActive={active}
-                      style={
-                        active
-                          ? {
-                              backgroundColor: "var(--color-brand-primary, #0F172A)",
-                              color: "var(--color-brand-text, #FFFFFF)",
-                            }
-                          : undefined
-                      }
                       className={`w-full flex items-center ${
                         isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
                       } rounded-[8px] text-[13px] font-medium transition-colors ${
                         active
-                          ? "text-white font-semibold shadow-xs"
-                          : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
+                          ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                          : "text-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
                       <Link
@@ -464,14 +450,16 @@ export function AppSidebar() {
                         className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}
                         onClick={() => isMobile && setOpenMobile(false)}
                       >
-                        <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
+                        <item.icon className={`size-4 shrink-0 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
                         {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
                         {item.badge && !isCollapsed && (
                           <span
                             className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
                               item.badgeType === "danger"
                                 ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
-                                : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-default)]"
+                                : active
+                                ? "bg-primary-foreground/20 text-primary-foreground"
+                                : "bg-muted text-foreground border border-border"
                             }`}
                           >
                             {item.badge}

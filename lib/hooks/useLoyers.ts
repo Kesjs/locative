@@ -13,54 +13,23 @@ export interface LoyerTransaction {
   echeance: string;
 }
 
-const DEMO_TRANSACTIONS: LoyerTransaction[] = [
-  {
-    id: "tx-1",
-    locataire_nom: "Koudjo Dossou",
-    bien_nom: "Villa Fidjrossè Plage",
-    montant: 350000,
-    methode: "MTN MoMo",
-    statut: "payé",
-    quittance_url: "/quittances/lok-2026-01.pdf",
-    date_reglement: "05/03/2026",
-    echeance: "05/03/2026",
-  },
-  {
-    id: "tx-2",
-    locataire_nom: "Bérénice Agossou",
-    bien_nom: "Studio Meublé Haie Vive",
-    montant: 120000,
-    methode: "Moov Money",
-    statut: "payé",
-    quittance_url: "/quittances/lok-2026-02.pdf",
-    date_reglement: "03/03/2026",
-    echeance: "05/03/2026",
-  },
-  {
-    id: "tx-3",
-    locataire_nom: "Gérard Bio",
-    bien_nom: "Appartement 3P Ganhi",
-    montant: 220000,
-    methode: "MTN MoMo",
-    statut: "retard",
-    echeance: "01/03/2026",
-  },
-];
-
 export function useLoyers() {
   return useQuery({
     queryKey: ["loyers"],
     queryFn: async (): Promise<LoyerTransaction[]> => {
       if (!isSupabaseConfigured()) {
-        return DEMO_TRANSACTIONS;
+        return [];
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("loyers_transactions").select("*").order("echeance", { ascending: false });
+      const { data, error } = await supabase
+        .from("loyers_transactions")
+        .select("*")
+        .order("echeance", { ascending: false });
       if (error) {
-        console.warn("Supabase fetch error, fallback to demo:", error);
-        return DEMO_TRANSACTIONS;
+        console.error("Supabase fetch error (loyers):", error.message);
+        return [];
       }
-      return (data as LoyerTransaction[]) || DEMO_TRANSACTIONS;
+      return (data as LoyerTransaction[]) || [];
     },
   });
 }
