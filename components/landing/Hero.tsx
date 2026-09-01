@@ -1,13 +1,75 @@
 "use client";
 
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, Star } from "lucide-react";
-import EmailOtpForm from "./EmailOtpForm";
+import { ArrowRight, CheckCircle2, Star, Mail } from "lucide-react";
 import DashboardPreview from "./DashboardPreview";
 import FluidFlowGrid from "@/components/ui/fluid-flow-grid";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { handleError } from "@/lib/errors";
 
 export default function Hero() {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState("Créez votre espace en quelques secondes. Essai gratuit 14 jours sans engagement.");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  const handleHeroSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setIsError(false);
+    setFeedback("Un code de connexion sécurisé va vous être envoyé...");
+
+    try {
+      if (!isSupabaseConfigured()) {
+        const message = handleError(
+          new Error("Configuration Supabase manquante"),
+          "Service momentanément indisponible. Réessayez dans un instant.",
+          "hero:otp"
+        );
+        setIsError(true);
+        setFeedback(message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const supabase = createClient();
+      await supabase.from("leads_waitlist").insert([
+        {
+          email: email.trim(),
+          source: "hero_landing",
+          profile_type: "bailleur",
+          city: "Cotonou",
+        },
+      ]);
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+          shouldCreateUser: true,
+        },
+      });
+      if (error) throw error;
+
+      setIsSuccess(true);
+      setFeedback(`Code envoyé à ${email.trim()}. Redirection...`);
+      window.setTimeout(() => {
+        window.location.href = `/auth/verify?email=${encodeURIComponent(email.trim())}`;
+      }, 800);
+    } catch (err) {
+      const message = handleError(err, "Impossible d'envoyer le code. Vérifiez votre email.", "hero:otp");
+      setIsError(true);
+      setFeedback(message);
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section id="hero" className="relative overflow-hidden bg-[#FAF9F6] pb-12 pt-28 sm:pb-20 sm:pt-36">
       
@@ -68,19 +130,50 @@ export default function Hero() {
             Que vous soyez au Bénin ou dans la diaspora, pilotez vos logements, encaissez vos loyers par MTN MoMo, émettez vos quittances certifiées et publiez votre mini-site vitrine depuis un seul espace.
           </motion.p>
 
-          {/* Formulaire de Conversion Email OTP */}
+          {/* Formulaire de Conversion Email OTP - Visible & Ultra-Contraste */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
-            data-landing-hero-form
-            className="mt-8 w-full max-w-[520px]"
+            className="mt-8 w-full max-w-[500px]"
           >
-            <EmailOtpForm
-              source="hero_landing"
-              buttonLabel="Commencer"
-              helperText="Créez votre espace en quelques secondes. Essai gratuit 14 jours sans engagement."
-            />
+            <form
+              onSubmit={handleHeroSubmit}
+              className="group relative flex w-full flex-col gap-2 rounded-xl bg-white p-2 border-2 border-[#18181B] shadow-[0_12px_36px_rgba(24,24,27,0.08)] transition-all duration-300 focus-within:border-[#9D6B3C] focus-within:ring-4 focus-within:ring-[#9D6B3C]/15 sm:flex-row sm:items-center"
+            >
+              <div className="flex flex-1 items-center gap-3 px-3">
+                <Mail size={20} className="shrink-0 text-[#18181B]" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Votre adresse email"
+                  required
+                  className="h-11 w-full bg-transparent text-[15px] font-semibold text-[#18181B] placeholder-[#71717A] outline-none min-w-0"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-lg bg-[#18181B] hover:bg-[#9D6B3C] px-6 text-[14px] font-bold text-white transition-all duration-200 shadow-md cursor-pointer disabled:cursor-wait disabled:opacity-75 shrink-0"
+              >
+                <span>{isSubmitting ? "Envoi..." : isSuccess ? "Code envoyé" : "Commencer"}</span>
+                <ArrowRight aria-hidden="true" size={16} className="transition-transform group-hover:translate-x-1" />
+              </button>
+            </form>
+
+            <p
+              className={`mt-2.5 text-center text-[12px] font-medium leading-relaxed ${
+                isSuccess
+                  ? "text-[#15803D] font-bold"
+                  : isError
+                  ? "text-[#E11D48] font-bold"
+                  : "text-[#52525B]"
+              }`}
+            >
+              {feedback}
+            </p>
           </motion.div>
 
           {/* Preuve Sociale & Indicateurs de Confiance */}
@@ -88,14 +181,14 @@ export default function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.46, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[12px] font-medium text-[#52525B]"
+            className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[12px] font-medium text-[#52525B]"
           >
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {[...Array(5)].map((_, i) => (
                   <img
                     key={i}
-                    className="inline-block h-7 w-7 rounded-full border-2 border-white shadow-2xs"
+                    className="inline-block h-7 w-7 rounded-full border-2 border-white shadow-2xs object-cover"
                     src={`https://i.pravatar.cc/100?img=${i + 10}`}
                     alt="Avatar bailleur"
                   />
@@ -104,7 +197,7 @@ export default function Hero() {
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <Star key={i} className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
                   ))}
                 </div>
                 <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-[#18181B]">
@@ -117,7 +210,7 @@ export default function Hero() {
             <span className="hidden h-5 w-px bg-[#E8E3DC] sm:block" />
 
             <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-[#18181B]">
-              <span className="rounded-[4px] border border-[#E8E3DC] bg-white px-1.5 py-0.5 text-[10px] font-extrabold text-[#9D6B3C]">
+              <span className="rounded-[4px] border border-[#E8E3DC] bg-[#F6EFE7] px-1.5 py-0.5 text-[10px] font-extrabold text-[#9D6B3C]">
                 FCFA
               </span>
               100% adapté au Bénin &amp; Afrique de l&apos;Ouest
