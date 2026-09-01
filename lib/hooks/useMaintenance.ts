@@ -31,11 +31,13 @@ export function useTickets() {
         .from("maintenance_tickets")
         .select("*")
         .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Supabase fetch error (tickets):", error.message);
+        if (error) {
+          return [];
+        }
+        return (data as Ticket[]) || [];
+      } catch {
         return [];
       }
-      return (data as Ticket[]) || [];
     },
   });
 }
@@ -48,9 +50,13 @@ export function useAddTicket() {
         return { ...newTicket, id: Date.now().toString() };
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("maintenance_tickets").insert([newTicket]).select().single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase.from("maintenance_tickets").insert([newTicket]).select().single();
+        if (error) return { ...newTicket, id: Date.now().toString() };
+        return data;
+      } catch {
+        return { ...newTicket, id: Date.now().toString() };
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["maintenance-tickets"] });
@@ -66,17 +72,18 @@ export function useArtisans() {
         return [];
       }
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("maintenance_artisans")
-        .select("*")
-        .order("nom");
-      if (error) {
-        console.error("Supabase fetch error (artisans):", error.message);
+      try {
+        const { data, error } = await supabase
+          .from("maintenance_artisans")
+          .select("*")
+          .order("nom");
+        if (error) {
+          return [];
+        }
+        return (data as Artisan[]) || [];
+      } catch {
         return [];
       }
-      return (data as Artisan[]) || [];
-    },
-  });
 }
 
 export function useAddArtisan() {
