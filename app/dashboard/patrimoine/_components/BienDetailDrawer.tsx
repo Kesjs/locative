@@ -115,8 +115,13 @@ export function BienDetailDrawer({ bien, onClose, onEdit }: BienDetailDrawerProp
               <div className="min-w-0">
                 <h2 className="text-[16px] font-bold text-card-foreground truncate">{bien.nom}</h2>
                 <p className="text-[12px] text-muted-foreground flex items-center gap-1 truncate">
-                  <MapPinIcon className="w-3.5 h-3.5 shrink-0" /> {bien.adresse}, {bien.ville}
+                  <MapPinIcon className="w-3.5 h-3.5 shrink-0" /> {bien.adresse || bien.ville}
                 </p>
+                {bien.repere && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate mt-0.5">
+                    📍 {bien.repere}
+                  </p>
+                )}
               </div>
               <button onClick={onClose} className="p-2 hover:bg-muted rounded-full shrink-0 ml-2" aria-label="Fermer">
                 <XMarkIcon className="w-5 h-5 text-muted-foreground" />
@@ -347,6 +352,26 @@ function ApercuTab({
           )}
         </div>
       </div>
+
+      {(bien.compteur_sbee || bien.compteur_soneb) && (
+        <div>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase mb-2">Compteurs &amp; Énergie</p>
+          <div className="grid grid-cols-2 gap-2.5">
+            {bien.compteur_sbee && (
+              <div className="p-2.5 rounded-lg border border-border bg-muted/20">
+                <span className="text-[11px] text-muted-foreground block font-semibold">SBEE (Énergie)</span>
+                <span className="text-[13px] font-bold text-card-foreground font-mono">{bien.compteur_sbee}</span>
+              </div>
+            )}
+            {bien.compteur_soneb && (
+              <div className="p-2.5 rounded-lg border border-border bg-muted/20">
+                <span className="text-[11px] text-muted-foreground block font-semibold">SONEB (Eau)</span>
+                <span className="text-[13px] font-bold text-card-foreground font-mono">{bien.compteur_soneb}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,8 @@ export interface Bien {
   nom: string;
   adresse: string;
   ville: string;
+  quartier?: string;
+  repere?: string;
   type: string;
   loyer_mensuel: number;
   charges?: number;
@@ -17,15 +19,55 @@ export interface Bien {
   caution_montant?: number | null;
   surface_m2?: number | null;
   nb_pieces?: number | null;
+  compteur_sbee?: string;
+  compteur_soneb?: string;
   archive?: boolean;
   created_at?: string;
   updated_at?: string;
 }
 
+export const CATEGORIES_BIEN = [
+  {
+    categorie: "Habitation",
+    types: [
+      "Studio",
+      "Appartement 2P (1 chambre)",
+      "Appartement 3P (2 chambres)",
+      "Appartement 4P+",
+      "Villa individuelle",
+      "Duplex / Triplex",
+      "Chambre sanitaire",
+    ],
+  },
+  {
+    categorie: "Locaux Commerciaux & Professionnels",
+    types: [
+      "Boutique / Magasin commercial",
+      "Bureau / Plateau d'affaires",
+      "Entrepôt / Hangar de stockage",
+      "Immeuble multi-lots",
+      "Autre local",
+    ],
+  },
+];
+
+export const VILLES_BENIN = [
+  "Cotonou",
+  "Abomey-Calavi",
+  "Porto-Novo",
+  "Parakou",
+  "Ouidah",
+  "Bohicon",
+  "Sèmè-Kpodji",
+  "Allada",
+  "Natitingou",
+  "Djougou",
+];
+
 // Tags d'équipements prédéfinis proposés à l'étape 4 du formulaire d'ajout
 export const EQUIPEMENTS_PREDEFINIS = [
   "Climatisation",
-  "Forage / surpresseur",
+  "Forage / Surpresseur",
   "Compteur SBEE personnel",
   "Compteur SONEB personnel",
   "Groupe électrogène",
@@ -38,7 +80,7 @@ export const EQUIPEMENTS_PREDEFINIS = [
   "Gardiennage",
 ];
 
-// Plafond légal de caution = 3x le loyer mensuel
+// Plafond légal de caution au Bénin (Loi 2022-30) = 3x le loyer mensuel max
 export function plafondCaution(loyerMensuel: number) {
   return (loyerMensuel || 0) * 3;
 }
@@ -79,7 +121,6 @@ export function useAddBien() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
     },
   });
 }
@@ -87,75 +128,49 @@ export function useAddBien() {
 export function useUpdateBien() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Bien> & { id: string }) => {
+    mutationFn: async ({ id, ...patch }: Partial<Bien> & { id: string }) => {
       if (!isSupabaseConfigured()) {
-        return { id, ...updates };
+        return { id, ...patch } as Bien;
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("biens").update(updates).eq("id", id).select().single();
+      const { data, error } = await supabase.from("biens").update(patch).eq("id", id).select().single();
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
     },
   });
 }
 
-export function useUpdateBienStatut() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, statut }: { id: string; statut: Bien["statut"] }) => {
-      if (!isSupabaseConfigured()) {
-        return { id, statut };
-      }
-      const supabase = createClient();
-      const { data, error } = await supabase.from("biens").update({ statut }).eq("id", id).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["biens"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
-    },
-  });
-}
-
-export function useArchiveBien() {
+export function useDeleteBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       if (!isSupabaseConfigured()) {
-        return { id, archive: true };
+        return true;
       }
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("biens")
-        .update({ archive: true, archived_at: new Date().toISOString() })
-        .eq("id", id)
-        .select()
-        .single();
+      // Soft-delete pour préserver l'intégrité de l'historique des loyers
+      const { error } = await supabase.from("biens").update({ archive: true }).eq("id", id);
       if (error) throw error;
-      return data;
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
     },
   });
 }
 
-// Upload de photos vers le bucket Supabase Storage "biens-photos"
 export async function uploadBienPhoto(file: File): Promise<string> {
+  if (!isSupabaseConfigured()) {
+    return URL.createObjectURL(file);
+  }
   const supabase = createClient();
   const ext = file.name.split(".").pop();
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage.from("biens-photos").upload(path, file, {
-    cacheControl: "3600",
-    upsert: false,
-  });
-  if (error) throw error;
-  const { data } = supabase.storage.from("biens-photos").getPublicUrl(path);
+  const path = `biens/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+  const { error: uploadError } = await supabase.storage.from("photos").upload(path, file);
+  if (uploadError) throw uploadError;
+  const { data } = supabase.storage.from("photos").getPublicUrl(path);
   return data.publicUrl;
 }

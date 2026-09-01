@@ -134,7 +134,7 @@ export function getNavItems(profileType: string): NavItem[] {
   // Profil Par Défaut : Propriétaire Bailleur
   return [
     { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Mon Patrimoine", url: "/dashboard/patrimoine", icon: Building2 },
+    { title: "Logements & Locaux", url: "/dashboard/patrimoine", icon: Building2 },
     { title: "Locataires & Baux", url: "/dashboard/locataires", icon: Users },
     { title: "Loyers & Quittances", url: "/dashboard/loyers", icon: CreditCard },
     { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Megaphone },

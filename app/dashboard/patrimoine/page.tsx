@@ -101,7 +101,7 @@ export default function PatrimoinePage() {
     <div className="space-y-6 pb-24 sm:pb-6">
       <div className="flex items-center justify-between">
         <h1 className="text-[20px] font-extrabold text-foreground">
-          {role === "Agence" ? "Portefeuille Biens" : "Mon Patrimoine"}
+          {role === "Agence" ? "Portefeuille Biens" : "Logements & Locaux"}
         </h1>
       </div>
 
@@ -110,9 +110,9 @@ export default function PatrimoinePage() {
       ) : biens.length === 0 ? (
         <EmptyState
           icon={BuildingOffice2Icon}
-          title="Aucun bien dans votre patrimoine"
-          description="Commencez par ajouter votre premier bien immobilier pour le gérer."
-          actionLabel="Ajouter un bien"
+          title="Aucun logement ou local enregistré"
+          description="Ajoutez vos appartements, villas, boutiques ou bureaux pour activer le suivi en direct."
+          actionLabel="Ajouter un logement / local"
           onAction={openAddModal}
         />
       ) : (
