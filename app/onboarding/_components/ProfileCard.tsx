@@ -24,14 +24,14 @@ export function ProfileCard({
       onClick={() => onSelect(id)}
       className={`p-4 text-left rounded-xl border transition-all cursor-pointer flex flex-col gap-2 ${
         isSelected
-          ? "bg-[#1C1C1C] text-white border-[#1C1C1C] shadow-md ring-2 ring-[#1C1C1C]/20"
-          : "bg-white text-[#1C1C1C] border-[#E8E5E0] hover:border-[#1C1C1C] shadow-sm hover:shadow-md"
+          ? "bg-[#0F172A] text-white border-[#0F172A] shadow-md ring-2 ring-[#0F172A]/20"
+          : "bg-white text-[#0F172A] border-[#E8E5E0] hover:border-[#0F172A] shadow-sm hover:shadow-md"
       }`}
     >
       <div className="flex items-center gap-3">
         <div
           className={`p-2 rounded-lg ${
-            isSelected ? "bg-white/10 text-white" : "bg-[#FAF9F6] text-[#1C1C1C]"
+            isSelected ? "bg-white/10 text-white" : "bg-[#FAF9F6] text-[#0F172A]"
           }`}
         >
           <Icon className="h-6 w-6" />

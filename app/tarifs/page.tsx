@@ -38,7 +38,7 @@ export default function TarifsPage() {
           <div className="container mx-auto max-w-4xl px-6">
             <div className="text-center mb-14">
               <div className="section-label mb-3">Questions fréquentes</div>
-              <h2 className="heading-2 text-[#1C1C1C] text-[30px]">
+              <h2 className="heading-2 text-[#0F172A] text-[30px]">
                 Tout comprendre sur nos abonnements
               </h2>
             </div>
@@ -46,8 +46,8 @@ export default function TarifsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {faqs.map((faq, index) => (
                 <div key={index} className="p-6 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0]">
-                  <h3 className="text-[16px] font-bold text-[#1C1C1C] mb-2.5 flex items-start gap-2">
-                    <QuestionMarkCircleIcon className="h-5 w-5 text-[#087F5B] shrink-0 mt-0.5" />
+                  <h3 className="text-[16px] font-bold text-[#0F172A] mb-2.5 flex items-start gap-2">
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
                     <span>{faq.q}</span>
                   </h3>
                   <p className="text-[14px] text-[#64635F] leading-relaxed pl-7">

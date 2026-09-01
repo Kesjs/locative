@@ -24,7 +24,7 @@ export function StepSaisieExpress({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight">
+        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#0F172A] tracking-tight leading-tight">
           Saisie Express
         </h2>
         <p className="text-[13px] text-[#64635F] mt-1.5">
@@ -62,7 +62,7 @@ function ExpressInput({
 }) {
   return (
     <div>
-      <label className="block text-[13px] font-bold text-[#1C1C1C] mb-1.5">
+      <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
         {field.label}
       </label>
       <div className="relative">
@@ -78,7 +78,7 @@ function ExpressInput({
               onChange(e.target.value);
             }
           }}
-          className={`w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#1C1C1C] focus:outline-none focus:border-[#1C1C1C] focus:ring-1 focus:ring-[#1C1C1C]/10 shadow-sm transition-shadow ${
+          className={`w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]/10 shadow-sm transition-shadow ${
             field.suffix ? "pr-12" : ""
           }`}
           placeholder={field.placeholder}

@@ -150,7 +150,7 @@ export default function AccountingPage() {
           {accountingLines.map((item, i) => (
             <div
               key={i}
-              className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-[8px] bg-[var(--bg-canvas)] border border-[var(--border-default)] gap-2 hover:border-[#1C1C1C] transition-colors"
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-[8px] bg-[var(--bg-canvas)] border border-[var(--border-default)] gap-2 hover:border-[#0F172A] transition-colors"
             >
               <div>
                 <span className="font-semibold text-[var(--text-primary)] text-[13px] block">

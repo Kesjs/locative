@@ -55,7 +55,7 @@ export default function HowItWorks() {
         className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(#1C1C1C 1px, transparent 1px), linear-gradient(90deg, #1C1C1C 1px, transparent 1px)",
+            "linear-gradient(#0F172A 1px, transparent 1px), linear-gradient(90deg, #0F172A 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
@@ -68,8 +68,8 @@ export default function HowItWorks() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mb-20 max-w-2xl text-center"
         >
-          <div className="section-label mb-3 text-[#1C1C1C]">Fonctionnement</div>
-          <h2 className="heading-2 mb-4 text-[#1C1C1C]">
+          <div className="section-label mb-3 text-[#0F172A]">Fonctionnement</div>
+          <h2 className="heading-2 mb-4 text-[#0F172A]">
             Du premier bien au premier encaissement
           </h2>
           <p className="body-text text-base sm:text-lg text-[#64635F]">
@@ -100,17 +100,17 @@ export default function HowItWorks() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: i * 0.12 }}
-                className="relative flex flex-col items-center text-center sm:items-start sm:text-left group bg-white border border-[#E8E5E0] rounded-[10px] p-6 shadow-2xs hover:border-[#1C1C1C] hover:-translate-y-1 transition-all duration-300"
+                className="relative flex flex-col items-center text-center sm:items-start sm:text-left group bg-white border border-[#E8E5E0] rounded-[10px] p-6 shadow-2xs hover:border-[#0F172A] hover:-translate-y-1 transition-all duration-300"
               >
                 {/* Icon Box */}
-                <div className="relative z-10 mb-4 flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1C1C1C] text-white shadow-xs">
+                <div className="relative z-10 mb-4 flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#0F172A] text-white shadow-xs">
                   <Icon className="h-6 w-6 text-white" />
                 </div>
 
-                <span className="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#1C1C1C]">
+                <span className="mb-1 text-[11px] font-bold uppercase tracking-widest text-[#0F172A]">
                   Étape {step.number}
                 </span>
-                <h3 className="mb-2 text-[17px] font-bold text-[#1C1C1C]">
+                <h3 className="mb-2 text-[17px] font-bold text-[#0F172A]">
                   {step.title}
                 </h3>
                 <p className="text-[13px] leading-relaxed text-[#64635F]">

@@ -283,7 +283,7 @@ export default function Sidebar() {
               height: 32,
               borderRadius: "50%",
               background: "var(--color-accent-light)",
-              border: "1px solid rgba(8,127,91,0.2)",
+              border: "1px solid rgba(217,119,6,0.2)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

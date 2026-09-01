@@ -32,10 +32,10 @@ export default function AuthLayout({
         <footer className="pt-6 border-t border-[#E8E5E0]/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-[#9C9A95]">
           <span>© 2026 Lokka. Fait pour le Bénin 🇧🇯</span>
           <div className="flex gap-4">
-            <Link href="/ressources" className="hover:text-[#1C1C1C] transition-colors">
+            <Link href="/ressources" className="hover:text-[#0F172A] transition-colors">
               Loi n° 2022-30
             </Link>
-            <Link href="/tarifs" className="hover:text-[#1C1C1C] transition-colors">
+            <Link href="/tarifs" className="hover:text-[#0F172A] transition-colors">
               Tarifs
             </Link>
           </div>
@@ -45,7 +45,7 @@ export default function AuthLayout({
       {/* ========================================================================= */}
       {/* COLONNE DROITE : Vidéo Immersive Fixée (Variante 5 - Dark Minimal)        */}
       {/* ========================================================================= */}
-      <div className="hidden lg:block lg:col-span-6 xl:col-span-7 h-screen sticky top-0 relative bg-[#1C1C1C] overflow-hidden">
+      <div className="hidden lg:block lg:col-span-6 xl:col-span-7 h-screen sticky top-0 relative bg-[#0F172A] overflow-hidden">
         {/* Full-Bleed Sticky Video */}
         <video
           autoPlay

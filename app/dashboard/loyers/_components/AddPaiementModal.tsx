@@ -36,7 +36,7 @@ export function AddPaiementModal({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-[12px] p-6 max-w-md w-full shadow-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[18px] font-bold text-[#1C1C1C]">Enregistrer un paiement manuel</h3>
+          <h3 className="text-[18px] font-bold text-[#0F172A]">Enregistrer un paiement manuel</h3>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
             <XMarkIcon className="w-5 h-5 text-[#64635F]" />
           </button>
@@ -82,7 +82,7 @@ export function AddPaiementModal({
               <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] font-bold text-[#64635F] hover:bg-gray-100 rounded-[6px]">
                 Annuler
               </button>
-              <button type="submit" disabled={isPending || !selectedTxId} className="px-4 py-2 bg-[#1C1C1C] text-white text-[13px] font-bold rounded-[6px] disabled:opacity-50">
+              <button type="submit" disabled={isPending || !selectedTxId} className="px-4 py-2 bg-[#0F172A] text-white text-[13px] font-bold rounded-[6px] disabled:opacity-50">
                 {isPending ? "Validation..." : "Valider le paiement"}
               </button>
             </div>

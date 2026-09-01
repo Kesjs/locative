@@ -39,7 +39,7 @@ export default function LocataireLoginPage() {
 
         <div className="w-full max-w-[380px] mx-auto my-auto">
           <div className="mb-8 text-left">
-            <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight mb-3">
+            <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#0F172A] tracking-tight leading-tight mb-3">
               Bienvenue chez vous.
             </h1>
             <p className="text-[14px] text-[#64635F]">
@@ -49,7 +49,7 @@ export default function LocataireLoginPage() {
 
           <form onSubmit={handleSendCode} className="space-y-4">
             <div>
-              <label className="block text-[12px] font-semibold text-[#1C1C1C] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#0F172A] mb-1.5">
                 Votre adresse email
               </label>
               <div className="relative">
@@ -62,7 +62,7 @@ export default function LocataireLoginPage() {
                   placeholder="nom@exemple.bj"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#1C1C1C] placeholder-[#9C9A95] focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition shadow-xs"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#0F172A] placeholder-[#9C9A95] focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition shadow-xs"
                 />
               </div>
             </div>
@@ -79,7 +79,7 @@ export default function LocataireLoginPage() {
 
           <p className="text-center text-[13px] text-[#64635F] mt-8 pt-4 border-t border-[#E8E5E0]">
             Problème de connexion ?{" "}
-            <Link href="/contact" className="font-bold text-[#1C1C1C] hover:underline ml-1">
+            <Link href="/contact" className="font-bold text-[#0F172A] hover:underline ml-1">
               Contacter l'agence
             </Link>
           </p>
@@ -103,13 +103,13 @@ export default function LocataireLoginPage() {
               <HomeIcon className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="font-bold text-[#1C1C1C] text-[16px]">Loyer de Septembre</h3>
+              <h3 className="font-bold text-[#0F172A] text-[16px]">Loyer de Septembre</h3>
               <p className="text-[13px] text-[#64635F]">Villa Les Cocotiers - Apt 2B</p>
             </div>
           </div>
           <div className="p-4 rounded-[12px] bg-[#FAF9F6] border border-[#E8E5E0] flex justify-between items-center">
             <span className="text-[14px] font-medium text-[#64635F]">Montant à régler</span>
-            <span className="text-[18px] font-extrabold text-[#1C1C1C]">350 000 FCFA</span>
+            <span className="text-[18px] font-extrabold text-[#0F172A]">350 000 FCFA</span>
           </div>
           <button type="button" disabled className="w-full py-3 bg-[#FFCC00] text-black font-bold text-[14px] rounded-[8px] flex justify-center items-center gap-2 opacity-80 cursor-not-allowed">
             Payer avec MTN MoMo

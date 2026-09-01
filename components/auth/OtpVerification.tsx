@@ -196,14 +196,14 @@ export default function OtpVerification({
       {/* Email Info & Change Button */}
       <div className="flex items-center justify-between p-3 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] text-[13px]">
         <div className="flex items-center gap-2.5 min-w-0">
-          <EnvelopeIcon className="w-4 h-4 text-[#1C1C1C] flex-shrink-0" />
-          <span className="font-semibold text-[#1C1C1C] truncate">{email}</span>
+          <EnvelopeIcon className="w-4 h-4 text-[#0F172A] flex-shrink-0" />
+          <span className="font-semibold text-[#0F172A] truncate">{email}</span>
         </div>
         {onChangeEmail && (
           <button
             type="button"
             onClick={onChangeEmail}
-            className="text-[12px] font-bold text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 py-0.5 rounded transition-colors flex-shrink-0 ml-2 cursor-pointer"
+            className="text-[12px] font-bold text-[#0F172A] hover:bg-[#F5F5DC] px-2 py-0.5 rounded transition-colors flex-shrink-0 ml-2 cursor-pointer"
           >
             Modifier
           </button>
@@ -229,9 +229,9 @@ export default function OtpVerification({
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="p-3 rounded-[6px] bg-[#FAF9F6] border border-[#E8E5E0] text-[#1C1C1C] text-[13px] flex items-center gap-2"
+            className="p-3 rounded-[6px] bg-[#FAF9F6] border border-[#E8E5E0] text-[#0F172A] text-[13px] flex items-center gap-2"
           >
-            <CheckCircleIcon className="w-4 h-4 flex-shrink-0 text-[#1C1C1C]" />
+            <CheckCircleIcon className="w-4 h-4 flex-shrink-0 text-[#0F172A]" />
             <span>Un nouveau code a été envoyé avec succès !</span>
           </motion.div>
         )}
@@ -240,11 +240,11 @@ export default function OtpVerification({
       {/* Inputs Pin Code 6 Chiffres */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-[12px] font-semibold text-[#1C1C1C]">
+          <label className="text-[12px] font-semibold text-[#0F172A]">
             Saisissez le code de sécurité ({length} chiffres)
           </label>
           <span className="text-[11px] text-[#64635F] flex items-center gap-1 font-medium bg-[#F3F2EE] border border-[#E8E5E0] px-2 py-0.5 rounded-full">
-            <EnvelopeIcon className="w-3 h-3 text-[#1C1C1C]" />
+            <EnvelopeIcon className="w-3 h-3 text-[#0F172A]" />
             <span>Envoyé par Email sécurisé</span>
           </span>
         </div>
@@ -270,10 +270,10 @@ export default function OtpVerification({
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-full h-11 sm:h-13 text-center text-[18px] sm:text-[20px] font-mono font-bold rounded-[6px] sm:rounded-[8px] border transition-all duration-150 outline-none select-all ${
                   isSuccess
-                    ? "bg-[#FAF9F6] border-[#1C1C1C] text-[#1C1C1C]"
+                    ? "bg-[#FAF9F6] border-[#0F172A] text-[#0F172A]"
                     : digit
-                    ? "bg-white border-[#1C1C1C] text-[#1C1C1C] shadow-xs ring-1 ring-[#1C1C1C]/10"
-                    : "bg-white border-[#E8E5E0] text-[#1C1C1C] focus:border-[#1C1C1C] focus:ring-2 focus:ring-[#1C1C1C]/5 shadow-xs"
+                    ? "bg-white border-[#0F172A] text-[#0F172A] shadow-xs ring-1 ring-[#0F172A]/10"
+                    : "bg-white border-[#E8E5E0] text-[#0F172A] focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/5 shadow-xs"
                 } disabled:opacity-75`}
               />
               {!digit && (
@@ -295,11 +295,11 @@ export default function OtpVerification({
         type="button"
         onClick={() => verifyCode(digits.join(""))}
         disabled={isLoading || isSuccess || digits.some((d) => d === "")}
-        className="w-full py-3 px-4 bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[8px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="w-full py-3 px-4 bg-[#0F172A] hover:bg-[#F5F5DC] hover:text-[#0F172A] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[8px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {isSuccess ? (
           <span className="inline-flex items-center gap-2">
-            <CheckCircleIcon className="w-4 h-4 text-[#1C1C1C]" />
+            <CheckCircleIcon className="w-4 h-4 text-[#0F172A]" />
             Succès...
           </span>
         ) : isLoading ? (
@@ -320,14 +320,14 @@ export default function OtpVerification({
         {countdown > 0 ? (
           <span className="text-[12px] text-[#9C9A95]">
             Renvoyer dans{" "}
-            <strong className="text-[#1C1C1C] font-mono">{countdown}s</strong>
+            <strong className="text-[#0F172A] font-mono">{countdown}s</strong>
           </span>
         ) : (
           <button
             type="button"
             onClick={handleResend}
             disabled={resending}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 py-1 rounded transition-colors disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0F172A] hover:bg-[#F5F5DC] px-2 py-1 rounded transition-colors disabled:opacity-50 cursor-pointer"
           >
             <ArrowPathIcon className={`w-3.5 h-3.5 ${resending ? "animate-spin" : ""}`} />
             <span>Renvoyer le code</span>
@@ -338,7 +338,7 @@ export default function OtpVerification({
           <button
             type="button"
             onClick={onFallbackPassword}
-            className="text-[12px] font-medium text-[#64635F] hover:text-[#1C1C1C] hover:bg-[#F5F5DC] px-2 py-1 rounded transition-colors cursor-pointer"
+            className="text-[12px] font-medium text-[#64635F] hover:text-[#0F172A] hover:bg-[#F5F5DC] px-2 py-1 rounded transition-colors cursor-pointer"
           >
             Utiliser un mot de passe
           </button>

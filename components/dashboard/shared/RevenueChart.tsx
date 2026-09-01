@@ -29,7 +29,7 @@ export function RevenueChart({
   xAxisKey = "month",
   dataKeys,
   colors = [
-    "hsl(243, 75%, 59%)", // Lokka Primary (Indigo)
+    "hsl(38, 92%, 50%)", // Lokka Primary (Terre Cuite)
     "hsl(142.1, 76.2%, 36.3%)", // Lokka Success (Emerald)
     "hsl(38, 92%, 50%)", // Lokka Warning (Amber)
   ],

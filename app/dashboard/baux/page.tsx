@@ -22,7 +22,7 @@ export default function BauxPage() {
       </span>
     )},
     { key: "actions", header: "Actions", renderCell: () => (
-      <button className="text-[#1C1C1C] font-semibold text-[12px] underline hover:text-[#C5A880]">Détails</button>
+      <button className="text-[#0F172A] font-semibold text-[12px] underline hover:text-[#C5A880]">Détails</button>
     )},
   ];
 
@@ -36,7 +36,7 @@ export default function BauxPage() {
         <h1 className="text-[20px] font-extrabold text-[var(--text-primary)]">Baux & Locataires</h1>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0F172A] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
         >
           <PlusIcon className="w-4 h-4" /> Nouveau Bail
         </button>

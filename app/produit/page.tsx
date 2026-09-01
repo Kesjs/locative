@@ -91,7 +91,7 @@ export default function ProduitPage() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <div className="section-label mb-4">Le Produit Lokka</div>
-            <h1 className="heading-1 text-[#1C1C1C] text-[clamp(2.4rem,5.5vw,4.25rem)] leading-[1.12] mb-6">
+            <h1 className="heading-1 text-[#0F172A] text-[clamp(2.4rem,5.5vw,4.25rem)] leading-[1.12] mb-6">
               L&apos;infrastructure moderne de votre gestion locative au{" "}
               <span className="font-serif italic font-normal text-[#64635F]">
                 Bénin
@@ -139,12 +139,12 @@ export default function ProduitPage() {
                   }`}
                 >
                   <div className="lg:col-span-7">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] text-[12px] font-semibold text-[#087F5B] mb-4">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#087F5B]" />
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] text-[12px] font-semibold text-[#D97706] mb-4">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#D97706]" />
                       {mod.badge}
                     </div>
 
-                    <h2 className="heading-2 text-[#1C1C1C] text-[26px] sm:text-[32px] mb-4">
+                    <h2 className="heading-2 text-[#0F172A] text-[26px] sm:text-[32px] mb-4">
                       {mod.title}
                     </h2>
 
@@ -154,8 +154,8 @@ export default function ProduitPage() {
 
                     <ul className="space-y-3">
                       {mod.points.map((pt, i) => (
-                        <li key={i} className="flex items-start gap-3 text-[14px] text-[#1C1C1C]">
-                          <CheckCircleIcon className="h-5 w-5 text-[#087F5B] shrink-0 mt-0.5" />
+                        <li key={i} className="flex items-start gap-3 text-[14px] text-[#0F172A]">
+                          <CheckCircleIcon className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
                           <span>{pt}</span>
                         </li>
                       ))}
@@ -164,9 +164,9 @@ export default function ProduitPage() {
 
                   <div className="lg:col-span-5 bg-[#FAF9F6] border border-[#E8E5E0] rounded-[8px] p-6 flex flex-col justify-center items-center text-center min-h-[260px] relative overflow-hidden">
                     <div className="h-16 w-16 rounded-full bg-white border border-[#E8E5E0] flex items-center justify-center mb-4 shadow-sm">
-                      <Icon className="h-8 w-8 text-[#1C1C1C]" />
+                      <Icon className="h-8 w-8 text-[#0F172A]" />
                     </div>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#087F5B] mb-1">
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#D97706] mb-1">
                       {mod.highlight}
                     </span>
                     <span className="text-[14px] font-medium text-[#64635F]">
@@ -183,7 +183,7 @@ export default function ProduitPage() {
         <section className="bg-[#F3F1ED] py-20 border-y border-[#E8E5E0]">
           <div className="container mx-auto max-w-5xl px-6 text-center">
             <div className="section-label mb-3">Expérience Simplifiée</div>
-            <h2 className="heading-2 text-[#1C1C1C] text-[30px] mb-12">
+            <h2 className="heading-2 text-[#0F172A] text-[30px] mb-12">
               Comment Lokka fonctionne au quotidien
             </h2>
 
@@ -209,10 +209,10 @@ export default function ProduitPage() {
                   key={idx}
                   className="bg-white border border-[#E8E5E0] rounded-[8px] p-8 text-left relative"
                 >
-                  <div className="text-[28px] font-serif italic text-[#087F5B] mb-4">
+                  <div className="text-[28px] font-serif italic text-[#D97706] mb-4">
                     {item.step}
                   </div>
-                  <h3 className="text-[18px] font-bold text-[#1C1C1C] mb-2">
+                  <h3 className="text-[18px] font-bold text-[#0F172A] mb-2">
                     {item.title}
                   </h3>
                   <p className="text-[14px] text-[#64635F] leading-relaxed">

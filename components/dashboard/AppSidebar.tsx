@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sidebar,
@@ -27,9 +27,20 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Building2,
@@ -49,7 +60,7 @@ import {
   Briefcase,
   Wallet,
   Globe,
-  Users2
+  Users2,
 } from "lucide-react";
 
 interface SubItem {
@@ -82,20 +93,23 @@ export const SIDEBAR_DATA = {
 };
 
 export function getNavItems(profileType: string): NavItem[] {
-  if (profileType === "agence") {
+  const norm = (profileType || "").toLowerCase();
+
+  if (norm.includes("agence")) {
     return [
       { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
       { title: "Mandats & Propriétaires", url: "/dashboard/mandats", icon: Briefcase },
       { title: "Portefeuille Biens", url: "/dashboard/patrimoine", icon: Building2 },
-      { title: "Baux & Locataires", url: "/dashboard/baux", icon: Users },
-      { title: "Trésorerie & Reversements", url: "/dashboard/tresorerie", icon: Wallet },
-      { title: "Vitrine & Acquisition", url: "/dashboard/vitrine", icon: Globe },
+      { title: "Baux & Locataires", url: "/dashboard/locataires", icon: Users },
+      { title: "Comptabilité & Reversements", url: "/dashboard/comptabilite", icon: Wallet },
+      { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Globe },
       { title: "Maintenance & Artisans", url: "/dashboard/maintenance", icon: Wrench },
-      { title: "Équipe", url: "/dashboard/equipe", icon: Users2 },
+      { title: "Équipe & Agents", url: "/dashboard/equipe", icon: Users2 },
       { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
     ];
   }
-  if (profileType === "admin") {
+
+  if (norm.includes("admin")) {
     return [
       { title: "Vue Globale", url: "/dashboard/admin", icon: LayoutDashboard },
       { title: "Utilisateurs", url: "/dashboard/admin/utilisateurs", icon: Users },
@@ -103,25 +117,25 @@ export function getNavItems(profileType: string): NavItem[] {
       { title: "Système & Logs", url: "/dashboard/admin/systeme", icon: Settings },
     ];
   }
-  
-  if (profileType === "locataire") {
+
+  if (norm.includes("locataire")) {
     return [
-      { title: "Mon Résumé", url: "/dashboard/locataire", icon: LayoutDashboard },
-      { title: "Loyers & Paiements", url: "/dashboard/locataire/loyers", icon: CreditCard },
-      { title: "Documents", url: "/dashboard/locataire/documents", icon: Globe }, // Reusing an icon for now or DocumentText
-      { title: "Maintenance", url: "/dashboard/locataire/maintenance", icon: Wrench },
+      { title: "Mon Espace", url: "/dashboard/locataire", icon: LayoutDashboard },
+      { title: "Loyers & Quittances", url: "/dashboard/locataire/loyers", icon: CreditCard },
+      { title: "Mes Documents", url: "/dashboard/locataire/documents", icon: Globe },
+      { title: "Maintenance & Pannes", url: "/dashboard/locataire/maintenance", icon: Wrench },
       { title: "Paramètres", url: "/dashboard/locataire/parametres", icon: Settings },
     ];
   }
 
-  // Default to Bailleur
+  // Profil Par Défaut : Propriétaire Bailleur
   return [
     { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
     { title: "Mon Patrimoine", url: "/dashboard/patrimoine", icon: Building2 },
     { title: "Locataires & Baux", url: "/dashboard/locataires", icon: Users },
     { title: "Loyers & Quittances", url: "/dashboard/loyers", icon: CreditCard },
-    { title: "Annonces & Visites", url: "/dashboard/annonces", icon: Megaphone },
-    { title: "Maintenance", url: "/dashboard/maintenance", icon: Wrench },
+    { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Megaphone },
+    { title: "Maintenance & Artisans", url: "/dashboard/maintenance", icon: Wrench },
     { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
   ];
 }
@@ -146,7 +160,6 @@ function CollapsibleNavItem({
 }) {
   const [isOpen, setIsOpen] = React.useState(isActive);
 
-  // Synchronise l'ouverture si la route change
   React.useEffect(() => {
     if (isActive) setIsOpen(true);
   }, [isActive]);
@@ -161,7 +174,7 @@ function CollapsibleNavItem({
           style={
             isActive
               ? {
-                  backgroundColor: "var(--color-brand-primary, #18181B)",
+                  backgroundColor: "var(--color-brand-primary, #0F172A)",
                   color: "var(--color-brand-text, #FFFFFF)",
                 }
               : undefined
@@ -188,7 +201,7 @@ function CollapsibleNavItem({
         style={
           isActive
             ? {
-                backgroundColor: "var(--color-brand-primary, #18181B)",
+                backgroundColor: "var(--color-brand-primary, #0F172A)",
                 color: "var(--color-brand-text, #FFFFFF)",
               }
             : undefined
@@ -219,7 +232,6 @@ function CollapsibleNavItem({
         />
       </button>
 
-      {/* Submenu collapsible animation */}
       <AnimatePresence initial={false}>
         {isOpen && item.items && (
           <motion.div
@@ -254,44 +266,228 @@ function CollapsibleNavItem({
 }
 
 export function AppSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { state, setOpenMobile, devRole } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+
   const userProfile = useUserProfile();
-  
   const currentRole = devRole || userProfile.role || "bailleur";
-  // Here we derive the nav items based on the user's actual profileType or devRole
   const navItems = getNavItems(currentRole);
+  const isNormalizedAdminOrLocataire =
+    currentRole.toLowerCase().includes("admin") || currentRole.toLowerCase().includes("locataire");
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
   };
 
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      if (isSupabaseConfigured()) {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+      }
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("lokka_dev_plan");
+        localStorage.removeItem("lokka_dev_role");
+      }
+      setShowLogoutDialog(false);
+      router.push("/auth/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      router.push("/auth/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
-    <Sidebar collapsible="icon" className="border-r border-[var(--border-default)] bg-[var(--bg-sidebar)] text-[var(--text-primary)]">
-      {/* ─── 1. HEADER : TEAM SWITCHER OU LOGO SIMPLE ─── */}
-      <SidebarHeader className="border-b border-[var(--border-subtle)] p-2">
-        {(currentRole === "admin" || currentRole === "locataire") ? (
-          <div className="flex items-center gap-3 px-3 py-2 h-[48px] rounded-[8px]">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-[8px] bg-[var(--color-brand-primary, #18181B)] text-white shrink-0 shadow-xs">
-              <Building className="size-4" />
-            </div>
-            {!isCollapsed && (
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-bold text-[var(--text-primary)] text-[15px]">
-                  Lokka
-                </span>
-                <span className="truncate text-[11px] text-[var(--text-muted)] uppercase tracking-wider">
-                  {currentRole === "admin" ? "Administration HQ" : "Espace Locataire"}
-                </span>
+    <>
+      <Sidebar
+        collapsible="icon"
+        className="border-r border-[var(--border-default)] bg-[var(--bg-sidebar)] text-[var(--text-primary)] z-30"
+      >
+        {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE ─── */}
+        <SidebarHeader className="border-b border-[var(--border-subtle)] p-2">
+          {isNormalizedAdminOrLocataire ? (
+            <div className="flex items-center gap-3 px-3 py-2 h-[48px] rounded-[8px]">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-[8px] bg-white border border-border shrink-0 shadow-xs overflow-hidden">
+                <img src="/logo.png" alt="Lokka" className="w-full h-full object-contain p-0.5" />
               </div>
+              {!isCollapsed && (
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-extrabold text-[var(--text-primary)] text-[15px]">
+                    Lokka
+                  </span>
+                  <span className="truncate text-[11px] text-[#087F5B] font-bold uppercase tracking-wider">
+                    {currentRole.toLowerCase().includes("admin") ? "Admin HQ" : "Espace Locataire"}
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton
+                      size="lg"
+                      className={`w-full flex items-center ${
+                        isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
+                      } rounded-[8px] data-[state=open]:bg-[var(--hover-bg)] transition-colors cursor-pointer`}
+                    >
+                      <div className="flex aspect-square size-8 items-center justify-center rounded-[8px] bg-white border border-border shrink-0 shadow-xs overflow-hidden">
+                        <img src={userProfile.customLogo || "/logo.png"} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                      </div>
+                      {!isCollapsed && (
+                        <>
+                          <div className="grid flex-1 text-left text-sm leading-tight">
+                            <span className="truncate font-bold text-[var(--text-primary)] text-[13.5px]">
+                              {activeTeam.name}
+                            </span>
+                            <span className="truncate text-[11px] text-[var(--text-muted)] font-medium">
+                              {activeTeam.plan}
+                            </span>
+                          </div>
+                          <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    className="w-60 rounded-xl p-1.5 shadow-2xl border border-[var(--border-default)] bg-[var(--bg-surface-elevated)] z-50 animate-in fade-in-50 zoom-in-95"
+                    align="start"
+                    side={isMobile ? "bottom" : "right"}
+                    sideOffset={8}
+                  >
+                    <DropdownMenuLabel className="text-[10.5px] text-[var(--text-muted)] px-2.5 py-1.5 font-bold uppercase tracking-wider">
+                      {currentRole.toLowerCase().includes("agence") ? "Agences & Filiales" : "Patrimoines & Portefeuilles"}
+                    </DropdownMenuLabel>
+                    {SIDEBAR_DATA.teams.map((team, index) => (
+                      <DropdownMenuItem
+                        key={team.name}
+                        onClick={() => setActiveTeam(team)}
+                        className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
+                      >
+                        <div className="flex size-6 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-subtle)]">
+                          <team.logo className="size-3.5 text-primary" />
+                        </div>
+                        <span className="truncate flex-1 font-semibold">{team.name}</span>
+                        <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="bg-[var(--border-default)] my-1" />
+                    <DropdownMenuItem
+                      onClick={() =>
+                        alert(
+                          currentRole.toLowerCase().includes("agence")
+                            ? "Ajout d'une filiale..."
+                            : "Ajout d'un nouveau patrimoine / SCI..."
+                        )
+                      }
+                      className="gap-2 p-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] cursor-pointer"
+                    >
+                      <div className="flex size-6 items-center justify-center rounded-[6px] border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)]">
+                        <Plus className="size-3.5" />
+                      </div>
+                      <span>
+                        {currentRole.toLowerCase().includes("agence")
+                          ? "Ajouter une filiale"
+                          : "Ajouter une SCI / Portefeuille"}
+                      </span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          )}
+        </SidebarHeader>
+
+        {/* ─── 2. NAV GROUPS ─── */}
+        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-3 space-y-4">
+          <SidebarGroup>
+            {!isCollapsed && (
+              <SidebarGroupLabel className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">
+                Navigation Principale
+              </SidebarGroupLabel>
             )}
-          </div>
-        ) : (
+            <SidebarMenu className="gap-1 mt-1">
+              {navItems.map((item) => {
+                const active = isLinkActive(item.url);
+
+                if (item.items && item.items.length > 0) {
+                  return (
+                    <CollapsibleNavItem
+                      key={item.title}
+                      item={item}
+                      isActive={active}
+                      pathname={pathname}
+                      isCollapsed={isCollapsed}
+                      isMobile={isMobile}
+                      setOpenMobile={setOpenMobile}
+                    />
+                  );
+                }
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      isActive={active}
+                      style={
+                        active
+                          ? {
+                              backgroundColor: "var(--color-brand-primary, #0F172A)",
+                              color: "var(--color-brand-text, #FFFFFF)",
+                            }
+                          : undefined
+                      }
+                      className={`w-full flex items-center ${
+                        isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
+                      } rounded-[8px] text-[13px] font-medium transition-colors ${
+                        active
+                          ? "text-white font-semibold shadow-xs"
+                          : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
+                      }`}
+                    >
+                      <Link
+                        href={item.url}
+                        className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}
+                        onClick={() => isMobile && setOpenMobile(false)}
+                      >
+                        <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
+                        {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
+                        {item.badge && !isCollapsed && (
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                              item.badgeType === "danger"
+                                ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
+                                : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-default)]"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+
+        {/* ─── 3. USER FOOTER PROFIL & DROPDOWN ─── */}
+        <SidebarFooter className="border-t border-[var(--border-subtle)] p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -300,25 +496,22 @@ export function AppSidebar() {
                     size="lg"
                     className={`w-full flex items-center ${
                       isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                    } rounded-[8px] data-[state=open]:bg-[var(--hover-bg)] transition-colors`}
+                    } rounded-xl data-[state=open]:bg-[var(--hover-bg)] transition-all cursor-pointer`}
                   >
-                    <div
-                      style={{
-                        backgroundColor: "var(--color-brand-primary, #18181B)",
-                        color: "var(--color-brand-text, #FFFFFF)",
-                      }}
-                      className="flex aspect-square size-8 items-center justify-center rounded-[8px] text-white shrink-0 shadow-xs"
-                    >
-                      <activeTeam.logo className="size-4" />
-                    </div>
+                    <Avatar className="h-8 w-8 rounded-full border border-[var(--border-default)] shrink-0">
+                      <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+                      <AvatarFallback className="bg-[#087F5B] text-white text-[11px] font-bold">
+                        {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     {!isCollapsed && (
                       <>
                         <div className="grid flex-1 text-left text-sm leading-tight">
                           <span className="truncate font-bold text-[var(--text-primary)] text-[13px]">
-                            {activeTeam.name}
+                            {userProfile.name}
                           </span>
-                          <span className="truncate text-[11px] text-[var(--text-muted)]">
-                            {activeTeam.plan}
+                          <span className="truncate text-[11px] text-[var(--text-muted)] font-medium">
+                            {userProfile.role}
                           </span>
                         </div>
                         <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
@@ -327,206 +520,96 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
+                {/* Dropdown Positioned Above Sidebar Footer to prevent overlap */}
                 <DropdownMenuContent
-                  className="w-56 rounded-[10px] p-1.5 shadow-xl border-[var(--border-default)] bg-[var(--bg-surface-elevated)]"
+                  className="w-64 rounded-2xl p-2 shadow-2xl border border-[var(--border-default)] bg-card text-card-foreground z-50 animate-in fade-in-50 zoom-in-95"
+                  side={isMobile ? "top" : isCollapsed ? "right" : "top"}
                   align="start"
-                  side={isMobile ? "bottom" : "right"}
-                  sideOffset={4}
+                  sideOffset={12}
                 >
-                  <DropdownMenuLabel className="text-xs text-[var(--text-muted)] px-2 py-1.5 font-bold uppercase tracking-wider">
-                    {currentRole === "agence" ? "Agences & Filiales" : "Patrimoines & SCI"}
-                  </DropdownMenuLabel>
-                  {SIDEBAR_DATA.teams.map((team, index) => (
-                    <DropdownMenuItem
-                      key={team.name}
-                      onClick={() => setActiveTeam(team)}
-                      className="gap-2.5 p-2 rounded-[6px] text-[12px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
-                    >
-                      <div className="flex size-6 items-center justify-center rounded-[4px] border border-[var(--border-default)] bg-[var(--bg-subtle)]">
-                        <team.logo className="size-3.5" />
-                      </div>
-                      <span className="truncate flex-1 font-semibold">{team.name}</span>
-                      <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator className="bg-[var(--border-default)]" />
-                  <DropdownMenuItem
-                    onClick={() => alert(currentRole === "agence" ? "Ajout d'une filiale..." : "Ajout d'un nouveau patrimoine / SCI...")}
-                    className="gap-2 p-2 rounded-[6px] text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] cursor-pointer"
-                  >
-                    <div className="flex size-6 items-center justify-center rounded-[4px] border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)]">
-                      <Plus className="size-3.5" />
+                  <DropdownMenuLabel className="p-2 space-y-1">
+                    <div className="text-[13.5px] font-bold text-foreground">{userProfile.name}</div>
+                    <div className="text-[11.5px] text-muted-foreground font-normal truncate">
+                      {userProfile.email || "alexandre@lokka.bj"}
                     </div>
-                    <span>{currentRole === "agence" ? "Ajouter une filiale" : "Ajouter une SCI / Bien"}</span>
+                    <div className="pt-1 flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {userProfile.role}
+                      </span>
+                    </div>
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuSeparator className="bg-border my-1.5" />
+
+                  <DropdownMenuGroup className="space-y-0.5">
+                    <DropdownMenuItem
+                      onClick={() => router.push("/dashboard/parametres")}
+                      className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-foreground hover:bg-muted"
+                    >
+                      <BadgeCheck className="size-4 text-primary" />
+                      <span>Paramètres du compte</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/dashboard/parametres")}
+                      className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-foreground hover:bg-muted"
+                    >
+                      <ShieldCheck className="size-4 text-emerald-600" />
+                      <span>Fiscalité &amp; IFU Bénin</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+
+                  <DropdownMenuSeparator className="bg-border my-1.5" />
+
+                  {/* Bouton de Déconnexion qui ouvre l'AlertDialog */}
+                  <DropdownMenuItem
+                    onClick={() => setShowLogoutDialog(true)}
+                    className="gap-2.5 p-2 rounded-lg text-[12.5px] font-semibold text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Se déconnecter</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
-        )}
-      </SidebarHeader>
+        </SidebarFooter>
 
-      {/* ─── 2. NAV GROUPS (WITH DISCREET SCROLLBAR & WORKING COLLAPSIBLE SUBMENUS) ─── */}
-      <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-3 space-y-4">
-        {/* Navigation */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">
-              Menu Principal
-            </SidebarGroupLabel>
-          )}
-          <SidebarMenu className="gap-1 mt-1">
-            {navItems.map((item) => {
-              const active = isLinkActive(item.url);
+        <SidebarRail />
+      </Sidebar>
 
-              if (item.items && item.items.length > 0) {
-                return (
-                  <CollapsibleNavItem
-                    key={item.title}
-                    item={item}
-                    isActive={active}
-                    pathname={pathname}
-                    isCollapsed={isCollapsed}
-                    isMobile={isMobile}
-                    setOpenMobile={setOpenMobile}
-                  />
-                );
-              }
+      {/* ─── 4. MODAL DE CONFIRMATION DE DÉCONNEXION (ALERT DIALOG) ─── */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="bg-card border border-border rounded-2xl p-6 max-w-md shadow-2xl text-card-foreground">
+          <AlertDialogHeader>
+            <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2">
+              <LogOut className="w-6 h-6" />
+            </div>
+            <AlertDialogTitle className="text-[17px] font-bold text-foreground">
+              Confirmer la déconnexion
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-muted-foreground leading-relaxed mt-1">
+              Êtes-vous sûr de vouloir vous déconnecter de votre espace Lokka ? Vos données de gestion sont synchronisées en toute sécurité.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-              return (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={active}
-                    style={
-                      active
-                        ? {
-                            backgroundColor: "var(--color-brand-primary, #18181B)",
-                            color: "var(--color-brand-text, #FFFFFF)",
-                          }
-                        : undefined
-                    }
-                    className={`w-full flex items-center ${
-                      isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
-                    } rounded-[8px] text-[13px] font-medium transition-colors ${
-                      active
-                        ? "text-white font-semibold shadow-xs"
-                        : "text-[var(--text-primary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <Link
-                      href={item.url}
-                      className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}
-                      onClick={() => isMobile && setOpenMobile(false)}
-                    >
-                      <item.icon className="size-4 shrink-0 text-[var(--text-secondary)]" />
-                      {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
-                      {item.badge && !isCollapsed && (
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                            item.badgeType === "danger"
-                              ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
-                              : "bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-default)]"
-                          }`}
-                        >
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
-
-      {/* ─── 3. NAV USER FOOTER (PERFECT CONTRAST IN LIGHT & DARK MODE) ─── */}
-      <SidebarFooter className="border-t border-[var(--border-subtle)] p-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className={`w-full flex items-center ${
-                    isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                  } rounded-[8px] data-[state=open]:bg-[var(--hover-bg)] transition-colors`}
-                >
-                  <Avatar className="h-8 w-8 rounded-full border border-[var(--border-default)] shrink-0">
-                    <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                    <AvatarFallback className="bg-[var(--color-brand-primary)] text-white text-[11px] font-bold">
-                      {userProfile.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!isCollapsed && (
-                    <>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-bold text-[var(--text-primary)] text-[13px]">
-                          {userProfile.name}
-                        </span>
-                        <span className="truncate text-[11px] text-[var(--text-muted)]">
-                          {userProfile.role}
-                        </span>
-                      </div>
-                      <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
-                    </>
-                  )}
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                className="w-56 rounded-[10px] p-1.5 shadow-xl border-[var(--border-default)] bg-[var(--bg-surface-elevated)]"
-                side={isMobile ? "bottom" : "right"}
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="p-2">
-                  <div className="text-[13px] font-bold text-[var(--text-primary)]">{userProfile.name}</div>
-                  <div className="text-[11px] text-[var(--text-muted)] font-normal">{userProfile.role}</div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-[var(--border-default)]" />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => alert("Offre Lokka Pro : Gestion illimitée et baux certifiés.")}
-                    className="gap-2 p-2 rounded-[6px] text-[12px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
-                  >
-                    <Sparkles className="size-4 text-[#C5A880]" />
-                    <span>Passer à Lokka Pro</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => (window.location.href = "/dashboard/parametres")}
-                    className="gap-2 p-2 rounded-[6px] text-[12px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
-                  >
-                    <BadgeCheck className="size-4 text-[var(--text-secondary)]" />
-                    <span>Paramètres du compte</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => (window.location.href = "/dashboard/comptabilite")}
-                    className="gap-2 p-2 rounded-[6px] text-[12px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
-                  >
-                    <ShieldCheck className="size-4 text-[var(--text-secondary)]" />
-                    <span>Fiscalité TFU Bénin</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator className="bg-[var(--border-default)]" />
-                <DropdownMenuItem
-                  onClick={() => {
-                    window.location.href = "/auth/login";
-                  }}
-                  className="gap-2 p-2 rounded-[6px] text-[12px] font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
-                >
-                  <LogOut className="size-4" />
-                  <span>Déconnexion</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-
-      <SidebarRail />
-    </Sidebar>
+          <AlertDialogFooter className="mt-6 flex items-center justify-end gap-3">
+            <AlertDialogCancel
+              disabled={isLoggingOut}
+              className="px-4 py-2 text-[13px] font-bold rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition"
+            >
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmLogout}
+              disabled={isLoggingOut}
+              className="px-5 py-2 text-[13px] font-bold rounded-lg bg-destructive hover:bg-destructive/90 text-white cursor-pointer transition shadow-xs"
+            >
+              {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

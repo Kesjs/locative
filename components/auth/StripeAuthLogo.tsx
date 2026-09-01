@@ -16,7 +16,7 @@ export default function StripeAuthLogo() {
       className="group relative inline-flex items-center gap-3 p-1.5 -ml-1.5 rounded-[10px] transition-colors duration-200 hover:bg-[#F5F5DC] hover:shadow-xs hover:border hover:border-[#E8E5E0] border border-transparent select-none cursor-pointer"
     >
       {/* Icon Box with Morphing Animation */}
-      <div className="relative w-8 h-8 rounded-[8px] bg-[#1C1C1C] flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-sm">
+      <div className="relative w-8 h-8 rounded-[8px] bg-[#0F172A] flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-sm">
         <AnimatePresence mode="wait" initial={false}>
           {!isHovered ? (
             <motion.div
@@ -69,7 +69,7 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="font-serif text-[20px] font-bold text-[#1C1C1C] tracking-tight"
+              className="font-serif text-[20px] font-bold text-[#0F172A] tracking-tight"
               style={{ fontFamily: "'Instrument Serif', 'Georgia', serif" }}
             >
               Lokka.
@@ -81,7 +81,7 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="text-[13px] font-semibold text-[#1C1C1C] flex items-center gap-1 tracking-tight"
+              className="text-[13px] font-semibold text-[#0F172A] flex items-center gap-1 tracking-tight"
             >
               Retour à l&apos;accueil
             </motion.span>

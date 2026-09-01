@@ -61,19 +61,19 @@ function BentoCard({
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay }}
       onMouseMove={handleMouseMove}
-      className={`group relative overflow-hidden rounded-[14px] bg-white border border-border-default transition-all duration-300 hover:border-[#087F5B]/50 hover:shadow-[0_16px_40px_rgba(8,127,91,0.06)] flex flex-col justify-between p-6 sm:p-8 ${className}`}
+      className={`group relative overflow-hidden rounded-[14px] bg-white border border-border-default transition-all duration-300 hover:border-[#D97706]/50 hover:shadow-[0_16px_40px_rgba(217,119,6,0.06)] flex flex-col justify-between p-6 sm:p-8 ${className}`}
     >
       {/* Magic UI Subtle Radial Glow Effect */}
       <div
         className="pointer-events-none absolute -inset-px rounded-[14px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(8,127,91,0.04), transparent 45%)`,
+          background: `radial-gradient(500px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(217,119,6,0.04), transparent 45%)`,
         }}
       />
 
       <div className="z-10 mb-6">
         {badge && (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-success-strong bg-success-soft border border-[#087F5B]/20 px-3 py-1 rounded-full mb-3.5">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-success-strong bg-success-soft border border-[#D97706]/20 px-3 py-1 rounded-full mb-3.5">
             {badge}
           </span>
         )}
@@ -89,9 +89,9 @@ function BentoCard({
           {pills.map((pill, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-primary bg-bg-canvas border border-border-default px-2.5 py-1 rounded-[6px] transition-colors group-hover:border-[#087F5B]/30"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-primary bg-bg-canvas border border-border-default px-2.5 py-1 rounded-[6px] transition-colors group-hover:border-[#D97706]/30"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#087F5B]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#D97706]" />
               {pill}
             </span>
           ))}
@@ -165,7 +165,7 @@ export default function Features() {
         className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(#1C1C1C 1px, transparent 1px), linear-gradient(90deg, #1C1C1C 1px, transparent 1px)",
+            "linear-gradient(#0F172A 1px, transparent 1px), linear-gradient(90deg, #0F172A 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
@@ -356,7 +356,7 @@ export default function Features() {
                   onClick={() => setManagementTab("owner")}
                   className={`flex items-center gap-1.5 pb-1 px-2 text-[12px] font-bold border-b-2 transition-all ${
                     managementTab === "owner"
-                      ? "border-[#087F5B] text-success-strong"
+                      ? "border-[#D97706] text-success-strong"
                       : "border-transparent text-text-secondary hover:text-text-primary"
                   }`}
                 >
@@ -368,7 +368,7 @@ export default function Features() {
                   onClick={() => setManagementTab("tenant")}
                   className={`flex items-center gap-1.5 pb-1 px-2 text-[12px] font-bold border-b-2 transition-all ${
                     managementTab === "tenant"
-                      ? "border-[#087F5B] text-success-strong"
+                      ? "border-[#D97706] text-success-strong"
                       : "border-transparent text-text-secondary hover:text-text-primary"
                   }`}
                 >
@@ -484,11 +484,11 @@ export default function Features() {
               <div className="flex h-24 items-end gap-2 px-1">
                 {[
                   { h: 45, label: "M1", color: "bg-[#9C9A95]" },
-                  { h: 65, label: "M2", color: "bg-[#087F5B]" },
+                  { h: 65, label: "M2", color: "bg-[#D97706]" },
                   { h: 55, label: "M3", color: "bg-[#9C9A95]" },
-                  { h: 85, label: "M4", color: "bg-[#087F5B]" },
+                  { h: 85, label: "M4", color: "bg-[#D97706]" },
                   { h: 70, label: "M5", color: "bg-[#9C9A95]" },
-                  { h: 100, label: "M6", color: "bg-[#1C1C1C]" },
+                  { h: 100, label: "M6", color: "bg-[#0F172A]" },
                 ].map((bar, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                     <motion.div
@@ -506,11 +506,11 @@ export default function Features() {
               {/* Chart Legend */}
               <div className="flex items-center justify-between gap-1 pt-2.5 mt-2 border-t border-border-default text-[10px] text-text-secondary">
                 <div className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-[#1C1C1C]" />
+                  <span className="h-2 w-2 rounded-full bg-[#0F172A]" />
                   <span>Pic Maximal</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-[#087F5B]" />
+                  <span className="h-2 w-2 rounded-full bg-[#D97706]" />
                   <span>Objectif Atteint</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -560,7 +560,7 @@ export default function Features() {
                     onClick={() => setShowcaseTheme("emerald")}
                     className={`h-5 px-2 rounded text-[10px] font-bold transition-all ${
                       showcaseTheme === "emerald"
-                        ? "bg-[#087F5B] text-white"
+                        ? "bg-[#D97706] text-white"
                         : "bg-bg-canvas text-text-secondary hover:bg-[#E8E5E0]"
                     }`}
                   >
@@ -571,7 +571,7 @@ export default function Features() {
                     onClick={() => setShowcaseTheme("dark")}
                     className={`h-5 px-2 rounded text-[10px] font-bold transition-all ${
                       showcaseTheme === "dark"
-                        ? "bg-[#1C1C1C] text-white"
+                        ? "bg-[#0F172A] text-white"
                         : "bg-bg-canvas text-text-secondary hover:bg-[#E8E5E0]"
                     }`}
                   >
@@ -603,7 +603,7 @@ export default function Features() {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     type="button"
-                    className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-border-default text-text-primary hover:border-[#1C1C1C] text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                    className="flex-1 sm:flex-initial py-2 px-3 bg-white border border-border-default text-text-primary hover:border-[#0F172A] text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
                   >
                     <CalendarDaysIcon className="h-3.5 w-3.5 text-text-secondary" />
                     <span>Visite</span>
@@ -612,8 +612,8 @@ export default function Features() {
                     type="button"
                     className={`flex-1 sm:flex-initial py-2 px-3 text-white text-[11px] font-bold rounded-[6px] flex items-center justify-center gap-1.5 shadow-2xs transition-colors ${
                       showcaseTheme === "emerald"
-                        ? "bg-[#087F5B] hover:bg-[#066347]"
-                        : "bg-[#1C1C1C] hover:bg-[#333333]"
+                        ? "bg-[#D97706] hover:bg-[#066347]"
+                        : "bg-[#0F172A] hover:bg-[#333333]"
                     }`}
                   >
                     <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />

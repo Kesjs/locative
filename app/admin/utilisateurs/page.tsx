@@ -51,7 +51,7 @@ export default function AdminUtilisateursPage() {
       {suspendModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[12px] p-6 max-w-sm w-full shadow-2xl">
-            <h3 className="text-[18px] font-bold text-[#1C1C1C] mb-2">Suspendre ce compte ?</h3>
+            <h3 className="text-[18px] font-bold text-[#0F172A] mb-2">Suspendre ce compte ?</h3>
             <p className="text-[13px] text-[#64635F] mb-6">
               L'utilisateur ne pourra plus accéder à son espace. Cette action est réversible.
             </p>

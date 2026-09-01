@@ -57,8 +57,8 @@ export default function ConversionSection() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mb-16 max-w-2xl text-center"
         >
-          <div className="section-label mb-3 text-[#1C1C1C]">Trois Piliers Stratégiques</div>
-          <h2 className="heading-2 mb-4 text-[#1C1C1C]">
+          <div className="section-label mb-3 text-[#0F172A]">Trois Piliers Stratégiques</div>
+          <h2 className="heading-2 mb-4 text-[#0F172A]">
             Pourquoi Lokka transforme votre gestion
           </h2>
           <p className="body-text text-base sm:text-lg text-[#64635F]">
@@ -76,14 +76,14 @@ export default function ConversionSection() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-white border border-[#E8E5E0] rounded-[10px] p-7 sm:p-8 flex flex-col justify-between shadow-xs hover:border-[#1C1C1C] hover:-translate-y-1 transition-all duration-300 group"
+                className="bg-white border border-[#E8E5E0] rounded-[10px] p-7 sm:p-8 flex flex-col justify-between shadow-xs hover:border-[#0F172A] hover:-translate-y-1 transition-all duration-300 group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#1C1C1C] text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#0F172A] text-white">
                       <Icon className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1C1C] bg-[#F3F2EE] border border-[#E8E5E0] px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#0F172A] bg-[#F3F2EE] border border-[#E8E5E0] px-2.5 py-1 rounded-full">
                       {pillar.badge}
                     </span>
                   </div>
@@ -91,7 +91,7 @@ export default function ConversionSection() {
                   <span className="text-[12px] font-bold text-[#9C9A95] uppercase tracking-widest block mb-1">
                     Pilier {pillar.number}
                   </span>
-                  <h3 className="text-[18px] font-bold text-[#1C1C1C] mb-3">
+                  <h3 className="text-[18px] font-bold text-[#0F172A] mb-3">
                     {pillar.title}
                   </h3>
                   <p className="text-[14px] text-[#64635F] leading-relaxed">
@@ -99,7 +99,7 @@ export default function ConversionSection() {
                   </p>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-[#FAF9F6] flex items-center gap-2 text-[12px] font-semibold text-[#1C1C1C]">
+                <div className="pt-6 mt-6 border-t border-[#FAF9F6] flex items-center gap-2 text-[12px] font-semibold text-[#0F172A]">
                   <CheckCircleIcon className="h-4 w-4 shrink-0 text-[#64635F]" />
                   <span>Disponible sur tous les forfaits</span>
                 </div>
@@ -113,14 +113,14 @@ export default function ConversionSection() {
           initial={{ opacity: 0, scale: 0.98, y: 20 }}
           animate={isInView ? { opacity: 1, scale: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-white border border-[#1C1C1C] rounded-[12px] p-6 sm:p-10 shadow-sm text-center max-w-3xl mx-auto"
+          className="bg-white border border-[#0F172A] rounded-[12px] p-6 sm:p-10 shadow-sm text-center max-w-3xl mx-auto"
         >
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#1C1C1C] bg-[#F3F2EE] border border-[#E8E5E0] px-3 py-1 rounded-full mb-4">
-            <SparklesIcon className="w-3.5 h-3.5 text-[#1C1C1C]" />
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#0F172A] bg-[#F3F2EE] border border-[#E8E5E0] px-3 py-1 rounded-full mb-4">
+            <SparklesIcon className="w-3.5 h-3.5 text-[#0F172A]" />
             <span>Votre Site Vitrine Prêt en 30 secondes</span>
           </span>
 
-          <h3 className="text-[22px] sm:text-[26px] font-bold text-[#1C1C1C] mb-2">
+          <h3 className="text-[22px] sm:text-[26px] font-bold text-[#0F172A] mb-2">
             Réservez votre lien public d&apos;agence ou de bailleur
           </h3>
           <p className="text-[14px] text-[#64635F] mb-6">
@@ -129,7 +129,7 @@ export default function ConversionSection() {
 
           <div className="flex flex-col sm:flex-row items-stretch justify-center gap-2 max-w-lg mx-auto">
             <div className="flex items-center bg-[#FAF9F6] border border-[#E8E5E0] rounded-[6px] px-3 py-2.5 flex-1 shadow-2xs">
-              <span className="text-[14px] font-bold text-[#1C1C1C]">https://</span>
+              <span className="text-[14px] font-bold text-[#0F172A]">https://</span>
               <input
                 type="text"
                 value={claimedDomain}
@@ -137,9 +137,9 @@ export default function ConversionSection() {
                   setClaimedDomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
                 }
                 placeholder="votre-nom"
-                className="bg-transparent border-none outline-none font-bold text-[14px] text-[#1C1C1C] px-1 w-28 sm:w-36 text-center"
+                className="bg-transparent border-none outline-none font-bold text-[14px] text-[#0F172A] px-1 w-28 sm:w-36 text-center"
               />
-              <span className="text-[14px] font-bold text-[#1C1C1C]">.lokka.bj</span>
+              <span className="text-[14px] font-bold text-[#0F172A]">.lokka.bj</span>
             </div>
 
             <a
@@ -152,7 +152,7 @@ export default function ConversionSection() {
           </div>
 
           <div className="mt-3 text-[11px] text-[#64635F] font-semibold flex items-center justify-center gap-1">
-            <CheckCircleIcon className="w-3.5 h-3.5 text-[#1C1C1C]" />
+            <CheckCircleIcon className="w-3.5 h-3.5 text-[#0F172A]" />
             <span>Adresse {claimedDomain || "votre-nom"}.lokka.bj disponible immédiatement</span>
           </div>
         </motion.div>

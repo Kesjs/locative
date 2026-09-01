@@ -16,13 +16,13 @@ export default function EquipePage() {
     { key: "role", header: "Rôle", renderCell: (row: any) => row.role },
     { key: "statut", header: "Statut", renderCell: (row: any) => (
       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-        row.statut === "Actif" ? "bg-[#E6F5EF] text-[#087F5B]" : "bg-[#F3F4F6] text-[#6B7280]"
+        row.statut === "Actif" ? "bg-[#E6F5EF] text-[#D97706]" : "bg-[#F3F4F6] text-[#6B7280]"
       }`}>
         {row.statut}
       </span>
     )},
     { key: "actions", header: "Actions", renderCell: () => (
-      <button className="text-[#1C1C1C] font-semibold text-[12px] underline hover:text-[#087F5B]">Gérer</button>
+      <button className="text-[#0F172A] font-semibold text-[12px] underline hover:text-[#D97706]">Gérer</button>
     )},
   ];
 
@@ -36,7 +36,7 @@ export default function EquipePage() {
         <h1 className="text-[20px] font-extrabold text-[var(--text-primary)]">Équipe & Accès</h1>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1C] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0F172A] text-white rounded-[6px] text-[13px] font-bold hover:bg-black transition-colors"
         >
           <PlusIcon className="w-4 h-4" /> Inviter un collaborateur
         </button>

@@ -31,7 +31,7 @@ export default function AssistancePage() {
 
         <div>
           <label className="block text-[12px] font-bold text-[#64635F] mb-1">Photo (optionnel)</label>
-          <label className="w-full min-h-[44px] flex items-center justify-center gap-2 border border-[#E8E5E0] rounded-[6px] bg-[#FAF9F6] text-[13px] font-bold text-[#1C1C1C] cursor-pointer hover:bg-gray-100 transition-colors">
+          <label className="w-full min-h-[44px] flex items-center justify-center gap-2 border border-[#E8E5E0] rounded-[6px] bg-[#FAF9F6] text-[13px] font-bold text-[#0F172A] cursor-pointer hover:bg-gray-100 transition-colors">
             <CameraIcon className="w-5 h-5" />
             <span>Prendre une photo</span>
             {/* Native camera capture for mobile */}
@@ -39,19 +39,19 @@ export default function AssistancePage() {
           </label>
         </div>
 
-        <button type="submit" className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-[#1C1C1C] text-white rounded-[6px] text-[14px] font-bold mt-2 shadow-sm">
+        <button type="submit" className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-[#0F172A] text-white rounded-[6px] text-[14px] font-bold mt-2 shadow-sm">
           <PlusIcon className="w-4 h-4" />
           Envoyer le signalement
         </button>
       </form>
 
       <div className="space-y-4">
-        <h2 className="text-[16px] font-bold text-[#1C1C1C]">Mes signalements</h2>
+        <h2 className="text-[16px] font-bold text-[#0F172A]">Mes signalements</h2>
         <div className="space-y-3">
           {signalements.map((s) => (
             <div key={s.id} className="bg-white border border-[#E8E5E0] rounded-[12px] p-4 flex items-center justify-between shadow-xs">
               <div>
-                <div className="text-[14px] font-bold text-[#1C1C1C]">{s.type}</div>
+                <div className="text-[14px] font-bold text-[#0F172A]">{s.type}</div>
                 <div className="text-[12px] font-medium text-[#64635F] mt-0.5">{s.date}</div>
               </div>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${

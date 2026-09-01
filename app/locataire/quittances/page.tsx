@@ -34,11 +34,11 @@ export default function QuittancesPage() {
         {quittances.map((q) => (
           <div key={q.id} className="bg-white border border-[#E8E5E0] rounded-[12px] p-4 flex items-center justify-between shadow-xs">
             <div>
-              <div className="text-[14px] font-bold text-[#1C1C1C]">{q.mois}</div>
+              <div className="text-[14px] font-bold text-[#0F172A]">{q.mois}</div>
               <div className="text-[12px] font-medium text-[#64635F] mt-0.5">{q.montant.toLocaleString()} FCFA</div>
             </div>
             <button className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-[#FAF9F6] border border-[#E8E5E0] rounded-[8px] hover:bg-gray-100 transition-colors">
-              <DocumentArrowDownIcon className="w-5 h-5 text-[#1C1C1C]" />
+              <DocumentArrowDownIcon className="w-5 h-5 text-[#0F172A]" />
             </button>
           </div>
         ))}

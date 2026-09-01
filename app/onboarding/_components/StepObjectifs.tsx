@@ -19,7 +19,7 @@ export function StepObjectifs({ selected, onChange }: StepObjectifsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight">
+        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#0F172A] tracking-tight leading-tight">
           Quels sont vos objectifs ?
         </h2>
         <p className="text-[13px] text-[#64635F] mt-1.5">

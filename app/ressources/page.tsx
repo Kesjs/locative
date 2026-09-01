@@ -91,7 +91,7 @@ export default function RessourcesPage() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <div className="section-label mb-4">Centre de Ressources</div>
-            <h1 className="heading-1 text-[#1C1C1C] text-[clamp(2.4rem,5.5vw,4.25rem)] leading-[1.12] mb-6">
+            <h1 className="heading-1 text-[#0F172A] text-[clamp(2.4rem,5.5vw,4.25rem)] leading-[1.12] mb-6">
               Le guide essentiel de la gestion locative au{" "}
               <span className="font-serif italic font-normal text-[#64635F]">
                 Bénin
@@ -108,10 +108,10 @@ export default function RessourcesPage() {
           <div className="bg-white border border-[#E8E5E0] rounded-[12px] p-8 sm:p-12 shadow-sm mb-16">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-10 w-10 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] flex items-center justify-center">
-                <ScaleIcon className="h-5 w-5 text-[#087F5B]" />
+                <ScaleIcon className="h-5 w-5 text-[#D97706]" />
               </div>
               <div>
-                <h2 className="text-[22px] font-bold text-[#1C1C1C]">
+                <h2 className="text-[22px] font-bold text-[#0F172A]">
                   Ce que change la Loi n° 2022-30 pour les bailleurs
                 </h2>
                 <p className="text-[13px] text-[#64635F]">
@@ -124,10 +124,10 @@ export default function RessourcesPage() {
               {lawPoints.map((point, index) => (
                 <div key={index} className="p-5 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0]">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <h3 className="text-[15px] font-bold text-[#1C1C1C]">
+                    <h3 className="text-[15px] font-bold text-[#0F172A]">
                       {point.title}
                     </h3>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#E6F5EF] text-[#087F5B] border border-[#087F5B]/20">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#E6F5EF] text-[#D97706] border border-[#D97706]/20">
                       {point.status}
                     </span>
                   </div>
@@ -145,7 +145,7 @@ export default function RessourcesPage() {
           <div className="container mx-auto max-w-5xl px-6">
             <div className="text-center mb-12">
               <div className="section-label mb-2">Outil Interactif</div>
-              <h2 className="heading-2 text-[#1C1C1C] text-[28px] mb-3">
+              <h2 className="heading-2 text-[#0F172A] text-[28px] mb-3">
                 Simulateur de Rendement Locatif (FCFA)
               </h2>
               <p className="body-text text-[#64635F]">
@@ -157,7 +157,7 @@ export default function RessourcesPage() {
               {/* Inputs */}
               <div className="lg:col-span-7 space-y-5">
                 <div>
-                  <label className="block text-[13px] font-semibold text-[#1C1C1C] mb-2">
+                  <label className="block text-[13px] font-semibold text-[#0F172A] mb-2">
                     Valeur d&apos;achat ou estimation du bien (FCFA)
                   </label>
                   <input
@@ -174,7 +174,7 @@ export default function RessourcesPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#1C1C1C] mb-2">
+                    <label className="block text-[13px] font-semibold text-[#0F172A] mb-2">
                       Loyer mensuel prévu (FCFA)
                     </label>
                     <input
@@ -187,7 +187,7 @@ export default function RessourcesPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#1C1C1C] mb-2">
+                    <label className="block text-[13px] font-semibold text-[#0F172A] mb-2">
                       Charges &amp; entretien annuels (FCFA)
                     </label>
                     <input
@@ -202,7 +202,7 @@ export default function RessourcesPage() {
               </div>
 
               {/* Result KPI Card */}
-              <div className="lg:col-span-5 bg-[#1C1C1C] text-white rounded-[10px] p-6 text-center flex flex-col justify-center">
+              <div className="lg:col-span-5 bg-[#0F172A] text-white rounded-[10px] p-6 text-center flex flex-col justify-center">
                 <div className="text-[11px] font-bold uppercase tracking-widest text-[#E6F5EF] mb-2">
                   Résultats de rentabilité
                 </div>
@@ -237,7 +237,7 @@ export default function RessourcesPage() {
         <section className="container mx-auto max-w-5xl px-6 pb-24">
           <div className="text-center mb-12">
             <div className="section-label mb-2">Modèles Juridiques</div>
-            <h2 className="heading-2 text-[#1C1C1C] text-[28px] mb-3">
+            <h2 className="heading-2 text-[#0F172A] text-[28px] mb-3">
               Modèles types certifiés à télécharger
             </h2>
             <p className="body-text text-[#64635F]">
@@ -249,19 +249,19 @@ export default function RessourcesPage() {
             {templates.map((tpl, i) => (
               <div
                 key={i}
-                className="p-6 rounded-[8px] bg-white border border-[#E8E5E0] shadow-sm flex flex-col justify-between hover:border-[#1C1C1C] transition-all"
+                className="p-6 rounded-[8px] bg-white border border-[#E8E5E0] shadow-sm flex flex-col justify-between hover:border-[#0F172A] transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div className="h-9 w-9 rounded-full bg-[#FAF9F6] border border-[#E8E5E0] flex items-center justify-center">
-                      <DocumentTextIcon className="h-5 w-5 text-[#1C1C1C]" />
+                      <DocumentTextIcon className="h-5 w-5 text-[#0F172A]" />
                     </div>
                     <span className="text-[11px] font-bold text-[#64635F] bg-[#FAF9F6] px-2.5 py-1 rounded border border-[#E8E5E0]">
                       {tpl.format}
                     </span>
                   </div>
 
-                  <h3 className="text-[16px] font-bold text-[#1C1C1C] mb-2">
+                  <h3 className="text-[16px] font-bold text-[#0F172A] mb-2">
                     {tpl.title}
                   </h3>
                   <p className="text-[13px] text-[#64635F] leading-relaxed mb-6">
@@ -271,7 +271,7 @@ export default function RessourcesPage() {
 
                 <Link href="/auth/register" className="mt-auto">
                   <button className="btn-secondary w-full py-2.5 text-[13px] flex items-center justify-center gap-2">
-                    <ArrowDownTrayIcon className="h-4 w-4 text-[#087F5B]" />
+                    <ArrowDownTrayIcon className="h-4 w-4 text-[#D97706]" />
                     Accéder au modèle (Gratuit)
                   </button>
                 </Link>

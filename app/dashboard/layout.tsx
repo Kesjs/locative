@@ -4,6 +4,7 @@ import * as React from "react";
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import Header from "@/components/dashboard/Header";
+import { DevPlanSwitcher } from "@/components/dashboard/DevPlanSwitcher";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { layoutMode } = useSidebar();
@@ -22,6 +23,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         <Header />
         {children}
       </div>
+      <DevPlanSwitcher />
     </SidebarInset>
   );
 }

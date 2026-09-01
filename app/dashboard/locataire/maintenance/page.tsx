@@ -61,7 +61,7 @@ export default function LocataireMaintenancePage() {
             Déclarez un incident technique dans votre logement.
           </p>
         </div>
-        <button className="bg-[#1C1C1C] dark:bg-white text-white dark:text-black hover:opacity-90 px-5 py-2.5 rounded-[8px] font-bold text-[13px] shadow-sm transition-all flex items-center gap-2">
+        <button className="bg-[#0F172A] dark:bg-white text-white dark:text-black hover:opacity-90 px-5 py-2.5 rounded-[8px] font-bold text-[13px] shadow-sm transition-all flex items-center gap-2">
           <PlusIcon className="h-4 w-4" />
           Déclarer un incident
         </button>

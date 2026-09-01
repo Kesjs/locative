@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useBiens } from "./useBiens";
-import { useLocataires } from "./useLocataires";
+import { useLeases } from "./useLocataires";
 import { useLoyers } from "./useLoyers";
 
 export interface DashboardStats {
@@ -15,11 +15,12 @@ export interface DashboardStats {
 
 export function useDashboardStats() {
   const { data: biens = [] } = useBiens();
-  const { data: locataires = [] } = useLocataires();
+  const { data: leases = [] } = useLeases();
   const { data: loyers = [] } = useLoyers();
+  const locatairesActifs = leases.filter((l) => l.is_active);
 
   return useQuery({
-    queryKey: ["dashboard_stats", biens.length, locataires.length, loyers.length],
+    queryKey: ["dashboard_stats", biens.length, locatairesActifs.length, loyers.length],
     queryFn: async (): Promise<DashboardStats> => {
       const totalBiens = biens.length;
       const biensOccupes = biens.filter((b) => b.statut === "loué").length;
@@ -41,7 +42,7 @@ export function useDashboardStats() {
         tauxOccupation,
         totalBiens,
         biensOccupes,
-        totalLocataires: locataires.length,
+        totalLocataires: locatairesActifs.length,
         loyersEnAttente,
       };
     },

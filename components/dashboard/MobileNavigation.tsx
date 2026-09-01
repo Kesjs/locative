@@ -45,11 +45,11 @@ export function MobileNavigation() {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="relative z-10 m-3 w-[280px] h-[calc(100vh-24px)] rounded-[20px] overflow-hidden flex flex-col shadow-2xl border"
               style={{
-                backgroundColor: isDark ? "#18181B" : "#FFFFFF",
-                borderColor: isDark ? "#27272A" : "#E8E5E0",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                borderColor: isDark ? "#334155" : "#E8E5E0",
               }}
             >
-              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: isDark ? "#27272A" : "#E8E5E0" }}>
+              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: isDark ? "#334155" : "#E8E5E0" }}>
                 <span className="font-extrabold text-[18px] tracking-tight text-[var(--text-primary)]">Lokka</span>
                 <button onClick={handleClose} className="p-1.5 bg-black/5 dark:bg-white/10 rounded-full text-[var(--text-secondary)]">
                   <XMarkIcon className="h-5 w-5" />
@@ -103,8 +103,8 @@ export function MobileNavigation() {
               transition={{ type: "spring", damping: 22, stiffness: 200 }}
               className="absolute top-0 left-2 right-2 rounded-[24px] shadow-2xl border overflow-hidden"
               style={{
-                backgroundColor: isDark ? "#18181B" : "#FFFFFF",
-                borderColor: isDark ? "#27272A" : "#E8E5E0",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                borderColor: isDark ? "#334155" : "#E8E5E0",
               }}
             >
               <div className="p-4 flex flex-col h-full">

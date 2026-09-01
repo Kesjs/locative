@@ -13,6 +13,8 @@ export async function POST(request: Request) {
       propertyAddress,
       rentAmount,
       depositMonths = 3,
+      customMessage,
+      subject,
     } = body;
 
     if (!tenantName || (!tenantEmail && !tenantPhone)) {
@@ -22,10 +24,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const portalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://codeo-ui.com'}/locataire`;
+    const portalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lokka.bj'}/locataire`;
 
     // WhatsApp Message Text template
-    const whatsappMessage = `*LOKKA BÉNIN — Votre Espace Locataire est prêt !* 🇧🇯\n\nBonjour ${tenantName},\nVotre propriétaire/gestionnaire *${ownerName || 'votre bailleur'}* vous a créé un accès à votre espace pour *${propertyTitle}*.\n\n• *Loyer mensuel :* ${Number(rentAmount).toLocaleString('fr-FR')} FCFA\n• *Caution légale (Loi 2022-30) :* ${(Number(rentAmount) * Number(depositMonths)).toLocaleString('fr-FR')} FCFA (${depositMonths} mois)\n\n👉 *Accéder à votre espace :* ${portalUrl}\n\n_Connectez-vous avec votre numéro (+229) et votre code de sécurité pour télécharger vos quittances PDF et payer votre loyer par MoMo._`;
+    const customNoteText = customMessage ? `\n\n💬 *Note :* "${customMessage}"` : '';
+    const whatsappMessage = `*LOKKA BÉNIN — Votre Espace Locataire est prêt !* 🇧🇯\n\nBonjour ${tenantName},\nVotre propriétaire/gestionnaire *${ownerName || 'votre bailleur'}* vous a créé un accès à votre espace pour *${propertyTitle}*.\n\n• *Loyer mensuel :* ${Number(rentAmount).toLocaleString('fr-FR')} FCFA\n• *Caution légale (Loi 2022-30) :* ${(Number(rentAmount) * Number(depositMonths)).toLocaleString('fr-FR')} FCFA (${depositMonths} mois)${customNoteText}\n\n👉 *Accéder à votre espace :* ${portalUrl}\n\n_Connectez-vous avec votre numéro (+229) et votre code de sécurité pour télécharger vos quittances PDF et payer votre loyer par MoMo._`;
 
     // Send email via Resend if email is provided
     let emailResult = null;
@@ -38,6 +41,8 @@ export async function POST(request: Request) {
         propertyAddress: propertyAddress || 'Cotonou, Bénin',
         rentAmountFcfa: Number(rentAmount) || 0,
         depositMonths: Number(depositMonths) || 3,
+        customMessage,
+        subject,
         portalUrl,
       });
     }

@@ -36,7 +36,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#1C1C1C] tracking-tight">
+        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#0F172A] tracking-tight">
           Quel est votre profil ?
         </h2>
         <p className="text-[13px] text-[#64635F] mt-1">
@@ -64,20 +64,20 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       </div>
 
       <div>
-        <label className="block text-[13px] font-bold text-[#1C1C1C] mb-1.5">
+        <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
           {data.profileType === "bailleur" ? "Nom" : "Raison sociale du cabinet"}
         </label>
         <input
           type="text"
           value={data.nom}
           onChange={(e) => updateData({ nom: e.target.value })}
-          className="w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#1C1C1C] focus:outline-none focus:border-[#1C1C1C] focus:ring-1 focus:ring-[#1C1C1C]/10 shadow-sm transition-shadow"
+          className="w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]/10 shadow-sm transition-shadow"
           placeholder={data.profileType === "bailleur" ? "Ex: Koudjo Dossou" : "Ex: Agence Immobilière du Golfe"}
         />
       </div>
 
       <div>
-        <label className="block text-[13px] font-bold text-[#1C1C1C] mb-1.5">
+        <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
           Moyen de réception des fonds privilégié
         </label>
         <div className="flex gap-2 p-1 bg-[#FAF9F6] border border-[#E8E5E0] rounded-lg">
@@ -86,8 +86,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             onClick={() => updateData({ moyenReception: "mobile_money", mobileProvider: "mtn" })}
             className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
               data.moyenReception === "mobile_money"
-                ? "bg-white text-[#1C1C1C] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#1C1C1C]"
+                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
+                : "text-[#64635F] hover:text-[#0F172A]"
             }`}
           >
             Mobile Money
@@ -97,8 +97,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             onClick={() => updateData({ moyenReception: "banque", mobileProvider: undefined })}
             className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
               data.moyenReception === "banque"
-                ? "bg-white text-[#1C1C1C] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#1C1C1C]"
+                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
+                : "text-[#64635F] hover:text-[#0F172A]"
             }`}
           >
             Virement Bancaire
@@ -108,7 +108,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
 
       {data.moyenReception === "mobile_money" && (
         <div>
-          <label className="block text-[13px] font-bold text-[#1C1C1C] mb-1.5">
+          <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
             Réseau mobile
           </label>
           <div className="flex gap-2">
@@ -119,8 +119,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
                 onClick={() => updateData({ mobileProvider: provider })}
                 className={`flex-1 py-2 text-[13px] font-semibold rounded-lg border transition-all capitalize ${
                   data.mobileProvider === provider
-                    ? "bg-[#F5F5DC] text-[#1C1C1C] border-[#1C1C1C]"
-                    : "bg-white text-[#64635F] border-[#E8E5E0] hover:border-[#1C1C1C]"
+                    ? "bg-[#F5F5DC] text-[#0F172A] border-[#0F172A]"
+                    : "bg-white text-[#64635F] border-[#E8E5E0] hover:border-[#0F172A]"
                 }`}
               >
                 {provider}
@@ -131,7 +131,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       )}
 
       <div>
-        <label className="block text-[13px] font-bold text-[#1C1C1C] mb-1.5">
+        <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
           Zone géographique actuelle
         </label>
         <div className="flex gap-2 p-1 bg-[#FAF9F6] border border-[#E8E5E0] rounded-lg">
@@ -140,8 +140,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             onClick={() => updateData({ zoneGeo: "benin", paysDiaspora: undefined })}
             className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
               data.zoneGeo === "benin"
-                ? "bg-white text-[#1C1C1C] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#1C1C1C]"
+                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
+                : "text-[#64635F] hover:text-[#0F172A]"
             }`}
           >
             Au Bénin 🇧🇯
@@ -151,8 +151,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             onClick={() => updateData({ zoneGeo: "diaspora", paysDiaspora: "France" })}
             className={`flex-1 py-2 text-[13px] font-semibold rounded-md transition-all ${
               data.zoneGeo === "diaspora"
-                ? "bg-white text-[#1C1C1C] shadow-sm ring-1 ring-black/5"
-                : "text-[#64635F] hover:text-[#1C1C1C]"
+                ? "bg-white text-[#0F172A] shadow-sm ring-1 ring-black/5"
+                : "text-[#64635F] hover:text-[#0F172A]"
             }`}
           >
             Diaspora 🌍
@@ -162,14 +162,14 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
 
       {data.zoneGeo === "diaspora" && (
         <div>
-          <label className="block text-[13px] font-bold text-[#1C1C1C] mb-1.5">
+          <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
             Pays de résidence
           </label>
           <div className="relative">
             <select
               value={data.paysDiaspora || ""}
               onChange={(e) => updateData({ paysDiaspora: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#1C1C1C] focus:outline-none focus:border-[#1C1C1C] focus:ring-1 focus:ring-[#1C1C1C]/10 shadow-sm transition-shadow appearance-none cursor-pointer"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]/10 shadow-sm transition-shadow appearance-none cursor-pointer"
             >
               {COUNTRIES.filter(c => c.code !== "BJ").map((c) => (
                 <option key={c.code} value={c.name}>

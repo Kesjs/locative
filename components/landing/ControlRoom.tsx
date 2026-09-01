@@ -49,8 +49,8 @@ export default function ControlRoom() {
                   <CartesianGrid vertical={false} stroke="#E4E0D8" strokeDasharray="2 4" />
                   <XAxis dataKey="month" tick={{ fill: "#71717A", fontSize: 10 }} axisLine={{ stroke: "#E4E0D8" }} tickLine={false} />
                   <YAxis tickFormatter={formatMillions} tick={{ fill: "#71717A", fontSize: 10 }} axisLine={false} tickLine={false} width={45} domain={[0, 1600000]} />
-                  <Tooltip cursor={{ fill: "rgba(24,24,27,0.04)" }} formatter={(value) => [`${Number(value).toLocaleString("fr-FR")} FCFA`, "Loyers encaissés"]} contentStyle={{ border: "1px solid #E4E0D8", borderRadius: "6px", boxShadow: "0 8px 24px rgba(24,24,27,0.08)", fontSize: "11px" }} />
-                  <Bar dataKey="value" fill="#18181B" radius={[3, 3, 0, 0]} isAnimationActive animationDuration={700} />
+                  <Tooltip cursor={{ fill: "rgba(15,23,42,0.04)" }} formatter={(value) => [`${Number(value).toLocaleString("fr-FR")} FCFA`, "Loyers encaissés"]} contentStyle={{ border: "1px solid #E4E0D8", borderRadius: "6px", boxShadow: "0 8px 24px rgba(15,23,42,0.08)", fontSize: "11px" }} />
+                  <Bar dataKey="value" fill="#0F172A" radius={[3, 3, 0, 0]} isAnimationActive animationDuration={700} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

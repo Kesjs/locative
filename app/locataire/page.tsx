@@ -36,7 +36,7 @@ export default function MonLoyerPage() {
         <h1 className="text-[14px] font-bold text-[#64635F] uppercase tracking-wider mb-2">
           Loyer de Septembre
         </h1>
-        <div className="text-[48px] sm:text-[56px] font-extrabold text-[#1C1C1C] tracking-tight leading-none mb-4">
+        <div className="text-[48px] sm:text-[56px] font-extrabold text-[#0F172A] tracking-tight leading-none mb-4">
           {isUpToDate ? "À jour" : `${data.solde.toLocaleString()} FCFA`}
         </div>
         
@@ -54,7 +54,7 @@ export default function MonLoyerPage() {
 
       {!isUpToDate && (
         <div className="sticky bottom-20 md:static mt-12 w-full max-w-sm mx-auto p-4 bg-white md:bg-transparent rounded-t-[20px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-none">
-          <button className="w-full h-14 bg-[#1C1C1C] text-white rounded-[12px] text-[16px] font-extrabold hover:bg-black transition-colors shadow-lg flex items-center justify-center">
+          <button className="w-full h-14 bg-[#0F172A] text-white rounded-[12px] text-[16px] font-extrabold hover:bg-black transition-colors shadow-lg flex items-center justify-center">
             Payer via Mobile Money
           </button>
           <div className="text-center text-[11px] text-[#9C9A95] mt-3 font-medium">

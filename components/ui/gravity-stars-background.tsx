@@ -15,7 +15,7 @@ export function GravityStarsBackground({
   quantity = 60,
   staticity = 50,
   ease = 50,
-  color = "#087F5B",
+  color = "#D97706",
 }: GravityStarsBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);

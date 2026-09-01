@@ -130,7 +130,7 @@ export default function OnboardingPage() {
                   {index > 0 && (
                     <div
                       className={`absolute top-4 -left-1/2 w-full h-[2px] -z-0 transition-colors duration-300 ${
-                        index <= currentStep ? "bg-[#1C1C1C]" : "bg-[#E8E5E0]"
+                        index <= currentStep ? "bg-[#0F172A]" : "bg-[#E8E5E0]"
                       }`}
                     />
                   )}
@@ -138,9 +138,9 @@ export default function OnboardingPage() {
                   <div
                     className={`relative z-10 h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 ${
                       isCompleted
-                        ? "bg-[#1C1C1C] text-white shadow-sm"
+                        ? "bg-[#0F172A] text-white shadow-sm"
                         : isCurrent
-                        ? "bg-[#1C1C1C] text-white ring-4 ring-[#1C1C1C]/10 shadow-sm"
+                        ? "bg-[#0F172A] text-white ring-4 ring-[#0F172A]/10 shadow-sm"
                         : "bg-[#FAF9F6] text-[#9C9A95] border-2 border-[#E8E5E0]"
                     }`}
                   >
@@ -150,9 +150,9 @@ export default function OnboardingPage() {
                   <span
                     className={`mt-2 text-[11px] font-medium hidden sm:block ${
                       isCurrent
-                        ? "text-[#1C1C1C] font-bold"
+                        ? "text-[#0F172A] font-bold"
                         : isCompleted
-                        ? "text-[#1C1C1C]"
+                        ? "text-[#0F172A]"
                         : "text-[#9C9A95]"
                     }`}
                   >
@@ -223,7 +223,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="px-5 py-2.5 text-[13px] font-bold text-[#64635F] hover:text-[#1C1C1C] transition-colors disabled:opacity-50"
+              className="px-5 py-2.5 text-[13px] font-bold text-[#64635F] hover:text-[#0F172A] transition-colors disabled:opacity-50"
             >
               Retour
             </button>
@@ -238,7 +238,7 @@ export default function OnboardingPage() {
             className={`px-8 py-2.5 text-[14px] font-bold rounded-lg shadow-sm transition-all flex items-center gap-2 ${
               !isStepValid() || isSubmitting
                 ? "bg-[#E8E5E0] text-[#9C9A95] cursor-not-allowed"
-                : "bg-[#1C1C1C] text-white hover:bg-black hover:shadow-md cursor-pointer"
+                : "bg-[#0F172A] text-white hover:bg-black hover:shadow-md cursor-pointer"
             }`}
           >
             {isSubmitting ? (

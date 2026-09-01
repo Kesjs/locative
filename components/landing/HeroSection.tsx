@@ -66,10 +66,10 @@ export default function HeroSection() {
               className="mt-8 flex flex-wrap items-center gap-3"
             >
               <LiquidButton
-                baseColor="#18181B"
+                baseColor="#0F172A"
                 liquidColor="#F4F2EC"
                 textColor="#FFFFFF"
-                textHoverColor="#18181B"
+                textHoverColor="#0F172A"
                 size="lg"
               >
                 Démarrer gratuitement

@@ -23,9 +23,9 @@ export const COLOR_THEMES: Record<
 > = {
   zinc: {
     name: "Zinc",
-    hex: "#18181B",
-    primary: "#18181B",
-    hover: "#27272A",
+    hex: "#0F172A",
+    primary: "#0F172A",
+    hover: "#334155",
     light: "#F4F4F5",
     text: "#FFFFFF",
   },
@@ -784,7 +784,7 @@ export const SidebarMenuButton = React.forwardRef<
               top: tooltipTop,
               transform: "translateY(-50%)",
               zIndex: 9999999,
-              backgroundColor: "#18181B",
+              backgroundColor: "#0F172A",
               color: "#FFFFFF",
               padding: "5px 10px",
               borderRadius: "6px",
@@ -795,7 +795,7 @@ export const SidebarMenuButton = React.forwardRef<
               boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
               animation: "tooltip-slide-right 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards",
             }}
-            className="dark:bg-white dark:text-[#18181B]"
+            className="dark:bg-white dark:text-[#0F172A]"
           >
             {tooltip}
           </div>

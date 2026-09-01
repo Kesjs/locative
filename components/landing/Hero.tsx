@@ -13,12 +13,24 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[760px] flex-col items-center text-center">
-          <div className="relative mb-6 inline-flex items-center gap-2 overflow-hidden rounded-full border border-border-default bg-white px-3 py-1.5 text-[12px] font-semibold text-text-primary shadow-xs">
-            <BorderBeam size={32} duration={4} delay={0} />
-            <span className="relative z-10 inline-flex items-center gap-1.5">
-              <span className="rounded-[4px] bg-success-strong px-1.5 py-0.5 text-[9px] font-bold tracking-[0.12em] text-white">NEW</span>
-              <span>Une nouvelle façon de gérer vos biens</span>
-            </span>
+          
+          {/* Logo Hero & Badge */}
+          <div className="mb-6 flex flex-col items-center gap-3">
+            <img
+              src="/logo-lokka.png"
+              alt="Lokka Bénin"
+              className="h-10 sm:h-12 w-auto object-contain select-none transition-transform hover:scale-105"
+            />
+            
+            <div className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-border-default bg-white px-3 py-1 text-[11.5px] font-semibold text-text-primary shadow-xs">
+              <BorderBeam size={32} duration={4} delay={0} />
+              <span className="relative z-10 inline-flex items-center gap-1.5">
+                <span className="rounded-[4px] bg-success-strong px-1.5 py-0.5 text-[9px] font-bold tracking-[0.12em] text-white">
+                  LOI 2022-30 🇧🇯
+                </span>
+                <span>Plateforme officielle de gestion locative au Bénin</span>
+              </span>
+            </div>
           </div>
 
           <h1 className="max-w-[720px] text-[clamp(2.2rem,5.3vw,3.9rem)] font-semibold leading-[0.98] tracking-[-0.06em] text-text-primary">
@@ -28,8 +40,8 @@ export default function Hero() {
             </span>
           </h1>
 
-          <p className="mt-7 max-w-[610px] text-[15px] leading-[1.75] text-text-secondary sm:text-[16px]">
-            Que vous soyez au Bénin ou dans la diaspora, gérez vos logements, vos quittances officielles et votre site vitrine depuis un seul espace.
+          <p className="mt-6 max-w-[610px] text-[15px] leading-[1.75] text-text-secondary sm:text-[16px]">
+            Que vous soyez au Bénin ou dans la diaspora, gérez vos logements, vos encaissements MTN MoMo, vos quittances certifiées et votre mini-site vitrine depuis un seul espace.
           </p>
 
           <div data-landing-hero-form className="mt-8 w-full max-w-[470px]">
@@ -69,7 +81,7 @@ export default function Hero() {
 
             <span className="inline-flex items-center gap-1.5">
               <span className="rounded-[4px] border border-border-default bg-white px-1.5 py-0.5 text-[10px] font-bold text-text-primary">FCFA</span>
-              100% adapté à l&apos;Afrique francophone
+              100% adapté au Bénin &amp; Afrique de l&apos;Ouest
             </span>
           </div>
         </div>

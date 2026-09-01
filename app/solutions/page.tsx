@@ -94,7 +94,7 @@ export default function SolutionsPage() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <div className="section-label mb-4">Solutions par Profil</div>
-            <h1 className="heading-1 text-[#1C1C1C] text-[clamp(2.4rem,5.5vw,4.25rem)] leading-[1.12] mb-6">
+            <h1 className="heading-1 text-[#0F172A] text-[clamp(2.4rem,5.5vw,4.25rem)] leading-[1.12] mb-6">
               Une gestion sur-mesure pour chaque{" "}
               <span className="font-serif italic font-normal text-[#64635F]">
                 acteur immobilier
@@ -122,25 +122,25 @@ export default function SolutionsPage() {
                   transition={{ duration: 0.5, delay: index * 0.15 }}
                   className={`flex flex-col justify-between rounded-[12px] bg-white p-8 border transition-all duration-300 ${
                     sol.popular
-                      ? "border-[#1C1C1C] shadow-[0_12px_40px_rgba(0,0,0,0.08)] relative"
-                      : "border-[#E8E5E0] shadow-sm hover:border-[#1C1C1C]"
+                      ? "border-[#0F172A] shadow-[0_12px_40px_rgba(0,0,0,0.08)] relative"
+                      : "border-[#E8E5E0] shadow-sm hover:border-[#0F172A]"
                   }`}
                 >
                   {sol.popular && (
-                    <span className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#087F5B] text-white">
+                    <span className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#D97706] text-white">
                       Recommandé
                     </span>
                   )}
 
                   <div>
                     <div className="h-12 w-12 rounded-[8px] bg-[#FAF9F6] border border-[#E8E5E0] flex items-center justify-center mb-6">
-                      <Icon className="h-6 w-6 text-[#1C1C1C]" />
+                      <Icon className="h-6 w-6 text-[#0F172A]" />
                     </div>
 
-                    <div className="text-[12px] font-bold tracking-wider uppercase text-[#087F5B] mb-1">
+                    <div className="text-[12px] font-bold tracking-wider uppercase text-[#D97706] mb-1">
                       {sol.badge}
                     </div>
-                    <h3 className="text-[20px] font-bold text-[#1C1C1C] mb-1">
+                    <h3 className="text-[20px] font-bold text-[#0F172A] mb-1">
                       {sol.title}
                     </h3>
                     <div className="text-[13px] font-medium text-[#64635F] mb-4">
@@ -152,12 +152,12 @@ export default function SolutionsPage() {
                     </p>
 
                     <div className="pt-6 border-t border-[#E8E5E0] mb-8 space-y-3">
-                      <div className="text-[12px] font-bold uppercase tracking-wider text-[#1C1C1C] mb-3">
+                      <div className="text-[12px] font-bold uppercase tracking-wider text-[#0F172A] mb-3">
                         Avantages clés Lokka :
                       </div>
                       {sol.benefits.map((b, i) => (
-                        <div key={i} className="flex items-start gap-2.5 text-[13px] text-[#1C1C1C]">
-                          <CheckIcon className="h-4 w-4 text-[#087F5B] shrink-0 mt-0.5" />
+                        <div key={i} className="flex items-start gap-2.5 text-[13px] text-[#0F172A]">
+                          <CheckIcon className="h-4 w-4 text-[#D97706] shrink-0 mt-0.5" />
                           <span>{b}</span>
                         </div>
                       ))}
@@ -168,8 +168,8 @@ export default function SolutionsPage() {
                     <button
                       className={`w-full py-3 px-4 rounded-[6px] text-[13px] font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                         sol.popular
-                          ? "bg-[#1C1C1C] text-white hover:bg-[#333333]"
-                          : "bg-[#FAF9F6] text-[#1C1C1C] border border-[#E8E5E0] hover:bg-white"
+                          ? "bg-[#0F172A] text-white hover:bg-[#333333]"
+                          : "bg-[#FAF9F6] text-[#0F172A] border border-[#E8E5E0] hover:bg-white"
                       }`}
                     >
                       {sol.ctaText}
@@ -185,8 +185,8 @@ export default function SolutionsPage() {
         {/* Commitment Banner */}
         <section className="bg-white border-y border-[#E8E5E0] py-16">
           <div className="container mx-auto max-w-4xl px-6 text-center">
-            <ShieldCheckIcon className="h-10 w-10 text-[#087F5B] mx-auto mb-4" />
-            <h2 className="heading-2 text-[#1C1C1C] text-[26px] mb-3">
+            <ShieldCheckIcon className="h-10 w-10 text-[#D97706] mx-auto mb-4" />
+            <h2 className="heading-2 text-[#0F172A] text-[26px] mb-3">
               Un engagement sans compromis sur la sécurité
             </h2>
             <p className="body-text text-[15px] text-[#64635F] max-w-xl mx-auto leading-relaxed">

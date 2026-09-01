@@ -32,14 +32,14 @@ export default function AdminLoginPage() {
       <div className="h-full lg:h-screen lg:overflow-y-auto flex flex-col justify-between p-6 sm:p-10 lg:p-16 z-10">
         <div className="flex items-center justify-between mb-12">
           <StripeAuthLogo />
-          <span className="text-[12px] font-bold px-3 py-1 bg-[#1C1C1C] text-white rounded-full">
+          <span className="text-[12px] font-bold px-3 py-1 bg-[#0F172A] text-white rounded-full">
             Admin Portal
           </span>
         </div>
 
         <div className="w-full max-w-[380px] mx-auto my-auto">
           <div className="mb-8 text-left">
-            <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight mb-3">
+            <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#0F172A] tracking-tight leading-tight mb-3">
               Lokka HQ
             </h1>
             <p className="text-[14px] text-[#64635F]">
@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSendCode} className="space-y-4">
             <div>
-              <label className="block text-[12px] font-semibold text-[#1C1C1C] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#0F172A] mb-1.5">
                 Adresse email administrateur
               </label>
               <div className="relative">
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
                   placeholder="admin@lokka.bj"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#1C1C1C] placeholder-[#9C9A95] focus:outline-none focus:border-[#1C1C1C] focus:ring-1 focus:ring-[#1C1C1C] transition shadow-xs"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#0F172A] placeholder-[#9C9A95] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A] transition shadow-xs"
                 />
               </div>
             </div>
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-black text-white text-[13px] font-bold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              className="w-full py-2.5 px-4 bg-[#0F172A] hover:bg-black text-white text-[13px] font-bold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? "Authentification..." : "Accéder au HQ"}
               <ArrowRightIcon className="h-3.5 w-3.5" />
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
       {/* ========================================================================= */}
       {/* COLONNE DROITE : Visuel "Tech/Sécurité" Admin                             */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex flex-col items-center justify-center h-screen sticky top-0 relative bg-[#18181B] overflow-hidden p-12">
+      <div className="hidden lg:flex flex-col items-center justify-center h-screen sticky top-0 relative bg-[#0F172A] overflow-hidden p-12">
         {/* Subtle grid background */}
         <div 
           className="absolute inset-0 opacity-[0.03]" 
@@ -98,7 +98,7 @@ export default function AdminLoginPage() {
         />
         
         {/* Soft UI Graphic for Admin */}
-        <div className="relative z-10 w-full max-w-md bg-[#27272A] p-8 rounded-[24px] shadow-2xl border border-[#3F3F46] flex flex-col gap-6">
+        <div className="relative z-10 w-full max-w-md bg-[#334155] p-8 rounded-[24px] shadow-2xl border border-[#334155] flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
@@ -115,17 +115,17 @@ export default function AdminLoginPage() {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-[12px] bg-[#18181B] border border-[#3F3F46]">
+            <div className="p-3 rounded-[12px] bg-[#0F172A] border border-[#334155]">
               <div className="text-[11px] text-[#A1A1AA] mb-1">Total Utilisateurs</div>
               <div className="text-[18px] font-bold text-white">4,289</div>
             </div>
-            <div className="p-3 rounded-[12px] bg-[#18181B] border border-[#3F3F46]">
+            <div className="p-3 rounded-[12px] bg-[#0F172A] border border-[#334155]">
               <div className="text-[11px] text-[#A1A1AA] mb-1">Volume Mensuel</div>
               <div className="text-[18px] font-bold text-white">124.5M</div>
             </div>
           </div>
 
-          <div className="w-full h-1.5 bg-[#3F3F46] rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-[#334155] rounded-full overflow-hidden">
             <div className="w-2/3 h-full bg-blue-500 rounded-full" />
           </div>
         </div>

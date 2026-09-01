@@ -75,9 +75,9 @@ export default function RegisterPage() {
       <div className="w-full">
         {/* Titre & Sous-titre éditorial */}
         <div className="mb-8 text-left">
-          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#1C1C1C] tracking-tight leading-tight mb-2">
+          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#0F172A] tracking-tight leading-tight mb-2">
             Créer votre espace{" "}
-            <span className="font-serif italic font-normal text-[#1C1C1C]">
+            <span className="font-serif italic font-normal text-[#0F172A]">
               Lokka
             </span>
           </h1>
@@ -98,7 +98,7 @@ export default function RegisterPage() {
         {!otpSent ? (
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div>
-              <label className="block text-[12px] font-semibold text-[#1C1C1C] mb-1.5">
+              <label className="block text-[12px] font-semibold text-[#0F172A] mb-1.5">
                 Votre adresse email
               </label>
               <div className="relative">
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                   placeholder="nom@exemple.bj"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#1C1C1C] placeholder-[#9C9A95] focus:outline-none focus:border-[#1C1C1C] transition shadow-xs"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#0F172A] placeholder-[#9C9A95] focus:outline-none focus:border-[#0F172A] transition shadow-xs"
                 />
               </div>
               <span className="text-[11px] text-[#64635F] mt-1.5 block">
@@ -122,7 +122,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading || !email}
-              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              className="w-full py-2.5 px-4 bg-[#0F172A] hover:bg-[#F5F5DC] hover:text-[#0F172A] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? "Envoi..." : "Continuer"}
               <ArrowRightIcon className="h-3.5 w-3.5" />
@@ -145,7 +145,7 @@ export default function RegisterPage() {
           Vous avez déjà un compte ?{" "}
           <Link
             href="/auth/login"
-            className="font-bold text-[#1C1C1C] hover:underline ml-1"
+            className="font-bold text-[#0F172A] hover:underline ml-1"
           >
             Se connecter
           </Link>

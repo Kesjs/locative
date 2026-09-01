@@ -35,7 +35,7 @@ export default function AdminDomainesPage() {
       );
     }},
     { key: "actions", header: "Actions", renderCell: () => (
-      <button className="text-[#1C1C1C] font-semibold text-[12px] underline">Gérer</button>
+      <button className="text-[#0F172A] font-semibold text-[12px] underline">Gérer</button>
     )},
   ];
 

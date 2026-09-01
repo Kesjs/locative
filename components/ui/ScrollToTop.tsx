@@ -47,7 +47,7 @@ export default function ScrollToTop() {
           exit={{ opacity: 0, scale: 0.8, y: 16 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           aria-label="Revenir en haut de page"
-          className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-white text-[#1C1C1C] border border-[#E8E5E0] shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-200 hover:bg-[#F5F5DC] hover:text-[#1C1C1C] hover:border-[#E8E5E0] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] group cursor-pointer"
+          className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full bg-white text-[#0F172A] border border-[#E8E5E0] shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-200 hover:bg-[#F5F5DC] hover:text-[#0F172A] hover:border-[#E8E5E0] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] group cursor-pointer"
           style={{ width: size, height: size }}
         >
           {/* Indicateur circulaire de progression du scroll */}
@@ -72,7 +72,7 @@ export default function ScrollToTop() {
               cy={size / 2}
               r={radius}
               fill="transparent"
-              stroke="#1C1C1C"
+              stroke="#0F172A"
               strokeWidth={strokeWidth}
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}

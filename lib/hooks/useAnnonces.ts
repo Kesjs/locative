@@ -34,6 +34,24 @@ export function useAnnonces() {
   });
 }
 
+export function useToggleAnnonceStatut() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, statut }: { id: string; statut: Annonce["statut"] }) => {
+      if (!isSupabaseConfigured()) {
+        return { id, statut };
+      }
+      const supabase = createClient();
+      const { data, error } = await supabase.from("annonces").update({ statut }).eq("id", id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["annonces"] });
+    },
+  });
+}
+
 export function useAddAnnonce() {
   const queryClient = useQueryClient();
   return useMutation({

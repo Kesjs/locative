@@ -47,7 +47,7 @@ export default function TresoreriePage() {
     }},
     { key: "statut", header: "Statut", renderCell: (row: any) => (
       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-        row.statut === "Reversé" ? "bg-[#E6F5EF] text-[#087F5B]" : "bg-[#FEF3C7] text-[#D97706]"
+        row.statut === "Reversé" ? "bg-[#E6F5EF] text-[#D97706]" : "bg-[#FEF3C7] text-[#D97706]"
       }`}>
         {row.statut}
       </span>
@@ -91,7 +91,7 @@ export default function TresoreriePage() {
       {/* Sticky footer for total */}
       <div className="fixed bottom-0 left-0 right-0 md:left-[250px] bg-white border-t border-[#E8E5E0] p-4 flex justify-between items-center shadow-lg z-20">
         <span className="text-[14px] font-bold text-[#64635F]">Total Net Restant à Reverser</span>
-        <span className="text-[20px] font-extrabold text-[#1C1C1C]">{totalNet.toLocaleString()} FCFA</span>
+        <span className="text-[20px] font-extrabold text-[#0F172A]">{totalNet.toLocaleString()} FCFA</span>
       </div>
     </div>
   );

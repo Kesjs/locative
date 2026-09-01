@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
     },
   });
 
-  const COLORS = ["#1C1C1C", "#C5A880"];
+  const COLORS = ["#0F172A", "#C5A880"];
   const chartKey = useMemo(() => `chart-${data?.repartition?.length || 0}`, [data]);
 
   if (isLoading) {
@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#1C1C1C", border: "none", borderRadius: 8, padding: "8px 12px" }}
+                  contentStyle={{ backgroundColor: "#0F172A", border: "none", borderRadius: 8, padding: "8px 12px" }}
                   itemStyle={{ color: "#FAF9F6", fontSize: 12, fontWeight: 600 }}
                   formatter={(val: any, name: any) => [val, name]}
                 />
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center gap-4 mt-2 text-[10px] font-bold text-[#64635F]">
-            <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#1C1C1C]"></span> Bailleurs</div>
+            <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#0F172A]"></span> Bailleurs</div>
             <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#C5A880]"></span> Agences</div>
           </div>
         </div>
