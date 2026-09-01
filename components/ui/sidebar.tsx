@@ -407,7 +407,7 @@ export const Sidebar = React.forwardRef<
           position: "fixed",
           top: isFloating ? 12 : 0,
           left: isFloating ? 12 : 0,
-          zIndex: 40,
+          zIndex: layoutMode === "default" && !isCollapsed ? 50 : 40,
           transform: isHiddenOffscreen ? "translateX(-130%)" : "translateX(0)",
           opacity: isHiddenOffscreen ? 0 : 1,
           pointerEvents: isHiddenOffscreen ? "none" : "auto",
@@ -419,8 +419,8 @@ export const Sidebar = React.forwardRef<
             ? "1px solid hsl(var(--border))"
             : undefined,
           borderRadius: isFloating ? 14 : 0,
-          boxShadow: isFloating
-            ? "var(--shadow-card)"
+          boxShadow: isFloating || (layoutMode === "default" && !isCollapsed)
+            ? "var(--shadow-modal)"
             : "none",
           display: "flex",
           flexDirection: "column",
@@ -537,25 +537,24 @@ export const SidebarInset = React.forwardRef<
   const isCollapsed = state === "collapsed";
   const isFloating = variant === "floating";
   const isInset = variant === "inset";
-
-  // In Full Layout mode, when collapsed, the margin is strictly 0px (100% full screen)
   const isFullLayoutActive = layoutMode === "full" && isCollapsed;
 
-  const marginLeft = isMobile
-    ? "0px"
-    : isFullLayoutActive
-    ? "0px"
-    : isFloating
-      ? isCollapsed
-        ? "88px"
-        : "260px"
-      : isInset
-        ? isCollapsed
-          ? "76px"
-          : "248px"
-        : isCollapsed
-          ? SIDEBAR_WIDTH_ICON
-          : SIDEBAR_WIDTH;
+  // Calcul précis du décalage en fonction du mode (Overlay vs Push vs Full)
+  let marginLeft = "0px";
+  if (isMobile) {
+    marginLeft = "0px";
+  } else if (layoutMode === "full") {
+    // Mode Full : 100% de l'écran, pas de marge quand replié
+    marginLeft = isCollapsed ? "0px" : (isFloating ? "256px" : "240px");
+  } else if (layoutMode === "default") {
+    // Mode Overlay : la sidebar s'ouvre PAR-DESSUS le contenu sans pousser tout le tableau de bord
+    marginLeft = isCollapsed ? (isFloating ? "76px" : "68px") : (isFloating ? "76px" : "68px");
+  } else {
+    // Mode Push : la sidebar pousse physiquement tout le contenu
+    marginLeft = isCollapsed
+      ? (isFloating ? "76px" : "68px")
+      : (isFloating ? "256px" : "240px");
+  }
 
   return (
     <main

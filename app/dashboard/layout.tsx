@@ -7,19 +7,9 @@ import Header from "@/components/dashboard/Header";
 import { DevPlanSwitcher } from "@/components/dashboard/DevPlanSwitcher";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { layoutMode } = useSidebar();
-
   return (
     <SidebarInset className="min-h-screen bg-[var(--bg-canvas)] transition-all duration-300 w-full">
-      <div
-        className={`w-full mx-auto ${
-          layoutMode === "compact"
-            ? "p-3 sm:p-4 lg:p-5 max-w-[1350px]"
-            : layoutMode === "full"
-            ? "p-4 sm:p-6 lg:p-8 max-w-none"
-            : "p-4 sm:p-6 lg:p-8 max-w-[1500px]"
-        }`}
-      >
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <Header />
         {children}
       </div>
