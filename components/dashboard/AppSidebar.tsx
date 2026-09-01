@@ -141,7 +141,7 @@ export function getNavItems(profileType: string): NavItem[] {
 }
 
 /**
- * Composant de sous-menu rétractable pour économiser l'espace et clarifier la navigation
+ * Composant de sous-menu rétractable
  */
 function CollapsibleNavItem({
   item,
@@ -169,29 +169,27 @@ function CollapsibleNavItem({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all cursor-pointer select-none ${
+        className={`w-full relative flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors cursor-pointer select-none ${
           isActive
-            ? "bg-emerald-600 text-white font-semibold shadow-xs"
-            : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white"
+            ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-emerald-600 before:rounded-r-sm"
+            : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200"
         }`}
       >
-        <item.icon className={`size-4.5 shrink-0 ${isActive ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
+        <item.icon className={`size-4 shrink-0 ${isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-zinc-500"}`} />
         <span className="truncate flex-1 text-left font-medium">{item.title}</span>
         {item.badge && (
           <span
-            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
               item.badgeType === "danger"
                 ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
-                : isActive
-                ? "bg-white/20 text-white"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700"
             }`}
           >
             {item.badge}
           </span>
         )}
         <ChevronRight
-          className={`size-4 ${isActive ? "text-white" : "text-slate-400"} transition-transform duration-200 ${
+          className={`size-4 ${isActive ? "text-slate-700 dark:text-zinc-300" : "text-slate-400"} transition-transform duration-200 ${
             isOpen ? "rotate-90" : ""
           }`}
         />
@@ -204,7 +202,7 @@ function CollapsibleNavItem({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden ml-5 pl-2.5 border-l border-slate-200 dark:border-slate-800 space-y-1 mt-1"
+            className="overflow-hidden ml-4 pl-2.5 border-l border-slate-200 dark:border-zinc-800 space-y-0.5 mt-1"
           >
             {item.items.map((subItem) => {
               const isSubActive = pathname === subItem.url;
@@ -213,10 +211,10 @@ function CollapsibleNavItem({
                   key={subItem.title}
                   href={subItem.url}
                   onClick={() => isMobile && setOpenMobile(false)}
-                  className={`block text-[12.5px] py-1.5 px-2.5 rounded-lg transition-colors ${
+                  className={`block text-[12.5px] py-1.5 px-2 rounded-md transition-colors cursor-pointer ${
                     isSubActive
-                      ? "font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
+                      : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800"
                   }`}
                 >
                   {subItem.title}
@@ -277,21 +275,21 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="icon"
-        className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-30"
+        className="border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121215] text-slate-900 dark:text-zinc-100 z-30"
       >
         {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE ─── */}
-        <SidebarHeader className="border-b border-slate-200/80 dark:border-slate-800/80 p-2.5">
+        <SidebarHeader className="border-b border-slate-200/80 dark:border-zinc-800/80 p-2">
           {isNormalizedAdminOrLocataire ? (
-            <div className="flex items-center gap-3 px-3 py-2 h-[48px] rounded-xl">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-white border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs overflow-hidden">
+            <div className="flex items-center gap-2.5 px-2.5 py-1.5 h-[44px] rounded-lg">
+              <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-white border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
                 <img src="/logo.png" alt="Lokka" className="w-full h-full object-contain p-0.5" />
               </div>
               {!isCollapsed && (
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-extrabold text-slate-900 dark:text-white text-[15px]">
+                  <span className="truncate font-extrabold text-slate-900 dark:text-white text-[14px]">
                     Lokka
                   </span>
-                  <span className="truncate text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                  <span className="truncate text-[10.5px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
                     {currentRole.toLowerCase().includes("admin") ? "Admin HQ" : "Espace Locataire"}
                   </span>
                 </div>
@@ -305,19 +303,19 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       size="lg"
                       className={`w-full flex items-center ${
-                        isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                      } rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer`}
+                        isCollapsed ? "justify-center p-0" : "gap-2.5 px-2.5 py-1.5"
+                      } rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer`}
                     >
-                      <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-white border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs overflow-hidden">
+                      <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-white border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
                         <img src={userProfile.customLogo || "/logo.png"} alt="Logo" className="w-full h-full object-contain p-0.5" />
                       </div>
                       {!isCollapsed && (
                         <>
                           <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-bold text-slate-900 dark:text-white text-[13.5px]">
+                            <span className="truncate font-bold text-slate-900 dark:text-white text-[13px]">
                               {activeTeam.name}
                             </span>
-                            <span className="truncate text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            <span className="truncate text-[10.5px] text-slate-500 dark:text-zinc-400 font-medium">
                               {activeTeam.plan}
                             </span>
                           </div>
@@ -328,28 +326,28 @@ export function AppSidebar() {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
-                    className="w-60 rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-50 animate-in fade-in-50 zoom-in-95"
+                    className="w-56 rounded-lg p-1 shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 z-50 animate-in fade-in-50 zoom-in-95"
                     align="start"
                     side={isMobile ? "bottom" : "right"}
-                    sideOffset={8}
+                    sideOffset={6}
                   >
-                    <DropdownMenuLabel className="text-[10.5px] text-slate-400 dark:text-slate-500 px-2.5 py-1.5 font-bold uppercase tracking-wider">
+                    <DropdownMenuLabel className="text-[10px] text-slate-400 dark:text-zinc-500 px-2 py-1 font-bold uppercase tracking-wider">
                       {currentRole.toLowerCase().includes("agence") ? "Agences & Filiales" : "Patrimoines & Portefeuilles"}
                     </DropdownMenuLabel>
                     {SIDEBAR_DATA.teams.map((team, index) => (
                       <DropdownMenuItem
                         key={team.name}
                         onClick={() => setActiveTeam(team)}
-                        className="gap-2.5 p-2 rounded-xl text-[12.5px] font-medium cursor-pointer text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
                       >
-                        <div className="flex size-6 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-emerald-50 dark:bg-emerald-950/50">
-                          <team.logo className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <div className="flex size-5 items-center justify-center rounded border border-slate-200 dark:border-zinc-700 bg-emerald-50 dark:bg-emerald-950/50">
+                          <team.logo className="size-3 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <span className="truncate flex-1 font-semibold">{team.name}</span>
                         <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                       </DropdownMenuItem>
                     ))}
-                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
+                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
                     <DropdownMenuItem
                       onClick={() =>
                         alert(
@@ -358,10 +356,10 @@ export function AppSidebar() {
                             : "Ajout d'un nouveau patrimoine / SCI..."
                         )
                       }
-                      className="gap-2 p-2 rounded-xl text-[12px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                      className="gap-2 p-1.5 rounded-md text-[11.5px] font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
                     >
-                      <div className="flex size-6 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                        <Plus className="size-3.5 text-slate-600 dark:text-slate-300" />
+                      <div className="flex size-5 items-center justify-center rounded border border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800">
+                        <Plus className="size-3 text-slate-600 dark:text-zinc-300" />
                       </div>
                       <span>
                         {currentRole.toLowerCase().includes("agence")
@@ -377,14 +375,14 @@ export function AppSidebar() {
         </SidebarHeader>
 
         {/* ─── 2. NAV GROUPS ─── */}
-        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-3 space-y-4">
+        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-2 space-y-3">
           <SidebarGroup>
             {!isCollapsed && (
-              <SidebarGroupLabel className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-1">
+              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 px-2.5 py-1">
                 Navigation Principale
               </SidebarGroupLabel>
             )}
-            <SidebarMenu className="gap-1.5 mt-1">
+            <SidebarMenu className="gap-1 mt-0.5">
               {navItems.map((item) => {
                 const active = isLinkActive(item.url);
 
@@ -408,29 +406,27 @@ export function AppSidebar() {
                       asChild
                       tooltip={item.title}
                       isActive={active}
-                      className={`w-full flex items-center ${
-                        isCollapsed ? "justify-center p-0 h-10" : "gap-3 px-3 py-2.5"
-                      } rounded-xl text-[13.5px] font-medium transition-all ${
+                      className={`w-full relative flex items-center ${
+                        isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
+                      } rounded-lg text-[13px] font-medium transition-colors cursor-pointer ${
                         active
-                          ? "bg-emerald-600 dark:bg-emerald-600 text-white font-semibold shadow-xs"
-                          : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white"
+                          ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-emerald-600 before:rounded-r-sm shadow-2xs"
+                          : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200"
                       }`}
                     >
                       <Link
                         href={item.url}
-                        className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}
+                        className={isCollapsed ? "flex items-center justify-center w-full h-full cursor-pointer" : "cursor-pointer"}
                         onClick={() => isMobile && setOpenMobile(false)}
                       >
-                        <item.icon className={`size-4.5 shrink-0 ${active ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
+                        <item.icon className={`size-4 shrink-0 ${active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-zinc-500"}`} />
                         {!isCollapsed && <span className="truncate flex-1 font-medium">{item.title}</span>}
                         {!isCollapsed && item.badge && (
                           <span
-                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                               item.badgeType === "danger"
                                 ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
-                                : active
-                                ? "bg-white/20 text-white"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                                : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700"
                             }`}
                           >
                             {item.badge}
@@ -446,7 +442,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* ─── 3. FOOTER : PROFIL UTILISATEUR ─── */}
-        <SidebarFooter className="border-t border-slate-200/80 dark:border-slate-800/80 p-2">
+        <SidebarFooter className="border-t border-slate-200/80 dark:border-zinc-800/80 p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -454,22 +450,22 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     size="lg"
                     className={`w-full flex items-center ${
-                      isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                    } rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer`}
+                      isCollapsed ? "justify-center p-0" : "gap-2.5 px-2.5 py-1.5"
+                    } rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer`}
                   >
-                    <Avatar className="h-8 w-8 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
+                    <Avatar className="h-7 w-7 rounded-full border border-slate-200 dark:border-zinc-700 shrink-0">
                       <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                      <AvatarFallback className="bg-emerald-600 text-white text-[11px] font-bold">
+                      <AvatarFallback className="bg-emerald-600 text-white text-[10.5px] font-bold">
                         {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     {!isCollapsed && (
                       <>
                         <div className="grid flex-1 text-left text-sm leading-tight">
-                          <span className="truncate font-bold text-slate-900 dark:text-white text-[13.5px]">
+                          <span className="truncate font-bold text-slate-900 dark:text-white text-[13px]">
                             {userProfile.name || "Alexandre Koudjo"}
                           </span>
-                          <span className="truncate text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                          <span className="truncate text-[10.5px] text-slate-500 dark:text-zinc-400 font-medium">
                             {userProfile.role || "Propriétaire Bailleur"}
                           </span>
                         </div>
@@ -480,42 +476,42 @@ export function AppSidebar() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
-                  className="w-56 rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-50 animate-in fade-in-50 zoom-in-95"
+                  className="w-56 rounded-lg p-1 shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 z-50 animate-in fade-in-50 zoom-in-95"
                   side={isMobile ? "bottom" : "right"}
                   align="end"
-                  sideOffset={8}
+                  sideOffset={6}
                 >
                   <DropdownMenuLabel className="p-2 font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-[13px] font-bold text-slate-900 dark:text-white leading-none">
+                      <p className="text-[12.5px] font-bold text-slate-900 dark:text-white leading-none">
                         {userProfile.name || "Alexandre Koudjo"}
                       </p>
-                      <p className="text-[11px] leading-none text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] leading-none text-slate-500 dark:text-zinc-400">
                         {userProfile.email || "alexandre@lokka.bj"}
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
+                  <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
                   <DropdownMenuGroup>
                     <DropdownMenuItem
                       onClick={() => router.push("/dashboard/parametres")}
-                      className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-800"
                     >
                       <BadgeCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
                       <span>Mon Compte &amp; Sécurité</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => router.push("/dashboard/parametres")}
-                      className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-800"
                     >
                       <Sparkles className="size-4 text-amber-500" />
                       <span>Abonnement Pro</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
-                  <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
+                  <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
                   <DropdownMenuItem
                     onClick={() => setShowLogoutDialog(true)}
-                    className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50"
+                    className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50"
                   >
                     <LogOut className="size-4" />
                     <span>Se déconnecter</span>
@@ -530,30 +526,30 @@ export function AppSidebar() {
 
       {/* Modal de Déconnexion */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent className="bg-white dark:bg-[#101B17] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md shadow-2xl text-slate-900 dark:text-slate-100">
+        <AlertDialogContent className="bg-white dark:bg-[#18181B] border border-slate-200 dark:border-zinc-800 rounded-xl p-6 max-w-md shadow-2xl text-slate-900 dark:text-zinc-100">
           <AlertDialogHeader>
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
-              <LogOut className="w-6 h-6" />
+            <div className="w-11 h-11 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
+              <LogOut className="w-5 h-5" />
             </div>
-            <AlertDialogTitle className="text-[17px] font-bold text-slate-900 dark:text-white">
+            <AlertDialogTitle className="text-[16px] font-bold text-slate-900 dark:text-white">
               Confirmer la déconnexion
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+            <AlertDialogDescription className="text-[13px] text-slate-600 dark:text-zinc-400 leading-relaxed mt-1">
               Êtes-vous sûr de vouloir vous déconnecter de votre espace Lokka ? Vos données de gestion sont enregistrées en toute sécurité.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <AlertDialogFooter className="mt-6 flex items-center justify-end gap-3">
+          <AlertDialogFooter className="mt-6 flex items-center justify-end gap-2.5">
             <AlertDialogCancel
               disabled={isLoggingOut}
-              className="px-4 py-2 text-[13px] font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer transition"
+              className="px-3.5 py-2 text-[12.5px] font-semibold rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 cursor-pointer transition"
             >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmLogout}
               disabled={isLoggingOut}
-              className="px-5 py-2 text-[13px] font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 text-white cursor-pointer transition shadow-xs"
+              className="px-4 py-2 text-[12.5px] font-semibold rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer transition shadow-xs"
             >
               {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
             </AlertDialogAction>

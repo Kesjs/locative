@@ -32,7 +32,7 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
-  /* ─── Dynamic Brand Accent Tokens (Variante 3: Émeraude & Sauge) ─── */
+  /* ─── Dynamic Brand Accent Tokens ─── */
   --color-brand-primary: hsl(var(--primary));
   --color-brand-hover: hsl(160 84% 30%);
   --color-brand-light: hsl(150 60% 96%);
@@ -46,11 +46,11 @@
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-modal: var(--shadow-modal);
 
-  /* ─── Semantic Radius ─── */
+  /* ─── Semantic Radius (Sobres et standardisés) ─── */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 2px);
 }
 
 /* Masque la scrollbar tout en gardant le scroll fonctionnel */
@@ -62,32 +62,32 @@
   }
 }
 
-/* ─── ROOT DESIGN TOKENS (LIGHT THEME - VARIANTE 3: ÉMERAUDE TROPICALE & SAUGE) ─── */
+/* ─── ROOT DESIGN TOKENS (LIGHT THEME) ─── */
 :root {
-  --background: 150 20% 98%; /* #F8FAF9 Canvas doux anti-éblouissement */
-  --foreground: 222 47% 11%; /* #0F172A Ardoise Sombre haute lisibilité */
-  --card: 0 0% 100%; /* #FFFFFF Blanc Pur pour les cartes et la sidebar */
+  --background: 0 0% 98%; /* #FAFAFA Canvas clair sobre */
+  --foreground: 222 47% 11%; /* #0F172A Ardoise sombre haute lisibilité */
+  --card: 0 0% 100%; /* #FFFFFF Blanc pur */
   --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
   --primary: 160 84% 39%; /* #059669 Vert Émeraude */
   --primary-foreground: 0 0% 100%;
-  --secondary: 150 30% 96%; /* #EFF7F2 */
-  --secondary-foreground: 160 84% 28%;
+  --secondary: 210 20% 96%;
+  --secondary-foreground: 222 47% 11%;
   --muted: 210 20% 96%; /* #F1F5F9 */
-  --muted-foreground: 215 25% 38%; /* #475569 Texte secondaire net et lisible */
-  --accent: 150 60% 96%; /* #ECFDF5 Sauge douce */
-  --accent-foreground: 160 84% 28%; /* #065F46 */
-  --success: 160 84% 39%; /* #059669 */
+  --muted-foreground: 215 25% 38%; /* #475569 Texte secondaire lisible */
+  --accent: 150 60% 96%; /* #ECFDF5 */
+  --accent-foreground: 160 84% 28%;
+  --success: 160 84% 39%;
   --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%; /* #F59E0B */
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
-  --destructive: 347 77% 50%; /* #E11D48 */
+  --destructive: 347 77% 50%;
   --destructive-foreground: 0 0% 100%;
-  --border: 220 13% 91%; /* #E2E8F0 Bordure fine et nette */
+  --border: 220 13% 91%; /* #E2E8F0 */
   --input: 220 13% 91%;
   --ring: 160 84% 39%;
-  --radius: 0.75rem;
+  --radius: 0.5rem; /* 8px standard shadcn (pas d'arrondi excessif) */
 
   /* Surfaces & Dynamic Aliases */
   --bg-canvas: hsl(var(--background));
@@ -118,40 +118,40 @@
 
   /* Interactive States */
   --hover-bg: hsl(var(--muted));
-  --active-bg: hsl(var(--accent));
+  --active-bg: hsl(var(--muted));
 }
 
-/* ─── DARK THEME (VARIANTE 3: NOCTURNE ÉMERAUDE PROFONDE & HAUTE LISIBILITÉ) ─── */
+/* ─── DARK THEME (VRAI NOIR PROFOND & PUR ZINC / SLATE - SANS TEINTE VERTE DANS LE NOIR) ─── */
 .dark {
-  --background: 160 30% 6%; /* #0B120F Nuit Végétale Profonde */
-  --foreground: 210 40% 98%; /* #F8FAFC Blanc pur éclatant lisible */
-  --card: 160 25% 9%; /* #101B17 Surface sombre riche et nette */
-  --card-foreground: 210 40% 98%;
-  --popover: 160 25% 9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 160 84% 45%; /* #10B981 Émeraude Lumineuse Accessible */
-  --primary-foreground: 160 30% 6%;
-  --secondary: 160 25% 14%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 160 20% 14%; /* #13231E */
-  --muted-foreground: 215 20% 65%; /* #94A3B8 Texte secondaire net et clair */
-  --accent: 160 35% 14%; /* #142A22 */
-  --accent-foreground: 160 84% 65%;
-  --success: 160 84% 45%;
-  --success-foreground: 160 30% 6%;
+  --background: 0 0% 3.9%; /* #0A0A0A Noir profond pur */
+  --foreground: 0 0% 98%; /* #FAFAFA Blanc pur éclatant */
+  --card: 240 5.9% 10%; /* #18181B / #121214 Carte sombre sobre et élégante */
+  --card-foreground: 0 0% 98%;
+  --popover: 240 5.9% 10%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 160 84% 39%; /* #059669 Vert Émeraude vif réservé aux actions */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 3.7% 15.9%; /* #27272A */
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%; /* #27272A */
+  --muted-foreground: 240 5% 64.9%; /* #A1A1AA Texte secondaire clair et neutre */
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --success: 160 84% 39%;
+  --success-foreground: 0 0% 100%;
   --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
   --destructive: 347 77% 55%;
   --destructive-foreground: 0 0% 100%;
-  --border: 160 20% 17%; /* #1C3027 Bordure nette */
-  --input: 160 20% 17%;
-  --ring: 160 84% 45%;
+  --border: 240 3.7% 15.9%; /* #27272A Bordure neutre sombre */
+  --input: 240 3.7% 15.9%;
+  --ring: 160 84% 39%;
 
   /* Surfaces & Dynamic Aliases for Dark Mode */
   --bg-canvas: hsl(var(--background));
   --bg-surface: hsl(var(--card));
   --bg-surface-elevated: hsl(var(--card));
-  --bg-subtle: hsl(var(--accent));
+  --bg-subtle: hsl(var(--muted));
   --bg-muted: hsl(var(--muted));
   --bg-sidebar: hsl(var(--card));
   --bg-header: hsl(var(--background));
@@ -170,13 +170,13 @@
   --sidebar-border: hsl(var(--border));
 
   /* Shadows */
-  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-  --shadow-card-hover: 0 10px 30px -4px rgba(0, 0, 0, 0.7);
-  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.7);
+  --shadow-card-hover: 0 10px 30px -4px rgba(0, 0, 0, 0.85);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
 
   /* Interactive States */
   --hover-bg: hsl(var(--muted));
-  --active-bg: hsl(var(--accent));
+  --active-bg: hsl(var(--muted));
 }
 
 /* ─── Global Reset & Body ─── */
@@ -187,6 +187,17 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Cursor pointer par défaut pour tous les éléments interactifs */
+button,
+[role="button"],
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select {
+  cursor: pointer;
 }
 
 /* Scrollbar stylisée */

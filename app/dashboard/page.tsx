@@ -16,7 +16,6 @@ import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { AddBienModal } from "@/app/dashboard/patrimoine/_components/AddBienModal";
 import { AddPaiementModal } from "@/app/dashboard/loyers/_components/AddPaiementModal";
 import { AddTicketModal } from "@/app/dashboard/maintenance/_components/AddTicketModal";
-import { OnboardingTour } from "@/components/dashboard/OnboardingTour";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Wallet, AlertCircle, PieChart, Landmark, HandCoins, FileCheck, Wrench, Building2, TrendingUp, Plus } from "lucide-react";
 
@@ -246,15 +245,12 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setIsAddBienOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
           >
             <Landmark className="w-4 h-4" /> Ajouter un bien
           </button>
         </div>
       </div>
-
-      {/* Guide d'Onboarding Interactif */}
-      <OnboardingTour onOpenAddBien={() => setIsAddBienOpen(true)} />
 
       {stats.totalBiens === 0 ? (
         <div className="bg-card border border-border rounded-xl p-6 sm:p-10 shadow-xs">
