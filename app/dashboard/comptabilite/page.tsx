@@ -50,11 +50,17 @@ export default function AccountingPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-[1440px] mx-auto pb-10">
-      <Header
-        title="Comptabilité & Fiscalité"
-        subtitle="Bilan financier, charges d'entretien et estimation officielle TFU DGI Bénin."
-      />
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
+        <div>
+          <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">
+            Comptabilité &amp; Fiscalité Immobilière
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-1">
+            Bilan financier, suivi des charges d&apos;entretien et estimation officielle TFU conforme DGI Bénin.
+          </p>
+        </div>
+      </div>
 
       {/* 3 Summary Bento Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

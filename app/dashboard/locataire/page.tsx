@@ -17,8 +17,7 @@ export default function LocataireOverviewPage() {
   // Render Loading State
   if (loadingContrat || loadingQuittances || loadingTickets) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 pt-4 space-y-6">
-        <Header breadcrumbs={["Tableau de bord", "Mon Résumé"]} />
+      <div className="space-y-6 pb-12">
         <div className="h-20 bg-muted/60 animate-pulse rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {[1, 2, 3].map((i) => (
@@ -34,12 +33,8 @@ export default function LocataireOverviewPage() {
   const ticketEnCours = tickets?.filter((t) => t.statut === "En cours").length || 0;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-4">
-      <Header
-        breadcrumbs={["Tableau de bord", "Mon Résumé"]}
-      />
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs mb-6">
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
         <div>
           <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">Bonjour ! 👋</h1>
           <p className="text-[13px] text-muted-foreground mt-1">Bienvenue dans votre espace locataire Lokka.</p>

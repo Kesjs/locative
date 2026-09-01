@@ -29,9 +29,9 @@ export function RevenueChart({
   xAxisKey = "month",
   dataKeys,
   colors = [
-    "hsl(38, 92%, 50%)", // Lokka Primary (Terre Cuite)
-    "hsl(142.1, 76.2%, 36.3%)", // Lokka Success (Emerald)
-    "hsl(38, 92%, 50%)", // Lokka Warning (Amber)
+    "#9D6B3C", // Lokka Primary (Caramel Feutré)
+    "#15803D", // Lokka Success (Émeraude Feutré)
+    "#9D6B3C", // Lokka Warning (Caramel)
   ],
   formatter = (val) => `${Number(val).toLocaleString("fr-FR")} FCFA`,
 }: RevenueChartProps) {

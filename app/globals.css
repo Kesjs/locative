@@ -73,10 +73,8 @@
   --popover-foreground: 240 6% 10%;
   --primary: 30 44% 43%; /* #9D6B3C Caramel Feutré - Lokka Luxury */
   --primary-foreground: 0 0% 100%;
-  --secondary: 34 30% 96%; /* #F8F5F0 Sable très clair */
-  --secondary-foreground: 240 6% 10%;
-  --muted: 240 4% 46%; /* #71717A Zinc 500 */
-  --muted-foreground: 240 4% 46%;
+  --muted: 240 5% 34%; /* #52525B Zinc 700 - Contraste WCAG AAA élevé */
+  --muted-foreground: 240 5% 34%; /* #52525B - Fin des textes gris pâles */
   --accent: 34 45% 93%; /* #F6EFE7 Lait d'Avoine */
   --accent-foreground: 30 44% 43%;
   --success: 142 71% 29%; /* #15803D Émeraude Feutré */
@@ -85,8 +83,8 @@
   --warning-foreground: 34 45% 93%;
   --destructive: 347 77% 50%; /* #E11D48 */
   --destructive-foreground: 0 0% 100%;
-  --border: 30 14% 89%; /* #E8E3DC Sable Fin */
-  --input: 30 14% 89%;
+  --border: 30 14% 86%; /* #E2DDD5 */
+  --input: 30 14% 86%;
   --ring: 30 44% 43%;
   --radius: 0.5rem;
 

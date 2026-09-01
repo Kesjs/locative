@@ -12,8 +12,7 @@ export default function AdminUtilisateursPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <Header breadcrumbs={["Tableau de bord Admin", "Utilisateurs"]} />
+      <div className="space-y-6 pb-12">
         <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
     );
@@ -21,19 +20,20 @@ export default function AdminUtilisateursPage() {
 
   const columns = [
     {
-      header: "Nom",
+      header: "Nom & Prénom",
       accessorKey: "nom",
-      cell: (row: any) => <span className="font-semibold text-[var(--text-primary)]">{row.nom}</span>,
+      cell: (row: any) => <span className="font-bold text-card-foreground">{row.nom}</span>,
     },
     {
       header: "Email",
       accessorKey: "email",
+      cell: (row: any) => <span className="text-muted-foreground">{row.email}</span>,
     },
     {
       header: "Rôle",
       accessorKey: "role",
       cell: (row: any) => (
-        <span className="text-[12px] bg-[var(--bg-subtle)] px-2 py-1 rounded text-[var(--text-secondary)] border border-[var(--border-default)]">
+        <span className="text-[11.5px] bg-accent px-2.5 py-0.5 rounded-full text-foreground border border-border font-semibold">
           {row.role}
         </span>
       ),
@@ -42,10 +42,10 @@ export default function AdminUtilisateursPage() {
       header: "Statut",
       accessorKey: "statut",
       cell: (row: any) => (
-        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-          row.statut === "Actif" ? "bg-emerald-100 text-emerald-700" :
-          row.statut === "Bloqué" ? "bg-red-100 text-red-700" :
-          "bg-amber-100 text-amber-700"
+        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+          row.statut === "Actif" ? "bg-success/10 text-success border-success/20" :
+          row.statut === "Bloqué" ? "bg-destructive/10 text-destructive border-destructive/20" :
+          "bg-warning/10 text-warning border-warning/20"
         }`}>
           {row.statut}
         </span>
@@ -54,46 +54,43 @@ export default function AdminUtilisateursPage() {
     {
       header: "Inscrit le",
       accessorKey: "dateInscription",
+      cell: (row: any) => <span className="text-muted-foreground">{row.dateInscription || "—"}</span>,
     },
     {
       header: "Actions",
       accessorKey: "id",
       cell: (row: any) => (
         <div className="flex gap-2">
-          {row.statut !== "Bloqué" ? (
-            <button className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-colors" title="Bloquer">
-              <NoSymbolIcon className="h-4 w-4" />
+          {row.statut === "Actif" ? (
+            <button className="text-destructive hover:text-destructive/80 font-bold text-[12px] flex items-center gap-1 cursor-pointer">
+              <NoSymbolIcon className="h-4 w-4" /> Bloquer
             </button>
           ) : (
-            <button className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-1.5 rounded-md transition-colors" title="Débloquer">
-              <CheckCircleIcon className="h-4 w-4" />
+            <button className="text-success hover:text-success/80 font-bold text-[12px] flex items-center gap-1 cursor-pointer">
+              <CheckCircleIcon className="h-4 w-4" /> Réactiver
             </button>
           )}
-          <button className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1.5 rounded-md transition-colors" title="Forcer mot de passe">
-            <ShieldExclamationIcon className="h-4 w-4" />
-          </button>
         </div>
       ),
     },
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-4">
-      <Header breadcrumbs={["Tableau de bord Admin", "Utilisateurs"]} />
-
-      <div className="mb-6">
-        <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
-          Gestion des Utilisateurs
-        </h1>
-        <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-          Gérez l'ensemble des Agences, Bailleurs et Locataires.
-        </p>
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
+        <div>
+          <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">
+            Comptes &amp; Utilisateurs Plateforme
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-1">
+            Visualisez et gérez les comptes propriétaires, gestionnaires et locataires inscrits.
+          </p>
+        </div>
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-2xs">
+      <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
         <DataTable data={utilisateurs || []} columns={columns} searchKey="nom" />
       </div>
     </div>
   );
 }
-

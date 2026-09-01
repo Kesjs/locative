@@ -12,8 +12,7 @@ export default function LocataireLoyersPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <Header breadcrumbs={["Tableau de bord", "Loyers & Paiements"]} />
+      <div className="space-y-6 pb-12">
         <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
     );
@@ -23,23 +22,27 @@ export default function LocataireLoyersPage() {
     {
       header: "Mois",
       accessorKey: "mois",
-      cell: (row: any) => <span className="font-bold">{row.mois}</span>,
+      cell: (row: any) => <span className="font-bold text-card-foreground">{row.mois}</span>,
     },
     {
       header: "Montant",
       accessorKey: "montant",
-      cell: (row: any) => `${row.montant.toLocaleString("fr-FR")} FCFA`,
+      cell: (row: any) => (
+        <span className="tabular-nums font-semibold text-card-foreground">
+          {Number(row.montant).toLocaleString("fr-FR")} FCFA
+        </span>
+      ),
     },
     {
       header: "Date de paiement",
       accessorKey: "datePaiement",
-      cell: (row: any) => row.datePaiement || "-",
+      cell: (row: any) => <span className="text-muted-foreground">{row.datePaiement || "—"}</span>,
     },
     {
       header: "Statut",
       accessorKey: "statut",
       cell: (row: any) => (
-        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
+        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-success/10 text-success border border-success/20">
           {row.statut}
         </span>
       ),
@@ -48,34 +51,32 @@ export default function LocataireLoyersPage() {
       header: "Actions",
       accessorKey: "id",
       cell: () => (
-        <button className="text-[#059669] hover:text-[#047857] flex items-center gap-1 font-semibold text-[12px]">
+        <button className="text-primary hover:text-primary/80 flex items-center gap-1.5 font-bold text-[12px] cursor-pointer">
           <DocumentArrowDownIcon className="h-4 w-4" />
-          Télécharger
+          Télécharger Quittance PDF
         </button>
       ),
     },
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-4">
-      <Header breadcrumbs={["Tableau de bord", "Loyers & Paiements"]} />
-
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
         <div>
-          <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
+          <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">
             Loyers & Quittances
           </h1>
-          <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-            Gérez vos paiements et téléchargez vos justificatifs.
+          <p className="text-[13px] text-muted-foreground mt-1">
+            Consultez l&apos;historique de vos paiements et téléchargez vos quittances officielles.
           </p>
         </div>
-        <button className="bg-[#FFCC00] text-black hover:bg-[#E6B800] px-5 py-2.5 rounded-[8px] font-bold text-[13px] shadow-sm transition-all flex items-center gap-2">
+        <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#9D6B3C] hover:bg-[#85572E] text-white rounded-lg text-[13px] font-bold transition-all shadow-xs cursor-pointer">
           <CurrencyDollarIcon className="h-4 w-4" />
-          Nouveau Paiement MoMo
+          Payer par MTN / Moov MoMo
         </button>
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-2xs">
+      <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
         <DataTable data={quittances || []} columns={columns} searchKey="mois" />
       </div>
     </div>

@@ -12,8 +12,7 @@ export default function LocataireDocumentsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <Header breadcrumbs={["Tableau de bord", "Mes Documents"]} />
+      <div className="space-y-6 pb-12">
         <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
     );
@@ -25,8 +24,8 @@ export default function LocataireDocumentsPage() {
       accessorKey: "nom",
       cell: (row: any) => (
         <div className="flex items-center gap-2">
-          <DocumentIcon className="h-4 w-4 text-[var(--text-muted)]" />
-          <span className="font-semibold text-[var(--text-primary)]">{row.nom}</span>
+          <DocumentIcon className="h-4 w-4 text-primary" />
+          <span className="font-semibold text-card-foreground">{row.nom}</span>
         </div>
       ),
     },
@@ -34,7 +33,7 @@ export default function LocataireDocumentsPage() {
       header: "Type",
       accessorKey: "type",
       cell: (row: any) => (
-        <span className="text-[12px] bg-[var(--bg-subtle)] px-2 py-1 rounded text-[var(--text-secondary)] border border-[var(--border-default)]">
+        <span className="text-[11.5px] bg-accent px-2.5 py-0.5 rounded-full text-foreground border border-border font-semibold">
           {row.type}
         </span>
       ),
@@ -42,32 +41,32 @@ export default function LocataireDocumentsPage() {
     {
       header: "Date d'ajout",
       accessorKey: "dateAjout",
+      cell: (row: any) => <span className="text-muted-foreground">{row.dateAjout || "—"}</span>,
     },
     {
       header: "Actions",
       accessorKey: "id",
       cell: () => (
-        <button className="text-[var(--text-primary)] hover:bg-[var(--hover-bg)] p-2 rounded-md transition-colors">
+        <button className="text-primary hover:text-primary/80 flex items-center gap-1.5 font-bold text-[12px] cursor-pointer">
           <ArrowDownTrayIcon className="h-4 w-4" />
+          Télécharger
         </button>
       ),
     },
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-4">
-      <Header breadcrumbs={["Tableau de bord", "Mes Documents"]} />
-
-      <div className="mb-6">
-        <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
-          Documents
+    <div className="space-y-6 pb-12">
+      <div className="p-5 bg-card border border-border rounded-xl shadow-xs">
+        <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">
+          Mes Documents &amp; Contrats
         </h1>
-        <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-          Votre bail, état des lieux et autres attestations.
+        <p className="text-[13px] text-muted-foreground mt-1">
+          Retrouvez votre bail de location, vos états des lieux et vos attestations légales certifiées.
         </p>
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-2xs">
+      <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
         <DataTable data={documents || []} columns={columns} searchKey="nom" />
       </div>
     </div>

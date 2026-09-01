@@ -6,57 +6,65 @@ import { ServerIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export default function AdminSystemePage() {
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-4">
-      <Header breadcrumbs={["Tableau de bord Admin", "Système"]} />
-
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
         <div>
-          <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
-            État du Système
+          <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">
+            État &amp; Santé du Système
           </h1>
-          <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-            Surveillez les performances et la base de données.
+          <p className="text-[13px] text-muted-foreground mt-1">
+            Surveillez les performances des bases de données Postgres, du stockage Supabase et des passerelles Mobile Money.
           </p>
         </div>
-        <button className="bg-[var(--bg-subtle)] border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--hover-bg)] px-4 py-2 rounded-[8px] font-bold text-[13px] shadow-sm transition-all flex items-center gap-2">
+        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-card border border-border text-foreground hover:bg-accent rounded-lg font-bold text-[13px] shadow-xs transition-all cursor-pointer">
           <ArrowPathIcon className="h-4 w-4" />
-          Actualiser
+          Actualiser les métriques
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-6 shadow-2xs">
+        <div className="bg-card border border-border rounded-xl p-6 shadow-xs">
           <div className="flex items-center gap-3 mb-4">
-            <ServerIcon className="h-6 w-6 text-emerald-500" />
-            <h3 className="text-[16px] font-bold text-[var(--text-primary)]">Services API (Supabase)</h3>
+            <ServerIcon className="h-6 w-6 text-success" />
+            <h3 className="text-[16px] font-bold text-card-foreground">Services Supabase &amp; API</h3>
           </div>
           <div className="space-y-4 text-[13px]">
-            <div className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-2">
-              <span className="text-[var(--text-secondary)]">Statut global</span>
-              <span className="font-bold text-emerald-500">Opérationnel</span>
+            <div className="flex justify-between items-center border-b border-border pb-2">
+              <span className="text-muted-foreground">Base de données Postgres</span>
+              <span className="font-bold text-success flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-success"></span>
+                Opérationnel
+              </span>
             </div>
-            <div className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-2">
-              <span className="text-[var(--text-secondary)]">Latence moyenne</span>
-              <span className="font-semibold text-[var(--text-primary)]">42ms</span>
+            <div className="flex justify-between items-center border-b border-border pb-2">
+              <span className="text-muted-foreground">Passerelle MTN MoMo / Moov</span>
+              <span className="font-bold text-success flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-success"></span>
+                Opérationnel
+              </span>
             </div>
-            <div className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-2">
-              <span className="text-[var(--text-secondary)]">Uptime</span>
-              <span className="font-semibold text-[var(--text-primary)]">99.98%</span>
+            <div className="flex justify-between items-center border-b border-border pb-2">
+              <span className="text-muted-foreground">Latence moyenne</span>
+              <span className="font-semibold text-card-foreground tabular-nums">38 ms</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-border pb-2">
+              <span className="text-muted-foreground">Disponibilité (Uptime 30j)</span>
+              <span className="font-semibold text-card-foreground tabular-nums">99.98%</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-6 shadow-2xs">
-          <h3 className="text-[16px] font-bold text-[var(--text-primary)] mb-4">Logs Récents</h3>
-          <div className="space-y-3 text-[12px] font-mono text-[var(--text-secondary)]">
-            <div className="p-2 bg-[var(--bg-subtle)] rounded border border-[var(--border-default)]">
-              <span className="text-blue-500">[INFO]</span> 2026-08-31 08:14:22 - Authentification réussie (Koudjo Dossou)
+        <div className="bg-card border border-border rounded-xl p-6 shadow-xs">
+          <h3 className="text-[16px] font-bold text-card-foreground mb-4">Journal d&apos;Événements Récents</h3>
+          <div className="space-y-3 text-[12px] font-mono">
+            <div className="p-3 bg-muted/20 rounded-lg border border-border">
+              <span className="text-primary font-bold">[INFO]</span> 2026-09-01 09:55:00 - Quittance certifiée générée avec QR Code (LOK-2026-01)
             </div>
-            <div className="p-2 bg-[var(--bg-subtle)] rounded border border-[var(--border-default)]">
-              <span className="text-amber-500">[WARN]</span> 2026-08-31 07:55:10 - Limite API proche (MTN MoMo Gateway)
+            <div className="p-3 bg-muted/20 rounded-lg border border-border">
+              <span className="text-success font-bold">[AUTH]</span> 2026-09-01 09:30:12 - Connexion sécurisée OTP validée (Bailleur Cotonou)
             </div>
-            <div className="p-2 bg-[var(--bg-subtle)] rounded border border-[var(--border-default)]">
-              <span className="text-blue-500">[INFO]</span> 2026-08-31 07:42:01 - CRON Job (Rappels loyers) exécuté avec succès
+            <div className="p-3 bg-muted/20 rounded-lg border border-border">
+              <span className="text-primary font-bold">[CRON]</span> 2026-09-01 08:00:00 - Vérification des échéances de loyers exécutée avec succès
             </div>
           </div>
         </div>

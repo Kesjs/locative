@@ -12,8 +12,7 @@ export default function LocataireMaintenancePage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <Header breadcrumbs={["Tableau de bord", "Maintenance"]} />
+      <div className="space-y-6 pb-12">
         <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
     );
@@ -21,26 +20,28 @@ export default function LocataireMaintenancePage() {
 
   const columns = [
     {
-      header: "Incident",
+      header: "Incident / Panne",
       accessorKey: "titre",
-      cell: (row: any) => <span className="font-semibold text-[var(--text-primary)]">{row.titre}</span>,
+      cell: (row: any) => <span className="font-bold text-card-foreground">{row.titre}</span>,
     },
     {
       header: "Catégorie",
       accessorKey: "categorie",
+      cell: (row: any) => <span className="text-muted-foreground">{row.categorie || "Général"}</span>,
     },
     {
-      header: "Date",
+      header: "Date de signalement",
       accessorKey: "dateCreation",
+      cell: (row: any) => <span className="text-muted-foreground">{row.dateCreation || "—"}</span>,
     },
     {
       header: "Statut",
       accessorKey: "statut",
       cell: (row: any) => (
-        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-          row.statut === "Résolu" ? "bg-emerald-100 text-emerald-700" :
-          row.statut === "En cours" ? "bg-amber-100 text-amber-700" :
-          "bg-blue-100 text-blue-700"
+        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+          row.statut === "Résolu" ? "bg-success/10 text-success border-success/20" :
+          row.statut === "En cours" ? "bg-warning/10 text-warning border-warning/20" :
+          "bg-primary/10 text-primary border-primary/20"
         }`}>
           {row.statut}
         </span>
@@ -49,25 +50,23 @@ export default function LocataireMaintenancePage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 pt-4">
-      <Header breadcrumbs={["Tableau de bord", "Maintenance"]} />
-
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-card border border-border rounded-xl shadow-xs">
         <div>
-          <h1 className="text-[24px] font-extrabold text-[var(--text-primary)] tracking-tight">
-            Maintenance
+          <h1 className="text-[20px] font-extrabold text-card-foreground tracking-tight">
+            Demandes d&apos;Intervention &amp; Pannes
           </h1>
-          <p className="text-[14px] text-[var(--text-secondary)] mt-1">
-            Déclarez un incident technique dans votre logement.
+          <p className="text-[13px] text-muted-foreground mt-1">
+            Signalez un incident technique (plomberie, climatisation, serrurerie) à votre bailleur.
           </p>
         </div>
-        <button className="bg-[#0F172A] dark:bg-white text-white dark:text-black hover:opacity-90 px-5 py-2.5 rounded-[8px] font-bold text-[13px] shadow-sm transition-all flex items-center gap-2">
+        <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs cursor-pointer">
           <PlusIcon className="h-4 w-4" />
           Déclarer un incident
         </button>
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-2xs">
+      <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
         <DataTable data={tickets || []} columns={columns} searchKey="titre" />
       </div>
     </div>
