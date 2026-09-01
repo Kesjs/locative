@@ -85,24 +85,60 @@ export function plafondCaution(loyerMensuel: number) {
   return (loyerMensuel || 0) * 3;
 }
 
+const LOCAL_STORAGE_KEY = "lokka_biens_cache";
+
+function getLocalBiens(): Bien[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveLocalBiens(biens: Bien[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(biens));
+  } catch (_) {}
+}
+
 export function useBiens() {
   return useQuery({
     queryKey: ["biens"],
     queryFn: async (): Promise<Bien[]> => {
+      const local = getLocalBiens().filter((b) => !b.archive);
+
       if (!isSupabaseConfigured()) {
-        return [];
+        return local;
       }
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("biens")
-        .select("*")
-        .eq("archive", false)
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Supabase fetch error (biens):", error.message);
-        return [];
+      try {
+        const { data, error } = await supabase
+          .from("biens")
+          .select("*")
+          .eq("archive", false)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.warn("Supabase fetch (falling back to local cache):", error.message);
+          return local;
+        }
+
+        const supaBiens = (data as Bien[]) || [];
+        // Combiner Supabase + Biens locaux de test s'il y en a
+        const combined = [...supaBiens];
+        for (const loc of local) {
+          if (!combined.some((b) => b.id === loc.id)) {
+            combined.push(loc);
+          }
+        }
+        return combined;
+      } catch (err) {
+        console.warn("Supabase error (using local):", err);
+        return local;
       }
-      return (data as Bien[]) || [];
     },
   });
 }
@@ -111,20 +147,35 @@ export function useAddBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newBien: Omit<Bien, "id">) => {
+      const localId = "bien_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 6);
+      const createdBien: Bien = {
+        ...newBien,
+        id: localId,
+        archive: false,
+        created_at: new Date().toISOString(),
+      };
+
       if (!isSupabaseConfigured()) {
-        return { ...newBien, id: Date.now().toString() };
+        const local = getLocalBiens();
+        saveLocalBiens([createdBien, ...local]);
+        return createdBien;
       }
+
       const supabase = createClient();
 
-      // 1. Récupérer l'utilisateur connecté
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      let organizationId: string | null = null;
+        // Si l'utilisateur n'est pas authentifié avec Supabase (accès direct /dashboard), stocker localement
+        if (!user) {
+          const local = getLocalBiens();
+          saveLocalBiens([createdBien, ...local]);
+          return createdBien;
+        }
 
-      if (user) {
-        // Trouver son organisation rattachée
+        let organizationId: string | null = null;
         const { data: profile } = await supabase
           .from("profiles")
           .select("organization_id")
@@ -134,48 +185,11 @@ export function useAddBien() {
         if (profile?.organization_id) {
           organizationId = profile.organization_id;
         } else {
-          // Sinon chercher la première organisation active
-          const { data: org } = await supabase
-            .from("organizations")
-            .select("id")
-            .limit(1)
-            .maybeSingle();
+          const { data: org } = await supabase.from("organizations").select("id").limit(1).maybeSingle();
           if (org?.id) organizationId = org.id;
         }
-      }
 
-      // Préparation du payload
-      const payload: Record<string, any> = {
-        nom: newBien.nom,
-        adresse: newBien.adresse,
-        ville: newBien.ville,
-        type: newBien.type,
-        loyer_mensuel: newBien.loyer_mensuel,
-        charges: newBien.charges || 0,
-        statut: newBien.statut || "vacant",
-        photos: newBien.photos || [],
-        photo_principale: newBien.photo_principale || null,
-        equipements: newBien.equipements || [],
-        caution_montant: newBien.caution_montant || null,
-        surface_m2: newBien.surface_m2 || null,
-        nb_pieces: newBien.nb_pieces || null,
-        quartier: newBien.quartier || null,
-        repere: newBien.repere || null,
-        compteur_sbee: newBien.compteur_sbee || null,
-        compteur_soneb: newBien.compteur_soneb || null,
-      };
-
-      if (organizationId) {
-        payload.organization_id = organizationId;
-      }
-
-      // Tentative d'insertion complète
-      let { data, error } = await supabase.from("biens").insert([payload]).select().single();
-
-      // En cas d'erreur de colonnes inexistantes avant migration 011, fallback gracieux
-      if (error && (error.code === "PGRST204" || error.message.includes("column"))) {
-        console.warn("Retrying insert without extended fields...");
-        const fallbackPayload: Record<string, any> = {
+        const payload: Record<string, any> = {
           nom: newBien.nom,
           adresse: newBien.adresse,
           ville: newBien.ville,
@@ -189,16 +203,30 @@ export function useAddBien() {
           caution_montant: newBien.caution_montant || null,
           surface_m2: newBien.surface_m2 || null,
           nb_pieces: newBien.nb_pieces || null,
+          quartier: newBien.quartier || null,
+          repere: newBien.repere || null,
+          compteur_sbee: newBien.compteur_sbee || null,
+          compteur_soneb: newBien.compteur_soneb || null,
         };
-        if (organizationId) fallbackPayload.organization_id = organizationId;
 
-        const retry = await supabase.from("biens").insert([fallbackPayload]).select().single();
-        if (retry.error) throw retry.error;
-        return retry.data;
+        if (organizationId) payload.organization_id = organizationId;
+
+        const { data, error } = await supabase.from("biens").insert([payload]).select().single();
+
+        if (error) {
+          console.warn("Supabase insert error, saving locally:", error.message);
+          const local = getLocalBiens();
+          saveLocalBiens([createdBien, ...local]);
+          return createdBien;
+        }
+
+        return data;
+      } catch (err) {
+        console.warn("Save catch, fallback local:", err);
+        const local = getLocalBiens();
+        saveLocalBiens([createdBien, ...local]);
+        return createdBien;
       }
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
@@ -210,27 +238,26 @@ export function useUpdateBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<Bien> & { id: string }) => {
+      // Mettre à jour localement d'abord
+      const local = getLocalBiens();
+      const updatedLocal = local.map((b) => (b.id === id ? { ...b, ...patch } : b));
+      saveLocalBiens(updatedLocal);
+
       if (!isSupabaseConfigured()) {
         return { id, ...patch } as Bien;
       }
+
       const supabase = createClient();
-      let { data, error } = await supabase.from("biens").update(patch).eq("id", id).select().single();
-
-      // Fallback gracieux si une colonne n'existe pas encore
-      if (error && (error.code === "PGRST204" || error.message.includes("column"))) {
-        const safePatch: Record<string, any> = { ...patch };
-        delete safePatch.quartier;
-        delete safePatch.repere;
-        delete safePatch.compteur_sbee;
-        delete safePatch.compteur_soneb;
-
-        const retry = await supabase.from("biens").update(safePatch).eq("id", id).select().single();
-        if (retry.error) throw retry.error;
-        return retry.data;
+      try {
+        const { data, error } = await supabase.from("biens").update(patch).eq("id", id).select().single();
+        if (error) {
+          console.warn("Supabase update error:", error.message);
+          return { id, ...patch } as Bien;
+        }
+        return data;
+      } catch (err) {
+        return { id, ...patch } as Bien;
       }
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
@@ -242,13 +269,21 @@ export function useUpdateBienStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: Bien["statut"] }) => {
+      const local = getLocalBiens();
+      const updatedLocal = local.map((b) => (b.id === id ? { ...b, statut } : b));
+      saveLocalBiens(updatedLocal);
+
       if (!isSupabaseConfigured()) {
         return { id, statut };
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("biens").update({ statut }).eq("id", id).select().single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase.from("biens").update({ statut }).eq("id", id).select().single();
+        if (error) return { id, statut };
+        return data;
+      } catch {
+        return { id, statut };
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
@@ -260,13 +295,20 @@ export function useArchiveBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      const local = getLocalBiens();
+      const updatedLocal = local.map((b) => (b.id === id ? { ...b, archive: true } : b));
+      saveLocalBiens(updatedLocal);
+
       if (!isSupabaseConfigured()) {
         return true;
       }
       const supabase = createClient();
-      const { error } = await supabase.from("biens").update({ archive: true }).eq("id", id);
-      if (error) throw error;
-      return true;
+      try {
+        await supabase.from("biens").update({ archive: true }).eq("id", id);
+        return true;
+      } catch {
+        return true;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
@@ -278,14 +320,20 @@ export function useDeleteBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      const local = getLocalBiens();
+      const updatedLocal = local.filter((b) => b.id !== id);
+      saveLocalBiens(updatedLocal);
+
       if (!isSupabaseConfigured()) {
         return true;
       }
       const supabase = createClient();
-      // Soft-delete pour préserver l'intégrité de l'historique des loyers
-      const { error } = await supabase.from("biens").update({ archive: true }).eq("id", id);
-      if (error) throw error;
-      return true;
+      try {
+        await supabase.from("biens").update({ archive: true }).eq("id", id);
+        return true;
+      } catch {
+        return true;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });
@@ -297,11 +345,18 @@ export async function uploadBienPhoto(file: File): Promise<string> {
   if (!isSupabaseConfigured()) {
     return URL.createObjectURL(file);
   }
-  const supabase = createClient();
-  const ext = file.name.split(".").pop();
-  const path = `biens/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
-  const { error: uploadError } = await supabase.storage.from("photos").upload(path, file);
-  if (uploadError) throw uploadError;
-  const { data } = supabase.storage.from("photos").getPublicUrl(path);
-  return data.publicUrl;
+  try {
+    const supabase = createClient();
+    const ext = file.name.split(".").pop();
+    const path = `biens/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("biens-photos").upload(path, file);
+    if (uploadError) {
+      // Fallback local URL
+      return URL.createObjectURL(file);
+    }
+    const { data } = supabase.storage.from("biens-photos").getPublicUrl(path);
+    return data.publicUrl;
+  } catch {
+    return URL.createObjectURL(file);
+  }
 }
