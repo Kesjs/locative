@@ -247,53 +247,78 @@ export const ADDONS = [
   "Agence : pack +100 biens pour 5 000 FCFA/mois",
 ] as const;
 
+export interface FaqCategory {
+  id: "all" | "tarifs" | "paiements" | "juridique" | "vitrine" | "diaspora" | "locataires";
+  label: string;
+}
+
+export const FAQ_CATEGORIES: FaqCategory[] = [
+  { id: "all", label: "Toutes les questions" },
+  { id: "tarifs", label: "Forfaits & Tarifs" },
+  { id: "paiements", label: "Mobile Money & Encaissements" },
+  { id: "juridique", label: "Loi 2022-30 & Quittances" },
+  { id: "vitrine", label: "Marketplace & Site Vitrine" },
+  { id: "diaspora", label: "Diaspora & Multi-biens" },
+  { id: "locataires", label: "Portail Locataires" },
+];
+
 export const FAQS: FaqItem[] = [
   {
+    category: "tarifs",
     question: "Quelle est la différence entre les formules Découverte, Bailleur et Agence ?",
     answer:
       "Découverte est gratuit à vie pour 1 bien avec une gestion basique et des quittances PDF manuelles. Bailleur (5 000 FCFA/mois, jusqu'à 15 biens) débloque le Mobile Money, le portail locataire et la Marketplace Lokka. Agence (25 000 FCFA/mois, 50 biens inclus) ajoute la gestion multi-propriétaires avec mandats, les reversements automatiques, un domaine personnalisé et le SEO/blog.",
   },
   {
+    category: "tarifs",
     question: "Que se passe-t-il si je dépasse le plafond de biens de mon forfait ?",
     answer:
       "Vous pouvez étendre votre forfait avec un pack additionnel plutôt que de changer de plan : +5 biens pour 2 000 FCFA/mois en Bailleur (jusqu'à 35 biens max), ou un pack +100 biens pour 5 000 FCFA/mois en Agence. Au-delà, contactez l'équipe Lokka pour une formule personnalisée.",
   },
   {
+    category: "locataires",
     question: "Comment mes locataires accèdent-ils à leurs quittances PDF et à leur espace ?",
     answer:
       "Dès que vous ajoutez un locataire sur Lokka, il reçoit un accès sécurisé par email ou numéro de téléphone (avec code OTP sans mot de passe complexe). Sur son espace web dédié, il retrouve l'historique complet de tous ses mois payés et peut télécharger à tout moment ses quittances PDF officielles certifiées avec QR Code.",
   },
   {
+    category: "paiements",
     question: "Comment fonctionne l'encaissement par Mobile Money (MTN MoMo & Moov) ?",
     answer:
       "Vos locataires peuvent régler leur loyer directement depuis leur téléphone en FCFA. Dès que la transaction est confirmée, votre tableau de bord s'actualise en temps réel et la quittance certifiée est générée automatiquement.",
   },
   {
+    category: "juridique",
     question: "Comment Lokka garantit-il la conformité avec la Loi n° 2022-30 au Bénin ?",
     answer:
       "Lokka intègre un bouclier juridique automatique : le sélecteur de caution bloque tout dépassement du plafond légal de 3 mois de loyer en vigueur au Bénin, les quittances comportent toutes les mentions légales obligatoires, et pour les agences, la commission de gestion est plafonnée à 10% comme l'exige la loi.",
   },
   {
+    category: "vitrine",
     question: "Comment fonctionne mon site vitrine public et le nom de domaine personnalisé ?",
     answer:
       "Chaque compte Bailleur ou Agence dispose d'un mini-site public (ex: agence-littoral.lokka.bj). Il vous suffit de cocher 'Publier' sur vos logements vacants pour qu'ils apparaissent instantanément avec leurs photos, loyers et bouton de réservation de visite. Avec Agence, vous pouvez connecter votre propre nom de domaine (ex: www.monagence.bj) avec votre logo et bénéficier du SEO/blog inclus.",
   },
   {
+    category: "vitrine",
     question: "Qu'est-ce que la Marketplace Lokka et les frais de visite Mobile Money ?",
     answer:
       "La Marketplace Lokka permet de publier vos annonces de biens vacants pour trouver des locataires sans passer par une agence tierce (disponible à partir de Bailleur). Vous pouvez fixer des frais de visite payables en ligne par Mobile Money, intégralement acquis, pour filtrer les demandes non sérieuses.",
   },
   {
+    category: "diaspora",
     question: "Je vis à l'étranger, Lokka est-il adapté pour gérer mes biens au Bénin ?",
     answer:
       "Absolument. En configurant votre profil Bailleur, vous choisissez simplement votre zone (Bénin ou Diaspora) : vous suivez en direct vos loyers avec double conversion FCFA / Euros (€) ou Dollars ($), échangez directement avec vos locataires pour éviter les intermédiaires opaques, et bénéficiez d'un archivage infalsifiable de tous les paiements.",
   },
   {
+    category: "locataires",
     question: "Mes locataires doivent-ils payer pour utiliser Lokka ?",
     answer:
       "Non, Lokka est 100% gratuit pour vos locataires. Ils peuvent recevoir leurs rappels et quittances, payer leur loyer et suivre leur bail sans aucun frais supplémentaire.",
   },
   {
+    category: "tarifs",
     question: "Puis-je changer de formule ou annuler à tout moment ?",
     answer:
       "Oui, les forfaits mensuels sont sans aucun engagement. Vous pouvez passer d'un plan à un autre ou annuler votre abonnement depuis vos paramètres en 1 clic, sans frais de résiliation.",
