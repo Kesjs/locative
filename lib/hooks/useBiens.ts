@@ -115,7 +115,88 @@ export function useAddBien() {
         return { ...newBien, id: Date.now().toString() };
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("biens").insert([newBien]).select().single();
+
+      // 1. Récupérer l'utilisateur connecté
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      let organizationId: string | null = null;
+
+      if (user) {
+        // Trouver son organisation rattachée
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profile?.organization_id) {
+          organizationId = profile.organization_id;
+        } else {
+          // Sinon chercher la première organisation active
+          const { data: org } = await supabase
+            .from("organizations")
+            .select("id")
+            .limit(1)
+            .maybeSingle();
+          if (org?.id) organizationId = org.id;
+        }
+      }
+
+      // Préparation du payload
+      const payload: Record<string, any> = {
+        nom: newBien.nom,
+        adresse: newBien.adresse,
+        ville: newBien.ville,
+        type: newBien.type,
+        loyer_mensuel: newBien.loyer_mensuel,
+        charges: newBien.charges || 0,
+        statut: newBien.statut || "vacant",
+        photos: newBien.photos || [],
+        photo_principale: newBien.photo_principale || null,
+        equipements: newBien.equipements || [],
+        caution_montant: newBien.caution_montant || null,
+        surface_m2: newBien.surface_m2 || null,
+        nb_pieces: newBien.nb_pieces || null,
+        quartier: newBien.quartier || null,
+        repere: newBien.repere || null,
+        compteur_sbee: newBien.compteur_sbee || null,
+        compteur_soneb: newBien.compteur_soneb || null,
+      };
+
+      if (organizationId) {
+        payload.organization_id = organizationId;
+      }
+
+      // Tentative d'insertion complète
+      let { data, error } = await supabase.from("biens").insert([payload]).select().single();
+
+      // En cas d'erreur de colonnes inexistantes avant migration 011, fallback gracieux
+      if (error && (error.code === "PGRST204" || error.message.includes("column"))) {
+        console.warn("Retrying insert without extended fields...");
+        const fallbackPayload: Record<string, any> = {
+          nom: newBien.nom,
+          adresse: newBien.adresse,
+          ville: newBien.ville,
+          type: newBien.type,
+          loyer_mensuel: newBien.loyer_mensuel,
+          charges: newBien.charges || 0,
+          statut: newBien.statut || "vacant",
+          photos: newBien.photos || [],
+          photo_principale: newBien.photo_principale || null,
+          equipements: newBien.equipements || [],
+          caution_montant: newBien.caution_montant || null,
+          surface_m2: newBien.surface_m2 || null,
+          nb_pieces: newBien.nb_pieces || null,
+        };
+        if (organizationId) fallbackPayload.organization_id = organizationId;
+
+        const retry = await supabase.from("biens").insert([fallbackPayload]).select().single();
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+
       if (error) throw error;
       return data;
     },
@@ -133,7 +214,21 @@ export function useUpdateBien() {
         return { id, ...patch } as Bien;
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("biens").update(patch).eq("id", id).select().single();
+      let { data, error } = await supabase.from("biens").update(patch).eq("id", id).select().single();
+
+      // Fallback gracieux si une colonne n'existe pas encore
+      if (error && (error.code === "PGRST204" || error.message.includes("column"))) {
+        const safePatch: Record<string, any> = { ...patch };
+        delete safePatch.quartier;
+        delete safePatch.repere;
+        delete safePatch.compteur_sbee;
+        delete safePatch.compteur_soneb;
+
+        const retry = await supabase.from("biens").update(safePatch).eq("id", id).select().single();
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+
       if (error) throw error;
       return data;
     },
