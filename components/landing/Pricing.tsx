@@ -80,18 +80,19 @@ export default function Pricing() {
             <div 
               key={plan.name} 
               className={`relative flex flex-col rounded-[16px] border bg-white p-6 shadow-sm ${
-                plan.popular ? "border-[#9D6B3C] ring-2 ring-[#9D6B3C]/20" : "border-[#E8E3DC]"
+                plan.popular ? "border-2 border-[#9D6B3C] ring-4 ring-[#9D6B3C]/10" : "border-[#E8E3DC]"
               }`}
             >
-              {plan.badgeLabel && (
-                <div className="absolute -top-3 right-6 rounded-full bg-[#15803D] px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
-                  {plan.badgeLabel}
+              <div className="mb-4 flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-[20px] font-bold text-[#18181B]">{plan.name}</h3>
+                  <p className="mt-1 text-[13px] text-[#52525B]">{plan.description}</p>
                 </div>
-              )}
-              
-              <div className="mb-4">
-                <h3 className="text-[19px] font-bold text-[#18181B]">{plan.name}</h3>
-                <p className="mt-2 text-[13px] text-[#52525B]">{plan.description}</p>
+                {plan.badgeLabel && (
+                  <span className="shrink-0 rounded-full bg-[#15803D] px-3 py-1 text-[10.5px] font-extrabold tracking-wider text-white uppercase shadow-xs">
+                    {plan.badgeLabel}
+                  </span>
+                )}
               </div>
               
               <div className="mb-6 border-b border-[#E8E3DC] pb-6">
@@ -152,7 +153,7 @@ export default function Pricing() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-10 hidden overflow-hidden rounded-lg border border-[#E8E3DC] bg-white shadow-xs lg:block"
+          className="mt-10 hidden rounded-lg border border-[#E8E3DC] bg-white shadow-xs lg:block overflow-hidden"
         >
           <div className="landing-table-scroll overflow-x-auto">
             <table className="w-full min-w-[820px] border-collapse text-left">
@@ -172,13 +173,15 @@ export default function Pricing() {
                         plan.popular ? "border-t-2 border-t-[#9D6B3C] bg-[#F6EFE7]/30" : ""
                       }`}
                     >
-                      {plan.badgeLabel && (
-                        <div className="absolute -top-3 right-4 rounded-full bg-[#15803D] px-3 py-0.5 text-[10px] font-bold tracking-widest text-white uppercase shadow-sm">
-                          {plan.badgeLabel}
-                        </div>
-                      )}
-                      <div className="text-[15px] font-bold text-[#18181B]">{plan.name}</div>
-                      <div className="tabular-nums mt-3 text-[24px] font-extrabold tracking-[-0.04em] text-[#18181B]">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="text-[16px] font-bold text-[#18181B]">{plan.name}</div>
+                        {plan.badgeLabel && (
+                          <span className="rounded-full bg-[#15803D] px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide text-white uppercase shadow-xs">
+                            {plan.badgeLabel}
+                          </span>
+                        )}
+                      </div>
+                      <div className="tabular-nums text-[24px] font-extrabold tracking-[-0.04em] text-[#18181B]">
                         {formatPlanPrice(plan, cycle)}
                         {plan.period ? <span className="ml-1 text-[11px] font-semibold tracking-normal text-[#71717A]">{plan.period}</span> : null}
                       </div>

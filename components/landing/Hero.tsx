@@ -11,18 +11,18 @@ export default function Hero() {
   return (
     <section id="hero" className="relative overflow-hidden bg-[#FAF9F6] pb-12 pt-28 sm:pb-20 sm:pt-36">
       
-      {/* 21st.dev Interactive Fluid Flow Grid Background avec masque d'estompage central pour lisibilité maximale */}
-      <div className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-45 [mask-image:radial-gradient(ellipse_80%_60%_at_50%_35%,black_30%,transparent_90%)]">
+      {/* 21st.dev Interactive Fluid Flow Grid Background */}
+      <div className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-30">
         <FluidFlowGrid
           lineBaseColor="24, 24, 27"
           accentColor="157, 107, 60"
-          spacing={36}
+          spacing={42}
           interactiveRadius={220}
         />
       </div>
 
-      {/* Halo Ambiant Caramel Poudré & Sable Doux (Option 3 Quiet Luxury) */}
-      <div className="pointer-events-none absolute left-1/2 top-20 h-[360px] w-[640px] -translate-x-1/2 rounded-full bg-[#9D6B3C]/[0.04] blur-3xl" />
+      {/* Halo Ambiant Doux Caramel & Sable */}
+      <div className="pointer-events-none absolute left-1/2 top-20 h-[360px] w-[640px] -translate-x-1/2 rounded-full bg-[#9D6B3C]/[0.05] blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[780px] flex-col items-center text-center">

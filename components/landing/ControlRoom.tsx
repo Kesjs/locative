@@ -87,7 +87,7 @@ export default function ControlRoom() {
                 <p className="mt-2 text-[17px] font-bold text-[#18181B]">Koudjo Dossou</p>
                 <p className="mt-1 text-[13px] font-medium text-[#52525B]">150 000 FCFA à relancer</p>
                 <button type="button" onClick={() => setIsReminderSent((current) => !current)} aria-expanded={isReminderSent} aria-controls="reminder-detail" className="mt-5 inline-flex items-center gap-2 border-b-2 border-[#18181B] pb-1 text-[12px] font-bold text-[#18181B] hover:border-[#E11D48] hover:text-[#E11D48] transition-colors cursor-pointer">{isReminderSent ? "Masquer le contexte" : "Envoyer une relance WhatsApp"}<ArrowRight aria-hidden="true" size={13} /></button>
-                <div id="reminder-detail" aria-live="polite" className={`mt-4 border-l-2 border-[#9D6B3C] bg-[#F6EFE7]/50 p-2.5 rounded-r-md text-[12px] leading-relaxed text-[#3F3F46] ${isReminderSent ? "block" : "hidden"}`}>Relance WhatsApp prête avec le lien de paiement direct. L&apos;historique reste attaché au dossier du locataire.</div>
+                <div id="reminder-detail" aria-live="polite" className={`mt-4 border border-[#E8E3DC] bg-[#FAF9F6] p-3 rounded-md text-[12px] leading-relaxed text-[#3F3F46] ${isReminderSent ? "block" : "hidden"}`}>Relance WhatsApp prête avec le lien de paiement direct. L&apos;historique reste attaché au dossier du locataire.</div>
               </div>
             </div>
             <div className="border-t border-[#E8E3DC] pt-5">

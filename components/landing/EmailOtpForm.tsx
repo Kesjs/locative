@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Mail } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { handleError } from "@/lib/errors";
 import type { FormStatus } from "./types";
@@ -33,7 +33,7 @@ export default function EmailOtpForm({
     if (!email.trim() || status === "submitting") return;
 
     setStatus("submitting");
-    setFeedback("Un code de connexion va être envoyé à cette adresse.");
+    setFeedback("Un code de connexion sécurisé va vous être envoyé...");
 
     try {
       if (!isSupabaseConfigured()) {
@@ -87,35 +87,68 @@ export default function EmailOtpForm({
   const isSuccess = status === "success";
 
   return (
-    <form onSubmit={handleSubmit} className={`landing-email-form ${dark ? "landing-email-form-dark" : ""} ${className}`}>
+    <form onSubmit={handleSubmit} className={`w-full ${className}`}>
+      <div
+        className={`relative flex flex-col gap-2 rounded-xl p-1.5 transition-all sm:flex-row sm:items-center ${
+          dark
+            ? "border border-white/20 bg-white/10 shadow-lg backdrop-blur-md focus-within:border-[#9D6B3C] focus-within:ring-2 focus-within:ring-[#9D6B3C]/30"
+            : "border-2 border-[#E8E3DC] bg-white shadow-sm focus-within:border-[#9D6B3C] focus-within:ring-4 focus-within:ring-[#9D6B3C]/10"
+        }`}
+      >
+        <div className="flex flex-1 items-center gap-3 px-3">
+          <Mail
+            size={18}
+            className={`shrink-0 ${dark ? "text-white/60" : "text-[#71717A]"}`}
+          />
+          <input
+            id={inputId}
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Entrez votre adresse email..."
+            required
+            aria-describedby={feedbackId}
+            className={`h-11 w-full bg-transparent text-[14.5px] font-medium outline-none ${
+              dark
+                ? "text-white placeholder:text-white/50"
+                : "text-[#18181B] placeholder:text-[#71717A]"
+            }`}
+          />
+        </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          id={inputId}
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Votre adresse email"
-          required
-          aria-describedby={feedbackId}
-          className="min-h-[46px] min-w-0 flex-1 rounded-sm border border-border-strong bg-white px-3.5 text-[14px] text-text-primary outline-none placeholder:text-text-muted focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10"
-        />
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-sm bg-brand-primary px-5 text-[13px] font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-wait disabled:opacity-75"
+          className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg px-6 text-[13.5px] font-bold text-white transition-all duration-200 shadow-sm cursor-pointer disabled:cursor-wait disabled:opacity-75 ${
+            dark
+              ? "bg-[#9D6B3C] hover:bg-[#85572E]"
+              : "bg-[#18181B] hover:bg-[#9D6B3C]"
+          }`}
         >
-          {isSubmitting ? "Envoi du code…" : isSuccess ? "Code envoyé" : buttonLabel}
-          {isSuccess ? <CheckCircle2 aria-hidden="true" size={16} /> : <ArrowRight aria-hidden="true" size={16} />}
+          <span>{isSubmitting ? "Envoi du code…" : isSuccess ? "Code envoyé" : buttonLabel}</span>
+          {isSuccess ? (
+            <CheckCircle2 aria-hidden="true" size={16} className="text-white" />
+          ) : (
+            <ArrowRight aria-hidden="true" size={16} className="transition-transform group-hover:translate-x-1" />
+          )}
         </button>
       </div>
+
       <p
         id={feedbackId}
         aria-live="polite"
-        className={`mt-3 text-[12px] leading-relaxed ${isSuccess ? "text-success-strong" : status === "error" ? "text-danger" : dark ? "text-white/60" : "text-text-muted"}`}
+        className={`mt-2.5 text-center text-[12px] font-medium leading-relaxed sm:text-left ${
+          isSuccess
+            ? "text-[#15803D] font-bold"
+            : status === "error"
+            ? "text-[#E11D48] font-bold"
+            : dark
+            ? "text-white/70"
+            : "text-[#52525B]"
+        }`}
       >
         {feedback}
       </p>
