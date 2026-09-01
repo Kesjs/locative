@@ -199,8 +199,13 @@ export default function DashboardPage() {
             href="/dashboard/loyers"
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-card hover:bg-muted text-card-foreground border border-border rounded-lg text-[13px] font-bold transition-all shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Échéancier & Quittances
+            Échéancier &amp; Quittances
           </Link>
+          <button
+            type="button"
+            onClick={() => setIsAddBienOpen(true)}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             <Landmark className="w-4 h-4" /> Ajouter un bien
           </button>
         </div>
