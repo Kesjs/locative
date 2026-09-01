@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, Star, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Star } from "lucide-react";
 import EmailOtpForm from "./EmailOtpForm";
 import DashboardPreview from "./DashboardPreview";
 import FluidFlowGrid from "@/components/ui/fluid-flow-grid";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 export default function Hero() {
   return (
@@ -25,33 +26,13 @@ export default function Hero() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[780px] flex-col items-center text-center">
           
-          {/* Nouveau Badge Animé Haut de Gamme avec Bordure Lumineuse et Radar Pulse */}
-          <div className="relative group mb-8 inline-flex items-center gap-2.5 rounded-full p-[1.5px] overflow-hidden shadow-sm transition-transform duration-300 hover:scale-105 cursor-default select-none">
-            {/* Animated Conic Gradient Border */}
-            <span className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#087F5B_0%,#D97706_50%,#087F5B_100%)] opacity-80" />
-            
-            {/* Inner Badge Container */}
-            <div className="relative inline-flex items-center gap-2.5 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1.5 text-[12.5px] font-semibold text-[#0F172A]">
-              
-              {/* Radar Pulsing Icon */}
-              <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#087F5B]" />
-              </span>
-
-              {/* Tag LOI 2022-30 */}
-              <span className="rounded-full bg-[#087F5B]/10 border border-[#087F5B]/20 px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-[#087F5B] uppercase">
-                Loi 2022-30 🇧🇯
-              </span>
-
-              {/* Main Badge Text */}
-              <span className="text-[#0F172A] font-bold">
-                Plateforme certifiée de gestion locative au Bénin
-              </span>
-
-              {/* Sparkle Icon */}
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-            </div>
+          {/* Badge Officiel */}
+          <div className="relative mb-6 inline-flex items-center gap-2 overflow-hidden rounded-full border border-border-default bg-white px-3 py-1.5 text-[12px] font-semibold text-text-primary shadow-xs">
+            <BorderBeam size={32} duration={4} delay={0} />
+            <span className="relative z-10 inline-flex items-center gap-1.5">
+              <span className="rounded-[4px] bg-success-strong px-1.5 py-0.5 text-[9px] font-bold tracking-[0.12em] text-white">NEW</span>
+              <span>Une nouvelle façon de gérer vos biens</span>
+            </span>
           </div>
 
           <h1 className="max-w-[740px] text-[clamp(2.3rem,5.4vw,4rem)] font-extrabold leading-[1.02] tracking-[-0.05em] text-[#0F172A]">
