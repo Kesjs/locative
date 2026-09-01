@@ -15,7 +15,15 @@ export type CurrencyMode = "fcfa" | "eur" | "usd";
 export type DensityMode = "comfort" | "compact";
 export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
 export const SIDEBAR_COOKIE_NAME = "lokka:sidebar";
-export type ColorTheme = "emerald" | "blue" | "amber" | "violet" | "zinc" | "rose";
+export type ColorTheme =
+  | "emerald"
+  | "blue"
+  | "amber"
+  | "violet"
+  | "terracotta"
+  | "cyan"
+  | "rose"
+  | "zinc";
 export type MobileNavVariant = "island" | "dynamic" | "fullscreen";
 
 export const COLOR_THEMES: Record<
@@ -23,7 +31,7 @@ export const COLOR_THEMES: Record<
   { name: string; hex: string; primaryHsl: string; ringHsl: string; hoverHsl: string; lightHsl: string }
 > = {
   emerald: {
-    name: "Émeraude Patrimoine",
+    name: "Émeraude Bénin",
     hex: "#059669",
     primaryHsl: "160 84% 39%",
     ringHsl: "160 84% 39%",
@@ -54,6 +62,30 @@ export const COLOR_THEMES: Record<
     hoverHsl: "262 83% 48%",
     lightHsl: "270 100% 98%",
   },
+  terracotta: {
+    name: "Terracotta Havana",
+    hex: "#EA580C",
+    primaryHsl: "21 90% 48%",
+    ringHsl: "21 90% 48%",
+    hoverHsl: "21 90% 38%",
+    lightHsl: "24 100% 97%",
+  },
+  cyan: {
+    name: "Cyan Océan",
+    hex: "#0891B2",
+    primaryHsl: "192 91% 36%",
+    ringHsl: "192 91% 36%",
+    hoverHsl: "192 91% 28%",
+    lightHsl: "186 100% 97%",
+  },
+  rose: {
+    name: "Rubis Rose",
+    hex: "#E11D48",
+    primaryHsl: "347 77% 50%",
+    ringHsl: "347 77% 50%",
+    hoverHsl: "347 77% 40%",
+    lightHsl: "350 100% 97%",
+  },
   zinc: {
     name: "Monochrome Zinc",
     hex: "#0F172A",
@@ -61,14 +93,6 @@ export const COLOR_THEMES: Record<
     ringHsl: "222 47% 11%",
     hoverHsl: "222 47% 20%",
     lightHsl: "240 5% 96%",
-  },
-  rose: {
-    name: "Rubis",
-    hex: "#E11D48",
-    primaryHsl: "347 77% 50%",
-    ringHsl: "347 77% 50%",
-    hoverHsl: "347 77% 40%",
-    lightHsl: "350 100% 97%",
   },
 };
 
@@ -212,6 +236,8 @@ export const SidebarProvider = React.forwardRef<
         if (co && COLOR_THEMES[co]) {
           _setColorTheme(co);
           applyColor(co);
+        } else {
+          applyColor("emerald");
         }
 
         const pm = localStorage.getItem("lokka_pref_privacy");

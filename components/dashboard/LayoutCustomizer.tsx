@@ -128,7 +128,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {(Object.keys(COLOR_THEMES) as ColorTheme[]).map((key) => {
                     const pal = COLOR_THEMES[key];
                     const isSelected = colorTheme === key;
@@ -145,12 +145,12 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                         }`}
                       >
                         <span
-                          className="h-4 w-4 rounded-full shrink-0 shadow-xs flex items-center justify-center"
+                          className="h-3.5 w-3.5 rounded-full shrink-0 shadow-xs flex items-center justify-center"
                           style={{ backgroundColor: pal.hex }}
                         >
                           {isSelected && <CheckIcon className="h-2.5 w-2.5 text-white stroke-[3]" />}
                         </span>
-                        <span className="text-[11px] truncate text-slate-800 dark:text-zinc-200">
+                        <span className="text-[11px] truncate text-slate-800 dark:text-zinc-200 font-medium">
                           {pal.name.split(" ")[0]}
                         </span>
                       </button>

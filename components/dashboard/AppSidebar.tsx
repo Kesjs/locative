@@ -174,11 +174,14 @@ function CollapsibleNavItem({
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full relative flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors cursor-pointer select-none ${
           isActive
-            ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-emerald-600 before:rounded-r-sm"
+            ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[var(--brand-accent)] before:rounded-r-sm shadow-2xs"
             : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200"
         }`}
       >
-        <item.icon className={`size-4 shrink-0 ${isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-zinc-500"}`} />
+        <item.icon
+          className="size-4 shrink-0 transition-colors"
+          style={{ color: isActive ? "var(--brand-accent)" : undefined }}
+        />
         <span className="truncate flex-1 text-left font-medium">{item.title}</span>
         {item.badge && (
           <span
@@ -216,7 +219,7 @@ function CollapsibleNavItem({
                   onClick={() => isMobile && setOpenMobile(false)}
                   className={`block text-[12.5px] py-1.5 px-2 rounded-md transition-colors cursor-pointer ${
                     isSubActive
-                      ? "font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
+                      ? "font-semibold text-[var(--brand-accent)] bg-[var(--brand-accent)]/10"
                       : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800"
                   }`}
                 >
@@ -300,7 +303,7 @@ export function AppSidebar() {
                   <span className="truncate font-extrabold text-slate-900 dark:text-white text-[14px]">
                     Lokka
                   </span>
-                  <span className="truncate text-[10.5px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                  <span className="truncate text-[10.5px] font-bold uppercase tracking-wider text-[var(--brand-accent)]">
                     {currentRole.toLowerCase().includes("admin") ? "Admin HQ" : "Espace Locataire"}
                   </span>
                 </div>
@@ -317,8 +320,14 @@ export function AppSidebar() {
                         isCollapsed ? "justify-center p-0" : "gap-2.5 px-2.5 py-1.5"
                       } rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer`}
                     >
-                      <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
-                        <Building2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                      <div
+                        className="flex aspect-square size-7 items-center justify-center rounded-md border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden"
+                        style={{
+                          backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
+                          color: "var(--brand-accent)",
+                        }}
+                      >
+                        <Building2 className="size-4" />
                       </div>
                       {!isCollapsed && (
                         <>
@@ -351,12 +360,18 @@ export function AppSidebar() {
                         onClick={() => setActiveTeam(team)}
                         className={`gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer ${
                           activeTeam.name === team.name
-                            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold"
+                            ? "bg-slate-100 dark:bg-zinc-800 text-[var(--brand-accent)] font-semibold"
                             : "text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
                         }`}
                       >
-                        <div className="flex size-5 items-center justify-center rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
-                          <team.logo className="size-3 text-emerald-600 dark:text-emerald-400" />
+                        <div
+                          className="flex size-5 items-center justify-center rounded border border-slate-200 dark:border-zinc-700"
+                          style={{
+                            backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
+                            color: "var(--brand-accent)",
+                          }}
+                        >
+                          <team.logo className="size-3" />
                         </div>
                         <span className="truncate flex-1">{team.name}</span>
                         <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
@@ -412,7 +427,7 @@ export function AppSidebar() {
                         isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
                       } rounded-lg text-[13px] font-medium transition-colors cursor-pointer ${
                         active
-                          ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-emerald-600 before:rounded-r-sm shadow-2xs"
+                          ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[var(--brand-accent)] before:rounded-r-sm shadow-2xs"
                           : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200"
                       }`}
                     >
@@ -421,7 +436,10 @@ export function AppSidebar() {
                         className={isCollapsed ? "flex items-center justify-center w-full h-full cursor-pointer" : "cursor-pointer"}
                         onClick={() => isMobile && setOpenMobile(false)}
                       >
-                        <item.icon className={`size-4 shrink-0 ${active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-zinc-500"}`} />
+                        <item.icon
+                          className="size-4 shrink-0 transition-colors"
+                          style={{ color: active ? "var(--brand-accent)" : undefined }}
+                        />
                         {!isCollapsed && <span className="truncate flex-1 font-medium">{item.title}</span>}
                         {!isCollapsed && item.badge && (
                           <span
@@ -445,30 +463,45 @@ export function AppSidebar() {
 
         {/* ─── 3. FOOTER : CARTE D'UPGRADE PLAN + PROFIL UTILISATEUR ─── */}
         <SidebarFooter className="border-t border-slate-200/80 dark:border-zinc-800/80 p-2 space-y-2">
-          {/* Bloc Upgrade Plan */}
+          {/* Bloc Upgrade Plan Dynamique */}
           {!isCollapsed ? (
-            <div className="p-3 rounded-lg border border-emerald-200/80 dark:border-zinc-800 bg-emerald-50/50 dark:bg-zinc-900/60 shadow-2xs">
+            <div
+              className="p-3 rounded-lg border shadow-2xs transition-colors"
+              style={{
+                borderColor: "color-mix(in srgb, var(--brand-accent) 25%, transparent)",
+                backgroundColor: "color-mix(in srgb, var(--brand-accent) 6%, transparent)",
+              }}
+            >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11.5px] font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <Sparkles className="size-3.5" style={{ color: "var(--brand-accent)" }} />
                   Plan Gratuit
                 </span>
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded">
+                <span
+                  className="text-[10px] font-bold px-1.5 py-0.2 rounded border"
+                  style={{
+                    color: "var(--brand-accent)",
+                    borderColor: "color-mix(in srgb, var(--brand-accent) 30%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
+                  }}
+                >
                   {activeBiensCount} / {planMaxBiens} biens
                 </span>
               </div>
               <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden mb-2.5">
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    isPlanFull ? "bg-amber-500" : "bg-emerald-600"
-                  }`}
-                  style={{ width: `${planUsagePercent}%` }}
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${planUsagePercent}%`,
+                    backgroundColor: isPlanFull ? "#F59E0B" : "var(--brand-accent)",
+                  }}
                 />
               </div>
               <button
                 type="button"
                 onClick={() => router.push("/tarifs")}
-                className="w-full py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                className="w-full py-1.5 px-2.5 text-white text-[11.5px] font-semibold rounded-md flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:opacity-90 active:scale-[0.98]"
+                style={{ backgroundColor: "var(--brand-accent)" }}
               >
                 <span>Passer à Pro</span>
                 <ArrowRight className="size-3" />
@@ -479,7 +512,12 @@ export function AppSidebar() {
               <button
                 type="button"
                 onClick={() => router.push("/tarifs")}
-                className="size-8 rounded-lg bg-emerald-50 dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-zinc-800 flex items-center justify-center hover:bg-emerald-100 transition-colors cursor-pointer"
+                className="size-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border hover:opacity-90"
+                style={{
+                  backgroundColor: "color-mix(in srgb, var(--brand-accent) 10%, transparent)",
+                  borderColor: "color-mix(in srgb, var(--brand-accent) 30%, transparent)",
+                  color: "var(--brand-accent)",
+                }}
                 title={`Passer à Pro (${activeBiensCount}/${planMaxBiens} biens)`}
               >
                 <Sparkles className="size-4" />
@@ -500,7 +538,10 @@ export function AppSidebar() {
                   >
                     <Avatar className="h-7 w-7 rounded-full border border-slate-200 dark:border-zinc-700 shrink-0">
                       <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                      <AvatarFallback className="bg-emerald-600 text-white text-[10.5px] font-bold">
+                      <AvatarFallback
+                        className="text-white text-[10.5px] font-bold"
+                        style={{ backgroundColor: "var(--brand-accent)" }}
+                      >
                         {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -542,7 +583,7 @@ export function AppSidebar() {
                       onClick={() => router.push("/dashboard/parametres")}
                       className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-800"
                     >
-                      <BadgeCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+                      <BadgeCheck className="size-4" style={{ color: "var(--brand-accent)" }} />
                       <span>Mon Compte &amp; Sécurité</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
