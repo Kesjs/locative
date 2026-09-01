@@ -36,7 +36,7 @@ export default function LoyersPage() {
     const totalReste = impayes.reduce((sum, l) => sum + (l.montant || 0), 0);
 
     const totalExigible = totalEncaisse + totalReste;
-    const tauxRecouvrement = totalExigible > 0 ? Math.round((totalEncaisse / totalExigible) * 100) : 100;
+    const tauxRecouvrement = totalExigible > 0 ? Math.round((totalEncaisse / totalExigible) * 100) : (totalTransactions > 0 ? 100 : 0);
 
     return { totalTransactions, totalEncaisse, totalReste, tauxRecouvrement };
   }, [loyers]);

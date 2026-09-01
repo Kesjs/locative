@@ -27,7 +27,7 @@ export default function Logo({
         src="/logo-lokka.png"
         alt="Lokka Bénin"
         style={{ height: `${h}px`, width: "auto", objectFit: "contain" }}
-        className="transition-transform duration-200 group-hover:scale-105 select-none"
+        className="transition-transform duration-200 group-hover:scale-105 select-none mix-blend-multiply dark:mix-blend-screen"
       />
     </div>
   ) : (
@@ -36,7 +36,7 @@ export default function Logo({
         src="/logo.png"
         alt="Lokka"
         style={{ height: `${h}px`, width: `${h}px`, objectFit: "contain" }}
-        className="rounded-lg transition-transform duration-200 group-hover:scale-105 select-none shadow-xs"
+        className="rounded-lg transition-transform duration-200 group-hover:scale-105 select-none shadow-xs mix-blend-multiply dark:mix-blend-screen"
       />
     </div>
   );

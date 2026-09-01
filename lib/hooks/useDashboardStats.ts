@@ -24,17 +24,17 @@ export function useDashboardStats() {
     queryFn: async (): Promise<DashboardStats> => {
       const totalBiens = biens.length;
       const biensOccupes = biens.filter((b) => b.statut === "loué").length;
-      const tauxOccupation = totalBiens > 0 ? Math.round((biensOccupes / totalBiens) * 100) : 100;
+      const tauxOccupation = totalBiens > 0 ? Math.round((biensOccupes / totalBiens) * 100) : 0;
 
       const loyersPayes = loyers.filter((l) => l.statut === "payé");
-      const totalRevenusMois = loyersPayes.reduce((acc, curr) => acc + curr.montant, 0);
+      const totalRevenusMois = loyersPayes.reduce((acc, curr) => acc + (Number(curr.montant) || 0), 0);
 
-      const totalAttendu = loyers.reduce((acc, curr) => acc + curr.montant, 0);
-      const tauxRecouvrement = totalAttendu > 0 ? Math.round((totalRevenusMois / totalAttendu) * 100) : 98;
+      const totalAttendu = loyers.reduce((acc, curr) => acc + (Number(curr.montant) || 0), 0);
+      const tauxRecouvrement = totalAttendu > 0 ? Math.round((totalRevenusMois / totalAttendu) * 100) : (totalBiens > 0 ? 100 : 0);
 
       const loyersEnAttente = loyers
         .filter((l) => l.statut === "en_attente" || l.statut === "retard")
-        .reduce((acc, curr) => acc + curr.montant, 0);
+        .reduce((acc, curr) => acc + (Number(curr.montant) || 0), 0);
 
       return {
         totalRevenusMois,

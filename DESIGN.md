@@ -2,19 +2,20 @@
 name: Lokka
 description: A consumer-focused SaaS offering that simplifies complex tasks.
 colors:
-  primary: "#1C1C1C"
-  secondary: "#087F5B"
-  tertiary: "#C92A2A"
+  primary: "#9D6B3C"
+  secondary: "#18181B"
+  tertiary: "#E11D48"
   neutral-bg: "#FAF9F6"
   surface-secondary: "#FFFFFF"
-  surface-tertiary: "#F3F1ED"
-  surface-dark: "#1C1C1C"
-  border-primary: "#E8E5E0"
-  text-primary: "#1C1C1C"
-  text-secondary: "#64635F"
-  text-tertiary: "#9C9A95"
-  accent-light: "#F5F5DC"
-  warning: "#E67700"
+  surface-tertiary: "#F6EFE7"
+  surface-dark: "#18181B"
+  border-primary: "#E8E3DC"
+  text-primary: "#18181B"
+  text-secondary: "#71717A"
+  text-tertiary: "#A1A1AA"
+  accent-light: "#F6EFE7"
+  success: "#15803D"
+  warning: "#9D6B3C"
 typography:
   display:
     fontFamily: "'Instrument Serif', 'Georgia', serif"
