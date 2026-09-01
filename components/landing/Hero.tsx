@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Star, Mail } from "lucide-react";
+import { CheckCircle2, Star, Mail, ArrowRight } from "lucide-react";
 import DashboardPreview from "./DashboardPreview";
 import FluidFlowGrid from "@/components/ui/fluid-flow-grid";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
@@ -177,13 +177,14 @@ export default function Hero() {
                 />
               </div>
 
-              <InteractiveHoverButton
+              <button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-11 rounded-xl px-5 text-[13.5px] bg-slate-900 text-white border-transparent hover:border-transparent shrink-0"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-[13.5px] font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors disabled:opacity-70 shrink-0 cursor-pointer"
               >
-                {isSubmitting ? "Envoi..." : isSuccess ? "Code envoyé" : "Commencer"}
-              </InteractiveHoverButton>
+                <span>{isSubmitting ? "Envoi..." : isSuccess ? "Code envoyé" : "Commencer"}</span>
+                <ArrowRight size={15} />
+              </button>
             </form>
 
             <p
