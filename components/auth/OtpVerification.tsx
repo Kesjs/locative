@@ -9,7 +9,6 @@ import {
   CheckCircleIcon,
   ArrowPathIcon,
   EnvelopeIcon,
-  ShieldCheckIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -26,7 +25,6 @@ export default function OtpVerification({
   length = 6,
   onSuccess,
   onChangeEmail,
-  onFallbackPassword,
 }: OtpVerificationProps) {
   const [digits, setDigits] = useState<string[]>(() => Array(length).fill(""));
   const [isLoading, setIsLoading] = useState(false);
@@ -111,7 +109,6 @@ export default function OtpVerification({
 
   // Gestion du changement dans chaque champ
   const handleChange = (index: number, val: string) => {
-    // Si l'utilisateur colle ou tape une chaîne complète (ex: 6 ou 8 chiffres)
     if (val.length > 1) {
       const cleaned = val.replace(/\D/g, "").slice(0, length);
       if (cleaned.length > 0) {
@@ -194,16 +191,16 @@ export default function OtpVerification({
   return (
     <div className="w-full space-y-5">
       {/* Email Info & Change Button */}
-      <div className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-[#E8E3DC] text-[13px] shadow-2xs">
+      <div className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-slate-200 text-[13px] shadow-2xs">
         <div className="flex items-center gap-2.5 min-w-0">
-          <EnvelopeIcon className="w-4 h-4 text-[#9D6B3C] flex-shrink-0" />
-          <span className="font-bold text-[#18181B] truncate">{email}</span>
+          <EnvelopeIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span className="font-semibold text-slate-900 truncate">{email}</span>
         </div>
         {onChangeEmail && (
           <button
             type="button"
             onClick={onChangeEmail}
-            className="text-[12px] font-bold text-[#18181B] hover:text-[#9D6B3C] px-2 py-0.5 rounded transition-colors flex-shrink-0 ml-2 cursor-pointer"
+            className="text-[12px] font-semibold text-emerald-700 hover:text-emerald-800 px-2 py-0.5 rounded transition-colors shrink-0 ml-2 cursor-pointer"
           >
             Modifier
           </button>
@@ -217,9 +214,9 @@ export default function OtpVerification({
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="p-3 rounded-lg bg-red-50 border border-red-200 text-[#E11D48] text-[13px] font-semibold flex items-center gap-2"
+            className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[13px] font-medium flex items-center gap-2"
           >
-            <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0 text-[#E11D48]" />
+            <ExclamationCircleIcon className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{errorMessage}</span>
           </motion.div>
         )}
@@ -229,9 +226,9 @@ export default function OtpVerification({
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-[#15803D] text-[13px] font-semibold flex items-center gap-2"
+            className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[13px] font-medium flex items-center gap-2"
           >
-            <CheckCircleIcon className="w-4 h-4 flex-shrink-0 text-[#15803D]" />
+            <CheckCircleIcon className="w-4 h-4 shrink-0 text-emerald-600" />
             <span>Un nouveau code a été envoyé avec succès !</span>
           </motion.div>
         )}
@@ -240,11 +237,11 @@ export default function OtpVerification({
       {/* Inputs Pin Code 6 Chiffres */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <label className="text-[12.5px] font-bold text-[#18181B]">
+          <label className="text-[12.5px] font-semibold text-slate-900">
             Code de sécurité ({length} chiffres)
           </label>
-          <span className="text-[11px] text-[#52525B] flex items-center gap-1 font-semibold bg-[#F6EFE7]/60 border border-[#E8E3DC] px-2.5 py-0.5 rounded-full">
-            <EnvelopeIcon className="w-3 h-3 text-[#9D6B3C]" />
+          <span className="text-[11px] text-emerald-800 flex items-center gap-1 font-semibold bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
+            <EnvelopeIcon className="w-3 h-3 text-emerald-600" />
             <span>Par Email</span>
           </span>
         </div>
@@ -268,16 +265,16 @@ export default function OtpVerification({
                 disabled={isLoading || isSuccess}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className={`w-full h-12 sm:h-14 text-center text-[19px] sm:text-[22px] font-mono font-extrabold rounded-xl border transition-all duration-150 outline-none select-all ${
+                className={`w-full h-12 sm:h-14 text-center text-[19px] sm:text-[22px] font-mono font-bold rounded-xl border transition-all duration-150 outline-none select-all ${
                   isSuccess
-                    ? "bg-emerald-50 border-[#15803D] text-[#15803D]"
+                    ? "bg-emerald-50 border-emerald-600 text-emerald-700"
                     : digit
-                    ? "bg-white border-[#18181B] text-[#18181B] shadow-xs ring-2 ring-[#18181B]/10"
-                    : "bg-white border-[#E8E3DC] text-[#18181B] focus:border-[#9D6B3C] focus:ring-4 focus:ring-[#9D6B3C]/15 shadow-2xs"
+                    ? "bg-white border-slate-900 text-slate-900 shadow-xs ring-2 ring-slate-900/10"
+                    : "bg-white border-slate-200 text-slate-900 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/15 shadow-2xs"
                 } disabled:opacity-75`}
               />
               {!digit && (
-                <span className="absolute inset-0 flex items-center justify-center pointer-events-none text-[#71717A] opacity-25 text-base">
+                <span className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-base">
                   •
                 </span>
               )}
@@ -285,7 +282,7 @@ export default function OtpVerification({
           ))}
         </motion.div>
 
-        <p className="text-[12px] text-[#71717A] text-center pt-0.5">
+        <p className="text-[12px] text-slate-500 text-center pt-0.5">
           Vous pouvez aussi cliquer directement sur le lien sécurisé reçu par email.
         </p>
       </div>
@@ -295,7 +292,7 @@ export default function OtpVerification({
         type="button"
         onClick={() => verifyCode(digits.join(""))}
         disabled={isLoading || isSuccess || digits.some((d) => d === "")}
-        className="w-full h-12 px-5 bg-[#18181B] hover:bg-[#9D6B3C] text-white text-[13.5px] font-bold rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="w-full h-12 px-5 bg-emerald-600 hover:bg-emerald-700 text-white text-[13.5px] font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {isSuccess ? (
           <span className="inline-flex items-center gap-2">
@@ -316,18 +313,18 @@ export default function OtpVerification({
       </button>
 
       {/* Actions secondaires : Renvoi */}
-      <div className="pt-2 flex flex-col items-center gap-2.5 text-center border-t border-[#E8E3DC]">
+      <div className="pt-2 flex flex-col items-center gap-2.5 text-center border-t border-slate-200/80">
         {countdown > 0 ? (
-          <span className="text-[12px] text-[#71717A]">
+          <span className="text-[12px] text-slate-500">
             Renvoyer un nouveau code dans{" "}
-            <strong className="text-[#18181B] font-mono">{countdown}s</strong>
+            <strong className="text-slate-900 font-mono">{countdown}s</strong>
           </span>
         ) : (
           <button
             type="button"
             onClick={handleResend}
             disabled={resending}
-            className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-[#18181B] hover:text-[#9D6B3C] px-2 py-1 rounded transition-colors disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-emerald-700 hover:text-emerald-800 px-2 py-1 rounded transition-colors disabled:opacity-50 cursor-pointer"
           >
             <ArrowPathIcon className={`w-3.5 h-3.5 ${resending ? "animate-spin" : ""}`} />
             <span>Renvoyer le code OTP</span>

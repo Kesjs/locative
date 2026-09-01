@@ -186,29 +186,29 @@ export default function Header({
     <>
       <header className="mb-6">
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between gap-4 pb-4 border-b border-border">
+        <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
           
           {/* Left: SidebarTrigger + Separator + Breadcrumb */}
           <div className="flex items-center gap-3 min-w-0">
-            <SidebarTrigger className="h-8.5 w-8.5 rounded-lg border border-border bg-card hover:bg-muted transition-colors shrink-0 text-foreground" />
-            <Separator orientation="vertical" className="h-4 bg-border shrink-0" />
+            <SidebarTrigger className="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#101B17] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 text-slate-800 dark:text-slate-100 shadow-2xs" />
+            <Separator orientation="vertical" className="h-4 bg-slate-200 dark:bg-slate-800 shrink-0" />
 
             <Breadcrumb className="hidden sm:block">
-              <BreadcrumbList className="text-[13px] font-medium text-muted-foreground">
+              <BreadcrumbList className="text-[13px] font-medium text-slate-500 dark:text-slate-400">
                 {currentCrumbs.map((crumb, i) => {
                   const isLast = i === currentCrumbs.length - 1;
                   return (
                     <React.Fragment key={i}>
-                      {i > 0 && <BreadcrumbSeparator className="text-muted-foreground" />}
+                      {i > 0 && <BreadcrumbSeparator className="text-slate-400 dark:text-slate-600" />}
                       <BreadcrumbItem>
                         {isLast ? (
-                          <BreadcrumbPage className="font-bold text-foreground">
+                          <BreadcrumbPage className="font-bold text-slate-900 dark:text-white">
                             {crumb}
                           </BreadcrumbPage>
                         ) : (
                           <BreadcrumbLink
                             href="/dashboard"
-                            className="hover:text-foreground transition-colors"
+                            className="hover:text-slate-900 dark:hover:text-white transition-colors"
                           >
                             {crumb}
                           </BreadcrumbLink>
@@ -226,13 +226,13 @@ export default function Header({
             {/* 1. Global Search Box ⌘K */}
             <div
               onClick={() => setIsSearchOpen(true)}
-              className="group relative flex items-center h-8.5 w-[140px] sm:w-[220px] md:w-[260px] px-2.5 bg-card hover:bg-muted border border-border hover:border-foreground/30 rounded-lg transition-all shadow-2xs cursor-pointer"
+              className="group relative flex items-center h-9 w-[150px] sm:w-[220px] md:w-[270px] px-3 bg-white dark:bg-[#101B17] hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-emerald-500/60 dark:hover:border-emerald-500/60 rounded-xl transition-all shadow-2xs cursor-pointer"
             >
-              <MagnifyingGlassIcon className="h-4 w-4 text-muted-foreground transition-colors shrink-0" />
-              <span className="ml-2 text-[12.5px] text-muted-foreground select-none truncate flex-1 font-medium">
+              <MagnifyingGlassIcon className="h-4 w-4 text-slate-400 dark:text-slate-400 transition-colors shrink-0" />
+              <span className="ml-2 text-[12.5px] text-slate-500 dark:text-slate-400 select-none truncate flex-1 font-medium">
                 Rechercher...
               </span>
-              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-muted border border-border text-[10px] font-mono text-muted-foreground rounded">
+              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono text-slate-500 dark:text-slate-400 rounded-md">
                 ⌘K
               </kbd>
             </div>
@@ -242,10 +242,10 @@ export default function Header({
               <button
                 type="button"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="h-8.5 w-8.5 flex items-center justify-center bg-card hover:bg-muted border border-border rounded-lg text-foreground transition-all shadow-2xs cursor-pointer"
+                className="h-9 w-9 flex items-center justify-center bg-white dark:bg-[#101B17] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 transition-all shadow-2xs cursor-pointer"
                 title="Notifications"
               >
-                <BellIcon className="h-4 w-4" />
+                <BellIcon className="h-4.5 w-4.5" />
                 <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-500" />
               </button>
 
@@ -256,21 +256,21 @@ export default function Header({
                     initial={{ opacity: 0, y: 6, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.96 }}
-                    className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-2xl shadow-2xl p-3 z-50 text-[12px] text-card-foreground animate-in fade-in-50"
+                    className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#101B17] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 z-50 text-[12px] text-slate-900 dark:text-slate-100 animate-in fade-in-50"
                   >
-                    <div className="flex items-center justify-between pb-2 border-b border-border font-bold text-foreground">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 font-bold text-slate-900 dark:text-white">
                       <span>Notifications récentes</span>
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800">
                         ● MoMo Live
                       </span>
                     </div>
                     <div className="py-2 space-y-2">
-                      <div className="p-2.5 rounded-lg bg-muted/40 border border-border">
-                        <div className="font-bold text-foreground flex items-center justify-between">
+                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
                           <span>Loyer reçu (MTN MoMo)</span>
-                          <span className="text-[10px] text-muted-foreground">09:42</span>
+                          <span className="text-[10px] text-slate-400">09:42</span>
                         </div>
-                        <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                        <p className="text-[11.5px] text-slate-600 dark:text-slate-300 mt-0.5">
                           Koudjo Dossou a réglé 350 000 FCFA avec succès.
                         </p>
                       </div>
@@ -286,14 +286,14 @@ export default function Header({
               onThemeChange={(newTheme) => setTheme(newTheme)}
               variant="circle"
               duration={450}
-              className="h-8.5 w-8.5"
+              className="h-9 w-9 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-[#101B17]"
             />
 
             {/* 4. Layout Customizer Button */}
             <button
               type="button"
               onClick={() => setIsCustomizerOpen(true)}
-              className="h-8.5 w-8.5 flex items-center justify-center bg-card hover:bg-muted border border-border rounded-lg text-foreground transition-all shadow-2xs cursor-pointer"
+              className="h-9 w-9 flex items-center justify-center bg-white dark:bg-[#101B17] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 transition-all shadow-2xs cursor-pointer"
               title="Personnaliser l'affichage"
             >
               <AdjustmentsHorizontalIcon className="h-4.5 w-4.5" />
@@ -304,20 +304,20 @@ export default function Header({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 bg-card hover:bg-muted border border-border rounded-xl transition-all shadow-2xs cursor-pointer outline-none"
+                  className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 bg-white dark:bg-[#101B17] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition-all shadow-2xs cursor-pointer outline-none"
                   aria-label="Menu utilisateur"
                 >
-                  <Avatar className="h-7 w-7 rounded-full border border-border shrink-0">
+                  <Avatar className="h-7 w-7 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
                     <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                    <AvatarFallback className="bg-[#087F5B] text-white text-[11px] font-bold">
+                    <AvatarFallback className="bg-emerald-600 text-white text-[11px] font-bold">
                       {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:flex flex-col text-left leading-tight">
-                    <span className="text-[12.5px] font-bold text-foreground truncate max-w-[110px]">
+                    <span className="text-[12.5px] font-bold text-slate-900 dark:text-white truncate max-w-[110px]">
                       {userProfile.name || "Alexandre K."}
                     </span>
-                    <span className="text-[10px] text-muted-foreground truncate max-w-[110px] font-semibold">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[110px] font-semibold">
                       {userProfile.role || "Bailleur"}
                     </span>
                   </div>
@@ -328,55 +328,46 @@ export default function Header({
                 align="end"
                 side="bottom"
                 sideOffset={8}
-                className="w-64 rounded-2xl p-2 shadow-2xl border border-border bg-card text-card-foreground z-50 animate-in fade-in-50 zoom-in-95"
+                className="w-64 rounded-2xl p-2 shadow-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-50 animate-in fade-in-50 zoom-in-95"
               >
                 <DropdownMenuLabel className="p-2 space-y-1">
                   <div className="flex items-center gap-2.5">
-                    <Avatar className="h-8 w-8 rounded-full border border-border shrink-0">
+                    <Avatar className="h-8 w-8 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
                       <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                      <AvatarFallback className="bg-[#087F5B] text-white text-[11px] font-bold">
+                      <AvatarFallback className="bg-emerald-600 text-white text-[11px] font-bold">
                         {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13.5px] font-bold text-foreground truncate">
+                      <div className="text-[13.5px] font-bold text-slate-900 dark:text-white truncate">
                         {userProfile.name || "Alexandre K."}
                       </div>
-                      <div className="text-[11.5px] text-muted-foreground font-normal truncate">
+                      <div className="text-[11.5px] text-slate-500 dark:text-slate-400 font-normal truncate">
                         {userProfile.email || "alexandre@lokka.bj"}
                       </div>
                     </div>
                   </div>
-                  <div className="pt-1.5">
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                      {userProfile.role || "Bailleur"}
-                    </span>
-                  </div>
                 </DropdownMenuLabel>
-
-                <DropdownMenuSeparator className="bg-border my-1.5" />
-
-                <DropdownMenuGroup className="space-y-0.5">
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
+                <DropdownMenuGroup>
                   <DropdownMenuItem
-                    className="text-[12.5px] gap-2.5 p-2 rounded-lg cursor-pointer text-foreground hover:bg-muted font-medium"
                     onClick={() => router.push("/dashboard/parametres")}
+                    className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
-                    <UserCircleIcon className="h-4 w-4 text-primary" />
-                    <span>Mon Profil &amp; Paramètres</span>
+                    <UserCircleIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Mon Profil Bailleur</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="text-[12.5px] gap-2.5 p-2 rounded-lg cursor-pointer text-foreground hover:bg-muted font-medium"
                     onClick={() => router.push("/dashboard/parametres")}
+                    className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
-                    <ShieldCheckIcon className="h-4 w-4 text-emerald-600" />
-                    <span>Fiscalité &amp; IFU Bénin</span>
+                    <ShieldCheckIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Sécurité &amp; Données</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-
-                <DropdownMenuSeparator className="bg-border my-1.5" />
-
+                <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
                 <DropdownMenuItem
-                  className="text-[12.5px] gap-2.5 p-2 rounded-lg text-destructive hover:bg-destructive/10 cursor-pointer font-semibold transition-colors"
+                  className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50"
                   onClick={() => setShowLogoutDialog(true)}
                 >
                   <ArrowLeftOnRectangleIcon className="h-4 w-4" />
@@ -391,7 +382,7 @@ export default function Header({
         <AnimatePresence>
           {isSearchOpen && (
             <div
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-start justify-center pt-20 p-4"
+              className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-start justify-center pt-20 p-4"
               onClick={() => setIsSearchOpen(false)}
             >
               <motion.div
@@ -399,32 +390,32 @@ export default function Header({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.97, y: -10 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden text-card-foreground"
+                className="w-full max-w-xl bg-white dark:bg-[#101B17] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden text-slate-900 dark:text-slate-100"
               >
                 {/* Search Bar Input */}
-                <div className="flex items-center px-4 py-3.5 border-b border-border bg-card">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="flex items-center px-4 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17]">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <input
                     type="text"
                     autoFocus
                     placeholder="Rechercher un bien, un locataire, un contrat..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full ml-3 text-[14px] bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground"
+                    className="w-full ml-3 text-[14px] bg-transparent border-none outline-none text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
                   />
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen(false)}
-                    className="p-1 text-muted-foreground hover:text-foreground rounded-md transition cursor-pointer"
+                    className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition cursor-pointer"
                   >
                     <XMarkIcon className="h-4 w-4" />
                   </button>
                 </div>
 
                 {/* Search Results */}
-                <div className="max-h-[340px] overflow-y-auto p-2 bg-card">
+                <div className="max-h-[340px] overflow-y-auto p-2 bg-white dark:bg-[#101B17]">
                   {filteredItems.length === 0 ? (
-                    <div className="py-8 text-center text-[13px] text-muted-foreground">
+                    <div className="py-8 text-center text-[13px] text-slate-500 dark:text-slate-400">
                       Aucun résultat trouvé pour « {searchQuery} »
                     </div>
                   ) : (
@@ -438,26 +429,26 @@ export default function Header({
                               router.push(item.url);
                               setIsSearchOpen(false);
                             }}
-                            className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted cursor-pointer group transition"
+                            className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer group transition"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="p-2 rounded-lg bg-muted text-foreground">
-                                <Icon className="h-4 w-4" />
+                              <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-950/60 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                                <Icon className="h-4.5 w-4.5" />
                               </div>
                               <div className="min-w-0">
-                                <div className="text-[13px] font-bold text-foreground truncate">
+                                <div className="text-[13.5px] font-bold text-slate-900 dark:text-white truncate">
                                   {item.title}
                                 </div>
-                                <div className="text-[11px] text-muted-foreground truncate">
+                                <div className="text-[11.5px] text-slate-500 dark:text-slate-400 truncate">
                                   {item.subtitle}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+                            <div className="flex items-center gap-2.5 shrink-0">
+                              <span className="text-[10.5px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
                                 {item.category}
                               </span>
-                              <ArrowRightIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition" />
+                              <ArrowRightIcon className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition" />
                             </div>
                           </div>
                         );
@@ -467,22 +458,22 @@ export default function Header({
                 </div>
 
                 {/* Command Palette Footer */}
-                <div className="px-4 py-2.5 bg-muted/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
+                <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                   <div className="flex items-center gap-3">
                     <span>
-                      <kbd className="px-1.5 py-0.5 bg-card border border-border rounded font-mono text-[10px] text-foreground">
+                      <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md font-mono text-[10px] text-slate-700 dark:text-slate-300 shadow-2xs">
                         ↑↓
                       </kbd>{" "}
                       Naviguer
                     </span>
                     <span>
-                      <kbd className="px-1.5 py-0.5 bg-card border border-border rounded font-mono text-[10px] text-foreground">
+                      <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md font-mono text-[10px] text-slate-700 dark:text-slate-300 shadow-2xs">
                         ↵
                       </kbd>{" "}
                       Ouvrir
                     </span>
                   </div>
-                  <span className="font-semibold text-foreground">Lokka Search 2.0</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Lokka Search 2.0</span>
                 </div>
               </motion.div>
             </div>
@@ -501,15 +492,15 @@ export default function Header({
 
       {/* ─── MODAL DE CONFIRMATION DE DÉCONNEXION (HEADER) ─── */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent className="bg-card border border-border rounded-2xl p-6 max-w-md shadow-2xl text-card-foreground">
+        <AlertDialogContent className="bg-white dark:bg-[#101B17] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md shadow-2xl text-slate-900 dark:text-slate-100">
           <AlertDialogHeader>
-            <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
               <ArrowLeftOnRectangleIcon className="w-6 h-6" />
             </div>
-            <AlertDialogTitle className="text-[17px] font-bold text-foreground">
+            <AlertDialogTitle className="text-[17px] font-bold text-slate-900 dark:text-white">
               Confirmer la déconnexion
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground leading-relaxed mt-1">
+            <AlertDialogDescription className="text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
               Êtes-vous sûr de vouloir vous déconnecter de votre espace Lokka ? Vos données de gestion sont enregistrées en toute sécurité.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -517,14 +508,14 @@ export default function Header({
           <AlertDialogFooter className="mt-6 flex items-center justify-end gap-3">
             <AlertDialogCancel
               disabled={isLoggingOut}
-              className="px-4 py-2 text-[13px] font-bold rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition"
+              className="px-4 py-2 text-[13px] font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer transition"
             >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmLogout}
               disabled={isLoggingOut}
-              className="px-5 py-2 text-[13px] font-bold rounded-lg bg-destructive hover:bg-destructive/90 text-white cursor-pointer transition shadow-xs"
+              className="px-5 py-2 text-[13px] font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 text-white cursor-pointer transition shadow-xs"
             >
               {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
             </AlertDialogAction>

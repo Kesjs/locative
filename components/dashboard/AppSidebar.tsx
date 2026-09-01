@@ -164,63 +164,34 @@ function CollapsibleNavItem({
     if (isActive) setIsOpen(true);
   }, [isActive]);
 
-  if (isCollapsed) {
-    return (
-      <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton
-          asChild
-          tooltip={item.title}
-          isActive={isActive}
-          style={
-            isActive
-              ? {
-                  backgroundColor: "var(--color-brand-primary, #0F172A)",
-                  color: "var(--color-brand-text, #FFFFFF)",
-                }
-              : undefined
-          }
-          className="w-full flex items-center justify-center p-0 h-9 rounded-[8px] transition-colors"
-        >
-          <Link
-            href={item.url}
-            className="flex items-center justify-center w-full h-full"
-            onClick={() => isMobile && setOpenMobile(false)}
-          >
-            <item.icon className="size-4 shrink-0" />
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    );
-  }
-
   return (
-    <SidebarMenuItem key={item.title} className="space-y-1">
+    <SidebarMenuItem>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 px-3 py-2 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer select-none ${
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all cursor-pointer select-none ${
           isActive
-            ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-            : "text-foreground hover:bg-muted hover:text-foreground"
+            ? "bg-emerald-600 text-white font-semibold shadow-xs"
+            : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white"
         }`}
       >
-        <item.icon className={`size-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`} />
+        <item.icon className={`size-4.5 shrink-0 ${isActive ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
         <span className="truncate flex-1 text-left font-medium">{item.title}</span>
         {item.badge && (
           <span
-            className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
               item.badgeType === "danger"
-                ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
+                ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
                 : isActive
-                ? "bg-primary-foreground/20 text-primary-foreground"
-                : "bg-muted text-foreground border border-border"
+                ? "bg-white/20 text-white"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
             }`}
           >
             {item.badge}
           </span>
         )}
         <ChevronRight
-          className={`size-4 ${isActive ? "text-primary-foreground" : "text-muted-foreground"} transition-transform duration-200 ${
+          className={`size-4 ${isActive ? "text-white" : "text-slate-400"} transition-transform duration-200 ${
             isOpen ? "rotate-90" : ""
           }`}
         />
@@ -233,7 +204,7 @@ function CollapsibleNavItem({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden ml-5 pl-2.5 border-l border-[var(--border-default)] space-y-0.5"
+            className="overflow-hidden ml-5 pl-2.5 border-l border-slate-200 dark:border-slate-800 space-y-1 mt-1"
           >
             {item.items.map((subItem) => {
               const isSubActive = pathname === subItem.url;
@@ -242,10 +213,10 @@ function CollapsibleNavItem({
                   key={subItem.title}
                   href={subItem.url}
                   onClick={() => isMobile && setOpenMobile(false)}
-                  className={`block text-[12px] py-1.5 px-2 rounded-[6px] transition-colors ${
+                  className={`block text-[12.5px] py-1.5 px-2.5 rounded-lg transition-colors ${
                     isSubActive
-                      ? "font-semibold text-[var(--text-primary)] bg-[var(--hover-bg)]"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
+                      ? "font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
                   {subItem.title}
@@ -306,21 +277,21 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="icon"
-        className="border-r border-[var(--border-default)] bg-[var(--bg-sidebar)] text-[var(--text-primary)] z-30"
+        className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-30"
       >
         {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE ─── */}
-        <SidebarHeader className="border-b border-[var(--border-subtle)] p-2">
+        <SidebarHeader className="border-b border-slate-200/80 dark:border-slate-800/80 p-2.5">
           {isNormalizedAdminOrLocataire ? (
-            <div className="flex items-center gap-3 px-3 py-2 h-[48px] rounded-[8px]">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-[8px] bg-white border border-border shrink-0 shadow-xs overflow-hidden">
+            <div className="flex items-center gap-3 px-3 py-2 h-[48px] rounded-xl">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-white border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs overflow-hidden">
                 <img src="/logo.png" alt="Lokka" className="w-full h-full object-contain p-0.5" />
               </div>
               {!isCollapsed && (
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-extrabold text-[var(--text-primary)] text-[15px]">
+                  <span className="truncate font-extrabold text-slate-900 dark:text-white text-[15px]">
                     Lokka
                   </span>
-                  <span className="truncate text-[11px] text-[#087F5B] font-bold uppercase tracking-wider">
+                  <span className="truncate text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
                     {currentRole.toLowerCase().includes("admin") ? "Admin HQ" : "Espace Locataire"}
                   </span>
                 </div>
@@ -335,50 +306,50 @@ export function AppSidebar() {
                       size="lg"
                       className={`w-full flex items-center ${
                         isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                      } rounded-[8px] data-[state=open]:bg-[var(--hover-bg)] transition-colors cursor-pointer`}
+                      } rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer`}
                     >
-                      <div className="flex aspect-square size-8 items-center justify-center rounded-[8px] bg-white border border-border shrink-0 shadow-xs overflow-hidden">
+                      <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-white border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs overflow-hidden">
                         <img src={userProfile.customLogo || "/logo.png"} alt="Logo" className="w-full h-full object-contain p-0.5" />
                       </div>
                       {!isCollapsed && (
                         <>
                           <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-bold text-[var(--text-primary)] text-[13.5px]">
+                            <span className="truncate font-bold text-slate-900 dark:text-white text-[13.5px]">
                               {activeTeam.name}
                             </span>
-                            <span className="truncate text-[11px] text-[var(--text-muted)] font-medium">
+                            <span className="truncate text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                               {activeTeam.plan}
                             </span>
                           </div>
-                          <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
+                          <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
                         </>
                       )}
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
-                    className="w-60 rounded-xl p-1.5 shadow-2xl border border-[var(--border-default)] bg-[var(--bg-surface-elevated)] z-50 animate-in fade-in-50 zoom-in-95"
+                    className="w-60 rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-50 animate-in fade-in-50 zoom-in-95"
                     align="start"
                     side={isMobile ? "bottom" : "right"}
                     sideOffset={8}
                   >
-                    <DropdownMenuLabel className="text-[10.5px] text-[var(--text-muted)] px-2.5 py-1.5 font-bold uppercase tracking-wider">
+                    <DropdownMenuLabel className="text-[10.5px] text-slate-400 dark:text-slate-500 px-2.5 py-1.5 font-bold uppercase tracking-wider">
                       {currentRole.toLowerCase().includes("agence") ? "Agences & Filiales" : "Patrimoines & Portefeuilles"}
                     </DropdownMenuLabel>
                     {SIDEBAR_DATA.teams.map((team, index) => (
                       <DropdownMenuItem
                         key={team.name}
                         onClick={() => setActiveTeam(team)}
-                        className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-[var(--text-primary)] hover:bg-[var(--hover-bg)]"
+                        className="gap-2.5 p-2 rounded-xl text-[12.5px] font-medium cursor-pointer text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
-                        <div className="flex size-6 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-subtle)]">
-                          <team.logo className="size-3.5 text-primary" />
+                        <div className="flex size-6 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-emerald-50 dark:bg-emerald-950/50">
+                          <team.logo className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <span className="truncate flex-1 font-semibold">{team.name}</span>
                         <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                       </DropdownMenuItem>
                     ))}
-                    <DropdownMenuSeparator className="bg-[var(--border-default)] my-1" />
+                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
                     <DropdownMenuItem
                       onClick={() =>
                         alert(
@@ -387,10 +358,10 @@ export function AppSidebar() {
                             : "Ajout d'un nouveau patrimoine / SCI..."
                         )
                       }
-                      className="gap-2 p-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] cursor-pointer"
+                      className="gap-2 p-2 rounded-xl text-[12px] font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                     >
-                      <div className="flex size-6 items-center justify-center rounded-[6px] border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)]">
-                        <Plus className="size-3.5" />
+                      <div className="flex size-6 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                        <Plus className="size-3.5 text-slate-600 dark:text-slate-300" />
                       </div>
                       <span>
                         {currentRole.toLowerCase().includes("agence")
@@ -409,11 +380,11 @@ export function AppSidebar() {
         <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-3 space-y-4">
           <SidebarGroup>
             {!isCollapsed && (
-              <SidebarGroupLabel className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">
+              <SidebarGroupLabel className="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-1">
                 Navigation Principale
               </SidebarGroupLabel>
             )}
-            <SidebarMenu className="gap-1 mt-1">
+            <SidebarMenu className="gap-1.5 mt-1">
               {navItems.map((item) => {
                 const active = isLinkActive(item.url);
 
@@ -438,11 +409,11 @@ export function AppSidebar() {
                       tooltip={item.title}
                       isActive={active}
                       className={`w-full flex items-center ${
-                        isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
-                      } rounded-[8px] text-[13px] font-medium transition-colors ${
+                        isCollapsed ? "justify-center p-0 h-10" : "gap-3 px-3 py-2.5"
+                      } rounded-xl text-[13.5px] font-medium transition-all ${
                         active
-                          ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                          : "text-foreground hover:bg-muted hover:text-foreground"
+                          ? "bg-emerald-600 dark:bg-emerald-600 text-white font-semibold shadow-xs"
+                          : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
                       <Link
@@ -450,16 +421,16 @@ export function AppSidebar() {
                         className={isCollapsed ? "flex items-center justify-center w-full h-full" : undefined}
                         onClick={() => isMobile && setOpenMobile(false)}
                       >
-                        <item.icon className={`size-4 shrink-0 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                        {!isCollapsed && <span className="truncate flex-1">{item.title}</span>}
-                        {item.badge && !isCollapsed && (
+                        <item.icon className={`size-4.5 shrink-0 ${active ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
+                        {!isCollapsed && <span className="truncate flex-1 font-medium">{item.title}</span>}
+                        {!isCollapsed && item.badge && (
                           <span
-                            className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                               item.badgeType === "danger"
-                                ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
+                                ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
                                 : active
-                                ? "bg-primary-foreground/20 text-primary-foreground"
-                                : "bg-muted text-foreground border border-border"
+                                ? "bg-white/20 text-white"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                             }`}
                           >
                             {item.badge}
@@ -474,8 +445,8 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        {/* ─── 3. USER FOOTER PROFIL & DROPDOWN ─── */}
-        <SidebarFooter className="border-t border-[var(--border-subtle)] p-2">
+        {/* ─── 3. FOOTER : PROFIL UTILISATEUR ─── */}
+        <SidebarFooter className="border-t border-slate-200/80 dark:border-slate-800/80 p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -484,85 +455,67 @@ export function AppSidebar() {
                     size="lg"
                     className={`w-full flex items-center ${
                       isCollapsed ? "justify-center p-0" : "gap-3 px-3 py-2"
-                    } rounded-xl data-[state=open]:bg-[var(--hover-bg)] transition-all cursor-pointer`}
+                    } rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer`}
                   >
-                    <Avatar className="h-8 w-8 rounded-full border border-[var(--border-default)] shrink-0">
+                    <Avatar className="h-8 w-8 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
                       <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                      <AvatarFallback className="bg-[#087F5B] text-white text-[11px] font-bold">
+                      <AvatarFallback className="bg-emerald-600 text-white text-[11px] font-bold">
                         {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     {!isCollapsed && (
                       <>
                         <div className="grid flex-1 text-left text-sm leading-tight">
-                          <span className="truncate font-bold text-[var(--text-primary)] text-[13px]">
-                            {userProfile.name}
+                          <span className="truncate font-bold text-slate-900 dark:text-white text-[13.5px]">
+                            {userProfile.name || "Alexandre Koudjo"}
                           </span>
-                          <span className="truncate text-[11px] text-[var(--text-muted)] font-medium">
-                            {userProfile.role}
+                          <span className="truncate text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            {userProfile.role || "Propriétaire Bailleur"}
                           </span>
                         </div>
-                        <ChevronsUpDown className="ml-auto size-4 text-[var(--text-muted)]" />
+                        <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
                       </>
                     )}
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
-                {/* Dropdown Positioned to the right of Sidebar Footer to prevent overlap */}
                 <DropdownMenuContent
-                  className="w-64 rounded-2xl p-2 shadow-2xl border border-border bg-card text-card-foreground z-50 animate-in fade-in-50 zoom-in-95"
-                  side="right"
+                  className="w-56 rounded-2xl p-1.5 shadow-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#101B17] text-slate-900 dark:text-slate-100 z-50 animate-in fade-in-50 zoom-in-95"
+                  side={isMobile ? "bottom" : "right"}
                   align="end"
-                  sideOffset={14}
+                  sideOffset={8}
                 >
-                  <DropdownMenuLabel className="p-2 space-y-1">
-                    <div className="flex items-center gap-2.5">
-                      <Avatar className="h-8 w-8 rounded-full border border-border shrink-0">
-                        <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                        <AvatarFallback className="bg-[#087F5B] text-white text-[11px] font-bold">
-                          {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[13.5px] font-bold text-foreground truncate">{userProfile.name}</div>
-                        <div className="text-[11.5px] text-muted-foreground font-normal truncate">
-                          {userProfile.email || "alexandre@lokka.bj"}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="pt-1.5 flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                        {userProfile.role}
-                      </span>
+                  <DropdownMenuLabel className="p-2 font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-[13px] font-bold text-slate-900 dark:text-white leading-none">
+                        {userProfile.name || "Alexandre Koudjo"}
+                      </p>
+                      <p className="text-[11px] leading-none text-slate-500 dark:text-slate-400">
+                        {userProfile.email || "alexandre@lokka.bj"}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
-
-                  <DropdownMenuSeparator className="bg-border my-1.5" />
-
-                  <DropdownMenuGroup className="space-y-0.5">
+                  <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
+                  <DropdownMenuGroup>
                     <DropdownMenuItem
                       onClick={() => router.push("/dashboard/parametres")}
-                      className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-foreground hover:bg-muted"
+                      className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
-                      <BadgeCheck className="size-4 text-primary" />
-                      <span>Paramètres du compte</span>
+                      <BadgeCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Mon Compte &amp; Sécurité</span>
                     </DropdownMenuItem>
-
                     <DropdownMenuItem
                       onClick={() => router.push("/dashboard/parametres")}
-                      className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-foreground hover:bg-muted"
+                      className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
-                      <ShieldCheck className="size-4 text-emerald-600" />
-                      <span>Fiscalité &amp; IFU Bénin</span>
+                      <Sparkles className="size-4 text-amber-500" />
+                      <span>Abonnement Pro</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
-
-                  <DropdownMenuSeparator className="bg-border my-1.5" />
-
-                  {/* Bouton de Déconnexion qui ouvre l'AlertDialog */}
+                  <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
                   <DropdownMenuItem
                     onClick={() => setShowLogoutDialog(true)}
-                    className="gap-2.5 p-2 rounded-lg text-[12.5px] font-semibold text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+                    className="gap-2 p-2 rounded-xl text-[12.5px] cursor-pointer text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50"
                   >
                     <LogOut className="size-4" />
                     <span>Se déconnecter</span>
@@ -572,36 +525,35 @@ export function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
-
         <SidebarRail />
       </Sidebar>
 
-      {/* ─── 4. MODAL DE CONFIRMATION DE DÉCONNEXION (ALERT DIALOG) ─── */}
+      {/* Modal de Déconnexion */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent className="bg-card border border-border rounded-2xl p-6 max-w-md shadow-2xl text-card-foreground">
+        <AlertDialogContent className="bg-white dark:bg-[#101B17] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md shadow-2xl text-slate-900 dark:text-slate-100">
           <AlertDialogHeader>
-            <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
               <LogOut className="w-6 h-6" />
             </div>
-            <AlertDialogTitle className="text-[17px] font-bold text-foreground">
+            <AlertDialogTitle className="text-[17px] font-bold text-slate-900 dark:text-white">
               Confirmer la déconnexion
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-muted-foreground leading-relaxed mt-1">
-              Êtes-vous sûr de vouloir vous déconnecter de votre espace Lokka ? Vos données de gestion sont synchronisées en toute sécurité.
+            <AlertDialogDescription className="text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+              Êtes-vous sûr de vouloir vous déconnecter de votre espace Lokka ? Vos données de gestion sont enregistrées en toute sécurité.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter className="mt-6 flex items-center justify-end gap-3">
             <AlertDialogCancel
               disabled={isLoggingOut}
-              className="px-4 py-2 text-[13px] font-bold rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition"
+              className="px-4 py-2 text-[13px] font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer transition"
             >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmLogout}
               disabled={isLoggingOut}
-              className="px-5 py-2 text-[13px] font-bold rounded-lg bg-destructive hover:bg-destructive/90 text-white cursor-pointer transition shadow-xs"
+              className="px-5 py-2 text-[13px] font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 text-white cursor-pointer transition shadow-xs"
             >
               {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
             </AlertDialogAction>

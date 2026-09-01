@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, CheckCircle2, Star, Mail } from "lucide-react";
+import { CheckCircle2, Star, Mail } from "lucide-react";
 import DashboardPreview from "./DashboardPreview";
 import FluidFlowGrid from "@/components/ui/fluid-flow-grid";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { handleError } from "@/lib/errors";
 
@@ -84,7 +86,7 @@ export default function Hero() {
   };
 
   return (
-    <section id="hero" className="relative overflow-hidden bg-[#F8FAF9] pb-10 pt-16 sm:pb-16 sm:pt-24">
+    <section id="hero" className="relative overflow-hidden bg-[#F8FAF9] pb-12 pt-24 sm:pb-20 sm:pt-36">
       
       {/* Subtle Fluid Grid with Unified Palette */}
       <div className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-40">
@@ -97,26 +99,25 @@ export default function Hero() {
       </div>
 
       {/* Ambiant Soft Emerald Halo */}
-      <div className="pointer-events-none absolute left-1/2 top-10 h-[360px] w-[640px] -translate-x-1/2 rounded-full bg-emerald-500/[0.07] blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-14 h-[380px] w-[660px] -translate-x-1/2 rounded-full bg-emerald-500/[0.07] blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[740px] flex-col items-center text-center">
           
-          {/* Badge Épuré Emerald & Sage */}
+          {/* Badge Hero : Fond & Bordure Purement Blancs au Repos, Action vers /auth/register */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-center mb-5"
+            className="flex justify-center mb-6"
           >
-            <a
-              href="#pricing"
-              className="group inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/80 backdrop-blur-md px-3.5 py-1.5 text-[12px] font-semibold text-emerald-950 shadow-xs transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-100/70"
-            >
-              <span className="flex h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
-              <span>Une nouvelle façon de gérer vos biens</span>
-              <ArrowRight className="w-3.5 h-3.5 text-emerald-700 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </a>
+            <Link href="/auth/register" className="inline-block">
+              <InteractiveHoverButton
+                className="border-slate-200 bg-white text-[12px] font-semibold text-slate-800 py-1.5 px-4 shadow-xs hover:border-slate-300"
+              >
+                Une nouvelle façon de gérer vos biens
+              </InteractiveHoverButton>
+            </Link>
           </motion.div>
 
           {/* Titre Principal H1 Harmonisé & Équilibré */}
@@ -153,16 +154,16 @@ export default function Hero() {
             Tous vos biens, encaissements et quittances réunis dans un espace fluide, moderne et 100% conforme.
           </motion.p>
 
-          {/* Formulaire de Conversion Email OTP - Fin & Épuré */}
+          {/* Formulaire de Conversion Email OTP avec InteractiveHoverButton */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 w-full max-w-[480px]"
+            className="mt-6 w-full max-w-[490px]"
           >
             <form
               onSubmit={handleHeroSubmit}
-              className="group relative flex w-full flex-col gap-2 rounded-xl bg-white p-1.5 border border-slate-200 shadow-md shadow-slate-900/5 transition-all duration-200 focus-within:border-emerald-600 focus-within:ring-3 focus-within:ring-emerald-500/15 sm:flex-row sm:items-center"
+              className="group relative flex w-full flex-col gap-2 rounded-2xl bg-white p-1.5 border border-slate-200 shadow-md shadow-slate-900/5 transition-all duration-200 focus-within:border-emerald-600 focus-within:ring-3 focus-within:ring-emerald-500/15 sm:flex-row sm:items-center"
             >
               <div className="flex flex-1 items-center gap-2.5 px-3">
                 <Mail size={18} className="shrink-0 text-slate-400" />
@@ -176,14 +177,13 @@ export default function Hero() {
                 />
               </div>
 
-              <button
+              <InteractiveHoverButton
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-5 text-[13.5px] font-semibold text-white transition-all duration-200 shadow-sm cursor-pointer disabled:cursor-wait disabled:opacity-75 shrink-0"
+                className="h-11 rounded-xl px-5 text-[13.5px] bg-slate-900 text-white border-transparent hover:border-transparent shrink-0"
               >
-                <span>{isSubmitting ? "Envoi..." : isSuccess ? "Code envoyé" : "Commencer"}</span>
-                <ArrowRight aria-hidden="true" size={15} className="transition-transform group-hover:translate-x-0.5" />
-              </button>
+                {isSubmitting ? "Envoi..." : isSuccess ? "Code envoyé" : "Commencer"}
+              </InteractiveHoverButton>
             </form>
 
             <p

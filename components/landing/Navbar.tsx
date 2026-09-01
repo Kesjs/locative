@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Logo from "@/components/ui/Logo";
 import { ArrowRightIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -13,9 +14,11 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      // Détecte quand l'utilisateur quitte le Hero (environ 280px)
+      setScrolled(window.scrollY > 280);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -60,21 +63,51 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Desktop Right Actions */}
+        {/* Desktop Right Actions Dynamiques selon le Scroll */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/auth/login"
-            className="text-[13px] font-semibold text-slate-700 hover:text-emerald-700 px-3 py-1.5 transition-colors cursor-pointer"
-          >
-            Se connecter
-          </Link>
-          <Link
-            href="/auth/register"
-            className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-slate-900 hover:bg-emerald-700 px-4 py-2 rounded-xl transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
-          >
-            <span>Démarrer</span>
-            <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
+          <AnimatePresence mode="wait" initial={false}>
+            {!scrolled ? (
+              // SUR LE HERO : Uniquement "Se connecter" sous forme de bouton solide (sans flèche au hover, zéro doublon avec le Hero)
+              <motion.div
+                key="hero-actions"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center justify-center text-[13px] font-semibold text-white bg-slate-900 hover:bg-emerald-700 px-4 py-2 rounded-xl transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
+                >
+                  Se connecter
+                </Link>
+              </motion.div>
+            ) : (
+              // HORS DU HERO : Les deux boutons réapparaissent (Lien "Se connecter" + Bouton "Démarrer")
+              <motion.div
+                key="scrolled-actions"
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="flex items-center gap-3"
+              >
+                <Link
+                  href="/auth/login"
+                  className="text-[13px] font-semibold text-slate-700 hover:text-emerald-700 px-3 py-1.5 transition-colors cursor-pointer"
+                >
+                  Se connecter
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <span>Démarrer</span>
+                  <ArrowRightIcon className="h-3.5 w-3.5" />
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Mobile Hamburger Button */}

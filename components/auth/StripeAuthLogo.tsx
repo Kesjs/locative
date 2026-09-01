@@ -13,10 +13,10 @@ export default function StripeAuthLogo() {
       href="/"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative inline-flex items-center gap-2.5 p-1.5 -ml-1.5 rounded-xl transition-all duration-200 hover:bg-[#F6EFE7]/60 border border-transparent hover:border-[#E8E3DC] select-none cursor-pointer"
+      className="group relative inline-flex items-center gap-2.5 p-1.5 -ml-1.5 rounded-xl transition-all duration-200 hover:bg-slate-100 border border-transparent select-none cursor-pointer"
     >
       {/* Icon Box with Morphing Animation */}
-      <div className="relative w-9 h-9 rounded-lg bg-[#18181B] flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-xs">
+      <div className="relative w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-xs">
         <AnimatePresence mode="wait" initial={false}>
           {!isHovered ? (
             <motion.div
@@ -57,7 +57,7 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="font-serif text-[22px] font-bold text-[#18181B] tracking-tight"
+              className="font-serif text-[22px] font-bold text-slate-900 tracking-tight"
             >
               LOKKA.
             </motion.span>
@@ -68,7 +68,7 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="text-[13px] font-bold text-[#18181B] flex items-center gap-1 tracking-tight"
+              className="text-[13px] font-semibold text-slate-900 flex items-center gap-1 tracking-tight"
             >
               Retour au site
             </motion.span>
