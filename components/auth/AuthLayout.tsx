@@ -29,13 +29,13 @@ export default function AuthLayout({
         </div>
 
         {/* Bottom Minimal Footer */}
-        <footer className="pt-6 border-t border-[#E8E5E0]/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-[#9C9A95]">
-          <span>© 2026 Lokka. Fait pour le Bénin 🇧🇯</span>
-          <div className="flex gap-4">
-            <Link href="/ressources" className="hover:text-[#0F172A] transition-colors">
-              Loi n° 2022-30
+        <footer className="pt-6 border-t border-[#E8E3DC] flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-[#52525B]">
+          <span className="font-medium">© 2026 Lokka. Fait pour le Bénin 🇧🇯</span>
+          <div className="flex gap-4 font-semibold">
+            <Link href="/#features" className="hover:text-[#18181B] transition-colors">
+              Fonctionnalités
             </Link>
-            <Link href="/tarifs" className="hover:text-[#0F172A] transition-colors">
+            <Link href="/#pricing" className="hover:text-[#18181B] transition-colors">
               Tarifs
             </Link>
           </div>
@@ -43,9 +43,9 @@ export default function AuthLayout({
       </div>
 
       {/* ========================================================================= */}
-      {/* COLONNE DROITE : Vidéo Immersive Fixée (Variante 5 - Dark Minimal)        */}
+      {/* COLONNE DROITE : Visuel Immersif & Présentation Lokka                     */}
       {/* ========================================================================= */}
-      <div className="hidden lg:block lg:col-span-6 xl:col-span-7 h-screen sticky top-0 relative bg-[#0F172A] overflow-hidden">
+      <div className="hidden lg:block lg:col-span-6 xl:col-span-7 h-screen sticky top-0 relative bg-[#18181B] overflow-hidden">
         {/* Full-Bleed Sticky Video */}
         <video
           autoPlay
@@ -54,14 +54,25 @@ export default function AuthLayout({
           playsInline
           preload="auto"
           poster="/videos/login-poster.jpg"
-          className="absolute inset-0 w-full h-full object-cover opacity-90 scale-[1.02]"
+          className="absolute inset-0 w-full h-full object-cover opacity-85 scale-[1.02]"
         >
           <source src="/videos/login.webm" type="video/webm" />
           <source src="/videos/login.mp4" type="video/mp4" />
         </video>
 
-        {/* Subtle Bottom Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#18181B]/80 via-[#18181B]/20 to-transparent pointer-events-none" />
+
+        {/* Floating Quote Badge */}
+        <div className="absolute bottom-10 left-10 right-10 p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white max-w-lg shadow-2xl">
+          <p className="font-serif text-[20px] font-normal italic leading-snug">
+            &ldquo;Lokka nous a permis de sécuriser 100% de nos loyers et d&apos;éliminer la paperasse au Bénin.&rdquo;
+          </p>
+          <div className="mt-3 flex items-center justify-between text-[12px] text-white/80">
+            <span className="font-bold text-white">Cabinet Immobilier du Golfe · Cotonou</span>
+            <span className="text-[#F59E0B] font-bold">★★★★★</span>
+          </div>
+        </div>
       </div>
     </div>
   );

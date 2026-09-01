@@ -111,9 +111,9 @@ export default function OnboardingPage() {
     <div className="min-h-screen w-full flex flex-col items-center py-8 px-4 bg-[#FAF9F6]">
       <div className="w-full max-w-xl flex flex-col justify-between p-4 mb-4 z-10 bg-[#FAF9F6]">
         {/* Header */}
-        <div className="w-full flex items-center justify-between pb-6 border-b border-[#E8E5E0]">
+        <div className="w-full flex items-center justify-between pb-6 border-b border-[#E8E3DC]">
           <Logo size="sm" variant="dark" />
-          <span className="text-[12px] font-bold text-[#64635F]">
+          <span className="text-[12px] font-bold text-[#52525B]">
             Configuration de votre espace
           </span>
         </div>
@@ -130,7 +130,7 @@ export default function OnboardingPage() {
                   {index > 0 && (
                     <div
                       className={`absolute top-4 -left-1/2 w-full h-[2px] -z-0 transition-colors duration-300 ${
-                        index <= currentStep ? "bg-[#0F172A]" : "bg-[#E8E5E0]"
+                        index <= currentStep ? "bg-[#18181B]" : "bg-[#E8E3DC]"
                       }`}
                     />
                   )}
@@ -138,22 +138,22 @@ export default function OnboardingPage() {
                   <div
                     className={`relative z-10 h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 ${
                       isCompleted
-                        ? "bg-[#0F172A] text-white shadow-sm"
+                        ? "bg-[#18181B] text-white shadow-xs"
                         : isCurrent
-                        ? "bg-[#0F172A] text-white ring-4 ring-[#0F172A]/10 shadow-sm"
-                        : "bg-[#FAF9F6] text-[#9C9A95] border-2 border-[#E8E5E0]"
+                        ? "bg-[#18181B] text-white ring-4 ring-[#9D6B3C]/20 shadow-xs"
+                        : "bg-[#FAF9F6] text-[#71717A] border-2 border-[#E8E3DC]"
                     }`}
                   >
                     {isCompleted ? <CheckIcon className="h-4 w-4 stroke-[2.5]" /> : index + 1}
                   </div>
 
                   <span
-                    className={`mt-2 text-[11px] font-medium hidden sm:block ${
+                    className={`mt-2 text-[11px] font-bold hidden sm:block ${
                       isCurrent
-                        ? "text-[#0F172A] font-bold"
+                        ? "text-[#18181B]"
                         : isCompleted
-                        ? "text-[#0F172A]"
-                        : "text-[#9C9A95]"
+                        ? "text-[#52525B]"
+                        : "text-[#71717A]"
                     }`}
                   >
                     {s.label}
@@ -165,7 +165,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Card Content Form */}
-        <div className="w-full bg-white border border-[#E8E5E0] rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="w-full bg-white border border-[#E8E3DC] rounded-2xl p-6 sm:p-8 shadow-xs">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (
               <motion.div
@@ -223,7 +223,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="px-5 py-2.5 text-[13px] font-bold text-[#64635F] hover:text-[#0F172A] transition-colors disabled:opacity-50"
+              className="px-5 py-2.5 text-[13px] font-bold text-[#52525B] hover:text-[#18181B] transition-colors disabled:opacity-50"
             >
               Retour
             </button>
@@ -235,10 +235,10 @@ export default function OnboardingPage() {
             type="button"
             disabled={!isStepValid() || isSubmitting}
             onClick={currentStep === 2 ? handleSubmit : handleNext}
-            className={`px-8 py-2.5 text-[14px] font-bold rounded-lg shadow-sm transition-all flex items-center gap-2 ${
+            className={`px-8 py-3 text-[13.5px] font-bold rounded-xl shadow-sm transition-all flex items-center gap-2 ${
               !isStepValid() || isSubmitting
-                ? "bg-[#E8E5E0] text-[#9C9A95] cursor-not-allowed"
-                : "bg-[#0F172A] text-white hover:bg-black hover:shadow-md cursor-pointer"
+                ? "bg-[#E8E3DC] text-[#71717A] cursor-not-allowed"
+                : "bg-[#18181B] text-white hover:bg-[#9D6B3C] hover:shadow-md cursor-pointer"
             }`}
           >
             {isSubmitting ? (
@@ -248,7 +248,7 @@ export default function OnboardingPage() {
               </>
             ) : currentStep === 2 ? (
               <>
-                <span>Terminer</span>
+                <span>Terminer la configuration</span>
                 <CheckCircleIcon className="w-4 h-4" />
               </>
             ) : (

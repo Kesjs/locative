@@ -29,13 +29,13 @@ function VerifyContent() {
       <div className="w-full">
         {/* Titre & Sous-titre éditorial */}
         <div className="mb-6 text-left">
-          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#0F172A] tracking-tight leading-tight mb-2">
+          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#18181B] tracking-tight leading-tight mb-2">
             Vérification de votre{" "}
-            <span className="font-serif italic font-normal text-[#0F172A]">
+            <span className="font-serif italic font-normal text-[#18181B]">
               identité
             </span>
           </h1>
-          <p className="text-[14px] text-[#64635F]">
+          <p className="text-[14px] text-[#52525B]">
             Entrez le code de sécurité pour accéder à votre espace Lokka.
           </p>
         </div>

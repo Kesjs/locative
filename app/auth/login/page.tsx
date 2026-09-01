@@ -73,20 +73,20 @@ export default function LoginPage() {
       <div className="w-full">
         {/* Titre & Sous-titre éditorial */}
         <div className="mb-8 text-left">
-          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#0F172A] tracking-tight leading-tight mb-2">
+          <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#18181B] tracking-tight leading-tight mb-2">
             Bon retour sur{" "}
-            <span className="font-serif italic font-normal text-[#0F172A]">
+            <span className="font-serif italic font-normal text-[#18181B]">
               Lokka
             </span>
           </h1>
-          <p className="text-[14px] text-[#64635F]">
+          <p className="text-[14px] text-[#52525B]">
             Accédez à vos loyers, quittances et locataires en toute simplicité.
           </p>
         </div>
 
         {/* Message d'erreur */}
         {errorMessage && (
-          <div className="mb-5 p-3 rounded-[6px] bg-red-50 border border-red-200 text-[#C92A2A] text-[13px] flex items-start gap-2">
+          <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-200 text-[#E11D48] text-[13px] font-semibold flex items-start gap-2">
             <span className="font-bold">!</span>
             <span>{errorMessage}</span>
           </div>
@@ -97,11 +97,11 @@ export default function LoginPage() {
           {!codeSent ? (
             <form onSubmit={handleSendCode} className="space-y-4">
               <div>
-                <label className="block text-[12px] font-semibold text-[#0F172A] mb-1.5">
+                <label className="block text-[12.5px] font-bold text-[#18181B] mb-1.5">
                   Votre adresse email
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9C9A95]">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#71717A]">
                     <EnvelopeIcon className="h-4 w-4" />
                   </div>
                   <input
@@ -110,7 +110,7 @@ export default function LoginPage() {
                     placeholder="nom@exemple.bj"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-[6px] text-[14px] text-[#0F172A] placeholder-[#9C9A95] focus:outline-none focus:border-[#0F172A] transition shadow-xs"
+                    className="w-full pl-10 pr-3.5 h-12 bg-white border border-[#E8E3DC] rounded-xl text-[14px] font-medium text-[#18181B] placeholder-[#71717A] focus:outline-none focus:border-[#9D6B3C] focus:ring-4 focus:ring-[#9D6B3C]/15 transition shadow-2xs"
                   />
                 </div>
               </div>
@@ -118,9 +118,9 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading || !email}
-                className="w-full py-2.5 px-4 bg-[#0F172A] hover:bg-[#F5F5DC] hover:text-[#0F172A] hover:border-[#E8E5E0] border border-transparent text-white text-[13px] font-semibold rounded-[6px] transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                className="w-full h-12 px-4 bg-[#18181B] hover:bg-[#9D6B3C] border border-transparent text-white text-[13.5px] font-bold rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
               >
-                {isLoading ? "Envoi..." : "Continuer"}
+                {isLoading ? "Envoi du code..." : "Continuer"}
                 <ArrowRightIcon className="h-3.5 w-3.5" />
               </button>
             </form>
@@ -140,11 +140,11 @@ export default function LoginPage() {
         </div>
 
         {/* Switch vers Inscription */}
-        <p className="text-center text-[13px] text-[#64635F] mt-8 pt-4 border-t border-[#E8E5E0]">
+        <p className="text-center text-[13px] text-[#52525B] mt-8 pt-4 border-t border-[#E8E3DC]">
           Pas encore de compte ?{" "}
           <Link
             href="/auth/register"
-            className="font-bold text-[#0F172A] hover:underline ml-1"
+            className="font-bold text-[#18181B] hover:text-[#9D6B3C] transition-colors ml-1"
           >
             Créer un compte
           </Link>

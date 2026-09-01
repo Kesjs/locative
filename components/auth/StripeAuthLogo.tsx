@@ -13,43 +13,31 @@ export default function StripeAuthLogo() {
       href="/"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative inline-flex items-center gap-3 p-1.5 -ml-1.5 rounded-[10px] transition-colors duration-200 hover:bg-[#F5F5DC] hover:shadow-xs hover:border hover:border-[#E8E5E0] border border-transparent select-none cursor-pointer"
+      className="group relative inline-flex items-center gap-2.5 p-1.5 -ml-1.5 rounded-xl transition-all duration-200 hover:bg-[#F6EFE7]/60 border border-transparent hover:border-[#E8E3DC] select-none cursor-pointer"
     >
       {/* Icon Box with Morphing Animation */}
-      <div className="relative w-8 h-8 rounded-[8px] bg-[#0F172A] flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-sm">
+      <div className="relative w-9 h-9 rounded-lg bg-[#18181B] flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-xs">
         <AnimatePresence mode="wait" initial={false}>
           {!isHovered ? (
             <motion.div
               key="logo-monogram"
-              initial={{ opacity: 0, scale: 0.8, rotate: -15 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.8, rotate: 15 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="flex items-center justify-center"
+              className="flex items-center justify-center text-white"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 500 500"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M195 87.5 L277 87.5 L231 237.5 L369 237.5 L323 372.5 L141.5 372.5 L180 252.5 L276.5 252.5 L230.5 317.5 L197.5 317.5 L217 252.5 M195 87.5"
-                  stroke="#FFFFFF"
-                  strokeWidth="20"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 21h18M5 21V7l8-4v18M13 10l6 3v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 10h.01M9 14h.01M9 18h.01M17 17h.01" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </motion.div>
           ) : (
             <motion.div
               key="back-arrow"
-              initial={{ opacity: 0, x: 8 }}
+              initial={{ opacity: 0, x: 6 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
+              exit={{ opacity: 0, x: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="flex items-center justify-center text-white"
             >
@@ -69,10 +57,9 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="font-serif text-[20px] font-bold text-[#0F172A] tracking-tight"
-              style={{ fontFamily: "'Instrument Serif', 'Georgia', serif" }}
+              className="font-serif text-[22px] font-bold text-[#18181B] tracking-tight"
             >
-              Lokka.
+              LOKKA.
             </motion.span>
           ) : (
             <motion.span
@@ -81,9 +68,9 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="text-[13px] font-semibold text-[#0F172A] flex items-center gap-1 tracking-tight"
+              className="text-[13px] font-bold text-[#18181B] flex items-center gap-1 tracking-tight"
             >
-              Retour à l&apos;accueil
+              Retour au site
             </motion.span>
           )}
         </AnimatePresence>
