@@ -184,6 +184,9 @@ export const SidebarProvider = React.forwardRef<
         const lm = localStorage.getItem("lokka_pref_layout") as LayoutMode;
         if (lm === "overlay" || lm === "push" || lm === "full" || lm === "default") {
           setLayoutModeState(lm);
+          if (lm === "full") {
+            _setOpen(false);
+          }
         }
 
         const th = localStorage.getItem("lokka_pref_theme") as ThemeMode;
@@ -239,6 +242,13 @@ export const SidebarProvider = React.forwardRef<
       try {
         localStorage.setItem("lokka_pref_layout", l);
       } catch (_) {}
+      if (l === "full") {
+        _setOpen(false); // Réduit immédiatement en plein écran
+      } else if (l === "push") {
+        _setOpen(true); // Ouvre la sidebar en poussant
+      } else if (l === "overlay") {
+        _setOpen(false); // Réduit en barre d'icônes par défaut
+      }
     };
 
     const setTheme = (t: ThemeMode) => {
@@ -369,7 +379,7 @@ export const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { state, variant: ctxVariant, layoutMode, isMobile } = useSidebar();
+    const { state, setOpen, variant: ctxVariant, layoutMode, isMobile } = useSidebar();
     const isCollapsed = state === "collapsed";
     const variant = variantProp || ctxVariant;
     const isFloating = variant === "floating";
@@ -382,42 +392,52 @@ export const Sidebar = React.forwardRef<
     }
 
     return (
-      <aside
-        ref={ref}
-        data-state={state}
-        data-variant={variant}
-        data-layout={layoutMode}
-        data-collapsible={state === "collapsed" ? collapsible : ""}
-        style={{
-          width: isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
-          height: isFloating ? "calc(100vh - 24px)" : "100vh",
-          position: "fixed",
-          top: isFloating ? 12 : 0,
-          left: isFloating ? 12 : 0,
-          zIndex: layoutMode === "overlay" && !isCollapsed ? 50 : 40,
-          transform: isFullHidden ? "translateX(-130%)" : "translateX(0)",
-          opacity: isFullHidden ? 0 : 1,
-          pointerEvents: isFullHidden ? "none" : "auto",
-          background: "hsl(var(--card))",
-          border: isFloating ? "1px solid hsl(var(--border))" : undefined,
-          borderRight: !isFloating ? "1px solid hsl(var(--border))" : undefined,
-          borderRadius: isFloating ? 12 : 0,
-          boxShadow: isFloating || (layoutMode === "overlay" && !isCollapsed)
-            ? "var(--shadow-modal)"
-            : "none",
-          display: "flex",
-          flexDirection: "column",
-          transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-          overflow: isCollapsed ? "visible" : "hidden",
-          boxSizing: "border-box",
-          padding: "12px 8px",
-          ...style,
-        }}
-        className={cn("sidebar-container group/sidebar text-foreground bg-card border-border", className)}
-        {...props}
-      >
-        {children}
-      </aside>
+      <>
+        {/* Backdrop pour fermer le volet Overlay en 1 clic dehors sans piège d'écran */}
+        {layoutMode === "overlay" && !isCollapsed && (
+          <div
+            className="fixed inset-0 bg-black/20 z-45 transition-opacity cursor-pointer"
+            onClick={() => setOpen(false)}
+          />
+        )}
+
+        <aside
+          ref={ref}
+          data-state={state}
+          data-variant={variant}
+          data-layout={layoutMode}
+          data-collapsible={state === "collapsed" ? collapsible : ""}
+          style={{
+            width: isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
+            height: isFloating ? "calc(100vh - 24px)" : "100vh",
+            position: "fixed",
+            top: isFloating ? 12 : 0,
+            left: isFloating ? 12 : 0,
+            zIndex: layoutMode === "overlay" && !isCollapsed ? 50 : 40,
+            transform: isFullHidden ? "translateX(-130%)" : "translateX(0)",
+            opacity: isFullHidden ? 0 : 1,
+            pointerEvents: isFullHidden ? "none" : "auto",
+            background: "hsl(var(--card))",
+            border: isFloating ? "1px solid hsl(var(--border))" : undefined,
+            borderRight: !isFloating ? "1px solid hsl(var(--border))" : undefined,
+            borderRadius: isFloating ? 12 : 0,
+            boxShadow: isFloating || (layoutMode === "overlay" && !isCollapsed)
+              ? "var(--shadow-modal)"
+              : "none",
+            display: "flex",
+            flexDirection: "column",
+            transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+            overflow: isCollapsed ? "visible" : "hidden",
+            boxSizing: "border-box",
+            padding: "12px 8px",
+            ...style,
+          }}
+          className={cn("sidebar-container group/sidebar text-foreground bg-card border-border", className)}
+          {...props}
+        >
+          {children}
+        </aside>
+      </>
     );
   }
 );
@@ -520,25 +540,25 @@ export const SidebarInset = React.forwardRef<
   const isFloating = variant === "floating";
   const isInset = variant === "inset";
 
-  // Calcul mathématique exact pour chaque mode
+  // Calcul mathématique précis
   let marginLeft = "0px";
 
   if (isMobile) {
     marginLeft = "0px";
-  } else if (layoutMode === "full" && isCollapsed) {
-    // Mode Plein écran quand replié : 0px marge
-    marginLeft = "0px";
+  } else if (layoutMode === "full") {
+    // Mode Plein écran : 0px si replié, décalage si ouvert
+    marginLeft = isCollapsed ? "0px" : (isFloating ? "264px" : isInset ? "252px" : SIDEBAR_WIDTH);
   } else if (layoutMode === "overlay") {
-    // Mode Overlay : la marge reste calée sur le mode réduit (68px) et le menu s'ouvre par-dessus
-    marginLeft = isFloating ? "92px" : "68px";
+    // Mode Overlay : la page s'appuie sur la barre d'icônes
+    marginLeft = isFloating ? "92px" : isInset ? "80px" : SIDEBAR_WIDTH_ICON;
   } else if (isFloating) {
-    // Mode Flottant : 264px quand ouvert, 92px quand replié
+    // Mode Push Flottant : 264px quand ouvert, 92px quand replié
     marginLeft = isCollapsed ? "92px" : "264px";
   } else if (isInset) {
-    // Mode Encadré : 252px quand ouvert, 80px quand replié
+    // Mode Push Encadré : 252px quand ouvert, 80px quand replié
     marginLeft = isCollapsed ? "80px" : "252px";
   } else {
-    // Mode Classique Push : 240px quand ouvert, 68px quand replié
+    // Mode Push Classique : 240px quand ouvert, 68px quand replié
     marginLeft = isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH;
   }
 
@@ -746,7 +766,6 @@ export const SidebarMenuButton = React.forwardRef<
           ref={ref}
           data-sidebar="menu-button"
           data-active={isActive}
-          // On supprime l'attribut title natif pour éviter le double tooltip jaune du navigateur
           className={cn(className)}
           style={{
             width: "100%",
@@ -764,7 +783,7 @@ export const SidebarMenuButton = React.forwardRef<
           {children}
         </Comp>
 
-        {/* Floating Custom Tooltip (Uniquement le nôtre) */}
+        {/* Floating Custom Tooltip (Zéro doublon avec le navigateur) */}
         {isCollapsed && tooltip && isHovered && (
           <div
             style={{
