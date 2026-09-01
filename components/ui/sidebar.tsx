@@ -9,7 +9,7 @@ const SIDEBAR_WIDTH = "240px";
 const SIDEBAR_WIDTH_ICON = "68px";
 
 export type SidebarVariant = "sidebar" | "floating" | "inset";
-export type LayoutMode = "full" | "compact" | "push" | "default";
+export type LayoutMode = "overlay" | "push" | "full" | "default";
 export type ThemeMode = "system" | "light" | "dark";
 export type CurrencyMode = "fcfa" | "eur";
 export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
@@ -30,7 +30,7 @@ export const COLOR_THEMES: Record<
     text: "#FFFFFF",
   },
   emerald: {
-    name: "Emerald",
+    name: "Émeraude",
     hex: "#059669",
     primary: "#059669",
     hover: "#047857",
@@ -38,7 +38,7 @@ export const COLOR_THEMES: Record<
     text: "#FFFFFF",
   },
   amber: {
-    name: "Gold",
+    name: "Or / Gold",
     hex: "#D97706",
     primary: "#D97706",
     hover: "#B45309",
@@ -46,7 +46,7 @@ export const COLOR_THEMES: Record<
     text: "#FFFFFF",
   },
   blue: {
-    name: "Sapphire",
+    name: "Saphir",
     hex: "#2563EB",
     primary: "#2563EB",
     hover: "#1D4ED8",
@@ -62,7 +62,7 @@ export const COLOR_THEMES: Record<
     text: "#FFFFFF",
   },
   rose: {
-    name: "Ruby",
+    name: "Rubis",
     hex: "#E11D48",
     primary: "#E11D48",
     hover: "#BE123C",
@@ -146,7 +146,7 @@ export const SidebarProvider = React.forwardRef<
 
     // Dynamic preferences
     const [variant, setVariantState] = React.useState<SidebarVariant>("sidebar");
-    const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("full");
+    const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("push");
     const [theme, setThemeState] = React.useState<ThemeMode>("light");
     const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
     const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("emerald");
@@ -182,11 +182,8 @@ export const SidebarProvider = React.forwardRef<
         if (sv === "sidebar" || sv === "floating" || sv === "inset") setVariantState(sv);
 
         const lm = localStorage.getItem("lokka_pref_layout") as LayoutMode;
-        if (lm === "full" || lm === "compact" || lm === "push" || lm === "default") {
+        if (lm === "overlay" || lm === "push" || lm === "full" || lm === "default") {
           setLayoutModeState(lm);
-          if (lm === "push") {
-            _setOpen(false);
-          }
         }
 
         const th = localStorage.getItem("lokka_pref_theme") as ThemeMode;
@@ -242,11 +239,6 @@ export const SidebarProvider = React.forwardRef<
       try {
         localStorage.setItem("lokka_pref_layout", l);
       } catch (_) {}
-      if (l === "push") {
-        _setOpen(false); // Réduit la sidebar en mode focus
-      } else {
-        _setOpen(true);
-      }
     };
 
     const setTheme = (t: ThemeMode) => {
@@ -377,10 +369,13 @@ export const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { state, variant: ctxVariant, isMobile } = useSidebar();
+    const { state, variant: ctxVariant, layoutMode, isMobile } = useSidebar();
     const isCollapsed = state === "collapsed";
     const variant = variantProp || ctxVariant;
     const isFloating = variant === "floating";
+
+    // En mode Full, la sidebar se replie complètement hors champ
+    const isFullHidden = layoutMode === "full" && isCollapsed;
 
     if (isMobile) {
       return null;
@@ -391,6 +386,7 @@ export const Sidebar = React.forwardRef<
         ref={ref}
         data-state={state}
         data-variant={variant}
+        data-layout={layoutMode}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         style={{
           width: isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
@@ -398,12 +394,17 @@ export const Sidebar = React.forwardRef<
           position: "fixed",
           top: isFloating ? 12 : 0,
           left: isFloating ? 12 : 0,
-          zIndex: 40,
+          zIndex: layoutMode === "overlay" && !isCollapsed ? 50 : 40,
+          transform: isFullHidden ? "translateX(-130%)" : "translateX(0)",
+          opacity: isFullHidden ? 0 : 1,
+          pointerEvents: isFullHidden ? "none" : "auto",
           background: "hsl(var(--card))",
           border: isFloating ? "1px solid hsl(var(--border))" : undefined,
           borderRight: !isFloating ? "1px solid hsl(var(--border))" : undefined,
           borderRadius: isFloating ? 12 : 0,
-          boxShadow: isFloating ? "var(--shadow-card)" : "none",
+          boxShadow: isFloating || (layoutMode === "overlay" && !isCollapsed)
+            ? "var(--shadow-modal)"
+            : "none",
           display: "flex",
           flexDirection: "column",
           transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -514,31 +515,43 @@ export const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"main">
 >(({ className, style, ...props }, ref) => {
-  const { state, variant, isMobile } = useSidebar();
+  const { state, variant, layoutMode, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const isFloating = variant === "floating";
   const isInset = variant === "inset";
 
-  // Calcul exact du décalage pour éviter TOUT chevauchement et combler 100% de la largeur
+  // Calcul mathématique exact pour chaque mode
   let marginLeft = "0px";
+
   if (isMobile) {
     marginLeft = "0px";
+  } else if (layoutMode === "full" && isCollapsed) {
+    // Mode Plein écran quand replié : 0px marge
+    marginLeft = "0px";
+  } else if (layoutMode === "overlay") {
+    // Mode Overlay : la marge reste calée sur le mode réduit (68px) et le menu s'ouvre par-dessus
+    marginLeft = isFloating ? "92px" : "68px";
   } else if (isFloating) {
+    // Mode Flottant : 264px quand ouvert, 92px quand replié
     marginLeft = isCollapsed ? "92px" : "264px";
   } else if (isInset) {
+    // Mode Encadré : 252px quand ouvert, 80px quand replié
     marginLeft = isCollapsed ? "80px" : "252px";
   } else {
-    // Mode Classique
+    // Mode Classique Push : 240px quand ouvert, 68px quand replié
     marginLeft = isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH;
   }
+
+  const isFullHidden = layoutMode === "full" && isCollapsed;
 
   return (
     <main
       ref={ref}
       data-variant={variant}
+      data-layout={layoutMode}
       style={{
         marginLeft,
-        width: isMobile ? "100%" : `calc(100% - ${marginLeft})`,
+        width: isMobile || isFullHidden ? "100%" : `calc(100% - ${marginLeft})`,
         flex: 1,
         minHeight: isInset ? "calc(100vh - 24px)" : "100vh",
         marginRight: isInset ? 12 : isFloating ? 12 : 0,
@@ -733,7 +746,7 @@ export const SidebarMenuButton = React.forwardRef<
           ref={ref}
           data-sidebar="menu-button"
           data-active={isActive}
-          title={isCollapsed && tooltip ? tooltip : undefined}
+          // On supprime l'attribut title natif pour éviter le double tooltip jaune du navigateur
           className={cn(className)}
           style={{
             width: "100%",
@@ -751,7 +764,7 @@ export const SidebarMenuButton = React.forwardRef<
           {children}
         </Comp>
 
-        {/* Floating Tooltip */}
+        {/* Floating Custom Tooltip (Uniquement le nôtre) */}
         {isCollapsed && tooltip && isHovered && (
           <div
             style={{
