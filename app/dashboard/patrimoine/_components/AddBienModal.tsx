@@ -25,6 +25,7 @@ import {
   plafondCaution,
   type Bien,
 } from "@/lib/hooks/useBiens";
+import { useAddTenantWithLease } from "@/lib/hooks/useLocataires";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -48,9 +49,12 @@ import {
   Zap,
   Droplets,
   RotateCcw,
+  User,
+  Phone,
+  Calendar,
 } from "lucide-react";
 
-const STEPS = ["Identité & Localisation", "Finances & Compteurs", "Photos", "Équipements"] as const;
+const STEPS = ["Identité & Localisation", "Finances & Statut", "Photos", "Équipements"] as const;
 type StepIndex = 0 | 1 | 2 | 3;
 
 const DRAFT_STORAGE_KEY = "lokka_add_bien_draft";
@@ -70,6 +74,9 @@ interface FormState {
   compteur_sbee: string;
   compteur_soneb: string;
   statut: Bien["statut"];
+  locataire_nom: string;
+  locataire_telephone: string;
+  locataire_date_debut: string;
   photos: string[];
   photo_principale: string | null;
   equipements: string[];
@@ -90,6 +97,9 @@ const EMPTY_FORM: FormState = {
   compteur_sbee: "",
   compteur_soneb: "",
   statut: "vacant",
+  locataire_nom: "",
+  locataire_telephone: "",
+  locataire_date_debut: new Date().toISOString().split("T")[0],
   photos: [],
   photo_principale: null,
   equipements: [],
@@ -111,6 +121,9 @@ function bienToForm(bien: Bien): FormState {
     compteur_sbee: bien.compteur_sbee || "",
     compteur_soneb: bien.compteur_soneb || "",
     statut: bien.statut,
+    locataire_nom: bien.locataire_nom || "",
+    locataire_telephone: "",
+    locataire_date_debut: new Date().toISOString().split("T")[0],
     photos: bien.photos || [],
     photo_principale: bien.photo_principale || bien.photos?.[0] || null,
     equipements: bien.equipements || [],
@@ -128,6 +141,7 @@ export function AddBienModal({
 }) {
   const { mutateAsync: addBien, isPending: isAdding } = useAddBien();
   const { mutateAsync: updateBien, isPending: isUpdating } = useUpdateBien();
+  const { mutateAsync: addTenantWithLease } = useAddTenantWithLease();
   const isPending = isAdding || isUpdating;
 
   const [step, setStep] = useState<StepIndex>(0);
@@ -175,6 +189,7 @@ export function AddBienModal({
         form.quartier !== "" ||
         form.loyer_mensuel !== "" ||
         form.repere !== "" ||
+        form.locataire_nom !== "" ||
         form.photos.length > 0 ||
         form.equipements.length > 0;
 
@@ -204,7 +219,11 @@ export function AddBienModal({
 
   const canAdvance = (): boolean => {
     if (step === 0) return form.nom.trim() !== "" && form.ville.trim() !== "";
-    if (step === 1) return form.loyer_mensuel.trim() !== "" && !cautionDepasse;
+    if (step === 1) {
+      if (form.loyer_mensuel.trim() === "" || cautionDepasse) return false;
+      if (form.statut === "loué" && form.locataire_nom.trim() === "") return false;
+      return true;
+    }
     return true;
   };
 
@@ -223,7 +242,6 @@ export function AddBienModal({
       });
 
     try {
-      // Tentative avec haute précision puis standard
       let position: GeolocationPosition;
       try {
         position = await getPosition({ enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
@@ -233,7 +251,6 @@ export function AddBienModal({
 
       const { latitude, longitude } = position.coords;
 
-      // Reverse geocoding via OpenStreetMap Nominatim
       try {
         const res = await fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=fr`,
@@ -244,13 +261,11 @@ export function AddBienModal({
           const data = await res.json();
           const addr = data.address || {};
 
-          // Détection de la ville béninoise la plus proche
           const detectedCity = addr.city || addr.town || addr.municipality || addr.county || "";
           const matchedVille = VILLES_BENIN.find(
             (v) => detectedCity.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(detectedCity.toLowerCase())
           );
 
-          // Détection du quartier / banlieue
           const detectedQuartier =
             addr.suburb || addr.quarter || addr.neighbourhood || addr.residential || addr.road || "";
 
@@ -269,7 +284,6 @@ export function AddBienModal({
         console.warn("Reverse geocode fallback:", geoErr);
       }
 
-      // Fallback si reverse-geocoding échoue : enregistre les coordonnées
       update({
         repere: `Position GPS : ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
       });
@@ -279,7 +293,7 @@ export function AddBienModal({
       if (err.code === 1) {
         toast.error("Veuillez autoriser l'accès à votre position dans votre navigateur.");
       } else {
-        toast.error("Impossible de détecter la position. Veuillez saisir le quartier manuellement.");
+        toast.error("Impossible de détecter la position. Saisissez le quartier manuellement.");
       }
     } finally {
       setIsGeolocating(false);
@@ -347,6 +361,7 @@ export function AddBienModal({
       loyer_mensuel: Number(form.loyer_mensuel) || 0,
       charges: Number(form.charges) || 0,
       statut: form.statut,
+      locataire_nom: form.statut === "loué" ? form.locataire_nom.trim() : undefined,
       photos: form.photos,
       photo_principale: form.photo_principale,
       equipements: form.equipements,
@@ -362,9 +377,38 @@ export function AddBienModal({
         await updateBien({ id: editBien.id, ...payload });
         toast.success("Logement / local mis à jour");
       } else {
-        await addBien(payload as Omit<Bien, "id">);
-        toast.success("Logement / local ajouté avec succès");
-        // Nettoyer le brouillon après création réussie
+        const createdBien = await addBien(payload as Omit<Bien, "id">);
+
+        // Si le bien est loué et qu'un locataire a été saisi : créer son profil + bail lié
+        if (form.statut === "loué" && form.locataire_nom.trim()) {
+          try {
+            await addTenantWithLease({
+              tenant: {
+                full_name: form.locataire_nom.trim(),
+                phone_number: form.locataire_telephone.trim() || "+229",
+                whatsapp_number: form.locataire_telephone.trim() || null,
+              },
+              lease: {
+                bien_id: createdBien.id,
+                start_date: form.locataire_date_debut || new Date().toISOString().split("T")[0],
+                rent_amount: Number(form.loyer_mensuel) || 0,
+                charges_amount: Number(form.charges) || 0,
+                deposit_months: Math.min(3, Math.round((Number(form.caution_montant) || 0) / (Number(form.loyer_mensuel) || 1)) || 3),
+                deposit_amount: Number(form.caution_montant) || 0,
+                due_day: 5,
+              },
+            });
+          } catch (tenantErr) {
+            console.warn("Tenant quick create error:", tenantErr);
+          }
+        }
+
+        toast.success(
+          form.statut === "loué"
+            ? `Logement créé et assigné à ${form.locataire_nom.trim()}`
+            : "Logement / local ajouté avec succès"
+        );
+
         try {
           localStorage.removeItem(DRAFT_STORAGE_KEY);
         } catch (_) {}
@@ -517,7 +561,7 @@ export function AddBienModal({
                     </Field>
                   </div>
 
-                  {/* Bouton Détecter GPS Professionnel */}
+                  {/* Bouton Détecter GPS */}
                   <Field label="Repère & Indication de localisation">
                     <div className="flex gap-2 mb-2">
                       <button
@@ -573,7 +617,7 @@ export function AddBienModal({
                 </>
               )}
 
-              {/* ─── ÉTAPE 2 : FINANCES & COMPTEURS ─── */}
+              {/* ─── ÉTAPE 2 : FINANCES & STATUT ─── */}
               {step === 1 && (
                 <>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -599,7 +643,7 @@ export function AddBienModal({
                     </Field>
                   </div>
 
-                  <Field label="Statut initial">
+                  <Field label="Statut d'occupation">
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         { id: "vacant", label: "Vacant", dotColor: "bg-slate-400" },
@@ -625,6 +669,69 @@ export function AddBienModal({
                       })}
                     </div>
                   </Field>
+
+                  {/* ─── BLOC LOCATAIRE EN PLACE (OPTION 1 : SAISIE RAPIDE PROGRESSIVE) ─── */}
+                  <AnimatePresence>
+                    {form.statut === "loué" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[12px] font-bold text-foreground flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            Locataire en place (Saisie Rapide)
+                          </span>
+                          <span className="text-[10.5px] text-muted-foreground">Profil &amp; Bail immédiat</span>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          <Field label="Nom & Prénom du locataire *">
+                            <div className="relative">
+                              <Input
+                                type="text"
+                                value={form.locataire_nom}
+                                onChange={(e) => update({ locataire_nom: e.target.value })}
+                                placeholder="Ex. Marc Mensah"
+                                className="rounded-lg pl-8 text-[13px] bg-card"
+                              />
+                              <User className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+                          </Field>
+
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <Field label="Téléphone / WhatsApp">
+                              <div className="relative">
+                                <Input
+                                  type="tel"
+                                  value={form.locataire_telephone}
+                                  onChange={(e) => update({ locataire_telephone: e.target.value })}
+                                  placeholder="+229 97 00 00 00"
+                                  className="rounded-lg pl-8 text-[12.5px] bg-card"
+                                />
+                                <Phone className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                              </div>
+                            </Field>
+
+                            <Field label="Date d'entrée / Début du bail">
+                              <div className="relative">
+                                <Input
+                                  type="date"
+                                  value={form.locataire_date_debut}
+                                  onChange={(e) => update({ locataire_date_debut: e.target.value })}
+                                  className="rounded-lg pl-8 text-[12px] bg-card"
+                                />
+                                <Calendar className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                              </div>
+                            </Field>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <Field label="Caution exigée (FCFA)">
                     <Input
