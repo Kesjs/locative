@@ -152,9 +152,9 @@ export default function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-4 max-w-[620px] text-[15.5px] leading-[1.65] font-normal text-[#3F3F46] sm:text-[17px]"
+            className="mt-4 max-w-[620px] text-[16px] leading-[1.6] font-medium text-[#3F3F46] sm:text-[18px]"
           >
-            L&apos;outil tout-en-un pour gérer vos biens au Bénin. Encaissements Mobile Money instantanés, quittances certifiées avec QR Code et suivi en temps réel de vos loyers.
+            Tous vos biens, toute votre gestion, dans un espace pensé pour vous.
           </motion.p>
 
           {/* Formulaire de Conversion Email OTP - Visible & Ultra-Contraste */}
