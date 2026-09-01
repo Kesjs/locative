@@ -23,7 +23,7 @@ const GROUP_LABELS = new Map<string, string>([
 ]);
 
 export default function Pricing() {
-  const [cycle, setCycle] = useState<BillingCycle>("annual");
+  const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const rows = useMemo(() => buildComparisonRows(), []);
   const isAnnual = cycle === "annual";
 
