@@ -9,7 +9,7 @@ const SIDEBAR_WIDTH = "240px";
 const SIDEBAR_WIDTH_ICON = "68px";
 
 export type SidebarVariant = "sidebar" | "floating" | "inset";
-export type LayoutMode = "default" | "compact" | "full" | "push";
+export type LayoutMode = "full" | "compact" | "push" | "default";
 export type ThemeMode = "system" | "light" | "dark";
 export type CurrencyMode = "fcfa" | "eur";
 export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
@@ -145,8 +145,8 @@ export const SidebarProvider = React.forwardRef<
     );
 
     // Dynamic preferences
-    const [variant, setVariantState] = React.useState<SidebarVariant>("floating");
-    const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("default");
+    const [variant, setVariantState] = React.useState<SidebarVariant>("sidebar");
+    const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("full");
     const [theme, setThemeState] = React.useState<ThemeMode>("light");
     const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
     const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("emerald");
@@ -154,7 +154,7 @@ export const SidebarProvider = React.forwardRef<
     const [devRole, _setDevRole] = React.useState<DevRole>("bailleur");
 
     const applyColor = (c: ColorTheme) => {
-      const pal = COLOR_THEMES[c] || COLOR_THEMES.zinc;
+      const pal = COLOR_THEMES[c] || COLOR_THEMES.emerald;
       if (typeof document !== "undefined") {
         document.documentElement.style.setProperty("--color-brand-primary", pal.primary);
         document.documentElement.style.setProperty("--color-brand-hover", pal.hover);
@@ -178,20 +178,18 @@ export const SidebarProvider = React.forwardRef<
 
     React.useEffect(() => {
       try {
-        const sv = localStorage.getItem("lokka_pref_sidebar");
+        const sv = localStorage.getItem("lokka_pref_sidebar") as SidebarVariant;
         if (sv === "sidebar" || sv === "floating" || sv === "inset") setVariantState(sv);
 
-        const lm = localStorage.getItem("lokka_pref_layout");
-        if (lm === "default" || lm === "compact" || lm === "full") {
+        const lm = localStorage.getItem("lokka_pref_layout") as LayoutMode;
+        if (lm === "full" || lm === "compact" || lm === "push" || lm === "default") {
           setLayoutModeState(lm);
-          if (lm === "full" || lm === "compact") {
+          if (lm === "push") {
             _setOpen(false);
-          } else {
-            _setOpen(true);
           }
         }
 
-        const th = localStorage.getItem("lokka_pref_theme");
+        const th = localStorage.getItem("lokka_pref_theme") as ThemeMode;
         if (th === "system" || th === "light" || th === "dark") {
           setThemeState(th);
           applyThemeClass(th);
@@ -199,7 +197,7 @@ export const SidebarProvider = React.forwardRef<
           applyThemeClass("light");
         }
 
-        const cu = localStorage.getItem("lokka_pref_currency");
+        const cu = localStorage.getItem("lokka_pref_currency") as CurrencyMode;
         if (cu === "fcfa" || cu === "eur") setCurrencyState(cu);
 
         const co = localStorage.getItem("lokka_pref_color") as ColorTheme;
@@ -215,9 +213,9 @@ export const SidebarProvider = React.forwardRef<
 
         const dr = localStorage.getItem(`${SIDEBAR_COOKIE_NAME}_devRole`) as DevRole;
         if (dr) {
-            _setDevRole(dr);
+          _setDevRole(dr);
         }
-      } catch (_) { }
+      } catch (_) {}
     }, []);
 
     React.useEffect(() => {
@@ -236,16 +234,16 @@ export const SidebarProvider = React.forwardRef<
       setVariantState(v);
       try {
         localStorage.setItem("lokka_pref_sidebar", v);
-      } catch (_) { }
+      } catch (_) {}
     };
 
     const setLayoutMode = (l: LayoutMode) => {
       setLayoutModeState(l);
       try {
         localStorage.setItem("lokka_pref_layout", l);
-      } catch (_) { }
-      if (l === "full" || l === "compact") {
-        _setOpen(false);
+      } catch (_) {}
+      if (l === "push") {
+        _setOpen(false); // Réduit la sidebar en mode focus
       } else {
         _setOpen(true);
       }
@@ -256,14 +254,14 @@ export const SidebarProvider = React.forwardRef<
       try {
         localStorage.setItem("lokka_pref_theme", t);
         applyThemeClass(t);
-      } catch (_) { }
+      } catch (_) {}
     };
 
     const setCurrency = (c: CurrencyMode) => {
       setCurrencyState(c);
       try {
         localStorage.setItem("lokka_pref_currency", c);
-      } catch (_) { }
+      } catch (_) {}
     };
 
     const setColorTheme = (c: ColorTheme) => {
@@ -271,32 +269,30 @@ export const SidebarProvider = React.forwardRef<
       try {
         localStorage.setItem("lokka_pref_color", c);
         applyColor(c);
-      } catch (_) { }
+      } catch (_) {}
     };
 
-    const setMobileNavVariant = React.useCallback((v: MobileNavVariant) => {
-        _setMobileNavVariant(v);
-        try {
-            localStorage.setItem(`${SIDEBAR_COOKIE_NAME}_mobileNavVariant`, v);
-        } catch (_) { }
-    }, []);
+    const setMobileNavVariant = (v: MobileNavVariant) => {
+      _setMobileNavVariant(v);
+      try {
+        localStorage.setItem(`${SIDEBAR_COOKIE_NAME}_mobileNavVariant`, v);
+      } catch (_) {}
+    };
 
-    const setDevRole = React.useCallback((r: DevRole) => {
-        _setDevRole(r);
-        try {
-            localStorage.setItem(`${SIDEBAR_COOKIE_NAME}_devRole`, r);
-        } catch (_) { }
-    }, []);
-
-    const toggleSidebar = React.useCallback(() => {
-      if (isMobile) {
-        setOpenMobile((prev) => !prev);
-      } else {
-        _setOpen((prev) => !prev);
-      }
-    }, [isMobile]);
+    const setDevRole = (r: DevRole) => {
+      _setDevRole(r);
+      try {
+        localStorage.setItem(`${SIDEBAR_COOKIE_NAME}_devRole`, r);
+      } catch (_) {}
+    };
 
     const state = open ? "expanded" : "collapsed";
+
+    const toggleSidebar = React.useCallback(() => {
+      return isMobile
+        ? setOpenMobile((open) => !open)
+        : setOpen((open) => !open);
+    }, [isMobile, setOpen, setOpenMobile]);
 
     const contextValue = React.useMemo<SidebarContext>(
       () => ({
@@ -363,7 +359,7 @@ SidebarProvider.displayName = "SidebarProvider";
 
 export const Sidebar = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> & {
+  React.ComponentProps<"aside"> & {
     side?: "left" | "right";
     variant?: "sidebar" | "floating" | "inset";
     collapsible?: "offcanvas" | "icon" | "none";
@@ -381,15 +377,11 @@ export const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { state, variant: ctxVariant, layoutMode, isMobile, openMobile, setOpenMobile } = useSidebar();
+    const { state, variant: ctxVariant, isMobile } = useSidebar();
     const isCollapsed = state === "collapsed";
     const variant = variantProp || ctxVariant;
     const isFloating = variant === "floating";
 
-    // In Full Layout mode, when collapsed, the sidebar is completely hidden offscreen (0px footprint)
-    const isHiddenOffscreen = layoutMode === "full" && isCollapsed;
-
-    // Sur mobile, la sidebar est gérée par notre composant custom MobileNavigation.tsx
     if (isMobile) {
       return null;
     }
@@ -399,7 +391,6 @@ export const Sidebar = React.forwardRef<
         ref={ref}
         data-state={state}
         data-variant={variant}
-        data-layout={layoutMode}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         style={{
           width: isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
@@ -407,27 +398,18 @@ export const Sidebar = React.forwardRef<
           position: "fixed",
           top: isFloating ? 12 : 0,
           left: isFloating ? 12 : 0,
-          zIndex: layoutMode === "default" && !isCollapsed ? 50 : 40,
-          transform: isHiddenOffscreen ? "translateX(-130%)" : "translateX(0)",
-          opacity: isHiddenOffscreen ? 0 : 1,
-          pointerEvents: isHiddenOffscreen ? "none" : "auto",
+          zIndex: 40,
           background: "hsl(var(--card))",
-          border: isFloating
-            ? "1px solid hsl(var(--border))"
-            : undefined,
-          borderRight: !isFloating
-            ? "1px solid hsl(var(--border))"
-            : undefined,
-          borderRadius: isFloating ? 14 : 0,
-          boxShadow: isFloating || (layoutMode === "default" && !isCollapsed)
-            ? "var(--shadow-modal)"
-            : "none",
+          border: isFloating ? "1px solid hsl(var(--border))" : undefined,
+          borderRight: !isFloating ? "1px solid hsl(var(--border))" : undefined,
+          borderRadius: isFloating ? 12 : 0,
+          boxShadow: isFloating ? "var(--shadow-card)" : "none",
           display: "flex",
           flexDirection: "column",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
           overflow: isCollapsed ? "visible" : "hidden",
           boxSizing: "border-box",
-          padding: "16px 12px",
+          padding: "12px 8px",
           ...style,
         }}
         className={cn("sidebar-container group/sidebar text-foreground bg-card border-border", className)}
@@ -444,18 +426,17 @@ export const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, onClick, style, ...props }, ref) => {
-  const { toggleSidebar, state, layoutMode, setOpen } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   return (
     <button
       ref={ref}
       data-sidebar="trigger"
+      aria-label="Toggle Sidebar"
       onClick={(event) => {
         onClick?.(event);
-        if (layoutMode === "full" && isCollapsed) {
-          setOpen(true);
-        } else {
+        if (!event.defaultPrevented) {
           toggleSidebar();
         }
       }}
@@ -533,49 +514,44 @@ export const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"main">
 >(({ className, style, ...props }, ref) => {
-  const { state, variant, layoutMode, isMobile } = useSidebar();
+  const { state, variant, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const isFloating = variant === "floating";
   const isInset = variant === "inset";
-  const isFullLayoutActive = layoutMode === "full" && isCollapsed;
 
-  // Calcul précis du décalage en fonction du mode (Overlay vs Push vs Full)
+  // Calcul exact du décalage pour éviter TOUT chevauchement et combler 100% de la largeur
   let marginLeft = "0px";
   if (isMobile) {
     marginLeft = "0px";
-  } else if (layoutMode === "full") {
-    // Mode Full : 100% de l'écran, pas de marge quand replié
-    marginLeft = isCollapsed ? "0px" : (isFloating ? "256px" : "240px");
-  } else if (layoutMode === "default") {
-    // Mode Overlay : la sidebar s'ouvre PAR-DESSUS le contenu sans pousser tout le tableau de bord
-    marginLeft = isCollapsed ? (isFloating ? "76px" : "68px") : (isFloating ? "76px" : "68px");
+  } else if (isFloating) {
+    marginLeft = isCollapsed ? "92px" : "264px";
+  } else if (isInset) {
+    marginLeft = isCollapsed ? "80px" : "252px";
   } else {
-    // Mode Push : la sidebar pousse physiquement tout le contenu
-    marginLeft = isCollapsed
-      ? (isFloating ? "76px" : "68px")
-      : (isFloating ? "256px" : "240px");
+    // Mode Classique
+    marginLeft = isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH;
   }
 
   return (
     <main
       ref={ref}
       data-variant={variant}
-      data-layout={layoutMode}
       style={{
         marginLeft,
-        width: isFullLayoutActive ? "100%" : "auto",
+        width: isMobile ? "100%" : `calc(100% - ${marginLeft})`,
+        flex: 1,
         minHeight: isInset ? "calc(100vh - 24px)" : "100vh",
-        marginRight: isInset && !isFullLayoutActive ? 12 : 0,
-        marginTop: isInset && !isFullLayoutActive ? 12 : 0,
-        marginBottom: isInset && !isFullLayoutActive ? 12 : 0,
-        borderRadius: isInset && !isFullLayoutActive ? 14 : 0,
-        border: isInset && !isFullLayoutActive ? "1px solid hsl(var(--border))" : "none",
+        marginRight: isInset ? 12 : isFloating ? 12 : 0,
+        marginTop: isInset ? 12 : isFloating ? 12 : 0,
+        marginBottom: isInset ? 12 : isFloating ? 12 : 0,
+        borderRadius: isInset ? 12 : 0,
+        border: isInset ? "1px solid hsl(var(--border))" : "none",
         backgroundColor: isInset ? "hsl(var(--card))" : undefined,
-        boxShadow: isInset && !isFullLayoutActive ? "0 4px 20px rgba(0,0,0,0.03)" : "none",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        boxShadow: isInset ? "var(--shadow-card)" : "none",
+        transition: "margin-left 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         ...style,
       }}
-      className={cn("sidebar-inset", className)}
+      className={cn("sidebar-inset w-full", className)}
       {...props}
     />
   );
@@ -592,8 +568,8 @@ export const SidebarHeader = React.forwardRef<
     style={{
       display: "flex",
       flexDirection: "column",
-      gap: 8,
-      marginBottom: 16,
+      gap: 4,
+      marginBottom: 8,
       ...style,
     }}
     {...props}
@@ -612,7 +588,7 @@ export const SidebarFooter = React.forwardRef<
       marginTop: "auto",
       display: "flex",
       flexDirection: "column",
-      gap: 8,
+      gap: 6,
       ...style,
     }}
     {...props}
@@ -648,8 +624,7 @@ export const SidebarGroup = React.forwardRef<
     style={{
       display: "flex",
       flexDirection: "column",
-      gap: 4,
-      marginBottom: 16,
+      gap: 2,
       ...style,
     }}
     {...props}
@@ -669,11 +644,11 @@ export const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       style={{
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.05em",
-        color: "var(--color-text-tertiary)",
+        color: "hsl(var(--muted-foreground))",
         padding: "4px 8px",
         ...style,
       }}
@@ -695,6 +670,8 @@ export const SidebarMenu = React.forwardRef<
       display: "flex",
       flexDirection: "column",
       gap: 2,
+      padding: 0,
+      margin: 0,
       ...style,
     }}
     {...props}
@@ -760,8 +737,8 @@ export const SidebarMenuButton = React.forwardRef<
           className={cn(className)}
           style={{
             width: "100%",
-            height: size === "lg" ? 48 : size === "sm" ? 32 : 38,
-            padding: isCollapsed ? 0 : "0 11px",
+            height: size === "lg" ? 44 : size === "sm" ? 32 : 36,
+            padding: isCollapsed ? 0 : "0 10px",
             display: "flex",
             alignItems: "center",
             justifyContent: isCollapsed ? "center" : "flex-start",
@@ -774,7 +751,7 @@ export const SidebarMenuButton = React.forwardRef<
           {children}
         </Comp>
 
-        {/* Floating Fixed Tooltip - Never clipped by overflow containers */}
+        {/* Floating Tooltip */}
         {isCollapsed && tooltip && isHovered && (
           <div
             style={{
@@ -783,18 +760,17 @@ export const SidebarMenuButton = React.forwardRef<
               top: tooltipTop,
               transform: "translateY(-50%)",
               zIndex: 9999999,
-              backgroundColor: "#0F172A",
-              color: "#FFFFFF",
-              padding: "5px 10px",
+              backgroundColor: "#0A0A0A",
+              color: "#FAFAFA",
+              padding: "4px 8px",
               borderRadius: "6px",
               fontSize: "12px",
               fontWeight: 500,
               whiteSpace: "nowrap",
               pointerEvents: "none",
-              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
-              animation: "tooltip-slide-right 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.4)",
+              border: "1px solid #27272A",
             }}
-            className="dark:bg-white dark:text-[#0F172A]"
           >
             {tooltip}
           </div>
@@ -804,73 +780,3 @@ export const SidebarMenuButton = React.forwardRef<
   }
 );
 SidebarMenuButton.displayName = "SidebarMenuButton";
-
-export const SidebarMenuSub = React.forwardRef<
-  HTMLUListElement,
-  React.ComponentProps<"ul">
->(({ className, style, ...props }, ref) => {
-  const { state } = useSidebar();
-  if (state === "collapsed") return null;
-
-  return (
-    <ul
-      ref={ref}
-      data-sidebar="menu-sub"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        paddingLeft: 24,
-        marginTop: 4,
-        listStyle: "none",
-        borderLeft: "1px solid var(--color-border-primary)",
-        marginLeft: 16,
-        ...style,
-      }}
-      {...props}
-    />
-  );
-});
-SidebarMenuSub.displayName = "SidebarMenuSub";
-
-export const SidebarMenuSubItem = React.forwardRef<
-  HTMLLIElement,
-  React.ComponentProps<"li">
->(({ ...props }, ref) => <li ref={ref} {...props} />);
-SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
-
-export const SidebarMenuSubButton = React.forwardRef<
-  HTMLAnchorElement,
-  React.ComponentProps<"a"> & {
-    asChild?: boolean;
-    size?: "sm" | "md";
-    isActive?: boolean;
-  }
->(({ asChild = false, size = "md", isActive, className, style, ...props }, ref) => {
-  const Comp = asChild ? Slot : "a";
-
-  return (
-    <Comp
-      ref={ref}
-      data-sidebar="menu-sub-button"
-      data-active={isActive}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        borderRadius: 4,
-        padding: "6px 10px",
-        fontSize: 13,
-        fontWeight: isActive ? 600 : 400,
-        color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-        textDecoration: "none",
-        transition: "background 0.15s ease",
-        ...style,
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-surface-tertiary)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-      {...props}
-    />
-  );
-});
-SidebarMenuSubButton.displayName = "SidebarMenuSubButton";

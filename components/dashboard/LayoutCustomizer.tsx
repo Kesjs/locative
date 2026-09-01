@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar, SidebarVariant, LayoutMode, ColorTheme } from "@/components/ui/sidebar";
 import {
   XMarkIcon,
   ArrowPathIcon,
@@ -27,8 +27,6 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setCurrency,
     colorTheme,
     setColorTheme,
-    mobileNavVariant,
-    setMobileNavVariant,
     devRole,
     setDevRole,
   } = useSidebar();
@@ -37,25 +35,20 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setTheme(newTheme);
   };
 
-  const handleSidebarChange = (variant: "inset" | "floating" | "sidebar") => {
+  const handleSidebarChange = (variant: SidebarVariant) => {
     setVariant(variant);
   };
 
-  const handleLayoutChange = (layout: "default" | "compact" | "full" | "push") => {
+  const handleLayoutChange = (layout: LayoutMode) => {
     setLayoutMode(layout);
-  };
-
-  const handleCurrencyChange = (curr: "fcfa" | "eur") => {
-    setCurrency(curr);
   };
 
   const handleReset = () => {
     setTheme("light");
-    setVariant("floating");
-    setLayoutMode("default");
+    setVariant("sidebar");
+    setLayoutMode("full");
     setCurrency("fcfa");
-    setColorTheme("zinc");
-    setMobileNavVariant("dynamic");
+    setColorTheme("emerald");
     setOpen(true);
   };
 
@@ -68,7 +61,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/15 transition-opacity flex justify-end">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity flex justify-end">
           {/* Backdrop Click */}
           <div className="flex-1 cursor-pointer" onClick={onClose} />
 
@@ -78,362 +71,215 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 26, stiffness: 240 }}
-            className="w-full max-w-[380px] bg-card text-card-foreground border-l border-border shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
+            className="w-full max-w-[380px] bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 border-l border-slate-200 dark:border-zinc-800 shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
           >
             {/* ─── 1. HEADER ─── */}
-            <div className="p-5 pb-4 border-b border-border bg-card flex items-start justify-between">
+            <div className="p-4 pb-3 border-b border-slate-200 dark:border-zinc-800 flex items-start justify-between">
               <div>
-                <h2 className="text-[17px] font-bold tracking-tight text-foreground">
-                  Personnalisation de l'affichage
+                <h2 className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white">
+                  Personnalisation de l&apos;affichage
                 </h2>
-                <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                  Ajustez l'apparence, les couleurs et la disposition selon vos préférences.
+                <p className="text-[12px] text-slate-500 dark:text-zinc-400 mt-0.5 leading-snug">
+                  Ajustez le style, la largeur et le thème de votre espace.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer shrink-0"
+                className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition cursor-pointer shrink-0"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
 
             {/* ─── 2. SECTIONS LIST ─── */}
-            <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+            <div className="p-4 space-y-5 flex-1 overflow-y-auto">
               {/* SECTION 1: THEME */}
               <div>
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <span className="text-[13px] font-bold text-foreground">Mode de thème</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Thème d&apos;apparence</span>
                   <button
                     type="button"
                     onClick={() => handleThemeChange("light")}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
-                    title="Réinitialiser le thème"
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
+                    title="Réinitialiser"
                   >
                     <ArrowPathIcon className="h-3 w-3" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2.5">
-                  {/* A. System (Split Oblique / Diagonal Light & Dark) */}
-                  <div
+                <div className="grid grid-cols-3 gap-2">
+                  {/* System */}
+                  <button
+                    type="button"
                     onClick={() => handleThemeChange("system")}
-                    className="cursor-pointer group flex flex-col items-center"
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      theme === "system"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
                   >
-                    <div
-                      className={`relative w-full h-[66px] rounded-[8px] overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
-                        theme === "system"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{
-                        background: "linear-gradient(135deg, #FFFFFF 50%, #0F172A 50%)",
-                      }}
-                    >
-                      {theme === "system" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      {/* Top Left (Light Side) */}
-                      <div className="flex items-center gap-1 z-10">
-                        <div className="w-2.5 h-1 rounded bg-[#0F172A]" />
-                        <div className="w-6 h-1 rounded bg-[#E4E4E7]" />
-                      </div>
-                      {/* Bottom Split Visuals */}
-                      <div className="flex items-end justify-between px-0.5 z-10">
-                        <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-4 bg-[#0F172A] rounded-xs" />
-                          <div className="w-1.5 h-6 bg-[#A1A1AA] rounded-xs" />
-                        </div>
-                        <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-3 bg-white/40 rounded-xs" />
-                          <div className="w-1.5 h-5 bg-white rounded-xs" />
-                        </div>
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5">System</span>
-                  </div>
+                    <span className="text-[11.5px] block font-semibold">Automatique</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Système</span>
+                  </button>
 
-                  {/* B. Light (Always Pure White Card Preview) */}
-                  <div
+                  {/* Light */}
+                  <button
+                    type="button"
                     onClick={() => handleThemeChange("light")}
-                    className="cursor-pointer group flex flex-col items-center"
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      theme === "light"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
                   >
-                    <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex flex-col justify-between ${
-                        theme === "light"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent shadow-xs"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: "#FFFFFF" }}
-                    >
-                      {theme === "light" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#0F172A] text-white flex items-center justify-center text-[10px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-1 rounded" style={{ backgroundColor: "#0F172A" }} />
-                        <div className="flex-1 h-1 rounded" style={{ backgroundColor: "#E4E4E7" }} />
-                      </div>
-                      <div className="flex items-end justify-between px-1">
-                        <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-5 rounded-xs" style={{ backgroundColor: "#52525B" }} />
-                          <div className="w-1.5 h-7 rounded-xs" style={{ backgroundColor: "#0F172A" }} />
-                          <div className="w-1.5 h-3 rounded-xs" style={{ backgroundColor: "#E4E4E7" }} />
-                        </div>
-                        <div className="h-6 w-6 rounded-full border flex items-center justify-center" style={{ borderColor: "#E4E4E7", backgroundColor: "#FAFAFA" }}>
-                          <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: "#0F172A" }} />
-                        </div>
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5">Light</span>
-                  </div>
+                    <span className="text-[11.5px] block font-semibold">Clair</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Jour</span>
+                  </button>
 
-                  {/* C. Dark (Always Pure Dark Navy/Black Card Preview) */}
-                  <div
+                  {/* Dark */}
+                  <button
+                    type="button"
                     onClick={() => handleThemeChange("dark")}
-                    className="cursor-pointer group flex flex-col items-center"
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      theme === "dark"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
                   >
-                    <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex flex-col justify-between ${
-                        theme === "dark"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent shadow-xs"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-white/50"
-                      }`}
-                      style={{ backgroundColor: "#0F172A" }}
-                    >
-                      {theme === "dark" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-white text-black flex items-center justify-center text-[10px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-1 rounded" style={{ backgroundColor: "#FFFFFF" }} />
-                        <div className="flex-1 h-1 rounded" style={{ backgroundColor: "#334155" }} />
-                      </div>
-                      <div className="flex items-end justify-between px-1">
-                        <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-5 rounded-xs" style={{ backgroundColor: "#71717A" }} />
-                          <div className="w-1.5 h-7 rounded-xs" style={{ backgroundColor: "#FFFFFF" }} />
-                          <div className="w-1.5 h-3 rounded-xs" style={{ backgroundColor: "#334155" }} />
-                        </div>
-                        <div className="h-6 w-6 rounded-full border flex items-center justify-center" style={{ borderColor: "#334155", backgroundColor: "#334155" }}>
-                          <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: "#FFFFFF" }} />
-                        </div>
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5">Dark</span>
-                  </div>
+                    <span className="text-[11.5px] block font-semibold">Sombre</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Nuit</span>
+                  </button>
                 </div>
               </div>
 
-              {/* SECTION 2: SIDEBAR */}
+              {/* SECTION 2: STYLE DU MENU (SIDEBAR) */}
               <div>
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[13px] font-bold">Sidebar</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Disposition du Menu</span>
                   <button
                     type="button"
-                    onClick={() => handleSidebarChange("floating")}
-                    className="text-[#9C9A95] hover:text-[#0F172A] dark:hover:text-[#FAFAFA] cursor-pointer"
-                    title="Réinitialiser la sidebar"
-                  >
-                    <ArrowPathIcon className="h-3 w-3" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2.5">
-                  {/* Inset */}
-                  <div
-                    onClick={() => handleSidebarChange("inset")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
-                    <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex gap-1.5 ${
-                        sidebarVariant === "inset"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: "#F4F4F5" }}
-                    >
-                      {sidebarVariant === "inset" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-5 h-full rounded-[4px]" style={{ backgroundColor: "#0F172A" }} />
-                      <div className="flex-1 h-full rounded-[4px] border p-1 flex flex-col gap-1" style={{ backgroundColor: "#FFFFFF", borderColor: "#E4E4E7" }}>
-                        <div className="w-full h-2 rounded-xs" style={{ backgroundColor: "#E4E4E7" }} />
-                        <div className="flex-1 rounded-xs" style={{ backgroundColor: "#F4F4F5" }} />
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5">Inset</span>
-                  </div>
-
-                  {/* Floating */}
-                  <div
-                    onClick={() => handleSidebarChange("floating")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
-                    <div
-                      className={`relative w-full h-[66px] rounded-[8px] p-1.5 transition-all flex gap-1.5 ${
-                        sidebarVariant === "floating"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: "#F4F4F5" }}
-                    >
-                      {sidebarVariant === "floating" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-5 my-0.5 h-[calc(100%-4px)] rounded-[4px] shadow-xs" style={{ backgroundColor: "#0F172A" }} />
-                      <div className="flex-1 h-full rounded-[4px] border p-1 flex flex-col gap-1" style={{ backgroundColor: "#FFFFFF", borderColor: "#E4E4E7" }}>
-                        <div className="w-full h-2 rounded-xs" style={{ backgroundColor: "#E4E4E7" }} />
-                        <div className="flex-1 rounded-xs" style={{ backgroundColor: "#F4F4F5" }} />
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5">Floating</span>
-                  </div>
-
-                  {/* Sidebar */}
-                  <div
                     onClick={() => handleSidebarChange("sidebar")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
-                    <div
-                      className={`relative w-full h-[66px] rounded-[8px] overflow-hidden transition-all flex ${
-                        sidebarVariant === "sidebar"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: "#FFFFFF" }}
-                    >
-                      {sidebarVariant === "sidebar" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-5 h-full shrink-0" style={{ backgroundColor: "#0F172A" }} />
-                      <div className="flex-1 p-1.5 flex flex-col gap-1" style={{ backgroundColor: "#F4F4F5" }}>
-                        <div className="w-full h-2 rounded-xs" style={{ backgroundColor: "#E4E4E7" }} />
-                        <div className="flex-1 border rounded-xs" style={{ backgroundColor: "#FFFFFF", borderColor: "#E4E4E7" }} />
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5">Sidebar</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 3: MODE D'AFFICHAGE (DEFAULT / PUSH / FULL) */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[13px] font-bold">Mode d'affichage</span>
-                  <button
-                    type="button"
-                    onClick={() => setLayoutMode("default")}
-                    className="text-[#9C9A95] hover:text-[#0F172A] dark:hover:text-[#FAFAFA] cursor-pointer"
-                    title="Réinitialiser l'affichage"
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
+                    title="Réinitialiser"
                   >
                     <ArrowPathIcon className="h-3 w-3" />
                   </button>
                 </div>
-                
-                <div className="grid grid-cols-3 gap-2.5">
-                  {/* Default (Overlay) */}
-                  <div
-                    onClick={() => handleLayoutChange("default")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
-                    <div
-                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
-                        layoutMode === "default"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: isDark ? "#0F172A" : "#F4F4F5" }}
-                    >
-                      {layoutMode === "default" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex w-full h-full p-1 gap-1">
-                        <div className="w-1/3 h-full rounded shadow-sm border z-10" style={{ backgroundColor: isDark ? "#334155" : "#FFFFFF", borderColor: isDark ? "#334155" : "#E4E4E7" }} />
-                        <div className="w-2/3 h-full rounded opacity-30" style={{ backgroundColor: isDark ? "#334155" : "#D4D4D8" }} />
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5 text-center">Overlay</span>
-                  </div>
 
-                  {/* Push Layout */}
-                  <div
-                    onClick={() => handleLayoutChange("push")}
-                    className="cursor-pointer group flex flex-col items-center"
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Classique */}
+                  <button
+                    type="button"
+                    onClick={() => handleSidebarChange("sidebar")}
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      sidebarVariant === "sidebar"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
                   >
-                    <div
-                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
-                        layoutMode === "push"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: isDark ? "#0F172A" : "#F4F4F5" }}
-                    >
-                      {layoutMode === "push" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex w-full h-full p-1 gap-1">
-                        <div className="w-1/3 h-full rounded shadow-sm border z-10 translate-x-1" style={{ backgroundColor: isDark ? "#334155" : "#FFFFFF", borderColor: isDark ? "#334155" : "#E4E4E7" }} />
-                        <div className="w-2/3 h-full rounded opacity-30 translate-x-1" style={{ backgroundColor: isDark ? "#334155" : "#D4D4D8" }} />
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5 text-center">Push</span>
-                  </div>
+                    <span className="text-[11.5px] block font-semibold">Classique</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Ancrée</span>
+                  </button>
 
-                  {/* Full Layout */}
-                  <div
-                    onClick={() => handleLayoutChange("full")}
-                    className="cursor-pointer group flex flex-col items-center"
+                  {/* Flottante */}
+                  <button
+                    type="button"
+                    onClick={() => handleSidebarChange("floating")}
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      sidebarVariant === "floating"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
                   >
-                    <div
-                      className={`relative w-full h-[54px] rounded-[8px] overflow-hidden transition-all flex items-center justify-center ${
-                        layoutMode === "full"
-                          ? "ring-2 ring-[#0F172A] dark:ring-white border-2 border-transparent"
-                          : "border border-[#E4E4E7] dark:border-[#334155] hover:border-[#0F172A]/40"
-                      }`}
-                      style={{ backgroundColor: isDark ? "#0F172A" : "#F4F4F5" }}
-                    >
-                      {layoutMode === "full" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#0F172A] dark:bg-white text-white dark:text-black flex items-center justify-center text-[8px] shadow-xs z-20">
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex w-full h-full p-1 gap-1">
-                        <div className="w-0 h-full rounded opacity-0" />
-                        <div className="w-full h-full rounded opacity-100 shadow-sm border" style={{ backgroundColor: isDark ? "#334155" : "#FFFFFF", borderColor: isDark ? "#334155" : "#E4E4E7" }} />
-                      </div>
-                    </div>
-                    <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[11px] font-medium mt-1.5 text-center">Full</span>
-                  </div>
+                    <span className="text-[11.5px] block font-semibold">Flottante</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Îlot</span>
+                  </button>
+
+                  {/* Encadrée */}
+                  <button
+                    type="button"
+                    onClick={() => handleSidebarChange("inset")}
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      sidebarVariant === "inset"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <span className="text-[11.5px] block font-semibold">Encadrée</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Carte</span>
+                  </button>
                 </div>
               </div>
 
-
-
-              {/* SECTION 4: COULEUR D'ACCENT (ACCENT COLOR PALETTE) */}
+              {/* SECTION 3: LARGEUR DU TABLEAU DE BORD */}
               <div>
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[13px] font-bold">Couleur d&apos;Accent</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Largeur de l&apos;Écran</span>
                   <button
                     type="button"
-                    onClick={() => setColorTheme("zinc")}
-                    className="text-[#9C9A95] hover:text-[#0F172A] dark:hover:text-[#FAFAFA] cursor-pointer"
-                    title="Réinitialiser la couleur"
+                    onClick={() => handleLayoutChange("full")}
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
+                    title="Réinitialiser"
+                  >
+                    <ArrowPathIcon className="h-3 w-3" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Pleine Largeur */}
+                  <button
+                    type="button"
+                    onClick={() => handleLayoutChange("full")}
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      layoutMode === "full"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <span className="text-[11.5px] block font-semibold">Pleine page</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Fluide 100%</span>
+                  </button>
+
+                  {/* Compact Centré */}
+                  <button
+                    type="button"
+                    onClick={() => handleLayoutChange("compact")}
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      layoutMode === "compact"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <span className="text-[11.5px] block font-semibold">Compacte</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Centrée</span>
+                  </button>
+
+                  {/* Focus */}
+                  <button
+                    type="button"
+                    onClick={() => handleLayoutChange("push")}
+                    className={`p-2 rounded-lg border text-center transition-all cursor-pointer ${
+                      layoutMode === "push"
+                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                        : "border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <span className="text-[11.5px] block font-semibold">Mode Focus</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">Menu réduit</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION 4: COULEUR D'ACCENT */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Couleur d&apos;Accent</span>
+                  <button
+                    type="button"
+                    onClick={() => setColorTheme("emerald")}
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
+                    title="Réinitialiser"
                   >
                     <ArrowPathIcon className="h-3 w-3" />
                   </button>
@@ -441,9 +287,9 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
 
                 <div className="grid grid-cols-6 gap-2">
                   {[
-                    { id: "zinc", name: "Zinc", hex: "#0F172A" },
                     { id: "emerald", name: "Émeraude", hex: "#059669" },
-                    { id: "amber", name: "Or / Gold", hex: "#D97706" },
+                    { id: "zinc", name: "Zinc", hex: "#0F172A" },
+                    { id: "amber", name: "Or", hex: "#D97706" },
                     { id: "blue", name: "Saphir", hex: "#2563EB" },
                     { id: "violet", name: "Violet", hex: "#7C3AED" },
                     { id: "rose", name: "Rubis", hex: "#E11D48" },
@@ -453,146 +299,66 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       <button
                         key={col.id}
                         type="button"
-                        onClick={() => setColorTheme(col.id as any)}
-                        title={col.name}
-                        className={`group relative h-9 w-full rounded-[8px] flex items-center justify-center transition-all cursor-pointer ${
+                        onClick={() => setColorTheme(col.id as ColorTheme)}
+                        className={`h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer relative ${
                           isSelected
-                            ? "ring-2 ring-[#0F172A] dark:ring-white ring-offset-2 scale-105"
-                            : "hover:scale-105 opacity-85 hover:opacity-100"
+                            ? "ring-2 ring-slate-900 dark:ring-white scale-105 shadow-sm"
+                            : "hover:scale-105 border border-slate-200 dark:border-zinc-700"
                         }`}
                         style={{ backgroundColor: col.hex }}
+                        title={col.name}
                       >
-                        {isSelected && (
-                          <CheckIcon className="h-4 w-4 text-white stroke-[3]" />
-                        )}
+                        {isSelected && <CheckIcon className="h-4 w-4 text-white stroke-[3]" />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* DEV MODE PROFILE SWITCHER */}
-              <div className="pt-4 border-t" style={{ borderColor: isDark ? "#334155" : "#E8E5E0" }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500">
-                    Mode Dev : Changer de profil
-                  </span>
-                </div>
+              {/* SECTION 5: SIMULATEUR DE PROFIL DEV */}
+              <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
+                  Mode Simulateur : Rôle Actif
+                </span>
                 <div className="grid grid-cols-2 gap-2">
-                  {(["agence", "bailleur", "locataire", "admin"] as const).map((role) => (
+                  {[
+                    { id: "bailleur", label: "Bailleur" },
+                    { id: "agence", label: "Agence Immobilière" },
+                    { id: "locataire", label: "Locataire" },
+                    { id: "admin", label: "Admin HQ" },
+                  ].map((r) => (
                     <button
-                      key={role}
+                      key={r.id}
                       type="button"
-                      onClick={() => {
-                        setDevRole(role);
-                        window.location.href = role === "locataire" 
-                          ? "/dashboard/locataire" 
-                          : role === "admin" 
-                          ? "/dashboard/admin" 
-                          : "/dashboard";
-                      }}
-                      className={`px-3 py-2 rounded-[8px] text-[12px] font-bold border transition-colors cursor-pointer ${
-                        devRole === role
-                          ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700"
-                          : "bg-transparent text-[inherit] border-[#E4E4E7] dark:border-[#334155] hover:border-amber-400"
+                      onClick={() => setDevRole(r.id as any)}
+                      className={`p-2 rounded-lg border text-left text-[12px] font-semibold transition-all cursor-pointer ${
+                        devRole === r.id
+                          ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200"
+                          : "border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
                       }`}
                     >
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                      {r.label}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* SECTION 5: DEVISE & CONTEXTE LOKKA */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span style={{ color: isDark ? "#FAFAFA" : "#0F172A" }} className="text-[13px] font-bold">Devise &amp; Contexte</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleCurrencyChange("fcfa")}
-                    style={{
-                      backgroundColor:
-                        currency === "fcfa"
-                          ? isDark
-                            ? "#FFFFFF"
-                            : "#0F172A"
-                          : isDark
-                          ? "#334155"
-                          : "#FFFFFF",
-                      borderColor:
-                        currency === "fcfa"
-                          ? isDark
-                            ? "#FFFFFF"
-                            : "#0F172A"
-                          : isDark
-                          ? "#334155"
-                          : "#E8E5E0",
-                      color:
-                        currency === "fcfa"
-                          ? isDark
-                            ? "#000000"
-                            : "#FFFFFF"
-                          : isDark
-                          ? "#A1A1AA"
-                          : "#64635F",
-                    }}
-                    className="py-2 px-3 rounded-[6px] border text-center font-bold text-[12px] transition cursor-pointer"
-                  >
-                    FCFA (Bénin 🇧🇯)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleCurrencyChange("eur")}
-                    style={{
-                      backgroundColor:
-                        currency === "eur"
-                          ? isDark
-                            ? "#FFFFFF"
-                            : "#0F172A"
-                          : isDark
-                          ? "#334155"
-                          : "#FFFFFF",
-                      borderColor:
-                        currency === "eur"
-                          ? isDark
-                            ? "#FFFFFF"
-                            : "#0F172A"
-                          : isDark
-                          ? "#334155"
-                          : "#E8E5E0",
-                      color:
-                        currency === "eur"
-                          ? isDark
-                            ? "#000000"
-                            : "#FFFFFF"
-                          : isDark
-                          ? "#A1A1AA"
-                          : "#64635F",
-                    }}
-                    className="py-2 px-3 rounded-[6px] border text-center font-bold text-[12px] transition cursor-pointer"
-                  >
-                    Euros (€ Diaspora)
-                  </button>
-                </div>
-              </div>
             </div>
 
-            {/* ─── 3. FOOTER (BIG RED RESET BUTTON) ─── */}
-            <div
-              style={{
-                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-                borderColor: isDark ? "#334155" : "#E8E5E0",
-              }}
-              className="p-4 border-t"
-            >
+            {/* ─── 3. FOOTER : RESET TOTAL ─── */}
+            <div className="p-4 border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full py-2.5 px-4 bg-[#E03131] hover:bg-[#C92A2A] text-white text-[13px] font-bold rounded-[8px] transition-colors shadow-xs active:scale-[0.99] cursor-pointer text-center"
+                className="text-[12px] font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
               >
-                Reset
+                Réinitialiser par défaut
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12.5px] font-semibold rounded-lg hover:opacity-90 transition shadow-xs cursor-pointer"
+              >
+                Fermer
               </button>
             </div>
           </motion.div>
