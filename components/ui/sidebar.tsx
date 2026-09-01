@@ -11,63 +11,64 @@ const SIDEBAR_WIDTH_ICON = "68px";
 export type SidebarVariant = "sidebar" | "floating" | "inset";
 export type LayoutMode = "overlay" | "push" | "full" | "default";
 export type ThemeMode = "system" | "light" | "dark";
-export type CurrencyMode = "fcfa" | "eur";
+export type CurrencyMode = "fcfa" | "eur" | "usd";
+export type DensityMode = "comfort" | "compact";
 export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
 export const SIDEBAR_COOKIE_NAME = "lokka:sidebar";
-export type ColorTheme = "zinc" | "emerald" | "amber" | "blue" | "violet" | "rose";
+export type ColorTheme = "emerald" | "blue" | "amber" | "violet" | "zinc" | "rose";
 export type MobileNavVariant = "island" | "dynamic" | "fullscreen";
 
 export const COLOR_THEMES: Record<
   ColorTheme,
-  { name: string; hex: string; primary: string; hover: string; light: string; text: string }
+  { name: string; hex: string; primaryHsl: string; ringHsl: string; hoverHsl: string; lightHsl: string }
 > = {
-  zinc: {
-    name: "Zinc",
-    hex: "#0F172A",
-    primary: "#0F172A",
-    hover: "#334155",
-    light: "#F4F4F5",
-    text: "#FFFFFF",
-  },
   emerald: {
-    name: "Émeraude",
+    name: "Émeraude Patrimoine",
     hex: "#059669",
-    primary: "#059669",
-    hover: "#047857",
-    light: "#ECFDF5",
-    text: "#FFFFFF",
-  },
-  amber: {
-    name: "Or / Gold",
-    hex: "#D97706",
-    primary: "#D97706",
-    hover: "#B45309",
-    light: "#FFFBEB",
-    text: "#FFFFFF",
+    primaryHsl: "160 84% 39%",
+    ringHsl: "160 84% 39%",
+    hoverHsl: "160 84% 30%",
+    lightHsl: "150 60% 96%",
   },
   blue: {
-    name: "Saphir",
+    name: "Cobalt Moderne",
     hex: "#2563EB",
-    primary: "#2563EB",
-    hover: "#1D4ED8",
-    light: "#EFF6FF",
-    text: "#FFFFFF",
+    primaryHsl: "217 91% 60%",
+    ringHsl: "217 91% 60%",
+    hoverHsl: "217 91% 48%",
+    lightHsl: "214 100% 97%",
+  },
+  amber: {
+    name: "Or Royal",
+    hex: "#D97706",
+    primaryHsl: "38 92% 50%",
+    ringHsl: "38 92% 50%",
+    hoverHsl: "38 92% 40%",
+    lightHsl: "48 100% 96%",
   },
   violet: {
-    name: "Violet",
+    name: "Violet Iris",
     hex: "#7C3AED",
-    primary: "#7C3AED",
-    hover: "#6D28D9",
-    light: "#F5F3FF",
-    text: "#FFFFFF",
+    primaryHsl: "262 83% 58%",
+    ringHsl: "262 83% 58%",
+    hoverHsl: "262 83% 48%",
+    lightHsl: "270 100% 98%",
+  },
+  zinc: {
+    name: "Monochrome Zinc",
+    hex: "#0F172A",
+    primaryHsl: "222 47% 11%",
+    ringHsl: "222 47% 11%",
+    hoverHsl: "222 47% 20%",
+    lightHsl: "240 5% 96%",
   },
   rose: {
     name: "Rubis",
     hex: "#E11D48",
-    primary: "#E11D48",
-    hover: "#BE123C",
-    light: "#FFF1F2",
-    text: "#FFFFFF",
+    primaryHsl: "347 77% 50%",
+    ringHsl: "347 77% 50%",
+    hoverHsl: "347 77% 40%",
+    lightHsl: "350 100% 97%",
   },
 };
 
@@ -89,6 +90,11 @@ type SidebarContext = {
   setCurrency: (c: CurrencyMode) => void;
   colorTheme: ColorTheme;
   setColorTheme: (c: ColorTheme) => void;
+  isPrivacyMode: boolean;
+  setIsPrivacyMode: (v: boolean | ((prev: boolean) => boolean)) => void;
+  togglePrivacyMode: () => void;
+  density: DensityMode;
+  setDensity: (d: DensityMode) => void;
   mobileNavVariant: MobileNavVariant;
   setMobileNavVariant: (v: MobileNavVariant) => void;
   devRole: DevRole;
@@ -150,16 +156,18 @@ export const SidebarProvider = React.forwardRef<
     const [theme, setThemeState] = React.useState<ThemeMode>("light");
     const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
     const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("emerald");
+    const [isPrivacyMode, setIsPrivacyMode] = React.useState<boolean>(false);
+    const [density, setDensityState] = React.useState<DensityMode>("comfort");
     const [mobileNavVariant, _setMobileNavVariant] = React.useState<MobileNavVariant>("dynamic");
     const [devRole, _setDevRole] = React.useState<DevRole>("bailleur");
 
     const applyColor = (c: ColorTheme) => {
       const pal = COLOR_THEMES[c] || COLOR_THEMES.emerald;
       if (typeof document !== "undefined") {
-        document.documentElement.style.setProperty("--color-brand-primary", pal.primary);
-        document.documentElement.style.setProperty("--color-brand-hover", pal.hover);
-        document.documentElement.style.setProperty("--color-brand-light", pal.light);
-        document.documentElement.style.setProperty("--color-brand-text", pal.text);
+        document.documentElement.style.setProperty("--primary", pal.primaryHsl);
+        document.documentElement.style.setProperty("--ring", pal.ringHsl);
+        document.documentElement.style.setProperty("--brand-accent", pal.hex);
+        document.documentElement.style.setProperty("--color-brand-primary", pal.hex);
       }
     };
 
@@ -198,13 +206,19 @@ export const SidebarProvider = React.forwardRef<
         }
 
         const cu = localStorage.getItem("lokka_pref_currency") as CurrencyMode;
-        if (cu === "fcfa" || cu === "eur") setCurrencyState(cu);
+        if (cu === "fcfa" || cu === "eur" || cu === "usd") setCurrencyState(cu);
 
         const co = localStorage.getItem("lokka_pref_color") as ColorTheme;
         if (co && COLOR_THEMES[co]) {
           _setColorTheme(co);
           applyColor(co);
         }
+
+        const pm = localStorage.getItem("lokka_pref_privacy");
+        if (pm === "true") setIsPrivacyMode(true);
+
+        const den = localStorage.getItem("lokka_pref_density") as DensityMode;
+        if (den === "comfort" || den === "compact") setDensityState(den);
 
         const mnv = localStorage.getItem(`${SIDEBAR_COOKIE_NAME}_mobileNavVariant`) as MobileNavVariant;
         if (mnv === "island" || mnv === "dynamic" || mnv === "fullscreen") {
@@ -243,11 +257,11 @@ export const SidebarProvider = React.forwardRef<
         localStorage.setItem("lokka_pref_layout", l);
       } catch (_) {}
       if (l === "full") {
-        _setOpen(false); // Réduit immédiatement en plein écran
+        _setOpen(false);
       } else if (l === "push") {
-        _setOpen(true); // Ouvre la sidebar en poussant
+        _setOpen(true);
       } else if (l === "overlay") {
-        _setOpen(false); // Réduit en barre d'icônes par défaut
+        _setOpen(false);
       }
     };
 
@@ -271,6 +285,23 @@ export const SidebarProvider = React.forwardRef<
       try {
         localStorage.setItem("lokka_pref_color", c);
         applyColor(c);
+      } catch (_) {}
+    };
+
+    const togglePrivacyMode = () => {
+      setIsPrivacyMode((prev) => {
+        const next = !prev;
+        try {
+          localStorage.setItem("lokka_pref_privacy", String(next));
+        } catch (_) {}
+        return next;
+      });
+    };
+
+    const setDensity = (d: DensityMode) => {
+      setDensityState(d);
+      try {
+        localStorage.setItem("lokka_pref_density", d);
       } catch (_) {}
     };
 
@@ -315,6 +346,11 @@ export const SidebarProvider = React.forwardRef<
         setCurrency,
         colorTheme,
         setColorTheme,
+        isPrivacyMode,
+        setIsPrivacyMode,
+        togglePrivacyMode,
+        density,
+        setDensity,
         mobileNavVariant,
         setMobileNavVariant,
         devRole,
@@ -333,6 +369,8 @@ export const SidebarProvider = React.forwardRef<
         theme,
         currency,
         colorTheme,
+        isPrivacyMode,
+        density,
         mobileNavVariant,
       ]
     );
@@ -546,19 +584,14 @@ export const SidebarInset = React.forwardRef<
   if (isMobile) {
     marginLeft = "0px";
   } else if (layoutMode === "full") {
-    // Mode Plein écran : 0px si replié, décalage si ouvert
     marginLeft = isCollapsed ? "0px" : (isFloating ? "264px" : isInset ? "252px" : SIDEBAR_WIDTH);
   } else if (layoutMode === "overlay") {
-    // Mode Overlay : la page s'appuie sur la barre d'icônes
     marginLeft = isFloating ? "92px" : isInset ? "80px" : SIDEBAR_WIDTH_ICON;
   } else if (isFloating) {
-    // Mode Push Flottant : 264px quand ouvert, 92px quand replié
     marginLeft = isCollapsed ? "92px" : "264px";
   } else if (isInset) {
-    // Mode Push Encadré : 252px quand ouvert, 80px quand replié
     marginLeft = isCollapsed ? "80px" : "252px";
   } else {
-    // Mode Push Classique : 240px quand ouvert, 68px quand replié
     marginLeft = isCollapsed ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH;
   }
 
@@ -783,7 +816,7 @@ export const SidebarMenuButton = React.forwardRef<
           {children}
         </Comp>
 
-        {/* Floating Custom Tooltip (Zéro doublon avec le navigateur) */}
+        {/* Floating Custom Tooltip */}
         {isCollapsed && tooltip && isHovered && (
           <div
             style={{

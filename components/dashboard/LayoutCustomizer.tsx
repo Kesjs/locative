@@ -2,11 +2,23 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSidebar, SidebarVariant, LayoutMode, ColorTheme, ThemeMode } from "@/components/ui/sidebar";
+import {
+  useSidebar,
+  SidebarVariant,
+  LayoutMode,
+  ColorTheme,
+  ThemeMode,
+  CurrencyMode,
+  DensityMode,
+  COLOR_THEMES,
+} from "@/components/ui/sidebar";
 import {
   XMarkIcon,
   ArrowPathIcon,
   CheckIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 interface LayoutCustomizerProps {
@@ -27,6 +39,10 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setCurrency,
     colorTheme,
     setColorTheme,
+    isPrivacyMode,
+    togglePrivacyMode,
+    density,
+    setDensity,
     devRole,
     setDevRole,
   } = useSidebar();
@@ -49,6 +65,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setLayoutMode("push");
     setCurrency("fcfa");
     setColorTheme("emerald");
+    setDensity("comfort");
     setOpen(true);
   };
 
@@ -62,7 +79,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-black/20 transition-opacity flex justify-end">
-          {/* Backdrop Click (sans aucun flou pour voir le dashboard en direct) */}
+          {/* Backdrop Click (sans flou pour prévisualiser en direct) */}
           <div className="flex-1 cursor-pointer" onClick={onClose} />
 
           {/* Drawer Panel */}
@@ -71,16 +88,17 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 26, stiffness: 240 }}
-            className="w-full max-w-[380px] bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 border-l border-slate-200 dark:border-zinc-800 shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
+            className="w-full max-w-[400px] bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 border-l border-slate-200 dark:border-zinc-800 shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
           >
             {/* ─── 1. HEADER ─── */}
             <div className="p-4 pb-3 border-b border-slate-200 dark:border-zinc-800 flex items-start justify-between">
               <div>
-                <h2 className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white">
-                  Personnalisation de l&apos;affichage
+                <h2 className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <SparklesIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  Personnalisation de l&apos;espace
                 </h2>
                 <p className="text-[12px] text-slate-500 dark:text-zinc-400 mt-0.5 leading-snug">
-                  Ajustez l&apos;apparence, les couleurs et la disposition selon vos préférences.
+                  Ajustez les couleurs, la confidentialité et l&apos;ergonomie.
                 </p>
               </div>
               <button
@@ -94,7 +112,97 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
 
             {/* ─── 2. SECTIONS LIST ─── */}
             <div className="p-4 space-y-5 flex-1 overflow-y-auto">
-              {/* SECTION 1: MODE DE THÈME AVEC MINIATURES GRAPHIQUES */}
+              {/* SECTION 1: COULEURS D'ACCENT MÉTIER (DYNAMIC SAAS PALETTES) */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">
+                    Couleur d&apos;Accent Dynamique
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setColorTheme("emerald")}
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
+                    title="Réinitialiser à Émeraude"
+                  >
+                    <ArrowPathIcon className="h-3 w-3" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {(Object.keys(COLOR_THEMES) as ColorTheme[]).map((key) => {
+                    const pal = COLOR_THEMES[key];
+                    const isSelected = colorTheme === key;
+
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setColorTheme(key)}
+                        className={`p-2 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                          isSelected
+                            ? "border-slate-900 dark:border-white ring-2 ring-slate-900/10 dark:ring-white/20 bg-slate-50 dark:bg-zinc-800/80 font-bold"
+                            : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span
+                          className="h-4 w-4 rounded-full shrink-0 shadow-xs flex items-center justify-center"
+                          style={{ backgroundColor: pal.hex }}
+                        >
+                          {isSelected && <CheckIcon className="h-2.5 w-2.5 text-white stroke-[3]" />}
+                        </span>
+                        <span className="text-[11px] truncate text-slate-800 dark:text-zinc-200">
+                          {pal.name.split(" ")[0]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* SECTION 2: MODE CONFIDENTIALITÉ & MASQUAGE DES LOYERS */}
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-900/60">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`p-1.5 rounded-lg ${
+                        isPrivacyMode
+                          ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+                          : "bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                      }`}
+                    >
+                      {isPrivacyMode ? (
+                        <EyeSlashIcon className="h-4 w-4" />
+                      ) : (
+                        <EyeIcon className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-[12.5px] font-bold text-slate-900 dark:text-white block">
+                        Mode Masquage / Discret
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                        {isPrivacyMode ? "Montants financiers masqués (••••••)" : "Montants visibles en clair"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={togglePrivacyMode}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      isPrivacyMode ? "bg-emerald-600" : "bg-slate-300 dark:bg-zinc-700"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        isPrivacyMode ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION 3: MODE DE THÈME AVEC MINIATURES */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode de thème</span>
@@ -109,13 +217,13 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  {/* System (Miniature Diagonale) */}
+                  {/* System */}
                   <div
                     onClick={() => handleThemeChange("system")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[62px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
+                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
                         theme === "system"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -135,25 +243,25 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       </div>
                       <div className="flex items-end justify-between px-0.5 z-10">
                         <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-3.5 bg-[#0F172A] rounded-xs" />
-                          <div className="w-1.5 h-5 bg-slate-400 rounded-xs" />
+                          <div className="w-1.5 h-3 bg-[#0F172A] rounded-xs" />
+                          <div className="w-1.5 h-4 bg-slate-400 rounded-xs" />
                         </div>
                         <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-2.5 bg-white/40 rounded-xs" />
-                          <div className="w-1.5 h-4 bg-white rounded-xs" />
+                          <div className="w-1.5 h-2 bg-white/40 rounded-xs" />
+                          <div className="w-1.5 h-3.5 bg-white rounded-xs" />
                         </div>
                       </div>
                     </div>
                     <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Système</span>
                   </div>
 
-                  {/* Light (Miniature Pure White) */}
+                  {/* Light */}
                   <div
                     onClick={() => handleThemeChange("light")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[62px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
+                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
                         theme === "light"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -170,21 +278,21 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                         <div className="w-5 h-1 rounded bg-slate-200" />
                       </div>
                       <div className="flex items-end gap-0.5 px-0.5">
-                        <div className="w-1.5 h-3.5 bg-[#0F172A] rounded-xs" />
-                        <div className="w-1.5 h-5 bg-slate-300 rounded-xs" />
-                        <div className="w-1.5 h-3 bg-slate-200 rounded-xs" />
+                        <div className="w-1.5 h-3 bg-[#0F172A] rounded-xs" />
+                        <div className="w-1.5 h-4.5 bg-slate-300 rounded-xs" />
+                        <div className="w-1.5 h-2.5 bg-slate-200 rounded-xs" />
                       </div>
                     </div>
                     <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Clair</span>
                   </div>
 
-                  {/* Dark (Miniature Pure Black) */}
+                  {/* Dark */}
                   <div
                     onClick={() => handleThemeChange("dark")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[62px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
+                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
                         theme === "dark"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -201,9 +309,9 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                         <div className="w-5 h-1 rounded bg-zinc-800" />
                       </div>
                       <div className="flex items-end gap-0.5 px-0.5">
-                        <div className="w-1.5 h-3.5 bg-zinc-600 rounded-xs" />
-                        <div className="w-1.5 h-5 bg-zinc-700 rounded-xs" />
-                        <div className="w-1.5 h-3 bg-zinc-800 rounded-xs" />
+                        <div className="w-1.5 h-3 bg-zinc-600 rounded-xs" />
+                        <div className="w-1.5 h-4.5 bg-zinc-700 rounded-xs" />
+                        <div className="w-1.5 h-2.5 bg-zinc-800 rounded-xs" />
                       </div>
                     </div>
                     <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Sombre</span>
@@ -211,7 +319,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 2: DISPOSITION DU MENU (SIDEBAR) AVEC MINIATURES */}
+              {/* SECTION 4: DISPOSITION DE LA SIDEBAR */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Style du Menu</span>
@@ -219,20 +327,20 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     type="button"
                     onClick={() => handleSidebarChange("sidebar")}
                     className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
-                    title="Réinitialiser la sidebar"
+                    title="Réinitialiser"
                   >
                     <ArrowPathIcon className="h-3 w-3" />
                   </button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  {/* Classique (Ancrée) */}
+                  {/* Classique */}
                   <div
                     onClick={() => handleSidebarChange("sidebar")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[62px] rounded-lg overflow-hidden transition-all flex ${
+                      className={`relative w-full h-[54px] rounded-lg overflow-hidden transition-all flex ${
                         sidebarVariant === "sidebar"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -240,7 +348,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       style={{ backgroundColor: isDark ? "#121215" : "#FFFFFF" }}
                     >
                       {sidebarVariant === "sidebar" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -259,7 +367,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[62px] rounded-lg p-1 transition-all flex gap-1 ${
+                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 ${
                         sidebarVariant === "floating"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -267,11 +375,11 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
                     >
                       {sidebarVariant === "floating" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-5 h-full rounded-md bg-emerald-600/90 shadow-2xs" />
+                      <div className="w-5 h-full rounded-md bg-emerald-600/90" />
                       <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
@@ -280,13 +388,13 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Flottante</span>
                   </div>
 
-                  {/* Encadrée (Inset) */}
+                  {/* Encadrée */}
                   <div
                     onClick={() => handleSidebarChange("inset")}
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[62px] rounded-lg p-1 transition-all flex gap-1 ${
+                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 ${
                         sidebarVariant === "inset"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -294,7 +402,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
                     >
                       {sidebarVariant === "inset" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -309,7 +417,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 3: MODE D'AFFICHAGE (OVERLAY / PUSH / FULL) */}
+              {/* SECTION 5: MODE D'AFFICHAGE (OVERLAY / PUSH / FULL) */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode d&apos;affichage</span>
@@ -330,7 +438,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[52px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
+                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
                         layoutMode === "overlay"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -356,7 +464,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[52px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
+                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
                         layoutMode === "push" || layoutMode === "default"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -382,7 +490,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     className="cursor-pointer group flex flex-col items-center"
                   >
                     <div
-                      className={`relative w-full h-[52px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
+                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
                         layoutMode === "full"
                           ? "ring-2 ring-emerald-600 border-2 border-transparent"
                           : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
@@ -403,51 +511,35 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 4: COULEUR D'ACCENT */}
+              {/* SECTION 6: DEVISE & CONTEXTE RÉGIONAL */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Couleur d&apos;Accent</span>
-                  <button
-                    type="button"
-                    onClick={() => setColorTheme("emerald")}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
-                    title="Réinitialiser la couleur"
-                  >
-                    <ArrowPathIcon className="h-3 w-3" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-6 gap-2">
+                <span className="text-[12.5px] font-bold text-slate-900 dark:text-white block mb-2">
+                  Devise &amp; Contexte Régional
+                </span>
+                <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: "emerald", name: "Émeraude", hex: "#059669" },
-                    { id: "zinc", name: "Zinc", hex: "#0F172A" },
-                    { id: "amber", name: "Or", hex: "#D97706" },
-                    { id: "blue", name: "Saphir", hex: "#2563EB" },
-                    { id: "violet", name: "Violet", hex: "#7C3AED" },
-                    { id: "rose", name: "Rubis", hex: "#E11D48" },
-                  ].map((col) => {
-                    const isSelected = colorTheme === col.id;
-                    return (
-                      <button
-                        key={col.id}
-                        type="button"
-                        onClick={() => setColorTheme(col.id as ColorTheme)}
-                        className={`h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer relative ${
-                          isSelected
-                            ? "ring-2 ring-slate-900 dark:ring-white scale-105 shadow-sm"
-                            : "hover:scale-105 border border-slate-200 dark:border-zinc-700"
-                        }`}
-                        style={{ backgroundColor: col.hex }}
-                        title={col.name}
-                      >
-                        {isSelected && <CheckIcon className="h-4 w-4 text-white stroke-[3]" />}
-                      </button>
-                    );
-                  })}
+                    { id: "fcfa", label: "FCFA", sub: "Bénin / UEMOA" },
+                    { id: "eur", label: "Euros (€)", sub: "Diaspora Europe" },
+                    { id: "usd", label: "Dollars ($)", sub: "International" },
+                  ].map((curr) => (
+                    <button
+                      key={curr.id}
+                      type="button"
+                      onClick={() => setCurrency(curr.id as CurrencyMode)}
+                      className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
+                        currency === curr.id
+                          ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                          : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                      }`}
+                    >
+                      <span className="text-[12px] block font-semibold">{curr.label}</span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-zinc-400 leading-none">{curr.sub}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* SECTION 5: SIMULATEUR DE PROFIL DEV */}
+              {/* SECTION 7: SIMULATEUR DE PROFIL DEV */}
               <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
                   Mode Simulateur : Rôle Actif
@@ -483,7 +575,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 onClick={handleReset}
                 className="text-[12px] font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
               >
-                Réinitialiser par défaut
+                Réinitialiser tout
               </button>
               <button
                 type="button"

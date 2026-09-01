@@ -51,6 +51,8 @@ import {
   ArrowLeftOnRectangleIcon,
   UserCircleIcon,
   ShieldCheckIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 
 interface HeaderProps {
@@ -66,7 +68,7 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme } = useSidebar();
+  const { theme, setTheme, isPrivacyMode, togglePrivacyMode } = useSidebar();
 
   const currentTheme =
     theme === "dark" ||
@@ -280,7 +282,25 @@ export default function Header({
               </AnimatePresence>
             </div>
 
-            {/* 3. Theme Toggler */}
+            {/* 3. Privacy Mode Toggle (Mode Masquage) */}
+            <button
+              type="button"
+              onClick={togglePrivacyMode}
+              className={`h-8.5 w-8.5 flex items-center justify-center border rounded-lg transition-all shadow-2xs cursor-pointer ${
+                isPrivacyMode
+                  ? "bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400/20"
+                  : "bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-200"
+              }`}
+              title={isPrivacyMode ? "Désactiver le mode masquage (Montants masqués)" : "Activer le mode masquage (Masquer les loyers sensibles)"}
+            >
+              {isPrivacyMode ? (
+                <EyeSlashIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+            </button>
+
+            {/* 4. Theme Toggler */}
             <AnimatedThemeToggler
               theme={currentTheme}
               onThemeChange={(newTheme) => setTheme(newTheme)}
@@ -289,7 +309,7 @@ export default function Header({
               className="h-8.5 w-8.5 border border-slate-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-[#18181B] cursor-pointer"
             />
 
-            {/* 4. Layout Customizer Button */}
+            {/* 5. Layout Customizer Button */}
             <button
               type="button"
               onClick={() => setIsCustomizerOpen(true)}

@@ -1,10 +1,13 @@
+"use client";
+
 import React from "react";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface KpiCardProps {
   title: string;
   value: number | string;
-  currency?: "FCFA" | "€";
+  currency?: "FCFA" | "€" | "$" | string;
   valueSuffix?: string;
   delta?: { value: string; trend: "up" | "down" | "neutral" };
   /** Raccourci hérité : équivaut à delta={{ value: trend, trend: trendUp ? "up" : "down" }} */
@@ -18,7 +21,7 @@ interface KpiCardProps {
 export function KpiCard({
   title,
   value,
-  currency,
+  currency: currencyProp,
   valueSuffix,
   delta,
   trend,
@@ -27,6 +30,7 @@ export function KpiCard({
   icon: Icon,
   iconColor = "default",
 }: KpiCardProps) {
+  const { isPrivacyMode, currency: globalCurrency } = useSidebar();
   const resolvedDelta = delta ?? (trend ? { value: trend, trend: trendUp ? ("up" as const) : ("down" as const) } : undefined);
   
   const iconColorStyles = {
@@ -37,8 +41,28 @@ export function KpiCard({
     default: "bg-muted text-foreground",
   };
 
+  const isMonetary = Boolean(currencyProp);
+  const rawNum = typeof value === "number" ? value : Number(value) || 0;
+
+  // Calcul du montant selon la devise sélectionnée
+  let displayValue = rawNum;
+  let displayUnit = currencyProp || "FCFA";
+
+  if (isMonetary) {
+    if (globalCurrency === "eur") {
+      displayValue = Math.round(rawNum / 655.957);
+      displayUnit = "€";
+    } else if (globalCurrency === "usd") {
+      displayValue = Math.round(rawNum / 600);
+      displayUnit = "$";
+    } else {
+      displayValue = rawNum;
+      displayUnit = "FCFA";
+    }
+  }
+
   return (
-    <div className="bg-card border border-border rounded-xl p-5 shadow-xs hover:border-primary/30 transition-all flex flex-col justify-between group">
+    <div className="bg-card border border-border rounded-xl p-5 shadow-xs hover:border-primary/40 transition-all flex flex-col justify-between group">
       <div>
         <div className="flex items-center justify-between text-[13px] text-muted-foreground font-medium mb-3">
           <div className="flex items-center gap-2">
@@ -64,12 +88,17 @@ export function KpiCard({
             </span>
           )}
         </div>
+
         <div className="text-[28px] font-extrabold text-card-foreground tracking-tight mb-1 flex items-baseline gap-1.5">
-          {currency ? (
+          {isPrivacyMode && isMonetary ? (
+            <span className="font-extrabold tracking-widest text-slate-400 dark:text-zinc-500 text-[22px] select-none">
+              •••••••• <span className="text-[13px] font-bold text-muted-foreground">{displayUnit}</span>
+            </span>
+          ) : isMonetary ? (
             <>
-              <NumberTicker value={typeof value === "number" ? value : Number(value) || 0} className="font-extrabold text-card-foreground" />
+              <NumberTicker value={displayValue} className="font-extrabold text-card-foreground" />
               <span className="text-[14px] font-semibold text-muted-foreground">
-                {currency}
+                {displayUnit}
               </span>
             </>
           ) : (
@@ -80,6 +109,7 @@ export function KpiCard({
           )}
         </div>
       </div>
+
       {subtitle && (
         <div className="pt-2 border-t border-border/50 text-[11px] text-muted-foreground">
           {subtitle}
