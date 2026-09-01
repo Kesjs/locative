@@ -2,201 +2,257 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { getNavItems } from "@/components/dashboard/AppSidebar";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { XMarkIcon, ArrowLeftOnRectangleIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 export function MobileNavigation() {
-  const { openMobile, setOpenMobile, mobileNavVariant, theme, devRole } = useSidebar();
+  const router = useRouter();
   const pathname = usePathname();
+  const { openMobile, setOpenMobile, devRole } = useSidebar();
   const userProfile = useUserProfile();
-  const navItems = getNavItems(devRole || userProfile.role || "bailleur");
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
-  const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const currentRole = devRole || userProfile.role || "bailleur";
+  const navItems = getNavItems(currentRole);
+  const isNormalizedAdminOrLocataire =
+    currentRole.toLowerCase().includes("admin") || currentRole.toLowerCase().includes("locataire");
 
-  if (!openMobile) return null;
+  const handleClose = React.useCallback(() => {
+    setOpenMobile(false);
+  }, [setOpenMobile]);
 
-  const handleClose = () => setOpenMobile(false);
+  // Lock body scroll when mobile menu is open
+  React.useEffect(() => {
+    if (openMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [openMobile]);
 
-  // === VARIANT 1: ISLAND ===
-  if (mobileNavVariant === "island") {
-    return (
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      if (isSupabaseConfigured()) {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+      }
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("lokka_dev_plan");
+        localStorage.removeItem("lokka_dev_role");
+      }
+      setShowLogoutDialog(false);
+      handleClose();
+      router.push("/auth/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      router.push("/auth/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const isLinkActive = (url: string) => {
+    if (url === "/dashboard") return pathname === "/dashboard";
+    return pathname.startsWith(url);
+  };
+
+  return (
+    <>
       <AnimatePresence>
         {openMobile && (
-          <div className="fixed inset-0 z-[100] flex justify-start">
+          <div className="fixed inset-0 z-[100] flex md:hidden">
+            {/* 1. Dark Backdrop Overlay - Click to close */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={handleClose}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs cursor-pointer"
+              aria-label="Fermer le menu de navigation"
             />
-            <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="relative z-10 m-3 w-[280px] h-[calc(100vh-24px)] rounded-[20px] overflow-hidden flex flex-col shadow-2xl border"
-              style={{
-                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-                borderColor: isDark ? "#334155" : "#E8E5E0",
-              }}
+
+            {/* 2. Drawer Sidebar Panel (Classic slide from left) */}
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="relative z-10 w-[280px] max-w-[85vw] h-full bg-card text-card-foreground border-r border-border shadow-2xl flex flex-col justify-between overflow-hidden select-none"
             >
-              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: isDark ? "#334155" : "#E8E5E0" }}>
-                <span className="font-extrabold text-[18px] tracking-tight text-[var(--text-primary)]">Lokka</span>
-                <button onClick={handleClose} className="p-1.5 bg-black/5 dark:bg-white/10 rounded-full text-[var(--text-secondary)]">
+              {/* ── HEADER: Logo & Close Button ── */}
+              <div className="p-4 border-b border-border flex items-center justify-between bg-card shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="flex aspect-square h-8 w-8 items-center justify-center rounded-lg bg-white border border-border shrink-0 shadow-xs overflow-hidden">
+                    <img
+                      src={userProfile.customLogo || "/logo.png"}
+                      alt="Lokka Logo"
+                      className="w-full h-full object-contain p-0.5"
+                    />
+                  </div>
+                  <div className="flex flex-col leading-tight">
+                    <span className="font-extrabold text-[15px] tracking-tight text-foreground">
+                      Lokka
+                    </span>
+                    <span className="text-[10.5px] font-bold text-primary uppercase tracking-wider">
+                      {isNormalizedAdminOrLocataire
+                        ? currentRole.toLowerCase().includes("admin")
+                          ? "Admin HQ"
+                          : "Espace Locataire"
+                        : "Patrimoine Lokka"}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  title="Fermer"
+                >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                {navItems.map((item) => {
-                  const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.title}
-                      href={item.url}
-                      onClick={handleClose}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-[12px] transition-colors ${
-                        isActive
-                          ? "bg-[var(--color-brand-primary)] text-white font-bold shadow-md"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-primary)] font-medium"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-[14px]">{item.title}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    );
-  }
 
-  // === VARIANT 2: DYNAMIC HEADER ===
-  if (mobileNavVariant === "dynamic") {
-    return (
-      <AnimatePresence>
-        {openMobile && (
-          <div className="fixed inset-0 z-[100]">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleClose}
-              className="absolute inset-0 bg-black/20 backdrop-blur-md"
-            />
-            <motion.div
-              initial={{ y: -20, opacity: 0, scale: 0.95 }}
-              animate={{ y: 8, opacity: 1, scale: 1 }}
-              exit={{ y: -20, opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", damping: 22, stiffness: 200 }}
-              className="absolute top-0 left-2 right-2 rounded-[24px] shadow-2xl border overflow-hidden"
-              style={{
-                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-                borderColor: isDark ? "#334155" : "#E8E5E0",
-              }}
-            >
-              <div className="p-4 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-[var(--color-brand-primary)] text-white flex items-center justify-center font-bold text-[12px]">
-                      {userProfile.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <span className="font-bold text-[15px] text-[var(--text-primary)]">{userProfile.name}</span>
+              {/* ── NAVIGATION LIST: Matching Desktop Items ── */}
+              <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 sidebar-scrollbar">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-3 mb-2">
+                    Navigation Principale
                   </div>
-                  <button onClick={handleClose} className="p-1.5 bg-black/5 dark:bg-white/10 rounded-full text-[var(--text-secondary)]">
-                    <XMarkIcon className="h-5 w-5" />
+                  <nav className="space-y-1">
+                    {navItems.map((item) => {
+                      const active = isLinkActive(item.url);
+                      const Icon = item.icon;
+
+                      return (
+                        <Link
+                          key={item.title}
+                          href={item.url}
+                          onClick={handleClose}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all ${
+                            active
+                              ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                              : "text-foreground hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          <Icon className={`h-4.5 w-4.5 shrink-0 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                          <span className="truncate flex-1">{item.title}</span>
+                          {item.badge && (
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                item.badgeType === "danger"
+                                  ? "bg-destructive text-destructive-foreground"
+                                  : "bg-muted text-foreground border border-border"
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </div>
+
+              {/* ── FOOTER: User Profile & Quick Logout ── */}
+              <div className="border-t border-border p-3 bg-card shrink-0 space-y-2">
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/40 border border-border">
+                  <Avatar className="h-9 w-9 rounded-full border border-border shrink-0">
+                    <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+                    <AvatarFallback className="bg-[#087F5B] text-white text-[12px] font-bold">
+                      {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0 leading-tight">
+                    <div className="text-[13px] font-bold text-foreground truncate">
+                      {userProfile.name}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {userProfile.role}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Link
+                    href="/dashboard/parametres"
+                    onClick={handleClose}
+                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-[12px] font-semibold transition"
+                  >
+                    <Cog6ToothIcon className="h-4 w-4 text-muted-foreground" />
+                    <span>Réglages</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLogoutDialog(true)}
+                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg bg-destructive/10 hover:bg-destructive/15 text-destructive text-[12px] font-semibold transition cursor-pointer"
+                  >
+                    <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                    <span>Quitter</span>
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {navItems.map((item) => {
-                    const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.title}
-                        href={item.url}
-                        onClick={handleClose}
-                        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[16px] transition-colors border ${
-                          isActive
-                            ? "bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)] text-white shadow-md"
-                            : "bg-[var(--bg-subtle)] border-transparent text-[var(--text-primary)] hover:border-[var(--border-default)]"
-                        }`}
-                      >
-                        <Icon className="h-6 w-6" />
-                        <span className="text-[11px] font-bold text-center">{item.title}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
               </div>
-            </motion.div>
+            </motion.aside>
           </div>
         )}
       </AnimatePresence>
-    );
-  }
 
-  // === VARIANT 3: FULLSCREEN CASCADE ===
-  if (mobileNavVariant === "fullscreen") {
-    return (
-      <AnimatePresence>
-        {openMobile && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-xl"
-          >
-            <div className="p-6 flex justify-end">
-              <button onClick={handleClose} className="p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition shadow-lg border border-white/20">
-                <XMarkIcon className="h-6 w-6" />
-              </button>
+      {/* Confirmation de Déconnexion Mobile */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="bg-card border border-border rounded-2xl p-6 max-w-md shadow-2xl text-card-foreground">
+          <AlertDialogHeader>
+            <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2">
+              <ArrowLeftOnRectangleIcon className="w-6 h-6" />
             </div>
-            <div className="flex-1 flex flex-col justify-center px-8 space-y-6">
-              {navItems.map((item, i) => {
-                const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
-                const Icon = item.icon;
-                return (
-                  <motion.div
-                    key={item.title}
-                    initial={{ x: -40, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -40, opacity: 0 }}
-                    transition={{ delay: i * 0.05, type: "spring", damping: 20, stiffness: 100 }}
-                  >
-                    <Link
-                      href={item.url}
-                      onClick={handleClose}
-                      className={`flex items-center gap-4 group ${isActive ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
-                    >
-                      <div className={`p-3 rounded-2xl shadow-lg border ${isActive ? "bg-white text-black border-transparent" : "bg-white/10 text-white border-white/20 group-hover:bg-white/20"}`}>
-                        <Icon className="h-7 w-7" />
-                      </div>
-                      <span className={`text-[24px] font-bold tracking-tight text-white`}>
-                        {item.title}
-                      </span>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  }
+            <AlertDialogTitle className="text-[17px] font-bold text-foreground">
+              Confirmer la déconnexion
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-muted-foreground leading-relaxed mt-1">
+              Êtes-vous sûr de vouloir vous déconnecter de votre espace Lokka ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-  return null;
+          <AlertDialogFooter className="mt-6 flex items-center justify-end gap-3">
+            <AlertDialogCancel
+              disabled={isLoggingOut}
+              className="px-4 py-2 text-[13px] font-bold rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition"
+            >
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmLogout}
+              disabled={isLoggingOut}
+              className="px-5 py-2 text-[13px] font-bold rounded-lg bg-destructive hover:bg-destructive/90 text-white cursor-pointer transition shadow-xs"
+            >
+              {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
 }

@@ -520,19 +520,29 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
-                {/* Dropdown Positioned Above Sidebar Footer to prevent overlap */}
+                {/* Dropdown Positioned to the right of Sidebar Footer to prevent overlap */}
                 <DropdownMenuContent
-                  className="w-64 rounded-2xl p-2 shadow-2xl border border-[var(--border-default)] bg-card text-card-foreground z-50 animate-in fade-in-50 zoom-in-95"
-                  side={isMobile ? "top" : isCollapsed ? "right" : "top"}
-                  align="start"
-                  sideOffset={12}
+                  className="w-64 rounded-2xl p-2 shadow-2xl border border-border bg-card text-card-foreground z-50 animate-in fade-in-50 zoom-in-95"
+                  side="right"
+                  align="end"
+                  sideOffset={14}
                 >
                   <DropdownMenuLabel className="p-2 space-y-1">
-                    <div className="text-[13.5px] font-bold text-foreground">{userProfile.name}</div>
-                    <div className="text-[11.5px] text-muted-foreground font-normal truncate">
-                      {userProfile.email || "alexandre@lokka.bj"}
+                    <div className="flex items-center gap-2.5">
+                      <Avatar className="h-8 w-8 rounded-full border border-border shrink-0">
+                        <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+                        <AvatarFallback className="bg-[#087F5B] text-white text-[11px] font-bold">
+                          {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[13.5px] font-bold text-foreground truncate">{userProfile.name}</div>
+                        <div className="text-[11.5px] text-muted-foreground font-normal truncate">
+                          {userProfile.email || "alexandre@lokka.bj"}
+                        </div>
+                      </div>
                     </div>
-                    <div className="pt-1 flex items-center gap-1.5">
+                    <div className="pt-1.5 flex items-center gap-1.5">
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                         {userProfile.role}
                       </span>

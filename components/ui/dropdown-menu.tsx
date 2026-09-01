@@ -3,11 +3,14 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+const DropdownMenuSub = DropdownMenuPrimitive.Sub;
+const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
@@ -17,18 +20,11 @@ const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      style={{
-        zIndex: 100,
-        minWidth: 220,
-        overflow: "hidden",
-        borderRadius: 8,
-        border: "1px solid var(--color-border-primary)",
-        background: "var(--color-surface-secondary)",
-        padding: 6,
-        color: "var(--color-text-primary)",
-        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-        ...style,
-      }}
+      style={style}
+      className={cn(
+        "z-50 min-w-[12rem] overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-2xl animate-in fade-in-50 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 select-none",
+        className
+      )}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
@@ -43,28 +39,12 @@ const DropdownMenuItem = React.forwardRef<
 >(({ className, inset, style, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
-    style={{
-      position: "relative",
-      display: "flex",
-      cursor: "pointer",
-      userSelect: "none",
-      alignItems: "center",
-      gap: 8,
-      borderRadius: 4,
-      padding: "8px 10px",
-      fontSize: 13,
-      fontWeight: 500,
-      color: "var(--color-text-primary)",
-      outline: "none",
-      transition: "background 0.15s ease",
-      ...style,
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background = "var(--color-surface-tertiary)";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background = "transparent";
-    }}
+    style={style}
+    className={cn(
+      "relative flex cursor-pointer select-none items-center gap-2 rounded-xl px-2.5 py-2 text-[12.5px] font-medium outline-none transition-colors hover:bg-muted focus:bg-muted text-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      inset && "pl-8",
+      className
+    )}
     {...props}
   />
 ));
@@ -78,15 +58,12 @@ const DropdownMenuLabel = React.forwardRef<
 >(({ className, inset, style, ...props }, ref) => (
   <DropdownMenuPrimitive.Label
     ref={ref}
-    style={{
-      padding: "6px 10px",
-      fontSize: 11,
-      fontWeight: 600,
-      color: "var(--color-text-tertiary)",
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
-      ...style,
-    }}
+    style={style}
+    className={cn(
+      "px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider",
+      inset && "pl-8",
+      className
+    )}
     {...props}
   />
 ));
@@ -98,12 +75,8 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    style={{
-      height: 1,
-      margin: "4px -6px",
-      background: "var(--color-border-primary)",
-      ...style,
-    }}
+    style={style}
+    className={cn("-mx-1.5 my-1.5 h-px bg-border", className)}
     {...props}
   />
 ));
@@ -116,17 +89,13 @@ const DropdownMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      style={{
-        marginLeft: "auto",
-        fontSize: 11,
-        letterSpacing: "0.05em",
-        color: "var(--color-text-tertiary)",
-        ...style,
-      }}
+      style={style}
+      className={cn("ml-auto text-[10px] tracking-widest text-muted-foreground", className)}
       {...props}
     />
   );
 };
+DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
 
 export {
   DropdownMenu,
@@ -137,4 +106,7 @@ export {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuRadioGroup,
 };

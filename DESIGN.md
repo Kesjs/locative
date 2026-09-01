@@ -1,21 +1,21 @@
 ---
 name: Lokka
-description: A consumer-focused SaaS offering that simplifies complex tasks.
+description: Modern real estate & property management SaaS with Tropical Palm Emerald & Sage aesthetic.
 colors:
-  primary: "#9D6B3C"
-  secondary: "#18181B"
+  primary: "#059669"
+  secondary: "#0F172A"
   tertiary: "#E11D48"
-  neutral-bg: "#FAF9F6"
+  neutral-bg: "#F4F9F6"
   surface-secondary: "#FFFFFF"
-  surface-tertiary: "#F6EFE7"
-  surface-dark: "#18181B"
-  border-primary: "#E8E3DC"
-  text-primary: "#18181B"
-  text-secondary: "#71717A"
-  text-tertiary: "#A1A1AA"
-  accent-light: "#F6EFE7"
-  success: "#15803D"
-  warning: "#9D6B3C"
+  surface-tertiary: "#ECFDF5"
+  surface-dark: "#0A1310"
+  border-primary: "#E2ECE6"
+  text-primary: "#0F172A"
+  text-secondary: "#5E6B65"
+  text-tertiary: "#94A3B8"
+  accent-light: "#ECFDF5"
+  success: "#059669"
+  warning: "#F59E0B"
 typography:
   display:
     fontFamily: "'Instrument Serif', 'Georgia', serif"
@@ -34,7 +34,7 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "{colors.surface-secondary}"
+    textColor: "#FFFFFF"
     rounded: "{rounded.sm}"
   button-secondary:
     backgroundColor: "transparent"
@@ -45,43 +45,29 @@ components:
     rounded: "{rounded.md}"
 ---
 
-# Design System: Lokka
+# Design System: Lokka (Variante 3: Émeraude Tropicale & Sauge)
 
 ## Overview
 
-**Creative North Star: "Refined Consumer Focus"**
+**Creative North Star: "Vitalité Immobilière & Rente Active"**
 
-Lokka is a consumer-facing SaaS that blends utility with elegance. The system uses a predominantly light, architectural grid aesthetic with stark black accents for focus and clarity. The design relies on precise spacing, refined borders, and a sophisticated serif display face to elevate common workflows out of typical SaaS utility and into a premium consumer experience.
+Lokka adopte une identité alliant la fraîcheur côtière ouest-africaine à la précision financière. Le système s'articule autour d'une base minérale ivoire-menthe (`#F4F9F6`), rehaussée de surfaces blanches aux bordures architecturales légères (`#E2ECE6`) et d'un vert Émeraude Forêt dense (`#059669`) pour commander les actions maîtresses et valoriser la croissance des rendements locatifs.
 
-**Key Characteristics:**
-- High-contrast primary interactions against warm, neutral backgrounds
-- Distinctive serif display paired with a clean, functional sans-serif body
-- Flat-by-default surfaces with subtle hover states over deep shadows
-- Architectural precision in grid lines and section dividers
+**Caractéristiques clés :**
+- Fond minéral doux anti-éblouissement (`#F4F9F6`)
+- Boutons d'action et éléments clés en Émeraude dense (`#059669` / `#047857`)
+- Badges et pastilles d'encaissement en Sauge & Menthe douce (`#ECFDF5`)
+- Typographie ardoise noble (`#0F172A`) assurant un contraste WCAG AAA irréprochable
+- Dark mode immersif en Nuit Végétale (`#0A1310` & `#121F1B`)
 
 ## Colors
 
-The palette is restrained, leaning on warm paper tones and deep blacks, with green and red reserved strictly for semantic feedback.
-
-### Primary
-- **Deep Black** (#1C1C1C): Used for primary text, primary buttons, and dark surface containers.
-- **Warm Paper** (#FAF9F6): The primary background color, providing a soft, non-stark canvas.
-- **Pure White** (#FFFFFF): Used for elevated surfaces like cards and the sidebar.
-
-### Secondary
-- **Subtle Beige** (#F3F1ED): Used for tertiary surfaces and sidebar accents.
-- **Crisp Sand** (#F5F5DC): A light accent used for badges and subtle highlights.
-
-### Neutral
-- **Architectural Border** (#E8E5E0): Primary divider and border color.
-- **Secondary Text** (#64635F): Used for body copy and supporting text.
-- **Tertiary Text** (#9C9A95): Used for captions and placeholders.
-
-### Semantic
-- **Action Green** (#087F5B): Used strictly for success states or specific ring highlights.
-- **Alert Red** (#C92A2A): Used for destructive actions or negative semantic states.
-
-**The One Voice Rule.** The primary accent (Deep Black) commands attention. It should be used sparingly for primary actions and display headings. When everything is bold, nothing is.
+### Primary & Accents
+- **Émeraude Forêt** (#059669): Couleur maîtresse pour les boutons d'action, le bouton actif de sidebar, les KPI clés et les flux positifs.
+- **Ivoire Menthe** (#F4F9F6): Canvas doux et moderne apportant de la respiration.
+- **Sauge & Menthe Claire** (#ECFDF5): Surfaces secondaires et badges de statut.
+- **Blanc Pur** (#FFFFFF): Cartes, tableaux et conteneurs de données.
+- **Ardoise Sombre** (#0F172A): Typographie principale.
 
 ## Typography
 

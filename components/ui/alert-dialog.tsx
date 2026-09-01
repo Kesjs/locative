@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { cn } from "@/lib/utils";
 
 export const AlertDialog = AlertDialogPrimitive.Root;
 export const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
@@ -10,16 +11,14 @@ export const AlertDialogPortal = AlertDialogPrimitive.Portal;
 export const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+>(({ className, style, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     ref={ref}
-    style={{
-      position: "fixed",
-      inset: 0,
-      zIndex: 100,
-      background: "rgba(0, 0, 0, 0.4)",
-      backdropFilter: "blur(4px)",
-    }}
+    style={style}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/50 backdrop-blur-xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
     {...props}
   />
 ));
@@ -38,21 +37,11 @@ export const AlertDialogContent = React.forwardRef<
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       ref={ref}
-      style={{
-        position: "fixed",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 101,
-        width: "100%",
-        maxWidth: 440,
-        background: "var(--color-surface-secondary)",
-        border: "1px solid var(--color-border-primary)",
-        borderRadius: 12,
-        padding: 24,
-        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
-        ...style,
-      }}
+      style={style}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border bg-card p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-2xl text-card-foreground",
+        className
+      )}
       {...props}
     />
   </AlertDialogPortal>
@@ -65,14 +54,8 @@ export const AlertDialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 8,
-      textAlign: "left",
-      marginBottom: 20,
-      ...style,
-    }}
+    style={style}
+    className={cn("flex flex-col space-y-2 text-center sm:text-left", className)}
     {...props}
   />
 );
@@ -83,14 +66,8 @@ export const AlertDialogTitle = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    style={{
-      fontFamily: "var(--font-sans)",
-      fontSize: 18,
-      fontWeight: 600,
-      color: "var(--color-text-primary)",
-      margin: 0,
-      ...style,
-    }}
+    style={style}
+    className={cn("text-lg font-bold text-foreground", className)}
     {...props}
   />
 ));
@@ -102,13 +79,8 @@ export const AlertDialogDescription = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    style={{
-      fontSize: 14,
-      color: "var(--color-text-secondary)",
-      lineHeight: 1.5,
-      margin: 0,
-      ...style,
-    }}
+    style={style}
+    className={cn("text-sm text-muted-foreground leading-relaxed", className)}
     {...props}
   />
 ));
@@ -120,12 +92,8 @@ export const AlertDialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    style={{
-      display: "flex",
-      justifyContent: "flex-end",
-      gap: 12,
-      ...style,
-    }}
+    style={style}
+    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 mt-4", className)}
     {...props}
   />
 );
@@ -136,13 +104,11 @@ export const AlertDialogAction = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className="btn-primary"
-    style={{
-      padding: "8px 18px",
-      fontSize: 13,
-      cursor: "pointer",
-      ...style,
-    }}
+    style={style}
+    className={cn(
+      "inline-flex items-center justify-center rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 cursor-pointer shadow-xs disabled:pointer-events-none disabled:opacity-50",
+      className
+    )}
     {...props}
   />
 ));
@@ -154,14 +120,13 @@ export const AlertDialogCancel = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AlertDialogPrimitive.Cancel
     ref={ref}
-    className="btn-secondary"
-    style={{
-      padding: "8px 18px",
-      fontSize: 13,
-      cursor: "pointer",
-      ...style,
-    }}
+    style={style}
+    className={cn(
+      "inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer shadow-xs disabled:pointer-events-none disabled:opacity-50",
+      className
+    )}
     {...props}
   />
 ));
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
+

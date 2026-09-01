@@ -149,7 +149,7 @@ export const SidebarProvider = React.forwardRef<
     const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("default");
     const [theme, setThemeState] = React.useState<ThemeMode>("light");
     const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
-    const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("zinc");
+    const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("emerald");
     const [mobileNavVariant, _setMobileNavVariant] = React.useState<MobileNavVariant>("dynamic");
     const [devRole, _setDevRole] = React.useState<DevRole>("bailleur");
 

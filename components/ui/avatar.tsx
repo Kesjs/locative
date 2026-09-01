@@ -10,16 +10,8 @@ const Avatar = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
-    style={{
-      position: "relative",
-      display: "flex",
-      height: 32,
-      width: 32,
-      flexShrink: 0,
-      overflow: "hidden",
-      borderRadius: "50%",
-      ...style,
-    }}
+    className={cn("relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border bg-muted", className)}
+    style={style}
     {...props}
   />
 ));
@@ -31,13 +23,8 @@ const AvatarImage = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    style={{
-      aspectRatio: "1/1",
-      height: "100%",
-      width: "100%",
-      objectFit: "cover",
-      ...style,
-    }}
+    className={cn("aspect-square h-full w-full object-cover", className)}
+    style={style}
     {...props}
   />
 ));
@@ -49,19 +36,11 @@ const AvatarFallback = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
-    style={{
-      display: "flex",
-      height: "100%",
-      width: "100%",
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: "50%",
-      background: "var(--color-accent-light)",
-      color: "var(--color-accent)",
-      fontSize: 12,
-      fontWeight: 600,
-      ...style,
-    }}
+    className={cn(
+      "flex h-full w-full items-center justify-center rounded-full bg-[#087F5B] text-white font-bold text-xs select-none",
+      className
+    )}
+    style={style}
     {...props}
   />
 ));
