@@ -30,19 +30,16 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
-  /* ─── Dynamic Brand Accent Tokens ─── */
+  /* ─── Dynamic Brand Accent Tokens (Variante 3: Émeraude & Sauge) ─── */
   --color-brand-primary: hsl(var(--primary));
-  --color-brand-hover: hsl(28 50% 35%);
-  --color-brand-light: hsl(34 45% 93%);
+  --color-brand-hover: hsl(160 84% 30%);
+  --color-brand-light: hsl(150 60% 96%);
   --color-brand-text: hsl(var(--primary-foreground));
 
-  /* ─── Alias directs Caramel / Ardoise (Option 3 Quiet Luxury) ─── */
-  --color-terracotta: hsl(30 44% 43%);
-  --color-terracotta-hover: hsl(28 50% 35%);
-  --color-terracotta-light: hsl(34 45% 93%);
-  --color-charcoal: hsl(240 6% 10%);
-  --color-charcoal-light: hsl(240 4% 28%);
-  --shadow-product-stage: 0 28px 72px rgba(24, 24, 27, 0.12), 0 8px 20px rgba(24, 24, 27, 0.06);
+  /* ─── Semantic Aliases ─── */
+  --color-emerald-deep: hsl(160 84% 39%);
+  --color-sage-soft: hsl(150 60% 96%);
+  --shadow-product-stage: 0 28px 72px rgba(15, 23, 42, 0.12), 0 8px 20px rgba(15, 23, 42, 0.06);
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-modal: var(--shadow-modal);
@@ -54,7 +51,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Masque la scrollbar tout en gardant le scroll fonctionnel (ex. tabs horizontales du drawer) */
+/* Masque la scrollbar tout en gardant le scroll fonctionnel */
 @utility no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -63,46 +60,48 @@
   }
 }
 
-/* ─── ROOT DESIGN TOKENS (LIGHT THEME - OPTION 3 CARAMEL & ARDOISE) ─── */
+/* ─── ROOT DESIGN TOKENS (LIGHT THEME - VARIANTE 3: ÉMERAUDE TROPICALE & SAUGE) ─── */
 :root {
-  --background: 40 25% 98%; /* #FAF9F6 Ivoire Papier Chaud */
-  --foreground: 240 6% 10%; /* #18181B Ardoise Zinc 900 */
-  --card: 0 0% 100%; /* #FFFFFF Blanc Pur */
-  --card-foreground: 240 6% 10%;
+  --background: 0 0% 100%; /* #FFFFFF Blanc Pur pour le fond du Dashboard */
+  --foreground: 222 47% 11%; /* #0F172A Ardoise Sombre pour le texte */
+  --card: 0 0% 100%; /* #FFFFFF Blanc Pur pour les cartes */
+  --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 6% 10%;
-  --primary: 30 44% 43%; /* #9D6B3C Caramel Feutré - Lokka Luxury */
+  --popover-foreground: 222 47% 11%;
+  --primary: 160 84% 39%; /* #059669 Vert Émeraude (Boutons, onglet actif, accents) */
   --primary-foreground: 0 0% 100%;
-  --muted: 240 5% 34%; /* #52525B Zinc 700 - Contraste WCAG AAA élevé */
-  --muted-foreground: 240 5% 34%; /* #52525B - Fin des textes gris pâles */
-  --accent: 34 45% 93%; /* #F6EFE7 Lait d'Avoine */
-  --accent-foreground: 30 44% 43%;
-  --success: 142 71% 29%; /* #15803D Émeraude Feutré */
+  --secondary: 150 30% 96%; /* #EFF7F2 */
+  --secondary-foreground: 160 84% 28%;
+  --muted: 220 9% 46%; /* #64748B */
+  --muted-foreground: 220 9% 46%;
+  --accent: 150 60% 96%; /* #ECFDF5 Sauge douce (Badges & sélections) */
+  --accent-foreground: 160 84% 28%; /* #065F46 */
+  --success: 160 84% 39%; /* #059669 */
   --success-foreground: 0 0% 100%;
-  --warning: 30 44% 43%; /* #9D6B3C */
-  --warning-foreground: 34 45% 93%;
+  --warning: 38 92% 50%; /* #F59E0B */
+  --warning-foreground: 0 0% 100%;
   --destructive: 347 77% 50%; /* #E11D48 */
   --destructive-foreground: 0 0% 100%;
-  --border: 30 14% 86%; /* #E2DDD5 */
-  --input: 30 14% 86%;
-  --ring: 30 44% 43%;
+  --border: 220 13% 91%; /* #E2E8F0 Bordure fine et nette */
+  --input: 220 13% 91%;
+  --ring: 160 84% 39%;
   --radius: 0.5rem;
 
   /* Surfaces & Fallback Aliases */
-  --bg-canvas: hsl(var(--background));
-  --bg-surface: hsl(var(--card));
-  --bg-surface-elevated: hsl(var(--card));
+  --bg-canvas: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
   --bg-subtle: hsl(var(--accent));
   --bg-muted: hsl(var(--secondary));
-  --bg-sidebar: hsl(var(--card));
-  --bg-header: hsl(var(--background));
+  --bg-sidebar: #FFFFFF;
+  --bg-header: #FFFFFF;
   --bg-input: hsl(var(--input));
 
   /* Typography Aliases */
   --text-primary: hsl(var(--foreground));
   --text-secondary: hsl(var(--muted-foreground));
   --text-muted: hsl(var(--muted-foreground));
-  --text-inverse: hsl(var(--background));
+  --text-inverse: #FFFFFF;
 
   /* Borders & Dividers */
   --border-subtle: hsl(var(--border));
@@ -120,31 +119,31 @@
   --active-bg: hsl(var(--accent));
 }
 
-/* ─── DARK THEME WCAG COMPLIANT DESIGN TOKENS ─── */
+/* ─── DARK THEME (VARIANTE 3: NOCTURNE ÉMERAUDE PROFONDE) ─── */
 .dark {
-  --background: 240 10% 4%; /* #09090B */
-  --foreground: 0 0% 98%; /* #FAFAFA */
-  --card: 240 6% 10%; /* #18181B */
-  --card-foreground: 0 0% 98%;
-  --popover: 240 6% 10%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 30 48% 55%; /* #C48A54 Caramel Lumineux Accessible */
-  --primary-foreground: 240 10% 4%;
-  --secondary: 240 4% 16%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 4% 65%;
-  --muted-foreground: 240 4% 65%;
-  --accent: 30 30% 18%;
-  --accent-foreground: 30 48% 55%;
-  --success: 142 60% 45%;
-  --success-foreground: 240 10% 4%;
-  --warning: 30 48% 55%;
-  --warning-foreground: 30 30% 18%;
+  --background: 160 30% 6%; /* #0A1310 Nuit Végétale */
+  --foreground: 150 20% 96%; /* #F0FDF4 */
+  --card: 160 25% 10%; /* #121F1B */
+  --card-foreground: 150 20% 96%;
+  --popover: 160 25% 10%;
+  --popover-foreground: 150 20% 96%;
+  --primary: 160 70% 45%; /* #10B981 Émeraude Lumineuse Accessible */
+  --primary-foreground: 160 30% 6%;
+  --secondary: 160 25% 14%;
+  --secondary-foreground: 150 20% 96%;
+  --muted: 150 15% 65%;
+  --muted-foreground: 150 15% 65%;
+  --accent: 160 35% 16%;
+  --accent-foreground: 160 70% 55%;
+  --success: 160 70% 45%;
+  --success-foreground: 160 30% 6%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
   --destructive: 347 77% 50%;
   --destructive-foreground: 0 0% 100%;
-  --border: 240 4% 18%; /* #27272A */
-  --input: 240 4% 18%;
-  --ring: 30 48% 55%;
+  --border: 160 20% 18%; /* #1E352E */
+  --input: 160 20% 18%;
+  --ring: 160 70% 45%;
 
   /* Shadows */
   --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5);

@@ -19,10 +19,9 @@ export default function Hero() {
 
   const [phraseIndex, setPhraseIndex] = useState(0);
   const ROTATING_PHRASES = [
-    "Enfin sous contrôle",
-    "100% automatisé",
-    "Rentabilisé sans stress",
-    "Géré depuis partout",
+    "sous contrôle",
+    "plus rentable",
+    "sans stress",
   ];
 
   useEffect(() => {
@@ -86,34 +85,34 @@ export default function Hero() {
   };
 
   return (
-    <section id="hero" className="relative overflow-hidden bg-[#FAF9F6] pb-12 pt-28 sm:pb-20 sm:pt-36">
+    <section id="hero" className="relative overflow-hidden bg-[#FAF9F6] pb-8 pt-20 sm:pb-14 sm:pt-28">
       
-      {/* 21st.dev Interactive Fluid Flow Grid Background */}
-      <div className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-30">
+      {/* 21st.dev Interactive Fluid Flow Grid Background - Enhanced Visibility */}
+      <div className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-65">
         <FluidFlowGrid
           lineBaseColor="24, 24, 27"
           accentColor="157, 107, 60"
-          spacing={42}
-          interactiveRadius={220}
+          spacing={38}
+          interactiveRadius={240}
         />
       </div>
 
       {/* Halo Ambiant Doux Caramel & Sable */}
-      <div className="pointer-events-none absolute left-1/2 top-20 h-[360px] w-[640px] -translate-x-1/2 rounded-full bg-[#9D6B3C]/[0.05] blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-16 h-[380px] w-[680px] -translate-x-1/2 rounded-full bg-[#9D6B3C]/[0.08] blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[780px] flex-col items-center text-center">
           
           {/* Badge Épuré avec Flèche Droite Animée */}
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="flex justify-center mb-6"
+            className="flex justify-center mb-4"
           >
             <a
-              href="#features"
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-[#E8E3DC] bg-white/90 backdrop-blur-md px-4 py-1.5 text-[12.5px] font-semibold text-[#18181B] shadow-xs transition-all duration-200 hover:border-[#9D6B3C]/50 hover:bg-white hover:shadow-sm"
+              href="#pricing"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-[#E8E3DC] bg-white/95 backdrop-blur-md px-4 py-1.5 text-[12px] sm:text-[12.5px] font-semibold text-[#18181B] shadow-xs transition-all duration-200 hover:border-[#9D6B3C]/50 hover:bg-white hover:shadow-sm"
             >
               <BorderBeam size={36} duration={6} delay={0} colorFrom="#9D6B3C" colorTo="#E8E3DC" />
               <span className="relative z-10 inline-flex items-center gap-2">
@@ -125,20 +124,20 @@ export default function Hero() {
 
           {/* Titre Principal H1 avec Rotateur de Mots Fluide */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-[740px] text-[clamp(2.4rem,5.6vw,4.1rem)] font-extrabold leading-[1.08] tracking-[-0.045em] text-[#18181B]"
+            className="max-w-[740px] text-[clamp(2.1rem,5vw,3.6rem)] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#18181B]"
           >
             Votre patrimoine locatif
-            <span className="mt-2 block h-[1.3em] relative overflow-hidden">
+            <span className="mt-1.5 block h-[1.3em] relative overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.span
                   key={phraseIndex}
                   initial={{ y: 28, opacity: 0, filter: "blur(4px)" }}
                   animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                   exit={{ y: -28, opacity: 0, filter: "blur(4px)" }}
-                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="inline-block font-serif text-[1.08em] font-normal italic tracking-[-0.035em] text-[#52525B]"
                 >
                   {ROTATING_PHRASES[phraseIndex]}
@@ -149,20 +148,20 @@ export default function Hero() {
 
           {/* Description & Proposition de Valeur SaaS Moderne */}
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-4 max-w-[620px] text-[16px] leading-[1.6] font-medium text-[#3F3F46] sm:text-[18px]"
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-3 max-w-[620px] text-[15px] leading-[1.6] font-medium text-[#3F3F46] sm:text-[17px]"
           >
             Tous vos biens, toute votre gestion, dans un espace pensé pour vous.
           </motion.p>
 
           {/* Formulaire de Conversion Email OTP - Visible & Ultra-Contraste */}
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-8 w-full max-w-[500px]"
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-6 w-full max-w-[500px]"
           >
             <form
               onSubmit={handleHeroSubmit}

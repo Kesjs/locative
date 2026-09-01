@@ -301,11 +301,13 @@ export const FAQS: FaqItem[] = [
 ];
 
 export function formatFcfa(value: number): string {
-  return `${new Intl.NumberFormat("fr-FR").format(value)}`;
+  return `${new Intl.NumberFormat("fr-FR").format(value)} FCFA`;
 }
 
 export function formatPlanPrice(plan: PricingPlan, cycle: "monthly" | "annual"): string {
-  return formatFcfa(cycle === "annual" ? plan.annualPriceFcfa : plan.monthlyPriceFcfa);
+  const val = cycle === "annual" ? plan.annualPriceFcfa : plan.monthlyPriceFcfa;
+  if (val === 0) return "0 FCFA";
+  return `${new Intl.NumberFormat("fr-FR").format(val)} FCFA`;
 }
 
 export function buildComparisonRows(): PricingComparisonRow[] {
