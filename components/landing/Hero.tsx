@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, CheckCircle2, Star, Mail } from "lucide-react";
 import DashboardPreview from "./DashboardPreview";
 import FluidFlowGrid from "@/components/ui/fluid-flow-grid";
@@ -16,6 +16,21 @@ export default function Hero() {
   const [feedback, setFeedback] = useState("Créez votre espace en quelques secondes. Essai gratuit 14 jours sans engagement.");
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
+
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const ROTATING_PHRASES = [
+    "Enfin sous contrôle",
+    "100% automatisé",
+    "Rentabilisé sans stress",
+    "Géré depuis partout",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % ROTATING_PHRASES.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [ROTATING_PHRASES.length]);
 
   const handleHeroSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -89,45 +104,57 @@ export default function Hero() {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         <div data-landing-hero-copy className="mx-auto flex max-w-[780px] flex-col items-center text-center">
           
-          {/* Badge Officiel avec BorderBeam & Animation d'Entrée */}
+          {/* Badge Épuré avec Flèche Droite Animée */}
           <motion.div
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="flex justify-center mb-6"
           >
-            <div className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-[#E8E3DC] bg-white/95 backdrop-blur-md px-3.5 py-1.5 text-[12px] font-semibold text-[#18181B] shadow-xs transition-transform duration-200 hover:scale-[1.02]">
-              <BorderBeam size={36} duration={5} delay={0} colorFrom="#9D6B3C" colorTo="#E8E3DC" />
+            <a
+              href="#features"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-[#E8E3DC] bg-white/90 backdrop-blur-md px-4 py-1.5 text-[12.5px] font-semibold text-[#18181B] shadow-xs transition-all duration-200 hover:border-[#9D6B3C]/50 hover:bg-white hover:shadow-sm"
+            >
+              <BorderBeam size={36} duration={6} delay={0} colorFrom="#9D6B3C" colorTo="#E8E3DC" />
               <span className="relative z-10 inline-flex items-center gap-2">
-                <span className="rounded-[4px] bg-[#15803D] px-1.5 py-0.5 text-[9px] font-bold tracking-[0.12em] text-white shadow-2xs">
-                  NEW
-                </span>
                 <span className="font-semibold text-[#18181B]">Une nouvelle façon de gérer vos biens</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#9D6B3C] transition-transform duration-300 group-hover:translate-x-1" />
               </span>
-            </div>
+            </a>
           </motion.div>
 
-          {/* Titre Principal H1 - Haute Lisibilité & Contraste WCAG AAA */}
+          {/* Titre Principal H1 avec Rotateur de Mots Fluide */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-[740px] text-[clamp(2.4rem,5.6vw,4.1rem)] font-extrabold leading-[1.03] tracking-[-0.045em] text-[#18181B]"
+            className="max-w-[740px] text-[clamp(2.4rem,5.6vw,4.1rem)] font-extrabold leading-[1.08] tracking-[-0.045em] text-[#18181B]"
           >
             Votre patrimoine locatif
-            <span className="mt-2 block font-serif text-[1.08em] font-normal italic tracking-[-0.035em] text-[#52525B]">
-              Enfin sous contrôle
+            <span className="mt-2 block h-[1.3em] relative overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={phraseIndex}
+                  initial={{ y: 28, opacity: 0, filter: "blur(4px)" }}
+                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                  exit={{ y: -28, opacity: 0, filter: "blur(4px)" }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-block font-serif text-[1.08em] font-normal italic tracking-[-0.035em] text-[#52525B]"
+                >
+                  {ROTATING_PHRASES[phraseIndex]}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </motion.h1>
 
-          {/* Description & Proposition de Valeur */}
+          {/* Description & Proposition de Valeur SaaS Moderne */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 max-w-[620px] text-[15.5px] leading-[1.75] font-normal text-[#3F3F46] sm:text-[17px]"
+            className="mt-4 max-w-[620px] text-[15.5px] leading-[1.65] font-normal text-[#3F3F46] sm:text-[17px]"
           >
-            Que vous soyez au Bénin ou dans la diaspora, pilotez vos logements, encaissez vos loyers par MTN MoMo, émettez vos quittances certifiées et publiez votre mini-site vitrine depuis un seul espace.
+            L&apos;outil tout-en-un pour gérer vos biens au Bénin. Encaissements Mobile Money instantanés, quittances certifiées avec QR Code et suivi en temps réel de vos loyers.
           </motion.p>
 
           {/* Formulaire de Conversion Email OTP - Visible & Ultra-Contraste */}
