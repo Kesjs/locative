@@ -244,18 +244,30 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Aperçu Tableau de Bord avec Révélation Fluide */}
+        {/* Aperçu Tableau de Bord avec Perspective 3D & Isométrique */}
         <motion.div
           initial={{ opacity: 0, y: 32, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.58, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-12 sm:mt-16"
+          className="mt-10 sm:mt-14 w-full"
         >
-          <div className="mb-3 flex items-center justify-between px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#71717A]">
-            <span>Votre tableau de bord en direct</span>
+          <div className="mb-4 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#71717A] max-w-5xl mx-auto">
+            <span className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#15803D] animate-pulse" />
+              Tableau de bord en direct
+            </span>
             <span className="hidden sm:inline">Patrimoine &amp; encaissements · Cotonou</span>
           </div>
-          <DashboardPreview />
+
+          <div className="mx-auto max-w-6xl [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+            <div className="[perspective:1200px] transition-all duration-700 ease-out">
+              <div className="[transform:rotateX(14deg)_scale(0.97)] hover:[transform:rotateX(4deg)_scale(1)] transition-transform duration-500 ease-out">
+                <div className="relative">
+                  <DashboardPreview />
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
