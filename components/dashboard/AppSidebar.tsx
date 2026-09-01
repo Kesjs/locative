@@ -11,7 +11,6 @@ import {
   SidebarFooter,
   SidebarRail,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -40,6 +39,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useBiens } from "@/lib/hooks/useBiens";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
@@ -61,6 +61,7 @@ import {
   Wallet,
   Globe,
   Users2,
+  ArrowRight,
 } from "lucide-react";
 
 interface SubItem {
@@ -80,14 +81,16 @@ interface NavItem {
 export const SIDEBAR_DATA = {
   teams: [
     {
-      name: "Patrimoine Lokka",
+      name: "Mon Patrimoine Personnel",
       logo: Building,
-      plan: "12 Biens · Pro",
+      plan: "Starter",
+      type: "personnel",
     },
     {
-      name: "SCI Paris Haussmann",
+      name: "SCI Familiale du Golfe",
       logo: Building2,
-      plan: "4 Biens · Diaspora",
+      plan: "SCI / Société",
+      type: "sci",
     },
   ],
 };
@@ -235,6 +238,9 @@ export function AppSidebar() {
   const { state, setOpenMobile, devRole } = useSidebar();
   const isCollapsed = state === "collapsed";
 
+  const { data: biens = [] } = useBiens();
+  const activeBiensCount = biens.filter((b) => !b.archive).length;
+
   const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -271,6 +277,11 @@ export function AppSidebar() {
     }
   };
 
+  // Calcul du quota selon le plan
+  const planMaxBiens = 3;
+  const planUsagePercent = Math.min(100, Math.round((activeBiensCount / planMaxBiens) * 100));
+  const isPlanFull = activeBiensCount >= planMaxBiens;
+
   return (
     <>
       <Sidebar
@@ -306,8 +317,8 @@ export function AppSidebar() {
                         isCollapsed ? "justify-center p-0" : "gap-2.5 px-2.5 py-1.5"
                       } rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer`}
                     >
-                      <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-white border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
-                        <img src={userProfile.customLogo || "/logo.png"} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                      <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
+                        <Building2 className="size-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       {!isCollapsed && (
                         <>
@@ -316,7 +327,7 @@ export function AppSidebar() {
                               {activeTeam.name}
                             </span>
                             <span className="truncate text-[10.5px] text-slate-500 dark:text-zinc-400 font-medium">
-                              {activeTeam.plan}
+                              {activeBiensCount} bien{activeBiensCount > 1 ? "s" : ""} · {activeTeam.plan}
                             </span>
                           </div>
                           <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
@@ -326,46 +337,42 @@ export function AppSidebar() {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
-                    className="w-56 rounded-lg p-1 shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 z-50 animate-in fade-in-50 zoom-in-95"
+                    className="w-60 rounded-lg p-1 shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 z-50 animate-in fade-in-50 zoom-in-95"
                     align="start"
                     side={isMobile ? "bottom" : "right"}
                     sideOffset={6}
                   >
                     <DropdownMenuLabel className="text-[10px] text-slate-400 dark:text-zinc-500 px-2 py-1 font-bold uppercase tracking-wider">
-                      {currentRole.toLowerCase().includes("agence") ? "Agences & Filiales" : "Patrimoines & Portefeuilles"}
+                      Vos Patrimoines &amp; SCI
                     </DropdownMenuLabel>
                     {SIDEBAR_DATA.teams.map((team, index) => (
                       <DropdownMenuItem
                         key={team.name}
                         onClick={() => setActiveTeam(team)}
-                        className="gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                        className={`gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer ${
+                          activeTeam.name === team.name
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold"
+                            : "text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                        }`}
                       >
-                        <div className="flex size-5 items-center justify-center rounded border border-slate-200 dark:border-zinc-700 bg-emerald-50 dark:bg-emerald-950/50">
+                        <div className="flex size-5 items-center justify-center rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
                           <team.logo className="size-3 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <span className="truncate flex-1 font-semibold">{team.name}</span>
+                        <span className="truncate flex-1">{team.name}</span>
                         <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
                     <DropdownMenuItem
                       onClick={() =>
-                        alert(
-                          currentRole.toLowerCase().includes("agence")
-                            ? "Ajout d'une filiale..."
-                            : "Ajout d'un nouveau patrimoine / SCI..."
-                        )
+                        alert("Pour ajouter une SCI ou un nouveau portefeuille dédié, rendez-vous dans vos Paramètres Patrimoine.")
                       }
                       className="gap-2 p-1.5 rounded-md text-[11.5px] font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
                     >
                       <div className="flex size-5 items-center justify-center rounded border border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800">
                         <Plus className="size-3 text-slate-600 dark:text-zinc-300" />
                       </div>
-                      <span>
-                        {currentRole.toLowerCase().includes("agence")
-                          ? "Ajouter une filiale"
-                          : "Ajouter une SCI / Portefeuille"}
-                      </span>
+                      <span>Ajouter une SCI / Portefeuille</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -374,15 +381,10 @@ export function AppSidebar() {
           )}
         </SidebarHeader>
 
-        {/* ─── 2. NAV GROUPS ─── */}
-        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-2 space-y-3">
-          <SidebarGroup>
-            {!isCollapsed && (
-              <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 px-2.5 py-1">
-                Navigation Principale
-              </SidebarGroupLabel>
-            )}
-            <SidebarMenu className="gap-1 mt-0.5">
+        {/* ─── 2. NAV GROUPS (SANS LABEL NAVIGATION PRINCIPALE) ─── */}
+        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-2 space-y-1">
+          <SidebarGroup className="p-0">
+            <SidebarMenu className="gap-1">
               {navItems.map((item) => {
                 const active = isLinkActive(item.url);
 
@@ -441,8 +443,51 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        {/* ─── 3. FOOTER : PROFIL UTILISATEUR ─── */}
-        <SidebarFooter className="border-t border-slate-200/80 dark:border-zinc-800/80 p-2">
+        {/* ─── 3. FOOTER : CARTE D'UPGRADE PLAN + PROFIL UTILISATEUR ─── */}
+        <SidebarFooter className="border-t border-slate-200/80 dark:border-zinc-800/80 p-2 space-y-2">
+          {/* Bloc Upgrade Plan */}
+          {!isCollapsed ? (
+            <div className="p-3 rounded-lg border border-emerald-200/80 dark:border-zinc-800 bg-emerald-50/50 dark:bg-zinc-900/60 shadow-2xs">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11.5px] font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  Plan Gratuit
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded">
+                  {activeBiensCount} / {planMaxBiens} biens
+                </span>
+              </div>
+              <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden mb-2.5">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    isPlanFull ? "bg-amber-500" : "bg-emerald-600"
+                  }`}
+                  style={{ width: `${planUsagePercent}%` }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/tarifs")}
+                className="w-full py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              >
+                <span>Passer à Pro</span>
+                <ArrowRight className="size-3" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-center mb-1">
+              <button
+                type="button"
+                onClick={() => router.push("/tarifs")}
+                className="size-8 rounded-lg bg-emerald-50 dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-zinc-800 flex items-center justify-center hover:bg-emerald-100 transition-colors cursor-pointer"
+                title={`Passer à Pro (${activeBiensCount}/${planMaxBiens} biens)`}
+              >
+                <Sparkles className="size-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Profil Utilisateur */}
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -501,11 +546,11 @@ export function AppSidebar() {
                       <span>Mon Compte &amp; Sécurité</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => router.push("/dashboard/parametres")}
+                      onClick={() => router.push("/tarifs")}
                       className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-800"
                     >
                       <Sparkles className="size-4 text-amber-500" />
-                      <span>Abonnement Pro</span>
+                      <span>Abonnement &amp; Facturation</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
