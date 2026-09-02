@@ -9,7 +9,6 @@ import {
   ColorTheme,
   ThemeMode,
   CurrencyMode,
-  DensityMode,
   COLOR_THEMES,
 } from "@/components/ui/sidebar";
 import {
@@ -41,8 +40,6 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setColorTheme,
     isPrivacyMode,
     togglePrivacyMode,
-    density,
-    setDensity,
     devRole,
     setDevRole,
   } = useSidebar();
@@ -68,7 +65,6 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setLayoutMode("push");
     setCurrency("fcfa");
     setColorTheme("emerald");
-    setDensity("comfort");
     setOpen(true);
   };
 
@@ -107,7 +103,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
             <div className="p-4 pb-3 border-b border-slate-200 dark:border-zinc-800 flex items-start justify-between">
               <div>
                 <h2 className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <SparklesIcon className="h-4 w-4" style={{ color: accentHex }} />
+                  <SparklesIcon className="h-4 w-4" style={{ color: "var(--brand-accent)" }} />
                   Personnalisation de l&apos;espace
                 </h2>
                 <p className="text-[12px] text-slate-500 dark:text-zinc-400 mt-0.5 leading-snug">
@@ -204,20 +200,20 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     type="button"
                     onClick={togglePrivacyMode}
                     className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    style={{ backgroundColor: isPrivacyMode ? accentHex : undefined }}
-                    data-state={isPrivacyMode ? "on" : "off"}
+                    style={{
+                      backgroundColor: isPrivacyMode ? "var(--brand-accent)" : undefined,
+                    }}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        isPrivacyMode ? "translate-x-4 bg-white" : "translate-x-0 bg-white"
-                      } ${!isPrivacyMode ? "bg-slate-300 dark:bg-zinc-700" : ""}`}
-                      style={!isPrivacyMode ? { backgroundColor: "#CBD5E1" } : undefined}
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        isPrivacyMode ? "translate-x-4" : "translate-x-0 bg-slate-400"
+                      }`}
                     />
                   </button>
                 </div>
               </div>
 
-              {/* SECTION 3: MODE DE THÈME */}
+              {/* SECTION 3: MODE DE THÈME AVEC MINIATURES DYNAMIQUES */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode de thème</span>
@@ -235,16 +231,18 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* System */}
                   <div onClick={() => handleThemeChange("system")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border ${
-                        theme === "system" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border"
                       style={{
                         background: "linear-gradient(135deg, #FFFFFF 50%, #0F172A 50%)",
-                        ...(theme === "system" ? selectedRingStyle : {}),
+                        borderColor: theme === "system" ? "var(--brand-accent)" : undefined,
+                        boxShadow: theme === "system" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {theme === "system" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -269,16 +267,18 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Light */}
                   <div onClick={() => handleThemeChange("light")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border ${
-                        theme === "light" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border"
                       style={{
                         backgroundColor: "#FFFFFF",
-                        ...(theme === "light" ? selectedRingStyle : {}),
+                        borderColor: theme === "light" ? "var(--brand-accent)" : undefined,
+                        boxShadow: theme === "light" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {theme === "light" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -298,16 +298,18 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Dark */}
                   <div onClick={() => handleThemeChange("dark")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border ${
-                        theme === "dark" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border"
                       style={{
                         backgroundColor: "#0A0A0A",
-                        ...(theme === "dark" ? selectedRingStyle : {}),
+                        borderColor: theme === "dark" ? "var(--brand-accent)" : undefined,
+                        boxShadow: theme === "dark" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {theme === "dark" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -344,21 +346,22 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Classique */}
                   <div onClick={() => handleSidebarChange("sidebar")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[54px] rounded-lg overflow-hidden transition-all flex border ${
-                        sidebarVariant === "sidebar" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[54px] rounded-lg overflow-hidden transition-all flex border"
                       style={{
                         backgroundColor: isDark ? "#121215" : "#FFFFFF",
-                        ...(sidebarVariant === "sidebar" ? selectedRingStyle : {}),
+                        borderColor: sidebarVariant === "sidebar" ? "var(--brand-accent)" : undefined,
+                        boxShadow: sidebarVariant === "sidebar" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {sidebarVariant === "sidebar" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      {/* Sidebar preview — couleur accent */}
-                      <div className="w-5 h-full shrink-0" style={{ backgroundColor: `${accentHex}E6` }} />
+                      <div className="w-5 h-full shrink-0" style={{ backgroundColor: "var(--brand-accent)" }} />
                       <div className="flex-1 p-1 flex flex-col gap-1 bg-slate-50 dark:bg-zinc-900">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 border border-slate-200 dark:border-zinc-800 rounded-xs bg-white dark:bg-zinc-950" />
@@ -370,20 +373,22 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Flottante */}
                   <div onClick={() => handleSidebarChange("floating")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border ${
-                        sidebarVariant === "floating" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border"
                       style={{
                         backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        ...(sidebarVariant === "floating" ? selectedRingStyle : {}),
+                        borderColor: sidebarVariant === "floating" ? "var(--brand-accent)" : undefined,
+                        boxShadow: sidebarVariant === "floating" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {sidebarVariant === "floating" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: `${accentHex}E6` }} />
+                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: "var(--brand-accent)" }} />
                       <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
@@ -395,20 +400,22 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Encadrée */}
                   <div onClick={() => handleSidebarChange("inset")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border ${
-                        sidebarVariant === "inset" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border"
                       style={{
                         backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        ...(sidebarVariant === "inset" ? selectedRingStyle : {}),
+                        borderColor: sidebarVariant === "inset" ? "var(--brand-accent)" : undefined,
+                        boxShadow: sidebarVariant === "inset" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {sidebarVariant === "inset" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: `${accentHex}E6` }} />
+                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: "var(--brand-accent)" }} />
                       <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900 shadow-xs">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
@@ -437,21 +444,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Overlay */}
                   <div onClick={() => handleLayoutChange("overlay")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border ${
-                        layoutMode === "overlay" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border"
                       style={{
                         backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        ...(layoutMode === "overlay" ? selectedRingStyle : {}),
+                        borderColor: layoutMode === "overlay" ? "var(--brand-accent)" : undefined,
+                        boxShadow: layoutMode === "overlay" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {layoutMode === "overlay" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
                       <div className="flex w-full h-full gap-1">
-                        <div className="w-1/3 h-full rounded shadow-md z-10" style={{ backgroundColor: `${accentHex}E6` }} />
+                        <div className="w-1/3 h-full rounded shadow-md z-10" style={{ backgroundColor: "var(--brand-accent)" }} />
                         <div className="w-2/3 h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 opacity-60" />
                       </div>
                     </div>
@@ -461,21 +470,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Push */}
                   <div onClick={() => handleLayoutChange("push")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border ${
-                        layoutMode === "push" || layoutMode === "default" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border"
                       style={{
                         backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        ...((layoutMode === "push" || layoutMode === "default") ? selectedRingStyle : {}),
+                        borderColor: (layoutMode === "push" || layoutMode === "default") ? "var(--brand-accent)" : undefined,
+                        boxShadow: (layoutMode === "push" || layoutMode === "default") ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {(layoutMode === "push" || layoutMode === "default") && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
                       <div className="flex w-full h-full gap-1">
-                        <div className="w-1/3 h-full rounded" style={{ backgroundColor: `${accentHex}E6` }} />
+                        <div className="w-1/3 h-full rounded" style={{ backgroundColor: "var(--brand-accent)" }} />
                         <div className="w-2/3 h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900" />
                       </div>
                     </div>
@@ -485,21 +496,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   {/* Full */}
                   <div onClick={() => handleLayoutChange("full")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border ${
-                        layoutMode === "full" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
-                      }`}
+                      className="relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border"
                       style={{
                         backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        ...(layoutMode === "full" ? selectedRingStyle : {}),
+                        borderColor: layoutMode === "full" ? "var(--brand-accent)" : undefined,
+                        boxShadow: layoutMode === "full" ? "0 0 0 2px var(--brand-accent)" : undefined,
                       }}
                     >
                       {layoutMode === "full" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
+                        <div
+                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
+                          style={{ backgroundColor: "var(--brand-accent)" }}
+                        >
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
                       <div className="w-full h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center">
-                        <div className="w-3/4 h-2 rounded opacity-60" style={{ backgroundColor: accentHex }} />
+                        <div className="w-3/4 h-2 rounded opacity-70" style={{ backgroundColor: "var(--brand-accent)" }} />
                       </div>
                     </div>
                     <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Full</span>
@@ -517,31 +530,29 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                     { id: "fcfa", label: "FCFA", sub: "Bénin / UEMOA" },
                     { id: "eur", label: "Euros (€)", sub: "Diaspora Europe" },
                     { id: "usd", label: "Dollars ($)", sub: "International" },
-                  ].map((curr) => (
-                    <button
-                      key={curr.id}
-                      type="button"
-                      onClick={() => setCurrency(curr.id as CurrencyMode)}
-                      className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                        currency === curr.id
-                          ? "font-bold"
-                          : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
-                      }`}
-                      style={
-                        currency === curr.id
-                          ? {
-                              borderColor: accentHex,
-                              backgroundColor: `${accentHex}12`,
-                              color: accentHex,
-                              boxShadow: `0 0 0 1px ${accentHex}`,
-                            }
-                          : {}
-                      }
-                    >
-                      <span className="text-[12px] block font-semibold">{curr.label}</span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-zinc-400 leading-none">{curr.sub}</span>
-                    </button>
-                  ))}
+                  ].map((curr) => {
+                    const isSelected = currency === curr.id;
+                    return (
+                      <button
+                        key={curr.id}
+                        type="button"
+                        onClick={() => setCurrency(curr.id as CurrencyMode)}
+                        className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? "font-bold shadow-2xs"
+                            : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
+                        }`}
+                        style={{
+                          borderColor: isSelected ? "var(--brand-accent)" : undefined,
+                          backgroundColor: isSelected ? "color-mix(in srgb, var(--brand-accent) 12%, transparent)" : undefined,
+                          color: isSelected ? "var(--brand-accent)" : undefined,
+                        }}
+                      >
+                        <span className="text-[12px] block font-semibold">{curr.label}</span>
+                        <span className="text-[9.5px] opacity-75 leading-none">{curr.sub}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

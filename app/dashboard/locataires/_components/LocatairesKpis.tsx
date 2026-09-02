@@ -10,7 +10,7 @@ export function LocatairesKpis({ leases }: { leases: LeaseWithDetails[] }) {
   const stats = useMemo(() => {
     const actifs = leases.filter((l) => l.is_active);
     const echeance60j = actifs.filter((l) => {
-      const j = joursAvantEcheanceBail(l);
+      const j = joursAvantEcheanceBail(l.end_date);
       return j !== null && j <= 60 && j >= 0;
     });
     const enRetard = actifs.filter((l) => (l.balance_due || 0) > 0);

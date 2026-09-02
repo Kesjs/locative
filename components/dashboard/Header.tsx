@@ -224,21 +224,21 @@ export default function Header({
           </div>
 
           {/* Right: Search + Notifications + Theme Toggler + Profile */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* 1. Global Search — icône seule sur mobile, barre complète sur sm+ */}
-            {/* Icône mobile uniquement */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* 1. Global Search — icône seule sur mobile (< sm), barre complète sur sm+ */}
             <button
               type="button"
               onClick={() => setIsSearchOpen(true)}
-              className="sm:hidden h-8.5 w-8.5 flex items-center justify-center bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-zinc-200 transition-all shadow-2xs cursor-pointer"
+              className="h-8.5 w-8.5 flex sm:hidden items-center justify-center bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-zinc-200 transition-all shadow-2xs cursor-pointer"
               title="Rechercher (⌘K)"
             >
               <MagnifyingGlassIcon className="h-4 w-4" />
             </button>
+
             {/* Barre complète desktop */}
             <div
               onClick={() => setIsSearchOpen(true)}
-              className="hidden sm:flex group relative items-center h-8.5 w-[210px] md:w-[250px] px-2.5 bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 rounded-lg transition-all shadow-2xs cursor-pointer"
+              className="group relative hidden sm:flex items-center h-8.5 w-[190px] md:w-[240px] px-2.5 bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 rounded-lg transition-all shadow-2xs cursor-pointer"
             >
               <MagnifyingGlassIcon className="h-4 w-4 text-slate-400 dark:text-zinc-400 transition-colors shrink-0" />
               <span className="ml-2 text-[12.5px] text-slate-500 dark:text-zinc-400 select-none truncate flex-1 font-medium">
@@ -319,7 +319,7 @@ export default function Header({
               className="h-8.5 w-8.5 border border-slate-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-[#18181B] cursor-pointer"
             />
 
-            {/* 5. Layout Customizer Button — desktop seulement */}
+            {/* 5. Layout Customizer Button (Desktop uniquement - masqué sur mobile) */}
             <button
               type="button"
               onClick={() => setIsCustomizerOpen(true)}

@@ -133,12 +133,12 @@ export function getNavItems(profileType: string): NavItem[] {
 
   // Profil Par Défaut : Propriétaire Bailleur
   return [
-    { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Logements & Locaux", url: "/dashboard/patrimoine", icon: Building2 },
-    { title: "Locataires & Baux", url: "/dashboard/locataires", icon: Users },
-    { title: "Loyers & Quittances", url: "/dashboard/loyers", icon: CreditCard },
-    { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Megaphone },
-    { title: "Maintenance & Artisans", url: "/dashboard/maintenance", icon: Wrench },
+    { title: "Accueil", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Logements", url: "/dashboard/patrimoine", icon: Building2 },
+    { title: "Locations", url: "/dashboard/locataires", icon: Users },
+    { title: "Loyers", url: "/dashboard/loyers", icon: CreditCard },
+    { title: "Vitrine", url: "/dashboard/annonces", icon: Megaphone },
+    { title: "Travaux", url: "/dashboard/maintenance", icon: Wrench },
     { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
   ];
 }

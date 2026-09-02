@@ -82,7 +82,7 @@ export function LocataireDetailDrawer({ lease, onClose }: LocataireDetailDrawerP
   const handleRenew = async () => {
     if (!lease || !renewDate) return;
     try {
-      await renewLease({ leaseId: lease.id, endDate: renewDate });
+      await renewLease({ leaseId: lease.id, newEndDate: renewDate });
       toast.success("Bail renouvelé");
       setShowRenew(false);
     } catch {
@@ -95,7 +95,13 @@ export function LocataireDetailDrawer({ lease, onClose }: LocataireDetailDrawerP
     const now = new Date();
     const period = now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
     try {
-      await recordPayment({ lease, amount: Number(paymentAmount), period });
+      await recordPayment({
+        lease_id: lease.id,
+        bien_id: lease.bien_id,
+        amount: Number(paymentAmount),
+        payment_method: "virement",
+        notes: period,
+      });
       toast.success("Paiement enregistré, quittance générée");
       setPaymentAmount("");
     } catch {
@@ -277,7 +283,7 @@ function BailTab({
 }) {
   const plafond = plafondCaution(lease.rent_amount);
   const cautionDepasse = (lease.deposit_amount || 0) > plafond;
-  const joursEcheance = joursAvantEcheanceBail(lease);
+  const joursEcheance = joursAvantEcheanceBail(lease.end_date);
 
   return (
     <div className="space-y-5">
@@ -391,7 +397,7 @@ function PaiementsTab({
 }) {
   const { data: ledger = [], isLoading: loadingLedger } = useRentLedger(lease.id);
   const { data: receipts = [], isLoading: loadingReceipts } = useReceipts(lease.id);
-  const statut = statutPaiement(lease);
+  const statut = statutPaiement(lease.balance_due || 0);
 
   return (
     <div className="space-y-5">

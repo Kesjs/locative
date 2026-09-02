@@ -51,7 +51,7 @@ export default function LocatairesPage() {
       key: "echeance",
       header: "Fin de bail",
       renderCell: (l: LeaseWithDetails) => {
-        const j = joursAvantEcheanceBail(l);
+        const j = joursAvantEcheanceBail(l.end_date);
         if (!l.end_date) return <span className="text-muted-foreground">Indéterminée</span>;
         return (
           <span className={j !== null && j <= 60 && j >= 0 ? "text-warning font-semibold" : "text-card-foreground"}>
@@ -64,16 +64,16 @@ export default function LocatairesPage() {
       key: "statut",
       header: "Statut",
       renderCell: (l: LeaseWithDetails) => {
-        const s = statutPaiement(l);
+        const s = statutPaiement(l.balance_due || 0);
         return (
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase border ${
-              s === "à jour"
+              s === "a_jour"
                 ? "bg-success/10 text-success border-success/20"
                 : "bg-destructive/10 text-destructive border-destructive/20"
             }`}
           >
-            {s === "retard" ? `Retard · ${l.balance_due.toLocaleString("fr-FR")} FCFA` : "À jour"}
+            {s === "retard" ? `Retard · ${(l.balance_due || 0).toLocaleString("fr-FR")} FCFA` : "À jour"}
           </span>
         );
       },

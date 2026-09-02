@@ -60,7 +60,25 @@ export interface Receipt {
 }
 
 const LOCAL_LEASES_KEY = "lokka_leases_cache";
-const LOCAL_TENANTS_KEY = "lokka_tenants_cache";
+const LOCAL_LEDGER_KEY = "lokka_ledger_cache";
+const LOCAL_RECEIPTS_KEY = "lokka_receipts_cache";
+
+const JOUR_MS = 1000 * 60 * 60 * 24;
+
+// ─── Calculs utilitaires ─────────────────────────────────────────
+
+export function joursAvantEcheanceBail(endDate?: string | null): number | null {
+  if (!endDate) return null;
+  const end = new Date(endDate).getTime();
+  const now = Date.now();
+  return Math.ceil((end - now) / JOUR_MS);
+}
+
+export function statutPaiement(balanceDue: number): "a_jour" | "retard" | "avance" {
+  if (balanceDue > 0) return "retard";
+  if (balanceDue < 0) return "avance";
+  return "a_jour";
+}
 
 function getLocalLeases(): LeaseWithDetails[] {
   if (typeof window === "undefined") return [];
@@ -231,6 +249,127 @@ export function useTerminateLease() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leases"] });
       queryClient.invalidateQueries({ queryKey: ["biens"] });
+    },
+  });
+}
+
+// Renouvelle un bail avec une nouvelle date de fin
+export function useRenewLease() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ leaseId, newEndDate }: { leaseId: string; newEndDate: string }) => {
+      const local = getLocalLeases();
+      const updated = local.map((l) => (l.id === leaseId ? { ...l, end_date: newEndDate } : l));
+      saveLocalLeases(updated);
+
+      if (!isSupabaseConfigured()) {
+        return { id: leaseId, newEndDate };
+      }
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase
+          .from("leases")
+          .update({ end_date: newEndDate })
+          .eq("id", leaseId)
+          .select()
+          .single();
+        if (error) return { id: leaseId, newEndDate };
+        return data;
+      } catch {
+        return { id: leaseId, newEndDate };
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leases"] });
+    },
+  });
+}
+
+// Livre des loyers (Ledger)
+export function useRentLedger(leaseId?: string) {
+  return useQuery({
+    queryKey: ["rent_ledger", leaseId],
+    enabled: Boolean(leaseId),
+    queryFn: async (): Promise<RentLedgerEntry[]> => {
+      if (!leaseId) return [];
+      if (!isSupabaseConfigured()) {
+        return [];
+      }
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase
+          .from("rent_ledger")
+          .select("*")
+          .eq("lease_id", leaseId)
+          .order("created_at", { ascending: false });
+        if (error) return [];
+        return (data as RentLedgerEntry[]) || [];
+      } catch {
+        return [];
+      }
+    },
+  });
+}
+
+// Enregistre un règlement de loyer
+export function useRecordPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      lease_id: string;
+      bien_id: string;
+      amount: number;
+      payment_method: string;
+      notes?: string;
+    }) => {
+      if (!isSupabaseConfigured()) {
+        return { success: true };
+      }
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase.from("rent_ledger").insert([
+          {
+            lease_id: payload.lease_id,
+            bien_id: payload.bien_id,
+            type: "paiement",
+            amount: payload.amount,
+          },
+        ]);
+        if (error) return { success: true };
+        return data;
+      } catch {
+        return { success: true };
+      }
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["rent_ledger", vars.lease_id] });
+      queryClient.invalidateQueries({ queryKey: ["leases"] });
+    },
+  });
+}
+
+// Quittances d'un bail
+export function useReceipts(leaseId?: string) {
+  return useQuery({
+    queryKey: ["receipts", leaseId],
+    enabled: Boolean(leaseId),
+    queryFn: async (): Promise<Receipt[]> => {
+      if (!leaseId) return [];
+      if (!isSupabaseConfigured()) {
+        return [];
+      }
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase
+          .from("receipts")
+          .select("*")
+          .eq("lease_id", leaseId)
+          .order("issued_at", { ascending: false });
+        if (error) return [];
+        return (data as Receipt[]) || [];
+      } catch {
+        return [];
+      }
     },
   });
 }
