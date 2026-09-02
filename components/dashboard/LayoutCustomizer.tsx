@@ -47,6 +47,9 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setDevRole,
   } = useSidebar();
 
+  // Récupère la couleur hex du thème actif pour l'utiliser dans les previews
+  const accentHex = COLOR_THEMES[colorTheme]?.hex ?? "#087F5B";
+
   const handleThemeChange = (newTheme: ThemeMode) => {
     setTheme(newTheme);
   };
@@ -75,11 +78,21 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
+  // Helpers styles réutilisables basés sur l'accent dynamique
+  const selectedRingStyle = {
+    outline: `2px solid ${accentHex}`,
+    outlineOffset: "1px",
+  };
+
+  const checkBadgeStyle = {
+    backgroundColor: accentHex,
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-black/20 transition-opacity flex justify-end">
-          {/* Backdrop Click (sans flou pour prévisualiser en direct) */}
+          {/* Backdrop Click */}
           <div className="flex-1 cursor-pointer" onClick={onClose} />
 
           {/* Drawer Panel */}
@@ -94,7 +107,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
             <div className="p-4 pb-3 border-b border-slate-200 dark:border-zinc-800 flex items-start justify-between">
               <div>
                 <h2 className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <SparklesIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <SparklesIcon className="h-4 w-4" style={{ color: accentHex }} />
                   Personnalisation de l&apos;espace
                 </h2>
                 <p className="text-[12px] text-slate-500 dark:text-zinc-400 mt-0.5 leading-snug">
@@ -112,7 +125,8 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
 
             {/* ─── 2. SECTIONS LIST ─── */}
             <div className="p-4 space-y-5 flex-1 overflow-y-auto">
-              {/* SECTION 1: COULEURS D'ACCENT MÉTIER (DYNAMIC SAAS PALETTES) */}
+
+              {/* SECTION 1: COULEURS D'ACCENT */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">
@@ -159,7 +173,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 2: MODE CONFIDENTIALITÉ & MASQUAGE DES LOYERS */}
+              {/* SECTION 2: MODE CONFIDENTIALITÉ */}
               <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-900/60">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -189,20 +203,21 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   <button
                     type="button"
                     onClick={togglePrivacyMode}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      isPrivacyMode ? "bg-emerald-600" : "bg-slate-300 dark:bg-zinc-700"
-                    }`}
+                    className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    style={{ backgroundColor: isPrivacyMode ? accentHex : undefined }}
+                    data-state={isPrivacyMode ? "on" : "off"}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        isPrivacyMode ? "translate-x-4" : "translate-x-0"
-                      }`}
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        isPrivacyMode ? "translate-x-4 bg-white" : "translate-x-0 bg-white"
+                      } ${!isPrivacyMode ? "bg-slate-300 dark:bg-zinc-700" : ""}`}
+                      style={!isPrivacyMode ? { backgroundColor: "#CBD5E1" } : undefined}
                     />
                   </button>
                 </div>
               </div>
 
-              {/* SECTION 3: MODE DE THÈME AVEC MINIATURES */}
+              {/* SECTION 3: MODE DE THÈME */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode de thème</span>
@@ -218,22 +233,18 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
 
                 <div className="grid grid-cols-3 gap-2">
                   {/* System */}
-                  <div
-                    onClick={() => handleThemeChange("system")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleThemeChange("system")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
-                        theme === "system"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border ${
+                        theme === "system" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
                       style={{
                         background: "linear-gradient(135deg, #FFFFFF 50%, #0F172A 50%)",
+                        ...(theme === "system" ? selectedRingStyle : {}),
                       }}
                     >
                       {theme === "system" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -256,20 +267,18 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </div>
 
                   {/* Light */}
-                  <div
-                    onClick={() => handleThemeChange("light")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleThemeChange("light")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
-                        theme === "light"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border ${
+                        theme === "light" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: "#FFFFFF" }}
+                      style={{
+                        backgroundColor: "#FFFFFF",
+                        ...(theme === "light" ? selectedRingStyle : {}),
+                      }}
                     >
                       {theme === "light" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -287,20 +296,18 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </div>
 
                   {/* Dark */}
-                  <div
-                    onClick={() => handleThemeChange("dark")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleThemeChange("dark")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between ${
-                        theme === "dark"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border ${
+                        theme === "dark" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: "#0A0A0A" }}
+                      style={{
+                        backgroundColor: "#0A0A0A",
+                        ...(theme === "dark" ? selectedRingStyle : {}),
+                      }}
                     >
                       {theme === "dark" && (
-                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -319,7 +326,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 4: DISPOSITION DE LA SIDEBAR */}
+              {/* SECTION 4: STYLE DU MENU */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Style du Menu</span>
@@ -335,24 +342,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
 
                 <div className="grid grid-cols-3 gap-2">
                   {/* Classique */}
-                  <div
-                    onClick={() => handleSidebarChange("sidebar")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleSidebarChange("sidebar")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[54px] rounded-lg overflow-hidden transition-all flex ${
-                        sidebarVariant === "sidebar"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[54px] rounded-lg overflow-hidden transition-all flex border ${
+                        sidebarVariant === "sidebar" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: isDark ? "#121215" : "#FFFFFF" }}
+                      style={{
+                        backgroundColor: isDark ? "#121215" : "#FFFFFF",
+                        ...(sidebarVariant === "sidebar" ? selectedRingStyle : {}),
+                      }}
                     >
                       {sidebarVariant === "sidebar" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-5 h-full shrink-0 bg-emerald-600/90" />
+                      {/* Sidebar preview — couleur accent */}
+                      <div className="w-5 h-full shrink-0" style={{ backgroundColor: `${accentHex}E6` }} />
                       <div className="flex-1 p-1 flex flex-col gap-1 bg-slate-50 dark:bg-zinc-900">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 border border-slate-200 dark:border-zinc-800 rounded-xs bg-white dark:bg-zinc-950" />
@@ -362,24 +368,22 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </div>
 
                   {/* Flottante */}
-                  <div
-                    onClick={() => handleSidebarChange("floating")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleSidebarChange("floating")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 ${
-                        sidebarVariant === "floating"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border ${
+                        sidebarVariant === "floating" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
+                      style={{
+                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
+                        ...(sidebarVariant === "floating" ? selectedRingStyle : {}),
+                      }}
                     >
                       {sidebarVariant === "floating" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-5 h-full rounded-md bg-emerald-600/90" />
+                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: `${accentHex}E6` }} />
                       <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
@@ -389,24 +393,22 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </div>
 
                   {/* Encadrée */}
-                  <div
-                    onClick={() => handleSidebarChange("inset")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleSidebarChange("inset")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 ${
-                        sidebarVariant === "inset"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border ${
+                        sidebarVariant === "inset" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
+                      style={{
+                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
+                        ...(sidebarVariant === "inset" ? selectedRingStyle : {}),
+                      }}
                     >
                       {sidebarVariant === "inset" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
-                      <div className="w-5 h-full rounded-md bg-emerald-600/90" />
+                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: `${accentHex}E6` }} />
                       <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900 shadow-xs">
                         <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
                         <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
@@ -417,7 +419,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                 </div>
               </div>
 
-              {/* SECTION 5: MODE D'AFFICHAGE (OVERLAY / PUSH / FULL) */}
+              {/* SECTION 5: MODE D'AFFICHAGE */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode d&apos;affichage</span>
@@ -433,25 +435,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
 
                 <div className="grid grid-cols-3 gap-2">
                   {/* Overlay */}
-                  <div
-                    onClick={() => handleLayoutChange("overlay")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleLayoutChange("overlay")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
-                        layoutMode === "overlay"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border ${
+                        layoutMode === "overlay" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
+                      style={{
+                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
+                        ...(layoutMode === "overlay" ? selectedRingStyle : {}),
+                      }}
                     >
                       {layoutMode === "overlay" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
                       <div className="flex w-full h-full gap-1">
-                        <div className="w-1/3 h-full rounded bg-emerald-600/90 shadow-md z-10" />
+                        <div className="w-1/3 h-full rounded shadow-md z-10" style={{ backgroundColor: `${accentHex}E6` }} />
                         <div className="w-2/3 h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 opacity-60" />
                       </div>
                     </div>
@@ -459,25 +459,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </div>
 
                   {/* Push */}
-                  <div
-                    onClick={() => handleLayoutChange("push")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleLayoutChange("push")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
-                        layoutMode === "push" || layoutMode === "default"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border ${
+                        layoutMode === "push" || layoutMode === "default" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
+                      style={{
+                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
+                        ...((layoutMode === "push" || layoutMode === "default") ? selectedRingStyle : {}),
+                      }}
                     >
                       {(layoutMode === "push" || layoutMode === "default") && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
                       <div className="flex w-full h-full gap-1">
-                        <div className="w-1/3 h-full rounded bg-emerald-600/90" />
+                        <div className="w-1/3 h-full rounded" style={{ backgroundColor: `${accentHex}E6` }} />
                         <div className="w-2/3 h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900" />
                       </div>
                     </div>
@@ -485,25 +483,23 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                   </div>
 
                   {/* Full */}
-                  <div
-                    onClick={() => handleLayoutChange("full")}
-                    className="cursor-pointer group flex flex-col items-center"
-                  >
+                  <div onClick={() => handleLayoutChange("full")} className="cursor-pointer group flex flex-col items-center">
                     <div
-                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 ${
-                        layoutMode === "full"
-                          ? "ring-2 ring-emerald-600 border-2 border-transparent"
-                          : "border border-slate-200 dark:border-zinc-700 hover:border-slate-400"
+                      className={`relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border ${
+                        layoutMode === "full" ? "border-transparent" : "border-slate-200 dark:border-zinc-700 hover:border-slate-400"
                       }`}
-                      style={{ backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5" }}
+                      style={{
+                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
+                        ...(layoutMode === "full" ? selectedRingStyle : {}),
+                      }}
                     >
                       {layoutMode === "full" && (
-                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] shadow-xs z-20">
+                        <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20" style={checkBadgeStyle}>
                           <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
                         </div>
                       )}
                       <div className="w-full h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center">
-                        <div className="w-3/4 h-2 rounded bg-emerald-600/60" />
+                        <div className="w-3/4 h-2 rounded opacity-60" style={{ backgroundColor: accentHex }} />
                       </div>
                     </div>
                     <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Full</span>
@@ -528,9 +524,19 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
                       onClick={() => setCurrency(curr.id as CurrencyMode)}
                       className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
                         currency === curr.id
-                          ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-600"
+                          ? "font-bold"
                           : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
                       }`}
+                      style={
+                        currency === curr.id
+                          ? {
+                              borderColor: accentHex,
+                              backgroundColor: `${accentHex}12`,
+                              color: accentHex,
+                              boxShadow: `0 0 0 1px ${accentHex}`,
+                            }
+                          : {}
+                      }
                     >
                       <span className="text-[12px] block font-semibold">{curr.label}</span>
                       <span className="text-[9.5px] text-slate-500 dark:text-zinc-400 leading-none">{curr.sub}</span>
