@@ -74,7 +74,7 @@ interface NavItem {
   url: string;
   icon: any;
   badge?: string;
-  badgeType?: "default" | "danger";
+  badgeType?: "default" | "danger" | "warning" | "soon";
   items?: SubItem[];
 }
 
@@ -105,7 +105,7 @@ export function getNavItems(profileType: string): NavItem[] {
       { title: "Portefeuille Biens", url: "/dashboard/patrimoine", icon: Building2 },
       { title: "Baux & Locataires", url: "/dashboard/locataires", icon: Users },
       { title: "Comptabilité & Reversements", url: "/dashboard/comptabilite", icon: Wallet },
-      { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Globe },
+      { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Globe, badge: "Bientôt", badgeType: "warning" },
       { title: "Maintenance & Artisans", url: "/dashboard/maintenance", icon: Wrench },
       { title: "Équipe & Agents", url: "/dashboard/equipe", icon: Users2 },
       { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
@@ -137,7 +137,7 @@ export function getNavItems(profileType: string): NavItem[] {
     { title: "Logements", url: "/dashboard/patrimoine", icon: Building2 },
     { title: "Locations", url: "/dashboard/locataires", icon: Users },
     { title: "Loyers", url: "/dashboard/loyers", icon: CreditCard },
-    { title: "Vitrine", url: "/dashboard/annonces", icon: Megaphone },
+    { title: "Vitrine", url: "/dashboard/annonces", icon: Megaphone, badge: "Bientôt", badgeType: "warning" },
     { title: "Travaux", url: "/dashboard/maintenance", icon: Wrench },
     { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
   ];
@@ -188,6 +188,8 @@ function CollapsibleNavItem({
             className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
               item.badgeType === "danger"
                 ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                : item.badgeType === "warning" || item.badgeType === "soon"
+                ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
                 : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700"
             }`}
           >
@@ -446,6 +448,8 @@ export function AppSidebar() {
                             className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                               item.badgeType === "danger"
                                 ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                                : item.badgeType === "warning" || item.badgeType === "soon"
+                                ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
                                 : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700"
                             }`}
                           >

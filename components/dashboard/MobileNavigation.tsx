@@ -169,9 +169,11 @@ export function MobileNavigation() {
                           <span className="truncate flex-1">{item.title}</span>
                           {item.badge && (
                             <span
-                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
                                 item.badgeType === "danger"
-                                  ? "bg-destructive text-destructive-foreground"
+                                  ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                                  : item.badgeType === "warning" || item.badgeType === "soon"
+                                  ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
                                   : "bg-muted text-foreground border border-border"
                               }`}
                             >

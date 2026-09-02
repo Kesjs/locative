@@ -1,292 +1,181 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  MegaphoneIcon,
-  PlusIcon,
-  ShareIcon,
-  EyeIcon,
-  CalendarDaysIcon,
-  EnvelopeIcon,
-  ChatBubbleLeftRightIcon,
-  CheckBadgeIcon,
-  ArrowTopRightOnSquareIcon,
-  PaintBrushIcon,
-  BuildingOffice2Icon,
-} from "@heroicons/react/24/outline";
-import { KpiCard } from "@/components/dashboard/shared/KpiCard";
-import { useAnnonces, useToggleAnnonceStatut, type Annonce } from "@/lib/hooks/useAnnonces";
-import { AddAnnonceModal } from "./_components/AddAnnonceModal";
-import { ShowcaseEmailModal } from "@/components/dashboard/ShowcaseEmailModal";
-import { VitrineStudio } from "./_components/VitrineStudio";
+  Megaphone,
+  Globe,
+  MessageSquare,
+  Calendar,
+  FileText,
+  Sparkles,
+  Clock,
+  Bell,
+  CheckCircle2,
+  ArrowLeft,
+  Share2,
+} from "lucide-react";
 
 export default function AnnoncesPage() {
-  const { data: annonces = [], isLoading } = useAnnonces();
-  const { mutateAsync: toggleStatut } = useToggleAnnonceStatut();
+  const [isNotified, setIsNotified] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"annonces" | "studio">("annonces");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedShowcase, setSelectedShowcase] = useState<any>(null);
-
-  // Statistics
-  const totalVues = annonces.reduce((acc, a) => acc + (a.vues || 0), 0);
-  const totalDemandes = annonces.reduce((acc, a) => acc + (a.demandes || 0), 0);
-  const annoncesActives = annonces.filter((a) => a.statut === "Active").length;
-
-  const publicVitrineUrl = "lokka.bj/p/patrimoine-lokka";
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://${publicVitrineUrl}`);
-    toast.success("Lien de votre vitrine copié dans le presse-papiers !");
+  const handleNotifyMe = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setIsNotified(true);
+      toast.success("C'est noté ! Vous serez alerté en avant-première lors de l'ouverture du module Annonces.");
+    }, 600);
   };
 
-  const handleOpenEmailModal = (annonce: Annonce) => {
-    setSelectedShowcase({
-      title: annonce.bien,
-      address: "Cotonou, Bénin",
-      type: "Appartement de standing",
-      rentAmount: 350000,
-      chargesAmount: 25000,
-      photoUrl: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-      features: ["Climatisation", "Compteur SBEE à carte", "Forage / Surpresseur", "Gardiennage"],
-      visitFee: 3000,
-      showcaseSlug: "patrimoine-lokka",
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-20 bg-muted/60 animate-pulse rounded-xl" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="h-28 bg-muted/60 animate-pulse rounded-xl" />
-          <div className="h-28 bg-muted/60 animate-pulse rounded-xl" />
-          <div className="h-28 bg-muted/60 animate-pulse rounded-xl" />
-        </div>
-      </div>
-    );
-  }
+  const upcomingFeatures = [
+    {
+      icon: Globe,
+      title: "Mini-Site Vitrine Personnalisé",
+      description: "Une page web publique élégante (ex: lokka.bj/p/votre-nom) présentant l'ensemble de vos logements disponibles avec photos, loyers et caractéristiques.",
+      color: "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
+      borderColor: "border-blue-200 dark:border-blue-900/50",
+    },
+    {
+      icon: MessageSquare,
+      title: "Diffusion WhatsApp & Réseaux Sociaux",
+      description: "Partagez vos fiches de location en 1 clic sur WhatsApp, Facebook et par email avec des messages pré-formatés et attractifs.",
+      color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
+      borderColor: "border-emerald-200 dark:border-emerald-900/50",
+    },
+    {
+      icon: Calendar,
+      title: "Prise de Rendez-vous de Visite",
+      description: "Permettez aux candidats locataires de réserver un créneau de visite en ligne avec qualification préalable de leur profil.",
+      color: "from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
+      borderColor: "border-amber-200 dark:border-amber-900/50",
+    },
+    {
+      icon: FileText,
+      title: "Affiches & Flyers PDF Instantanés",
+      description: "Génération automatique d'affiches « À Louer » au format PDF prêtes à imprimer ou à afficher sur vos portails et façades.",
+      color: "from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400",
+      borderColor: "border-purple-200 dark:border-purple-900/50",
+    },
+  ];
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[20px] font-extrabold text-foreground">Annonces &amp; Vitrine Publique</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
-            Publiez vos logements vacants, personnalisez votre mini-site et partagez vos fiches par Email / WhatsApp.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <a
-            href="/p/patrimoine-lokka"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-card hover:bg-muted border border-border rounded-lg text-[12.5px] font-bold text-foreground transition shadow-2xs"
-          >
-            <span>Voir mon mini-site</span>
-            <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
-          </a>
-          <button
-            type="button"
-            onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-[13px] font-bold hover:bg-primary/90 transition shadow-xs cursor-pointer"
-          >
-            <PlusIcon className="w-4 h-4" /> Créer une annonce
-          </button>
-        </div>
-      </div>
+    <div className="space-y-8 pb-16 max-w-5xl mx-auto">
+      {/* ─── BANNIÈRE PRINCIPALE : BIENTÔT DISPONIBLE ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="relative overflow-hidden rounded-2xl border border-amber-200/80 dark:border-amber-800/60 bg-gradient-to-br from-amber-500/5 via-background to-orange-500/5 p-6 sm:p-10 shadow-xs"
+      >
+        {/* Glow décoratif */}
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border">
-        <button
-          type="button"
-          onClick={() => setActiveTab("annonces")}
-          className={`pb-3 px-3 text-[13.5px] font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
-            activeTab === "annonces"
-              ? "text-primary border-primary"
-              : "text-muted-foreground border-transparent hover:text-foreground"
-          }`}
-        >
-          <MegaphoneIcon className="w-4 h-4" />
-          <span>Mes Annonces &amp; Demandes ({annonces.length})</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("studio")}
-          className={`pb-3 px-3 text-[13.5px] font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
-            activeTab === "studio"
-              ? "text-primary border-primary"
-              : "text-muted-foreground border-transparent hover:text-foreground"
-          }`}
-        >
-          <PaintBrushIcon className="w-4 h-4" />
-          <span>Studio &amp; Personnalisation de ma Vitrine</span>
-        </button>
-      </div>
-
-      {/* TAB 1: ANNONCES & DEMANDES */}
-      {activeTab === "annonces" && (
-        <div className="space-y-6 animate-in fade-in duration-150">
-          {/* KPIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <KpiCard
-              title="Annonces en ligne"
-              value={annoncesActives}
-              subtitle={`${annonces.length} annonce${annonces.length > 1 ? "s" : ""} au total`}
-              icon={MegaphoneIcon}
-              iconColor="blue"
-            />
-            <KpiCard
-              title="Vues totales générées"
-              value={totalVues}
-              subtitle="Visiteurs uniques sur vos fiches"
-              icon={EyeIcon}
-              iconColor="emerald"
-            />
-            <KpiCard
-              title="Demandes de visites"
-              value={totalDemandes}
-              subtitle="Prospects qualifiés enregistrés"
-              icon={CalendarDaysIcon}
-              iconColor="amber"
-            />
-          </div>
-
-          {/* Bloc Vitrine Publique */}
-          <div className="bg-card border border-border rounded-xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-[14.5px] font-bold text-card-foreground">Votre Mini-Site Vitrine Public</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-success/10 text-success">
-                  En ligne 🟢
-                </span>
-              </div>
-              <p className="text-[12.5px] text-muted-foreground">
-                Partagez ce lien unique avec vos prospects sur WhatsApp, Facebook ou par email pour recevoir des réservations de visite.
-              </p>
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11.5px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/80 shadow-2xs">
+                <Clock className="w-3.5 h-3.5" />
+                Module en préparation
+              </span>
+              <span className="text-[12px] font-medium text-muted-foreground">
+                Arrivée prévue dans la prochaine version
+              </span>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <code className="px-3.5 py-2 bg-muted border border-border rounded-lg text-[12.5px] text-foreground font-mono select-all">
-                {publicVitrineUrl}
-              </code>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-2.5">
+              <Megaphone className="w-7 h-7 text-amber-500" />
+              Annonces &amp; Vitrine Publique
+            </h1>
+
+            <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed">
+              Nous finalisons la suite marketing pour vous permettre de diffuser vos logements vacants,
+              générer votre mini-site vitrine et attirer des locataires qualifiés sans frais d'agence.
+            </p>
+          </div>
+
+          {/* Action CTA Box */}
+          <div className="w-full md:w-auto shrink-0 flex flex-col sm:flex-row md:flex-col gap-2.5">
+            {!isNotified ? (
               <button
                 type="button"
-                onClick={handleCopyLink}
-                className="p-2 bg-card border border-border rounded-lg hover:bg-muted text-foreground transition cursor-pointer shadow-2xs"
-                title="Copier le lien"
+                onClick={handleNotifyMe}
+                disabled={loading}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[13.5px] shadow-sm transition-all cursor-pointer hover:shadow-md active:scale-[0.98] disabled:opacity-60"
               >
-                <ShareIcon className="w-4 h-4" />
+                <Bell className="w-4 h-4" />
+                <span>{loading ? "Enregistrement..." : "M'avertir du lancement"}</span>
               </button>
-            </div>
-          </div>
-
-          {/* Liste des Annonces */}
-          <div className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
-            <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
-              <h2 className="text-[15px] font-bold text-card-foreground">Logements en Vitrine</h2>
-              <span className="text-[12px] text-muted-foreground font-medium">{annonces.length} annonce(s)</span>
-            </div>
-
-            {annonces.length === 0 ? (
-              <div className="text-center py-12 px-4">
-                <MegaphoneIcon className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                <h3 className="text-[14px] font-bold text-card-foreground mb-1">Aucune annonce publiée</h3>
-                <p className="text-[13px] text-muted-foreground mb-4">Créez votre première annonce pour commencer à recevoir des locataires.</p>
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-[13px] font-bold"
-                >
-                  Créer une annonce
-                </button>
-              </div>
             ) : (
-              <div className="divide-y divide-border">
-                {annonces.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-muted/30 transition-colors"
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <MegaphoneIcon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-[14.5px] text-card-foreground">{item.bien}</h3>
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                              item.statut === "Active"
-                                ? "bg-success/10 text-success"
-                                : item.statut === "Brouillon"
-                                ? "bg-warning/10 text-warning"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {item.statut}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-[12px] text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1">
-                            <EyeIcon className="w-3.5 h-3.5" /> {item.vues} vues
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <CalendarDaysIcon className="w-3.5 h-3.5" /> {item.demandes} demandes de visite
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 self-end sm:self-auto">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEmailModal(item)}
-                        className="px-3 py-1.5 bg-card hover:bg-muted text-card-foreground border border-border rounded-lg text-[12px] font-bold flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
-                      >
-                        <EnvelopeIcon className="w-3.5 h-3.5 text-primary" />
-                        <span>Envoyer la fiche (Email / Resend)</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toggleStatut({
-                            id: item.id,
-                            statut: item.statut === "Active" ? "Suspendue" : "Active",
-                          })
-                        }
-                        className="px-3 py-1.5 text-muted-foreground hover:text-foreground text-[12px] font-semibold transition"
-                      >
-                        {item.statut === "Active" ? "Suspendre" : "Activer"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[13px] font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <span>Vous serez prévenu(e) en priorité !</span>
               </div>
             )}
+
+            <Link
+              href="/dashboard"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-card hover:bg-muted border border-border text-foreground font-semibold text-[13px] transition cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Retour à l&apos;accueil</span>
+            </Link>
           </div>
         </div>
-      )}
+      </motion.div>
 
-      {/* TAB 2: STUDIO & PERSONNALISATION */}
-      {activeTab === "studio" && (
-        <div className="animate-in fade-in duration-150">
-          <VitrineStudio />
+      {/* ─── APERÇU DES FONCTIONNALITÉS EN COURS DE DÉVELOPPEMENT ─── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber-500" />
+          <h2 className="text-[17px] font-bold text-foreground">Ce qui arrive dans ce module</h2>
         </div>
-      )}
 
-      {/* Modals */}
-      <AddAnnonceModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
-      
-      {selectedShowcase && (
-        <ShowcaseEmailModal
-          isOpen={Boolean(selectedShowcase)}
-          onClose={() => setSelectedShowcase(null)}
-          propertyData={selectedShowcase}
-        />
-      )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {upcomingFeatures.map((feat, idx) => {
+            const Icon = feat.icon;
+            return (
+              <motion.div
+                key={feat.title}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.08 }}
+                className={`p-5 rounded-xl border bg-card/60 backdrop-blur-xs shadow-2xs space-y-2.5 transition-all hover:border-border hover:shadow-xs ${feat.borderColor}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 rounded-lg bg-gradient-to-br ${feat.color}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-[15px] font-bold text-card-foreground">{feat.title}</h3>
+                </div>
+                <p className="text-[13px] text-muted-foreground leading-relaxed">
+                  {feat.description}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ─── APERÇU DE LA VITRINE EN CHIFFRES / VISUEL ─── */}
+      <div className="p-6 rounded-2xl border border-dashed border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+        <div className="space-y-1">
+          <h4 className="text-[14px] font-bold text-foreground">Vous avez des logements disponibles dès maintenant ?</h4>
+          <p className="text-[12.5px] text-muted-foreground">
+            En attendant l&apos;ouverture de la vitrine, vous pouvez déjà enregistrer vos biens et vos baux dans l&apos;onglet Logements.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/patrimoine"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card hover:bg-muted border border-border text-[13px] font-bold text-foreground transition shadow-2xs shrink-0"
+        >
+          <Share2 className="w-3.5 h-3.5 text-primary" />
+          <span>Gérer mes logements</span>
+        </Link>
+      </div>
     </div>
   );
 }
