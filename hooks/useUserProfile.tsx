@@ -27,10 +27,15 @@ const DEFAULT_PROFILE: UserProfile = {
 
 const ROLE_LABELS: Record<string, string> = {
   bailleur: "Propriétaire Bailleur",
+  owner: "Propriétaire Bailleur",
   gestionnaire: "Gestionnaire",
+  manager: "Gestionnaire",
   agence: "Agence",
+  agency_admin: "Agence",
   locataire: "Locataire",
+  tenant: "Locataire",
   admin: "Administrateur",
+  super_admin: "Administrateur",
 };
 
 const PLAN_QUOTAS: Record<LokkaPlan, { current: number; max: number }> = {

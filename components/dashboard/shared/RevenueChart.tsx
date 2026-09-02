@@ -106,7 +106,11 @@ export function RevenueChart({
               tickLine={false}
               tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
               width={48}
-              tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`}
+              tickFormatter={(val) => {
+                if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+                if (val >= 1000) return `${Math.round(val / 1000)}k`;
+                return `${val}`;
+              }}
             />
             <Tooltip
               contentStyle={{
@@ -128,7 +132,7 @@ export function RevenueChart({
                 dataKey={key}
                 stackId="a"
                 fill={colors[i % colors.length]}
-                radius={i === dataKeys.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                radius={[6, 6, 0, 0]}
                 isAnimationActive={true}
                 animationDuration={600}
               />

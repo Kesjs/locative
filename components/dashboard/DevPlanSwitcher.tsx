@@ -16,6 +16,9 @@ export function DevPlanSwitcher() {
   const { plan, role, quotaBiens, switchDevPlan } = useUserProfile();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Sécurité : Ne jamais afficher le switcher en production
+  if (process.env.NODE_ENV === "production") return null;
+
   const PLANS: { id: LokkaPlan; name: string; price: string; role: string; desc: string; color: string }[] = [
     {
       id: "starter",
@@ -99,9 +102,17 @@ export function DevPlanSwitcher() {
             })}
           </div>
 
-          <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>Rôle actif : <strong>{role}</strong></span>
-            <span>Biens : <strong>{quotaBiens.current}/{quotaBiens.max}</strong></span>
+          <div className="pt-2 border-t border-border space-y-2">
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <span>Rôle actif : <strong>{role}</strong></span>
+              <span>Biens : <strong>{quotaBiens.current}/{quotaBiens.max}</strong></span>
+            </div>
+            <a
+              href="/locataire"
+              className="w-full py-1.5 px-3 rounded-lg bg-muted hover:bg-muted/80 text-[11px] font-bold text-foreground text-center block transition-colors border border-border"
+            >
+              Tester l'Espace Locataire
+            </a>
           </div>
         </div>
       )}

@@ -657,11 +657,11 @@ export const SidebarHeader = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="header"
+    className={cn("border-b border-border/80", className)}
     style={{
       display: "flex",
       flexDirection: "column",
       gap: 4,
-      marginBottom: 8,
       ...style,
     }}
     {...props}
@@ -676,6 +676,7 @@ export const SidebarFooter = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="footer"
+    className={cn("border-t border-border/80", className)}
     style={{
       marginTop: "auto",
       display: "flex",
@@ -695,6 +696,7 @@ export const SidebarContent = React.forwardRef<
   <div
     ref={ref}
     data-sidebar="content"
+    className={className}
     style={{
       flex: 1,
       overflowY: "auto",

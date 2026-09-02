@@ -97,4 +97,76 @@ export function useEncaisserLoyer() {
       queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
     },
   });
+export function useAddPaymentDirect() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      bien_nom: string;
+      locataire_nom: string;
+      montant: number;
+      methode: LoyerTransaction["methode"];
+      echeance?: string;
+    }) => {
+      const local = getLocalLoyers();
+      const newTx: LoyerTransaction = {
+        id: "tx_" + Date.now().toString(36),
+        bien_nom: payload.bien_nom,
+        locataire_nom: payload.locataire_nom,
+        montant: payload.montant,
+        methode: payload.methode,
+        statut: "payé",
+        date_reglement: new Date().toISOString(),
+        echeance: payload.echeance || new Date().toISOString().split("T")[0],
+      };
+      saveLocalLoyers([newTx, ...local]);
+
+      if (!isSupabaseConfigured()) {
+        return newTx;
+      }
+
+      const supabase = createClient();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        let orgId: string | null = null;
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", user.id)
+            .maybeSingle();
+          orgId = profile?.organization_id || null;
+        }
+
+        const insertPayload: Record<string, any> = {
+          bien_nom: payload.bien_nom,
+          locataire_nom: payload.locataire_nom,
+          montant: payload.montant,
+          methode: payload.methode,
+          statut: "payé",
+          date_reglement: new Date().toISOString(),
+          echeance: payload.echeance || new Date().toISOString().split("T")[0],
+        };
+        if (orgId) insertPayload.organization_id = orgId;
+
+        const { data, error } = await supabase
+          .from("loyers_transactions")
+          .insert([insertPayload])
+          .select()
+          .single();
+
+        if (error) {
+          console.warn("Direct payment insert notice:", error.message);
+          return newTx;
+        }
+        return data;
+      } catch (err) {
+        console.warn("Direct payment error:", err);
+        return newTx;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["loyers"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
+    },
+  });
 }

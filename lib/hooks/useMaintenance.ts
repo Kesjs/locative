@@ -32,10 +32,17 @@ export function useTickets() {
           .from("maintenance_tickets")
           .select("*")
           .order("created_at", { ascending: false });
-        if (error) {
+        if (error || !data) {
           return [];
         }
-        return (data as Ticket[]) || [];
+        return data.map((t: any) => ({
+          id: t.id,
+          titre: t.title || t.titre || "Incident",
+          bien: t.description || t.bien || "Bien concerné",
+          urgence: t.urgency === "high" ? "Haute" : t.urgency === "low" ? "Basse" : "Moyenne",
+          statut: t.status === "resolved" ? "Résolu" : t.status === "in_progress" ? "En cours" : "Nouveau",
+          created_at: t.created_at,
+        }));
       } catch {
         return [];
       }
@@ -52,10 +59,56 @@ export function useAddTicket() {
       }
       const supabase = createClient();
       try {
-        const { data, error } = await supabase.from("maintenance_tickets").insert([newTicket]).select().single();
-        if (error) return { ...newTicket, id: Date.now().toString() };
-        return data;
-      } catch {
+        const { data: { user } } = await supabase.auth.getUser();
+        let orgId: string | null = null;
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", user.id)
+            .maybeSingle();
+          orgId = profile?.organization_id || null;
+        }
+
+        const urgencyMap: Record<string, string> = {
+          Haute: "high",
+          Moyenne: "medium",
+          Basse: "low",
+        };
+        const statusMap: Record<string, string> = {
+          Nouveau: "open",
+          "En cours": "in_progress",
+          Résolu: "resolved",
+        };
+
+        const payload: Record<string, any> = {
+          title: newTicket.titre,
+          description: newTicket.bien,
+          urgency: urgencyMap[newTicket.urgence] || "medium",
+          status: statusMap[newTicket.statut] || "open",
+        };
+        if (orgId) payload.organization_id = orgId;
+
+        const { data, error } = await supabase
+          .from("maintenance_tickets")
+          .insert([payload])
+          .select()
+          .single();
+
+        if (error) {
+          console.warn("Ticket insert notice:", error.message);
+          return { ...newTicket, id: Date.now().toString() };
+        }
+        return {
+          id: data.id,
+          titre: data.title,
+          bien: data.description,
+          urgence: newTicket.urgence,
+          statut: newTicket.statut,
+          created_at: data.created_at,
+        };
+      } catch (err) {
+        console.warn("Ticket error:", err);
         return { ...newTicket, id: Date.now().toString() };
       }
     },

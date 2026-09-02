@@ -79,33 +79,55 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    const isAgency = state.profil.profileType === "agence";
+    const canonicalRole = isAgency ? "agency_admin" : "owner";
+
     try {
       if (isSupabaseConfigured()) {
         const supabase = createClient();
         const {
           data: { user },
         } = await supabase.auth.getUser();
+
         if (user) {
+          // 1. Tenter d'exécuter la RPC complete_onboarding_organization
+          const { error: rpcError } = await supabase.rpc("complete_onboarding_organization", {
+            p_name: state.profil.nom || (isAgency ? "Mon Agence Immobilière" : "Mon Portefeuille"),
+            p_type: isAgency ? "agency" : "owner",
+            p_portfolio_size: "1-5",
+            p_role: canonicalRole,
+          });
+
+          if (rpcError) {
+            console.warn("RPC complete_onboarding_organization notice:", rpcError.message);
+          }
+
+          // 2. Mettre à jour le profil avec le rôle canonique et onboarding_completed
           await supabase
             .from("profiles")
             .update({
               full_name: state.profil.nom,
-              role: state.profil.profileType,
+              role: canonicalRole,
               onboarding_completed: true,
             })
             .eq("id", user.id);
+
+          // Sauvegarder dans le localStorage pour l'UX client
           localStorage.setItem(
             "lokka_onboarding_objectifs",
             JSON.stringify(state.objectifs)
           );
+          localStorage.setItem("lokka_dev_role", isAgency ? "Agence" : "Propriétaire Bailleur");
+          localStorage.setItem("lokka_dev_plan", isAgency ? "agence" : "pro");
         }
       }
     } catch (err) {
       console.warn("Supabase onboarding sync notice:", err);
     }
+
     setTimeout(() => {
       router.push("/dashboard");
-    }, 900);
+    }, 800);
   };
 
   // Animation variants inspired by 21st.dev multistep pattern

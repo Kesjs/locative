@@ -18,11 +18,13 @@ export async function getPostAuthRedirect(fallbackEmail?: string): Promise<strin
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("onboarding_completed")
+    .select("role, onboarding_completed")
     .eq("id", user.id)
     .single();
 
   if (profile?.onboarding_completed) {
+    if (profile.role === "tenant") return "/dashboard/locataire";
+    if (profile.role === "super_admin") return "/admin";
     return "/dashboard";
   }
 

@@ -69,16 +69,13 @@ export default function Footer() {
           <span>
             © {new Date().getFullYear()} Lokka. Tous droits réservés · Conforme Loi n° 2022-30.
           </span>
-          <div className="flex gap-6">
-            {["Twitter", "LinkedIn", "GitHub"].map((social) => (
-              <a
-                key={social}
-                href="#"
-                className="hover:text-emerald-400 transition-colors duration-200 font-medium"
-              >
-                {social}
-              </a>
-            ))}
+          <div className="flex items-center gap-6">
+            <Link href="/confidentialite" className="hover:text-emerald-400 transition-colors duration-200">
+              Confidentialité
+            </Link>
+            <Link href="/conditions" className="hover:text-emerald-400 transition-colors duration-200">
+              Conditions d&apos;utilisation
+            </Link>
           </div>
         </div>
       </div>

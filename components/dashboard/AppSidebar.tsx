@@ -100,33 +100,33 @@ export function getNavItems(profileType: string): NavItem[] {
 
   if (norm.includes("agence")) {
     return [
-      { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Mandats & Propriétaires", url: "/dashboard/mandats", icon: Briefcase },
-      { title: "Portefeuille Biens", url: "/dashboard/patrimoine", icon: Building2 },
-      { title: "Baux & Locataires", url: "/dashboard/locataires", icon: Users },
-      { title: "Comptabilité & Reversements", url: "/dashboard/comptabilite", icon: Wallet },
-      { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Globe, badge: "Bientôt", badgeType: "warning" },
-      { title: "Maintenance & Artisans", url: "/dashboard/maintenance", icon: Wrench },
-      { title: "Équipe & Agents", url: "/dashboard/equipe", icon: Users2 },
+      { title: "Aperçu", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Mandats", url: "/dashboard/mandats", icon: Briefcase },
+      { title: "Lots", url: "/dashboard/patrimoine", icon: Building2 },
+      { title: "Locataires", url: "/dashboard/locataires", icon: Users },
+      { title: "Reversements", url: "/dashboard/comptabilite", icon: Wallet },
+      { title: "Vitrine", url: "/dashboard/annonces", icon: Globe, badge: "Bientôt", badgeType: "warning" },
+      { title: "Incidents", url: "/dashboard/maintenance", icon: Wrench },
+      { title: "Équipe", url: "/dashboard/equipe", icon: Users2 },
       { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
     ];
   }
 
   if (norm.includes("admin")) {
     return [
-      { title: "Vue Globale", url: "/dashboard/admin", icon: LayoutDashboard },
+      { title: "Global", url: "/dashboard/admin", icon: LayoutDashboard },
       { title: "Utilisateurs", url: "/dashboard/admin/utilisateurs", icon: Users },
       { title: "Abonnements", url: "/dashboard/admin/abonnements", icon: CreditCard },
-      { title: "Système & Logs", url: "/dashboard/admin/systeme", icon: Settings },
+      { title: "Système", url: "/dashboard/admin/systeme", icon: Settings },
     ];
   }
 
   if (norm.includes("locataire")) {
     return [
-      { title: "Mon Espace", url: "/dashboard/locataire", icon: LayoutDashboard },
-      { title: "Loyers & Quittances", url: "/dashboard/locataire/loyers", icon: CreditCard },
-      { title: "Mes Documents", url: "/dashboard/locataire/documents", icon: Globe },
-      { title: "Maintenance & Pannes", url: "/dashboard/locataire/maintenance", icon: Wrench },
+      { title: "Espace", url: "/dashboard/locataire", icon: LayoutDashboard },
+      { title: "Loyers", url: "/dashboard/locataire/loyers", icon: CreditCard },
+      { title: "Documents", url: "/dashboard/locataire/documents", icon: Globe },
+      { title: "Pannes", url: "/dashboard/locataire/maintenance", icon: Wrench },
       { title: "Paramètres", url: "/dashboard/locataire/parametres", icon: Settings },
     ];
   }
