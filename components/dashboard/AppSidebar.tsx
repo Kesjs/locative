@@ -292,7 +292,7 @@ export function AppSidebar() {
         className="border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121215] text-slate-900 dark:text-zinc-100 z-30"
       >
         {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE ─── */}
-        <SidebarHeader className="border-b border-slate-200/80 dark:border-zinc-800/80 p-2">
+        <SidebarHeader className="border-b border-slate-200 dark:border-zinc-800 p-2">
           {isNormalizedAdminOrLocataire ? (
             <div className="flex items-center gap-2.5 px-2.5 py-1.5 h-[44px] rounded-lg">
               <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-white border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
@@ -462,7 +462,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* ─── 3. FOOTER : CARTE D'UPGRADE PLAN + PROFIL UTILISATEUR ─── */}
-        <SidebarFooter className="border-t border-slate-200/80 dark:border-zinc-800/80 p-2 space-y-2">
+        <SidebarFooter className="border-t border-slate-200 dark:border-zinc-800 p-2 space-y-2">
           {/* Bloc Upgrade Plan Dynamique */}
           {!isCollapsed ? (
             <div

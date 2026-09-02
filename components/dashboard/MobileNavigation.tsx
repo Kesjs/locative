@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { XMarkIcon, ArrowLeftOnRectangleIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { useBiens } from "@/lib/hooks/useBiens";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export function MobileNavigation() {
   const router = useRouter();
@@ -30,7 +32,16 @@ export function MobileNavigation() {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const currentRole = devRole || userProfile.role || "bailleur";
-  const navItems = getNavItems(currentRole);
+  // On retire "Paramètres" de la nav mobile — accessible via "Réglages" en bas
+  const navItems = getNavItems(currentRole).filter(
+    (item) => item.title !== "Paramètres"
+  );
+
+  const { data: biens = [] } = useBiens();
+  const activeBiensCount = biens.filter((b) => !b.archive).length;
+  const planMaxBiens = 3;
+  const planUsagePercent = Math.min(100, Math.round((activeBiensCount / planMaxBiens) * 100));
+  const isPlanFull = activeBiensCount >= planMaxBiens;
   const isNormalizedAdminOrLocataire =
     currentRole.toLowerCase().includes("admin") || currentRole.toLowerCase().includes("locataire");
 
@@ -136,11 +147,8 @@ export function MobileNavigation() {
               </div>
 
               {/* ── NAVIGATION LIST: Matching Desktop Items ── */}
-              <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 sidebar-scrollbar">
+              <div className="flex-1 overflow-y-auto px-3 py-4 sidebar-scrollbar">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-3 mb-2">
-                    Navigation Principale
-                  </div>
                   <nav className="space-y-1">
                     {navItems.map((item) => {
                       const active = isLinkActive(item.url);
@@ -177,8 +185,53 @@ export function MobileNavigation() {
                 </div>
               </div>
 
-              {/* ── FOOTER: User Profile & Quick Logout ── */}
+              {/* ── FOOTER: Upgrade Plan + User Profile & Quick Logout ── */}
               <div className="border-t border-border p-3 bg-card shrink-0 space-y-2">
+                {/* Bloc Upgrade Plan */}
+                <div
+                  className="p-3 rounded-xl border shadow-xs transition-colors"
+                  style={{
+                    borderColor: "color-mix(in srgb, var(--brand-accent) 25%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--brand-accent) 6%, transparent)",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11.5px] font-bold text-foreground flex items-center gap-1.5">
+                      <Sparkles className="size-3.5" style={{ color: "var(--brand-accent)" }} />
+                      Plan Gratuit
+                    </span>
+                    <span
+                      className="text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                      style={{
+                        color: "var(--brand-accent)",
+                        borderColor: "color-mix(in srgb, var(--brand-accent) 30%, transparent)",
+                        backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
+                      }}
+                    >
+                      {activeBiensCount} / {planMaxBiens} biens
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden mb-2.5">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${planUsagePercent}%`,
+                        backgroundColor: isPlanFull ? "#F59E0B" : "var(--brand-accent)",
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { router.push("/tarifs"); handleClose(); }}
+                    className="w-full py-1.5 px-2.5 text-white text-[11.5px] font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:opacity-90 active:scale-[0.98]"
+                    style={{ backgroundColor: "var(--brand-accent)" }}
+                  >
+                    <span>Passer à Pro</span>
+                    <ArrowRight className="size-3" />
+                  </button>
+                </div>
+
+                {/* Profil utilisateur */}
                 <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/40 border border-border">
                   <Avatar className="h-9 w-9 rounded-full border border-border shrink-0">
                     <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
