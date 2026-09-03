@@ -15,6 +15,7 @@ import { UrgentActionsList, type UrgentActionItem } from "@/components/dashboard
 import { AddBienModal } from "@/app/dashboard/patrimoine/_components/AddBienModal";
 import { AddPaiementModal } from "@/app/dashboard/loyers/_components/AddPaiementModal";
 import { AddTicketModal } from "@/app/dashboard/maintenance/_components/AddTicketModal";
+import DashboardLoading from "./loading";
 import { ArrowRightIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import {
   Wallet,
@@ -168,20 +169,7 @@ export default function DashboardPage() {
   const isLoading = isLoadingBiens || isLoadingLoyers || isLoadingLeases || isLoadingTickets;
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 pb-12">
-        <div className="h-24 bg-muted/60 animate-pulse rounded-2xl" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="h-32 bg-muted/60 animate-pulse rounded-xl" />
-          <div className="h-32 bg-muted/60 animate-pulse rounded-xl" />
-          <div className="h-32 bg-muted/60 animate-pulse rounded-xl" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-72 bg-muted/60 animate-pulse rounded-xl" />
-          <div className="h-72 bg-muted/60 animate-pulse rounded-xl" />
-        </div>
-      </div>
-    );
+    return <DashboardLoading />;
   }
 
   // Vue Agence
