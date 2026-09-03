@@ -97,6 +97,8 @@ export function useEncaisserLoyer() {
       queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
     },
   });
+}
+
 export function useAddPaymentDirect() {
   const queryClient = useQueryClient();
   return useMutation({

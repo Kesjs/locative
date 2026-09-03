@@ -522,7 +522,7 @@ export default function DashboardPage() {
                 <div className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-bold text-muted-foreground group-hover:text-foreground">
                   <span>Explorer</span> <ArrowRightIcon className="w-3.5 h-3.5" />
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
 
