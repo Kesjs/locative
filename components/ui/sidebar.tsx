@@ -8,91 +8,60 @@ import { cn } from "@/lib/utils";
 const SIDEBAR_WIDTH = "240px";
 const SIDEBAR_WIDTH_ICON = "68px";
 
+import {
+  applyAccentColor,
+  applyThemeMode,
+} from "@/lib/theme/color-utils";
+
 export type SidebarVariant = "sidebar" | "floating" | "inset";
 export type LayoutMode = "overlay" | "push" | "full" | "default";
 export type ThemeMode = "system" | "light" | "dark";
 export type CurrencyMode = "fcfa" | "eur" | "usd";
 export type DensityMode = "comfort" | "compact";
+export type NavLayoutMode = "sidebar" | "topnav";
 export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
 export const SIDEBAR_COOKIE_NAME = "lokka:sidebar";
 export type ColorTheme =
-  | "emerald"
-  | "blue"
   | "amber"
+  | "blue"
+  | "indigo"
   | "violet"
-  | "terracotta"
+  | "emerald"
   | "cyan"
-  | "rose"
-  | "zinc";
+  | "custom";
 export type MobileNavVariant = "island" | "dynamic" | "fullscreen";
 
 export const COLOR_THEMES: Record<
   ColorTheme,
-  { name: string; hex: string; primaryHsl: string; ringHsl: string; hoverHsl: string; lightHsl: string }
+  { name: string; hex: string }
 > = {
-  emerald: {
-    name: "Émeraude Bénin",
-    hex: "#059669",
-    primaryHsl: "160 84% 39%",
-    ringHsl: "160 84% 39%",
-    hoverHsl: "160 84% 30%",
-    lightHsl: "150 60% 96%",
+  amber: {
+    name: "Ambre Lokka",
+    hex: "#F59E0B",
   },
   blue: {
-    name: "Cobalt Moderne",
-    hex: "#2563EB",
-    primaryHsl: "217 91% 60%",
-    ringHsl: "217 91% 60%",
-    hoverHsl: "217 91% 48%",
-    lightHsl: "214 100% 97%",
+    name: "Bleu",
+    hex: "#3B82F6",
   },
-  amber: {
-    name: "Or Royal",
-    hex: "#D97706",
-    primaryHsl: "38 92% 50%",
-    ringHsl: "38 92% 50%",
-    hoverHsl: "38 92% 40%",
-    lightHsl: "48 100% 96%",
+  indigo: {
+    name: "Indigo",
+    hex: "#6366F1",
   },
   violet: {
-    name: "Violet Iris",
-    hex: "#7C3AED",
-    primaryHsl: "262 83% 58%",
-    ringHsl: "262 83% 58%",
-    hoverHsl: "262 83% 48%",
-    lightHsl: "270 100% 98%",
+    name: "Violet",
+    hex: "#8B5CF6",
   },
-  terracotta: {
-    name: "Terracotta Havana",
-    hex: "#EA580C",
-    primaryHsl: "21 90% 48%",
-    ringHsl: "21 90% 48%",
-    hoverHsl: "21 90% 38%",
-    lightHsl: "24 100% 97%",
+  emerald: {
+    name: "Émeraude",
+    hex: "#10B981",
   },
   cyan: {
-    name: "Cyan Océan",
-    hex: "#0891B2",
-    primaryHsl: "192 91% 36%",
-    ringHsl: "192 91% 36%",
-    hoverHsl: "192 91% 28%",
-    lightHsl: "186 100% 97%",
+    name: "Cyan",
+    hex: "#06B6D4",
   },
-  rose: {
-    name: "Rubis Rose",
-    hex: "#E11D48",
-    primaryHsl: "347 77% 50%",
-    ringHsl: "347 77% 50%",
-    hoverHsl: "347 77% 40%",
-    lightHsl: "350 100% 97%",
-  },
-  zinc: {
-    name: "Monochrome Zinc",
-    hex: "#0F172A",
-    primaryHsl: "222 47% 11%",
-    ringHsl: "222 47% 11%",
-    hoverHsl: "222 47% 20%",
-    lightHsl: "240 5% 96%",
+  custom: {
+    name: "Personnalisée",
+    hex: "#F59E0B",
   },
 };
 
@@ -108,12 +77,16 @@ type SidebarContext = {
   setVariant: (v: SidebarVariant) => void;
   layoutMode: LayoutMode;
   setLayoutMode: (l: LayoutMode) => void;
+  navLayout: NavLayoutMode;
+  setNavLayout: (n: NavLayoutMode) => void;
   theme: ThemeMode;
   setTheme: (t: ThemeMode) => void;
   currency: CurrencyMode;
   setCurrency: (c: CurrencyMode) => void;
   colorTheme: ColorTheme;
   setColorTheme: (c: ColorTheme) => void;
+  customColorHex: string;
+  setCustomColorHex: (hex: string) => void;
   isPrivacyMode: boolean;
   setIsPrivacyMode: (v: boolean | ((prev: boolean) => boolean)) => void;
   togglePrivacyMode: () => void;
@@ -177,35 +150,22 @@ export const SidebarProvider = React.forwardRef<
     // Dynamic preferences
     const [variant, setVariantState] = React.useState<SidebarVariant>("sidebar");
     const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("push");
-    const [theme, setThemeState] = React.useState<ThemeMode>("light");
+    const [navLayout, setNavLayoutState] = React.useState<NavLayoutMode>("sidebar");
+    const [theme, setThemeState] = React.useState<ThemeMode>("dark");
     const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
-    const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("emerald");
+    const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("amber");
+    const [customColorHex, setCustomColorHexState] = React.useState<string>("#F59E0B");
     const [isPrivacyMode, setIsPrivacyMode] = React.useState<boolean>(false);
     const [density, setDensityState] = React.useState<DensityMode>("comfort");
     const [mobileNavVariant, _setMobileNavVariant] = React.useState<MobileNavVariant>("dynamic");
     const [devRole, _setDevRole] = React.useState<DevRole>("bailleur");
 
-    const applyColor = (c: ColorTheme) => {
-      const pal = COLOR_THEMES[c] || COLOR_THEMES.emerald;
-      if (typeof document !== "undefined") {
-        document.documentElement.style.setProperty("--primary", pal.primaryHsl);
-        document.documentElement.style.setProperty("--ring", pal.ringHsl);
-        document.documentElement.style.setProperty("--brand-accent", pal.hex);
-        document.documentElement.style.setProperty("--color-brand-primary", pal.hex);
+    const applyColor = (c: ColorTheme, customHex?: string) => {
+      let hex = COLOR_THEMES[c]?.hex || COLOR_THEMES.amber.hex;
+      if (c === "custom" && customHex) {
+        hex = customHex;
       }
-    };
-
-    const applyThemeClass = (t: ThemeMode) => {
-      if (typeof document === "undefined") return;
-      if (t === "dark") {
-        document.documentElement.classList.add("dark");
-      } else if (t === "light") {
-        document.documentElement.classList.remove("dark");
-      } else if (t === "system") {
-        const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        if (isDark) document.documentElement.classList.add("dark");
-        else document.documentElement.classList.remove("dark");
-      }
+      applyAccentColor(hex);
     };
 
     React.useEffect(() => {
@@ -221,23 +181,31 @@ export const SidebarProvider = React.forwardRef<
           }
         }
 
+        const nl = localStorage.getItem("lokka_pref_nav_layout") as NavLayoutMode;
+        if (nl === "sidebar" || nl === "topnav") setNavLayoutState(nl);
+
         const th = localStorage.getItem("lokka_pref_theme") as ThemeMode;
         if (th === "system" || th === "light" || th === "dark") {
           setThemeState(th);
-          applyThemeClass(th);
+          applyThemeMode(th);
         } else {
-          applyThemeClass("light");
+          setThemeState("dark");
+          applyThemeMode("dark");
         }
 
         const cu = localStorage.getItem("lokka_pref_currency") as CurrencyMode;
         if (cu === "fcfa" || cu === "eur" || cu === "usd") setCurrencyState(cu);
 
+        const custHex = localStorage.getItem("lokka_pref_custom_hex");
+        if (custHex) setCustomColorHexState(custHex);
+
         const co = localStorage.getItem("lokka_pref_color") as ColorTheme;
         if (co && COLOR_THEMES[co]) {
           _setColorTheme(co);
-          applyColor(co);
+          applyColor(co, custHex || undefined);
         } else {
-          applyColor("emerald");
+          _setColorTheme("amber");
+          applyColor("amber");
         }
 
         const pm = localStorage.getItem("lokka_pref_privacy");
@@ -262,8 +230,7 @@ export const SidebarProvider = React.forwardRef<
       if (theme === "system") {
         const mq = window.matchMedia("(prefers-color-scheme: dark)");
         const handler = (e: MediaQueryListEvent) => {
-          if (e.matches) document.documentElement.classList.add("dark");
-          else document.documentElement.classList.remove("dark");
+          applyThemeMode("system");
         };
         mq.addEventListener("change", handler);
         return () => mq.removeEventListener("change", handler);
@@ -291,11 +258,18 @@ export const SidebarProvider = React.forwardRef<
       }
     };
 
+    const setNavLayout = (n: NavLayoutMode) => {
+      setNavLayoutState(n);
+      try {
+        localStorage.setItem("lokka_pref_nav_layout", n);
+      } catch (_) {}
+    };
+
     const setTheme = (t: ThemeMode) => {
       setThemeState(t);
       try {
         localStorage.setItem("lokka_pref_theme", t);
-        applyThemeClass(t);
+        applyThemeMode(t);
       } catch (_) {}
     };
 
@@ -310,7 +284,17 @@ export const SidebarProvider = React.forwardRef<
       _setColorTheme(c);
       try {
         localStorage.setItem("lokka_pref_color", c);
-        applyColor(c);
+        applyColor(c, customColorHex);
+      } catch (_) {}
+    };
+
+    const setCustomColorHex = (hex: string) => {
+      setCustomColorHexState(hex);
+      _setColorTheme("custom");
+      try {
+        localStorage.setItem("lokka_pref_custom_hex", hex);
+        localStorage.setItem("lokka_pref_color", "custom");
+        applyAccentColor(hex);
       } catch (_) {}
     };
 
@@ -366,12 +350,16 @@ export const SidebarProvider = React.forwardRef<
         setVariant,
         layoutMode,
         setLayoutMode,
+        navLayout,
+        setNavLayout,
         theme,
         setTheme,
         currency,
         setCurrency,
         colorTheme,
         setColorTheme,
+        customColorHex,
+        setCustomColorHex,
         isPrivacyMode,
         setIsPrivacyMode,
         togglePrivacyMode,
@@ -392,12 +380,15 @@ export const SidebarProvider = React.forwardRef<
         toggleSidebar,
         variant,
         layoutMode,
+        navLayout,
         theme,
         currency,
         colorTheme,
+        customColorHex,
         isPrivacyMode,
         density,
         mobileNavVariant,
+        devRole,
       ]
     );
 

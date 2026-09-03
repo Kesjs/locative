@@ -7,50 +7,66 @@
   --font-serif: 'Instrument Serif', 'Georgia', serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ─── Standard Shadcn & Lokka Semantic Theme Tokens ─── */
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--success-foreground));
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--warning-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+  /* ─── Surfaces & Layout Tokens ─── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-hover: var(--surface-hover);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-  /* ─── Dynamic Brand Accent Tokens ─── */
-  --color-brand-primary: hsl(var(--primary));
-  --color-brand-hover: hsl(160 84% 30%);
-  --color-brand-light: hsl(150 60% 96%);
-  --color-brand-text: hsl(var(--primary-foreground));
+  /* ─── Primary Accent & Interactive Tokens ─── */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-border: var(--primary-border);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+  --color-accent: var(--primary-subtle);
+  --color-accent-foreground: var(--primary);
 
-  /* ─── Semantic Aliases ─── */
-  --color-emerald-deep: hsl(160 84% 39%);
-  --color-sage-soft: hsl(150 60% 96%);
-  --shadow-product-stage: 0 28px 72px rgba(15, 23, 42, 0.12), 0 8px 20px rgba(15, 23, 42, 0.06);
-  --shadow-card: var(--shadow-card);
-  --shadow-card-hover: var(--shadow-card-hover);
-  --shadow-modal: var(--shadow-modal);
+  /* ─── Typography Tokens ─── */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-disabled: var(--text-disabled);
+  --color-muted: var(--surface-secondary);
+  --color-muted-foreground: var(--text-secondary);
 
-  /* ─── Semantic Radius (Sobres et standardisés) ─── */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 2px);
+  /* ─── Borders & Inputs ─── */
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-input: var(--border);
+
+  /* ─── Domain Business Statuses (Indépendants du thème d'accent) ─── */
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-foreground: var(--info-foreground);
+
+  /* ─── Semantic Radius ─── */
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 /* Masque la scrollbar tout en gardant le scroll fonctionnel */
@@ -64,125 +80,115 @@
 
 /* ─── ROOT DESIGN TOKENS (LIGHT THEME) ─── */
 :root {
-  --background: 0 0% 98%; /* #FAFAFA Canvas clair sobre */
-  --foreground: 222 47% 11%; /* #0F172A Ardoise sombre haute lisibilité */
-  --card: 0 0% 100%; /* #FFFFFF Blanc pur */
-  --card-foreground: 222 47% 11%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --primary: 160 84% 39%; /* #059669 Vert Émeraude */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 20% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 20% 96%; /* #F1F5F9 */
-  --muted-foreground: 215 25% 38%; /* #475569 Texte secondaire lisible */
-  --accent: 150 60% 96%; /* #ECFDF5 */
-  --accent-foreground: 160 84% 28%;
-  --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-  --destructive: 347 77% 50%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 220 13% 91%; /* #E2E8F0 */
-  --input: 220 13% 91%;
-  --ring: 160 84% 39%;
-  --radius: 0.5rem; /* 8px standard shadcn (pas d'arrondi excessif) */
+  /* Hiérarchie douce sans "white everywhere" */
+  --background: #F7F7F8;
+  --foreground: #18181B;
+  --sidebar: #FFFFFF;
+  --sidebar-border: #E4E4E7;
+  --surface: #FFFFFF;
+  --surface-secondary: #F4F4F5;
+  --surface-elevated: #FFFFFF;
+  --surface-hover: #F0F0F2;
+  --card: #FFFFFF;
+  --card-foreground: #18181B;
+  --popover: #FFFFFF;
+  --popover-foreground: #18181B;
 
-  /* Surfaces & Dynamic Aliases */
-  --bg-canvas: hsl(var(--background));
-  --bg-surface: hsl(var(--card));
-  --bg-surface-elevated: hsl(var(--card));
-  --bg-subtle: hsl(var(--accent));
-  --bg-muted: hsl(var(--muted));
-  --bg-sidebar: hsl(var(--card));
-  --bg-header: hsl(var(--background));
-  --bg-input: hsl(var(--input));
+  /* Textes */
+  --text-primary: #18181B;
+  --text-secondary: #52525B;
+  --text-tertiary: #71717A;
+  --text-disabled: #A1A1AA;
+  --muted: #F4F4F5;
+  --muted-foreground: #52525B;
 
-  /* Typography Aliases */
-  --text-primary: hsl(var(--foreground));
-  --text-secondary: hsl(var(--muted-foreground));
-  --text-muted: hsl(var(--muted-foreground));
-  --text-inverse: hsl(var(--background));
+  /* Bordures */
+  --border: #E4E4E7;
+  --border-subtle: #F0F0F2;
+  --input: #E4E4E7;
 
-  /* Borders & Dividers */
-  --border-subtle: hsl(var(--border));
-  --border-default: hsl(var(--border));
-  --border-strong: hsl(var(--border));
-  --sidebar-border: hsl(var(--border));
+  /* Couleur d'accent dynamique (Ambre #F59E0B par défaut pour Lokka) */
+  --primary: #F59E0B;
+  --primary-hover: #D97706;
+  --primary-active: #B45309;
+  --primary-subtle: rgba(245, 158, 11, 0.12);
+  --primary-border: rgba(245, 158, 11, 0.25);
+  --primary-foreground: #000000;
+  --ring: #F59E0B;
 
-  /* Shadows */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
-  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  /* Couleurs Métier Sanctuarisées */
+  --success: #22C55E;
+  --success-subtle: rgba(34, 197, 94, 0.12);
+  --success-foreground: #FFFFFF;
+  --warning: #F59E0B;
+  --warning-subtle: rgba(245, 158, 11, 0.12);
+  --warning-foreground: #000000;
+  --danger: #EF4444;
+  --danger-subtle: rgba(239, 68, 68, 0.12);
+  --danger-foreground: #FFFFFF;
+  --info: #3B82F6;
+  --info-subtle: rgba(59, 130, 246, 0.12);
+  --info-foreground: #FFFFFF;
 
-  /* Interactive States */
-  --hover-bg: hsl(var(--muted));
-  --active-bg: hsl(var(--muted));
+  --radius: 0.5rem;
 }
 
-/* ─── DARK THEME (VRAI NOIR PROFOND & PUR ZINC / SLATE - SANS TEINTE VERTE DANS LE NOIR) ─── */
+/* ─── DARK THEME (SANS NOIR PUR #000000, HIÉRARCHIE DE SURFACES SAAS MODERNE) ─── */
 .dark {
-  --background: 0 0% 3.9%; /* #0A0A0A Noir profond pur */
-  --foreground: 0 0% 98%; /* #FAFAFA Blanc pur éclatant */
-  --card: 240 5.9% 10%; /* #18181B / #121214 Carte sombre sobre et élégante */
-  --card-foreground: 0 0% 98%;
-  --popover: 240 5.9% 10%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 160 84% 39%; /* #059669 Vert Émeraude vif réservé aux actions */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 240 3.7% 15.9%; /* #27272A */
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%; /* #27272A */
-  --muted-foreground: 240 5% 64.9%; /* #A1A1AA Texte secondaire clair et neutre */
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-  --destructive: 347 77% 55%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 240 3.7% 15.9%; /* #27272A Bordure neutre sombre */
-  --input: 240 3.7% 15.9%;
-  --ring: 160 84% 39%;
+  --background: #0B0B0D;
+  --foreground: #FAFAFA;
+  --sidebar: #111113;
+  --sidebar-border: #27272A;
+  --surface: #18181B;
+  --surface-secondary: #1F1F23;
+  --surface-elevated: #1F1F23;
+  --surface-hover: #27272A;
+  --card: #18181B;
+  --card-foreground: #FAFAFA;
+  --popover: #18181B;
+  --popover-foreground: #FAFAFA;
 
-  /* Surfaces & Dynamic Aliases for Dark Mode */
-  --bg-canvas: hsl(var(--background));
-  --bg-surface: hsl(var(--card));
-  --bg-surface-elevated: hsl(var(--card));
-  --bg-subtle: hsl(var(--muted));
-  --bg-muted: hsl(var(--muted));
-  --bg-sidebar: hsl(var(--card));
-  --bg-header: hsl(var(--background));
-  --bg-input: hsl(var(--input));
+  /* Textes */
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+  --text-disabled: #52525B;
+  --muted: #1F1F23;
+  --muted-foreground: #A1A1AA;
 
-  /* Typography Aliases */
-  --text-primary: hsl(var(--foreground));
-  --text-secondary: hsl(var(--muted-foreground));
-  --text-muted: hsl(var(--muted-foreground));
-  --text-inverse: hsl(var(--background));
+  /* Bordures */
+  --border: #27272A;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --input: #27272A;
 
-  /* Borders & Dividers */
-  --border-subtle: hsl(var(--border));
-  --border-default: hsl(var(--border));
-  --border-strong: hsl(var(--border));
-  --sidebar-border: hsl(var(--border));
+  /* Couleur d'accent dynamique (Ambre #F59E0B par défaut) */
+  --primary: #F59E0B;
+  --primary-hover: #D97706;
+  --primary-active: #B45309;
+  --primary-subtle: rgba(245, 158, 11, 0.15);
+  --primary-border: rgba(245, 158, 11, 0.30);
+  --primary-foreground: #000000;
+  --ring: #F59E0B;
 
-  /* Shadows */
-  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.7);
-  --shadow-card-hover: 0 10px 30px -4px rgba(0, 0, 0, 0.85);
-  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
-
-  /* Interactive States */
-  --hover-bg: hsl(var(--muted));
-  --active-bg: hsl(var(--muted));
+  /* Couleurs Métier Sanctuarisées */
+  --success: #22C55E;
+  --success-subtle: rgba(34, 197, 94, 0.15);
+  --success-foreground: #FFFFFF;
+  --warning: #F59E0B;
+  --warning-subtle: rgba(245, 158, 11, 0.15);
+  --warning-foreground: #000000;
+  --danger: #EF4444;
+  --danger-subtle: rgba(239, 68, 68, 0.15);
+  --danger-foreground: #FFFFFF;
+  --info: #3B82F6;
+  --info-subtle: rgba(59, 130, 246, 0.15);
+  --info-foreground: #FFFFFF;
 }
 
 /* ─── Global Reset & Body ─── */
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -200,7 +206,7 @@ select {
   cursor: pointer;
 }
 
-/* Scrollbar stylisée */
+/* Scrollbar stylisée discrète */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -209,9 +215,20 @@ select {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: var(--border);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: var(--text-tertiary);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toast";
 import QueryProvider from "@/components/providers/QueryProvider";
 import "./globals.css";
 
@@ -31,8 +31,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth">
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{
+              var t=localStorage.getItem('lokka_pref_theme')||'dark';
+              var d=window.matchMedia('(prefers-color-scheme: dark)').matches;
+              var r=t==='system'?(d?'dark':'light'):t;
+              var e=document.documentElement;
+              e.classList.remove('light','dark');
+              e.classList.add(r);
+              e.style.colorScheme=r;
+
+              var c=localStorage.getItem('lokka_pref_color')||'#F59E0B';
+              var clean=c.replace('#','');
+              var rgbNum=parseInt(clean,16);
+              var red=(rgbNum>>16)&255, green=(rgbNum>>8)&255, blue=rgbNum&255;
+              var lum=0.299*red + 0.587*green + 0.114*blue;
+              var fg=lum>145?'#000000':'#FFFFFF';
+              e.style.setProperty('--primary', c);
+              e.style.setProperty('--primary-foreground', fg);
+              e.style.setProperty('--primary-subtle', 'rgba('+red+','+green+','+blue+',0.14)');
+              e.style.setProperty('--primary-border', 'rgba('+red+','+green+','+blue+',0.28)');
+              e.style.setProperty('--ring', c);
+            }catch(err){}})();`,
+          }}
+        />
         <link rel="icon" href="/logo.png" type="image/png" sizes="any" />
         <link rel="shortcut icon" href="/logo.png" type="image/png" />
         <link rel="apple-touch-icon" href="/logo.png" />
@@ -50,13 +75,7 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           {children}
-          <Toaster
-            position="top-center"
-            richColors
-            toastOptions={{
-              style: { fontSize: "13px" },
-            }}
-          />
+          <Toaster />
         </QueryProvider>
       </body>
     </html>

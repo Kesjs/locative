@@ -237,11 +237,16 @@ function CollapsibleNavItem({
 }
 
 export function AppSidebar() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const isMobile = useIsMobile();
-  const { state, setOpenMobile, devRole } = useSidebar();
+  const {
+    state,
+    setOpenMobile,
+    devRole,
+    navLayout,
+  } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const isMobile = useIsMobile();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const { data: biens = [] } = useBiens();
   const activeBiensCount = biens.filter((b) => !b.archive).length;
@@ -287,25 +292,29 @@ export function AppSidebar() {
   const planUsagePercent = Math.min(100, Math.round((activeBiensCount / planMaxBiens) * 100));
   const isPlanFull = activeBiensCount >= planMaxBiens;
 
+  if (navLayout === "topnav" && !isMobile) {
+    return null;
+  }
+
   return (
     <>
       <Sidebar
         collapsible="icon"
-        className="border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121215] text-slate-900 dark:text-zinc-100 z-30"
+        className="border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--foreground)] z-30"
       >
         {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE ─── */}
-        <SidebarHeader className="border-b border-slate-200 dark:border-zinc-800 p-2">
+        <SidebarHeader className="border-b border-[var(--sidebar-border)] p-2">
           {isNormalizedAdminOrLocataire ? (
             <div className="flex items-center gap-2.5 px-2.5 py-1.5 h-[44px] rounded-lg">
-              <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-white border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden">
+              <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-white border border-[var(--border)] shrink-0 shadow-2xs overflow-hidden">
                 <img src="/logo.png" alt="Lokka" className="w-full h-full object-contain p-0.5" />
               </div>
               {!isCollapsed && (
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-extrabold text-slate-900 dark:text-white text-[14px]">
+                  <span className="truncate font-extrabold text-[var(--foreground)] text-[14px]">
                     Lokka
                   </span>
-                  <span className="truncate text-[10.5px] font-bold uppercase tracking-wider text-[var(--brand-accent)]">
+                  <span className="truncate text-[10.5px] font-bold uppercase tracking-wider text-[var(--primary)]">
                     {currentRole.toLowerCase().includes("admin") ? "Admin HQ" : "Espace Locataire"}
                   </span>
                 </div>
@@ -320,13 +329,13 @@ export function AppSidebar() {
                       size="lg"
                       className={`w-full flex items-center ${
                         isCollapsed ? "justify-center p-0" : "gap-2.5 px-2.5 py-1.5"
-                      } rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer`}
+                      } rounded-lg hover:bg-[var(--surface-hover)] transition-colors cursor-pointer`}
                     >
                       <div
-                        className="flex aspect-square size-7 items-center justify-center rounded-md border border-slate-200 dark:border-zinc-700 shrink-0 shadow-2xs overflow-hidden"
+                        className="flex aspect-square size-7 items-center justify-center rounded-md border border-[var(--border)] shrink-0 shadow-2xs overflow-hidden"
                         style={{
-                          backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
-                          color: "var(--brand-accent)",
+                          backgroundColor: "var(--primary-subtle)",
+                          color: "var(--primary)",
                         }}
                       >
                         <Building2 className="size-4" />
@@ -334,14 +343,14 @@ export function AppSidebar() {
                       {!isCollapsed && (
                         <>
                           <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-bold text-slate-900 dark:text-white text-[13px]">
+                            <span className="truncate font-bold text-[var(--foreground)] text-[13px]">
                               {activeTeam.name}
                             </span>
-                            <span className="truncate text-[10.5px] text-slate-500 dark:text-zinc-400 font-medium">
+                            <span className="truncate text-[10.5px] text-[var(--text-secondary)] font-medium">
                               {activeBiensCount} bien{activeBiensCount > 1 ? "s" : ""} · {activeTeam.plan}
                             </span>
                           </div>
-                          <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
+                          <ChevronsUpDown className="ml-auto size-4 text-[var(--text-secondary)]" />
                         </>
                       )}
                     </SidebarMenuButton>
@@ -429,8 +438,8 @@ export function AppSidebar() {
                         isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
                       } rounded-lg text-[13px] font-medium transition-colors cursor-pointer ${
                         active
-                          ? "bg-slate-100 dark:bg-zinc-800/90 text-slate-950 dark:text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[var(--brand-accent)] before:rounded-r-sm shadow-2xs"
-                          : "text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200"
+                          ? "bg-[var(--primary-subtle)] text-[var(--primary)] font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[var(--primary)] before:rounded-r-sm shadow-2xs"
+                          : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
                       }`}
                     >
                       <Link
@@ -440,17 +449,17 @@ export function AppSidebar() {
                       >
                         <item.icon
                           className="size-4 shrink-0 transition-colors"
-                          style={{ color: active ? "var(--brand-accent)" : undefined }}
+                          style={{ color: active ? "var(--primary)" : undefined }}
                         />
                         {!isCollapsed && <span className="truncate flex-1 font-medium">{item.title}</span>}
                         {!isCollapsed && item.badge && (
                           <span
                             className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                               item.badgeType === "danger"
-                                ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                                ? "bg-red-500/15 text-red-500"
                                 : item.badgeType === "warning" || item.badgeType === "soon"
-                                ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
-                                : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700"
+                                ? "bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                                : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border)]"
                             }`}
                           >
                             {item.badge}
@@ -466,46 +475,35 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* ─── 3. FOOTER : CARTE D'UPGRADE PLAN + PROFIL UTILISATEUR ─── */}
-        <SidebarFooter className="border-t border-slate-200 dark:border-zinc-800 p-2 space-y-2">
+        <SidebarFooter className="border-t border-[var(--sidebar-border)] p-2 space-y-2">
           {/* Bloc Upgrade Plan Dynamique */}
           {!isCollapsed ? (
             <div
-              className="p-3 rounded-lg border shadow-2xs transition-colors"
-              style={{
-                borderColor: "color-mix(in srgb, var(--brand-accent) 25%, transparent)",
-                backgroundColor: "color-mix(in srgb, var(--brand-accent) 6%, transparent)",
-              }}
+              className="p-3 rounded-lg border shadow-2xs transition-colors bg-[var(--surface-secondary)] border-[var(--border)]"
             >
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11.5px] font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <Sparkles className="size-3.5" style={{ color: "var(--brand-accent)" }} />
+                <span className="text-[11.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-[var(--primary)]" />
                   Plan Gratuit
                 </span>
                 <span
-                  className="text-[10px] font-bold px-1.5 py-0.2 rounded border"
-                  style={{
-                    color: "var(--brand-accent)",
-                    borderColor: "color-mix(in srgb, var(--brand-accent) 30%, transparent)",
-                    backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
-                  }}
+                  className="text-[10px] font-bold px-1.5 py-0.2 rounded border bg-[var(--primary-subtle)] text-[var(--primary)] border-[var(--primary-border)]"
                 >
                   {activeBiensCount} / {planMaxBiens} biens
                 </span>
               </div>
-              <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden mb-2.5">
+              <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden mb-2.5">
                 <div
-                  className="h-full rounded-full transition-all duration-300"
+                  className="h-full rounded-full transition-all duration-300 bg-[var(--primary)]"
                   style={{
                     width: `${planUsagePercent}%`,
-                    backgroundColor: isPlanFull ? "#F59E0B" : "var(--brand-accent)",
                   }}
                 />
               </div>
               <button
                 type="button"
                 onClick={() => router.push("/tarifs")}
-                className="w-full py-1.5 px-2.5 text-white text-[11.5px] font-semibold rounded-md flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:opacity-90 active:scale-[0.98]"
-                style={{ backgroundColor: "var(--brand-accent)" }}
+                className="w-full py-1.5 px-2.5 text-[11.5px] font-semibold rounded-md flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:opacity-90 active:scale-[0.98] bg-[var(--primary)] text-[var(--primary-foreground)]"
               >
                 <span>Passer à Pro</span>
                 <ArrowRight className="size-3" />
@@ -516,12 +514,7 @@ export function AppSidebar() {
               <button
                 type="button"
                 onClick={() => router.push("/tarifs")}
-                className="size-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border hover:opacity-90"
-                style={{
-                  backgroundColor: "color-mix(in srgb, var(--brand-accent) 10%, transparent)",
-                  borderColor: "color-mix(in srgb, var(--brand-accent) 30%, transparent)",
-                  color: "var(--brand-accent)",
-                }}
+                className="size-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border hover:opacity-90 bg-[var(--primary-subtle)] border-[var(--primary-border)] text-[var(--primary)]"
                 title={`Passer à Pro (${activeBiensCount}/${planMaxBiens} biens)`}
               >
                 <Sparkles className="size-4" />

@@ -12,13 +12,22 @@ import {
   COLOR_THEMES,
 } from "@/components/ui/sidebar";
 import {
-  XMarkIcon,
-  ArrowPathIcon,
-  CheckIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
+  X,
+  Sun,
+  Moon,
+  Laptop,
+  Check,
+  RotateCcw,
+  Eye,
+  EyeOff,
+  Sliders,
+  Palette,
+  Layout,
+  Layers,
+  ChevronDown,
+} from "lucide-react";
+import { ACCENT_PRESETS } from "@/lib/theme/color-utils";
+import { toast } from "@/components/ui/toast";
 
 interface LayoutCustomizerProps {
   isOpen: boolean;
@@ -27,68 +36,51 @@ interface LayoutCustomizerProps {
 
 export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
   const {
-    setOpen,
     variant: sidebarVariant,
     setVariant,
     layoutMode,
     setLayoutMode,
+    navLayout,
+    setNavLayout,
     theme,
     setTheme,
     currency,
     setCurrency,
     colorTheme,
     setColorTheme,
+    customColorHex,
+    setCustomColorHex,
     isPrivacyMode,
     togglePrivacyMode,
+    density,
+    setDensity,
     devRole,
     setDevRole,
   } = useSidebar();
 
-  // Récupère la couleur hex du thème actif pour l'utiliser dans les previews
-  const accentHex = COLOR_THEMES[colorTheme]?.hex ?? "#087F5B";
+  const [devSectionOpen, setDevSectionOpen] = React.useState(false);
 
-  const handleThemeChange = (newTheme: ThemeMode) => {
-    setTheme(newTheme);
-  };
-
-  const handleSidebarChange = (variant: SidebarVariant) => {
-    setVariant(variant);
-  };
-
-  const handleLayoutChange = (layout: LayoutMode) => {
-    setLayoutMode(layout);
-  };
+  const activeHex =
+    colorTheme === "custom"
+      ? customColorHex
+      : COLOR_THEMES[colorTheme]?.hex ?? "#F59E0B";
 
   const handleReset = () => {
-    setTheme("light");
+    setTheme("dark");
+    setColorTheme("amber");
+    setNavLayout("sidebar");
     setVariant("sidebar");
     setLayoutMode("push");
     setCurrency("fcfa");
-    setColorTheme("emerald");
-    setOpen(true);
-  };
-
-  const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-  // Helpers styles réutilisables basés sur l'accent dynamique
-  const selectedRingStyle = {
-    outline: `2px solid ${accentHex}`,
-    outlineOffset: "1px",
-  };
-
-  const checkBadgeStyle = {
-    backgroundColor: accentHex,
+    setDensity("comfort");
+    toast.success("Préférences réinitialisées", "Configuration par défaut Lokka appliquée.");
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/20 transition-opacity flex justify-end">
-          {/* Backdrop Click */}
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity flex justify-end">
+          {/* Backdrop */}
           <div className="flex-1 cursor-pointer" onClick={onClose} />
 
           {/* Drawer Panel */}
@@ -96,510 +88,466 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 26, stiffness: 240 }}
-            className="w-full max-w-[400px] bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 border-l border-slate-200 dark:border-zinc-800 shadow-2xl h-full flex flex-col justify-between overflow-hidden select-none"
+            transition={{ type: "spring", damping: 28, stiffness: 260 }}
+            className="w-full max-w-[390px] h-full flex flex-col justify-between overflow-hidden select-none border-l shadow-2xl bg-[var(--surface)] border-[var(--border)] text-[var(--foreground)]"
           >
             {/* ─── 1. HEADER ─── */}
-            <div className="p-4 pb-3 border-b border-slate-200 dark:border-zinc-800 flex items-start justify-between">
+            <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--surface-elevated)]">
               <div>
-                <h2 className="text-[16px] font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <SparklesIcon className="h-4 w-4" style={{ color: "var(--brand-accent)" }} />
-                  Personnalisation de l&apos;espace
+                <h2 className="text-[14px] font-bold tracking-tight text-[var(--foreground)] flex items-center gap-2">
+                  <Sliders className="h-4 w-4 text-[var(--primary)]" />
+                  Affichage & Préférences
                 </h2>
-                <p className="text-[12px] text-slate-500 dark:text-zinc-400 mt-0.5 leading-snug">
-                  Ajustez les couleurs, la confidentialité et l&apos;ergonomie.
+                <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">
+                  Personnalisez votre interface et vos outils Lokka.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition cursor-pointer shrink-0"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  title="Réinitialiser les préférences"
+                  className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* ─── 2. SECTIONS LIST ─── */}
-            <div className="p-4 space-y-5 flex-1 overflow-y-auto">
+            <div className="p-5 space-y-6 flex-1 overflow-y-auto no-scrollbar">
 
-              {/* SECTION 1: COULEURS D'ACCENT */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">
-                    Couleur d&apos;Accent Dynamique
+              {/* SECTION A: THÈME D'APPARENCE */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                    <Moon className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                    Thème Visuel
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setColorTheme("emerald")}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
-                    title="Réinitialiser à Émeraude"
-                  >
-                    <ArrowPathIcon className="h-3 w-3" />
-                  </button>
+                  <span className="text-[11px] text-[var(--text-secondary)] capitalize">
+                    {theme === "dark" ? "Sombre" : theme === "light" ? "Clair" : "Système"}
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {(Object.keys(COLOR_THEMES) as ColorTheme[]).map((key) => {
-                    const pal = COLOR_THEMES[key];
-                    const isSelected = colorTheme === key;
+                <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
+                  <button
+                    type="button"
+                    onClick={() => setTheme("light")}
+                    className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      theme === "light"
+                        ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <Sun className="h-3.5 w-3.5" />
+                    Clair
+                  </button>
 
+                  <button
+                    type="button"
+                    onClick={() => setTheme("dark")}
+                    className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      theme === "dark"
+                        ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <Moon className="h-3.5 w-3.5" />
+                    Sombre
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTheme("system")}
+                    className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      theme === "system"
+                        ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <Laptop className="h-3.5 w-3.5" />
+                    Auto
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION B: COULEUR D'ACCENT PERSONNALISABLE */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                    <Palette className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                    Couleur d&apos;Accent
+                  </span>
+                  <span className="text-[11px] font-mono text-[var(--text-secondary)] uppercase">
+                    {activeHex}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-7 gap-2 items-center">
+                  {ACCENT_PRESETS.map((preset) => {
+                    const isSelected = colorTheme === preset.id;
                     return (
                       <button
-                        key={key}
+                        key={preset.id}
                         type="button"
-                        onClick={() => setColorTheme(key)}
-                        className={`p-2 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                        onClick={() => setColorTheme(preset.id as ColorTheme)}
+                        title={preset.name}
+                        className={`h-9 w-full rounded-lg border transition-all flex items-center justify-center cursor-pointer relative ${
                           isSelected
-                            ? "border-slate-900 dark:border-white ring-2 ring-slate-900/10 dark:ring-white/20 bg-slate-50 dark:bg-zinc-800/80 font-bold"
-                            : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                            ? "border-[var(--foreground)] ring-2 ring-[var(--primary-subtle)] scale-105"
+                            : "border-[var(--border)] hover:scale-102 opacity-85 hover:opacity-100"
+                        }`}
+                        style={{ backgroundColor: preset.hex }}
+                      >
+                        {isSelected && (
+                          <Check
+                            className="h-3.5 w-3.5 stroke-[3]"
+                            style={{
+                              color:
+                                preset.id === "amber" || preset.id === "cyan"
+                                  ? "#000000"
+                                  : "#FFFFFF",
+                            }}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {/* Sélecteur Personnalisé (Color Picker) */}
+                  <label
+                    title="Couleur Personnalisée"
+                    className={`h-9 w-full rounded-lg border transition-all flex items-center justify-center cursor-pointer relative overflow-hidden ${
+                      colorTheme === "custom"
+                        ? "border-[var(--foreground)] ring-2 ring-[var(--primary-subtle)] scale-105"
+                        : "border-[var(--border)] hover:scale-102 opacity-85 hover:opacity-100"
+                    }`}
+                    style={{
+                      background:
+                        colorTheme === "custom"
+                          ? customColorHex
+                          : "conic-gradient(from 0deg, #f59e0b, #3b82f6, #6366f1, #8b5cf6, #10b981, #06b6d4, #f59e0b)",
+                    }}
+                  >
+                    <input
+                      type="color"
+                      value={customColorHex}
+                      onChange={(e) => setCustomColorHex(e.target.value)}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    {colorTheme === "custom" && (
+                      <Check className="h-3.5 w-3.5 text-white stroke-[3] drop-shadow-sm" />
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              {/* SECTION C: DISPOSITION GLOBALE (SIDEBAR VS TOP NAV) */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                    <Layout className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                    Navigation Principale
+                  </span>
+                  <span className="text-[11px] text-[var(--text-secondary)]">
+                    {navLayout === "sidebar" ? "Barre latérale" : "Top Nav horizontale"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  {/* Miniature Sidebar */}
+                  <button
+                    type="button"
+                    onClick={() => setNavLayout("sidebar")}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
+                      navLayout === "sidebar"
+                        ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-1 ring-[var(--primary)]"
+                        : "border-[var(--border)] hover:bg-[var(--surface-secondary)]"
+                    }`}
+                  >
+                    <div className="h-14 w-full rounded-md border border-[var(--border)] bg-[var(--surface-elevated)] flex overflow-hidden">
+                      <div className="w-1/3 h-full border-r border-[var(--border)] bg-[var(--primary-subtle)] p-1 flex flex-col gap-1">
+                        <div className="w-full h-1.5 rounded-xs bg-[var(--primary)]" />
+                        <div className="w-3/4 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
+                        <div className="w-2/3 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
+                      </div>
+                      <div className="flex-1 p-1.5 flex flex-col gap-1">
+                        <div className="w-full h-1.5 rounded-xs bg-[var(--surface-secondary)]" />
+                        <div className="w-full h-4 rounded-xs bg-[var(--surface-secondary)]" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11.5px] font-semibold text-[var(--foreground)]">
+                        Barre latérale
+                      </span>
+                      {navLayout === "sidebar" && (
+                        <Check className="h-3 w-3 text-[var(--primary)] stroke-[3]" />
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Miniature Top Nav */}
+                  <button
+                    type="button"
+                    onClick={() => setNavLayout("topnav")}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
+                      navLayout === "topnav"
+                        ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-1 ring-[var(--primary)]"
+                        : "border-[var(--border)] hover:bg-[var(--surface-secondary)]"
+                    }`}
+                  >
+                    <div className="h-14 w-full rounded-md border border-[var(--border)] bg-[var(--surface-elevated)] flex flex-col overflow-hidden">
+                      <div className="h-3 w-full border-b border-[var(--border)] bg-[var(--primary-subtle)] px-1.5 flex items-center gap-1">
+                        <div className="w-2 h-1.5 rounded-xs bg-[var(--primary)]" />
+                        <div className="w-4 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
+                        <div className="w-4 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
+                      </div>
+                      <div className="flex-1 p-1.5 flex flex-col gap-1">
+                        <div className="w-full h-1.5 rounded-xs bg-[var(--surface-secondary)]" />
+                        <div className="w-full h-4 rounded-xs bg-[var(--surface-secondary)]" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11.5px] font-semibold text-[var(--foreground)]">
+                        Top Nav
+                      </span>
+                      {navLayout === "topnav" && (
+                        <Check className="h-3 w-3 text-[var(--primary)] stroke-[3]" />
+                      )}
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION D: STYLE DE BARRE LATÉRALE (CONSERVÉ) */}
+              {navLayout === "sidebar" && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                      Style du Menu Latéral
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)] capitalize">
+                      {sidebarVariant === "sidebar"
+                        ? "Classique"
+                        : sidebarVariant === "floating"
+                        ? "Flottant"
+                        : "Encadré"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
+                    <button
+                      type="button"
+                      onClick={() => setVariant("sidebar")}
+                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                        sidebarVariant === "sidebar"
+                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      Classique
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setVariant("floating")}
+                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                        sidebarVariant === "floating"
+                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      Flottant
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setVariant("inset")}
+                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                        sidebarVariant === "inset"
+                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      Encadré
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION E: MODE D'AGENCEMENT (PUSH VS OVERLAY - CONSERVÉ) */}
+              {navLayout === "sidebar" && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-[var(--foreground)]">
+                      Comportement d&apos;Ouverture
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)]">
+                      {layoutMode === "push" ? "Repousser (Push)" : "Superposer (Overlay)"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
+                    <button
+                      type="button"
+                      onClick={() => setLayoutMode("push")}
+                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                        layoutMode === "push"
+                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      Pousser le contenu
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setLayoutMode("overlay")}
+                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                        layoutMode === "overlay"
+                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
+                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      Superposition
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION F: DEVISES EN PILULES RAPIDES */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-bold text-[var(--foreground)]">
+                    Devise Principale
+                  </span>
+                  <span className="text-[11px] font-semibold text-[var(--primary)] uppercase">
+                    {currency}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {(["fcfa", "eur", "usd"] as CurrencyMode[]).map((cur) => {
+                    const isCur = currency === cur;
+                    return (
+                      <button
+                        key={cur}
+                        type="button"
+                        onClick={() => setCurrency(cur)}
+                        className={`py-1.5 px-3 rounded-full text-[12px] font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                          isCur
+                            ? "bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)] shadow-xs"
+                            : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border)] hover:text-[var(--foreground)]"
                         }`}
                       >
-                        <span
-                          className="h-3.5 w-3.5 rounded-full shrink-0 shadow-xs flex items-center justify-center"
-                          style={{ backgroundColor: pal.hex }}
-                        >
-                          {isSelected && <CheckIcon className="h-2.5 w-2.5 text-white stroke-[3]" />}
-                        </span>
-                        <span className="text-[11px] truncate text-slate-800 dark:text-zinc-200 font-medium">
-                          {pal.name.split(" ")[0]}
-                        </span>
+                        {cur.toUpperCase()}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* SECTION 2: MODE CONFIDENTIALITÉ */}
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-900/60">
+              {/* SECTION G: MODE CONFIDENTIALITÉ (MASQUAGE SOLDES) */}
+              <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`p-1.5 rounded-lg ${
-                        isPrivacyMode
-                          ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
-                          : "bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300"
-                      }`}
-                    >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-md bg-[var(--surface)] border border-[var(--border)] text-[var(--primary)]">
                       {isPrivacyMode ? (
-                        <EyeSlashIcon className="h-4 w-4" />
+                        <EyeOff className="h-4 w-4" />
                       ) : (
-                        <EyeIcon className="h-4 w-4" />
+                        <Eye className="h-4 w-4 text-[var(--text-secondary)]" />
                       )}
                     </div>
                     <div>
-                      <span className="text-[12.5px] font-bold text-slate-900 dark:text-white block">
-                        Mode Masquage / Discret
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-zinc-400">
-                        {isPrivacyMode ? "Montants financiers masqués (••••••)" : "Montants visibles en clair"}
-                      </span>
+                      <p className="text-[12px] font-semibold text-[var(--foreground)]">
+                        Masquer les montants
+                      </p>
+                      <p className="text-[10.5px] text-[var(--text-secondary)]">
+                        Remplace les soldes par ••••••
+                      </p>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={togglePrivacyMode}
-                    className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    style={{
-                      backgroundColor: isPrivacyMode ? "var(--brand-accent)" : undefined,
-                    }}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                      isPrivacyMode ? "bg-[var(--primary)]" : "bg-[var(--border)]"
+                    }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        isPrivacyMode ? "translate-x-4" : "translate-x-0 bg-slate-400"
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                        isPrivacyMode ? "translate-x-4" : "translate-x-0"
                       }`}
                     />
                   </button>
                 </div>
               </div>
 
-              {/* SECTION 3: MODE DE THÈME AVEC MINIATURES DYNAMIQUES */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode de thème</span>
-                  <button
-                    type="button"
-                    onClick={() => handleThemeChange("light")}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
-                    title="Réinitialiser le thème"
-                  >
-                    <ArrowPathIcon className="h-3 w-3" />
-                  </button>
-                </div>
+              {/* SECTION H: OPTIONS DÉVELOPPEUR DISCRÈTES */}
+              <div className="border border-[var(--border)] rounded-xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setDevSectionOpen(!devSectionOpen)}
+                  className="w-full px-3.5 py-2.5 bg-[var(--surface-secondary)] text-left flex items-center justify-between cursor-pointer"
+                >
+                  <span className="text-[11.5px] font-semibold text-[var(--text-secondary)]">
+                    Simulateur de Rôle Dev
+                  </span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 text-[var(--text-secondary)] transition-transform duration-200 ${
+                      devSectionOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-                <div className="grid grid-cols-3 gap-2">
-                  {/* System */}
-                  <div onClick={() => handleThemeChange("system")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border"
-                      style={{
-                        background: "linear-gradient(135deg, #FFFFFF 50%, #0F172A 50%)",
-                        borderColor: theme === "system" ? "var(--brand-accent)" : undefined,
-                        boxShadow: theme === "system" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {theme === "system" && (
-                        <div
-                          className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
+                {devSectionOpen && (
+                  <div className="p-3 bg-[var(--surface)] border-t border-[var(--border)] space-y-1.5">
+                    <p className="text-[10.5px] text-[var(--text-secondary)] mb-2">
+                      Permutez l&apos;interface pour tester les différentes vues métiers :
+                    </p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(["bailleur", "gestionnaire", "agence"] as const).map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setDevRole(r as any)}
+                          className={`py-1 px-2 rounded-md text-[11px] font-medium border capitalize cursor-pointer transition ${
+                            devRole === r
+                              ? "bg-[var(--primary-subtle)] text-[var(--primary)] border-[var(--primary)]"
+                              : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                          }`}
                         >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1 z-10">
-                        <div className="w-2.5 h-1 rounded bg-[#0F172A]" />
-                        <div className="w-5 h-1 rounded bg-slate-300" />
-                      </div>
-                      <div className="flex items-end justify-between px-0.5 z-10">
-                        <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-3 bg-[#0F172A] rounded-xs" />
-                          <div className="w-1.5 h-4 bg-slate-400 rounded-xs" />
-                        </div>
-                        <div className="flex items-end gap-0.5">
-                          <div className="w-1.5 h-2 bg-white/40 rounded-xs" />
-                          <div className="w-1.5 h-3.5 bg-white rounded-xs" />
-                        </div>
-                      </div>
+                          {r}
+                        </button>
+                      ))}
                     </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Système</span>
                   </div>
-
-                  {/* Light */}
-                  <div onClick={() => handleThemeChange("light")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border"
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        borderColor: theme === "light" ? "var(--brand-accent)" : undefined,
-                        boxShadow: theme === "light" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {theme === "light" && (
-                        <div
-                          className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-1 rounded bg-[#0F172A]" />
-                        <div className="w-5 h-1 rounded bg-slate-200" />
-                      </div>
-                      <div className="flex items-end gap-0.5 px-0.5">
-                        <div className="w-1.5 h-3 bg-[#0F172A] rounded-xs" />
-                        <div className="w-1.5 h-4.5 bg-slate-300 rounded-xs" />
-                        <div className="w-1.5 h-2.5 bg-slate-200 rounded-xs" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Clair</span>
-                  </div>
-
-                  {/* Dark */}
-                  <div onClick={() => handleThemeChange("dark")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[58px] rounded-lg overflow-hidden p-1.5 transition-all flex flex-col justify-between border"
-                      style={{
-                        backgroundColor: "#0A0A0A",
-                        borderColor: theme === "dark" ? "var(--brand-accent)" : undefined,
-                        boxShadow: theme === "dark" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {theme === "dark" && (
-                        <div
-                          className="absolute top-1 right-1 h-4 w-4 rounded-full text-white flex items-center justify-center text-[10px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-1 rounded bg-white" />
-                        <div className="w-5 h-1 rounded bg-zinc-800" />
-                      </div>
-                      <div className="flex items-end gap-0.5 px-0.5">
-                        <div className="w-1.5 h-3 bg-zinc-600 rounded-xs" />
-                        <div className="w-1.5 h-4.5 bg-zinc-700 rounded-xs" />
-                        <div className="w-1.5 h-2.5 bg-zinc-800 rounded-xs" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Sombre</span>
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* SECTION 4: STYLE DU MENU */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Style du Menu</span>
-                  <button
-                    type="button"
-                    onClick={() => handleSidebarChange("sidebar")}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
-                    title="Réinitialiser"
-                  >
-                    <ArrowPathIcon className="h-3 w-3" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Classique */}
-                  <div onClick={() => handleSidebarChange("sidebar")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[54px] rounded-lg overflow-hidden transition-all flex border"
-                      style={{
-                        backgroundColor: isDark ? "#121215" : "#FFFFFF",
-                        borderColor: sidebarVariant === "sidebar" ? "var(--brand-accent)" : undefined,
-                        boxShadow: sidebarVariant === "sidebar" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {sidebarVariant === "sidebar" && (
-                        <div
-                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-5 h-full shrink-0" style={{ backgroundColor: "var(--brand-accent)" }} />
-                      <div className="flex-1 p-1 flex flex-col gap-1 bg-slate-50 dark:bg-zinc-900">
-                        <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
-                        <div className="flex-1 border border-slate-200 dark:border-zinc-800 rounded-xs bg-white dark:bg-zinc-950" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Classique</span>
-                  </div>
-
-                  {/* Flottante */}
-                  <div onClick={() => handleSidebarChange("floating")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border"
-                      style={{
-                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        borderColor: sidebarVariant === "floating" ? "var(--brand-accent)" : undefined,
-                        boxShadow: sidebarVariant === "floating" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {sidebarVariant === "floating" && (
-                        <div
-                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: "var(--brand-accent)" }} />
-                      <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900">
-                        <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
-                        <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Flottante</span>
-                  </div>
-
-                  {/* Encadrée */}
-                  <div onClick={() => handleSidebarChange("inset")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[54px] rounded-lg p-1 transition-all flex gap-1 border"
-                      style={{
-                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        borderColor: sidebarVariant === "inset" ? "var(--brand-accent)" : undefined,
-                        boxShadow: sidebarVariant === "inset" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {sidebarVariant === "inset" && (
-                        <div
-                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-5 h-full rounded-md" style={{ backgroundColor: "var(--brand-accent)" }} />
-                      <div className="flex-1 h-full rounded-md border border-slate-200 dark:border-zinc-800 p-1 flex flex-col gap-1 bg-white dark:bg-zinc-900 shadow-xs">
-                        <div className="w-full h-1.5 rounded-xs bg-slate-200 dark:bg-zinc-800" />
-                        <div className="flex-1 rounded-xs bg-slate-50 dark:bg-zinc-950" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Encadrée</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 5: MODE D'AFFICHAGE */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12.5px] font-bold text-slate-900 dark:text-white">Mode d&apos;affichage</span>
-                  <button
-                    type="button"
-                    onClick={() => handleLayoutChange("push")}
-                    className="text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 cursor-pointer"
-                    title="Réinitialiser l'affichage"
-                  >
-                    <ArrowPathIcon className="h-3 w-3" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Overlay */}
-                  <div onClick={() => handleLayoutChange("overlay")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border"
-                      style={{
-                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        borderColor: layoutMode === "overlay" ? "var(--brand-accent)" : undefined,
-                        boxShadow: layoutMode === "overlay" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {layoutMode === "overlay" && (
-                        <div
-                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex w-full h-full gap-1">
-                        <div className="w-1/3 h-full rounded shadow-md z-10" style={{ backgroundColor: "var(--brand-accent)" }} />
-                        <div className="w-2/3 h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 opacity-60" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Overlay</span>
-                  </div>
-
-                  {/* Push */}
-                  <div onClick={() => handleLayoutChange("push")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border"
-                      style={{
-                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        borderColor: (layoutMode === "push" || layoutMode === "default") ? "var(--brand-accent)" : undefined,
-                        boxShadow: (layoutMode === "push" || layoutMode === "default") ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {(layoutMode === "push" || layoutMode === "default") && (
-                        <div
-                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="flex w-full h-full gap-1">
-                        <div className="w-1/3 h-full rounded" style={{ backgroundColor: "var(--brand-accent)" }} />
-                        <div className="w-2/3 h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900" />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Push</span>
-                  </div>
-
-                  {/* Full */}
-                  <div onClick={() => handleLayoutChange("full")} className="cursor-pointer group flex flex-col items-center">
-                    <div
-                      className="relative w-full h-[50px] rounded-lg overflow-hidden transition-all flex items-center justify-center p-1 border"
-                      style={{
-                        backgroundColor: isDark ? "#0A0A0A" : "#F4F4F5",
-                        borderColor: layoutMode === "full" ? "var(--brand-accent)" : undefined,
-                        boxShadow: layoutMode === "full" ? "0 0 0 2px var(--brand-accent)" : undefined,
-                      }}
-                    >
-                      {layoutMode === "full" && (
-                        <div
-                          className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-white flex items-center justify-center text-[8px] shadow-xs z-20"
-                          style={{ backgroundColor: "var(--brand-accent)" }}
-                        >
-                          <CheckIcon className="h-2.5 w-2.5 stroke-[3]" />
-                        </div>
-                      )}
-                      <div className="w-full h-full rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-center">
-                        <div className="w-3/4 h-2 rounded opacity-70" style={{ backgroundColor: "var(--brand-accent)" }} />
-                      </div>
-                    </div>
-                    <span className="text-[11.5px] font-medium mt-1.5 text-slate-800 dark:text-zinc-200">Full</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 6: DEVISE & CONTEXTE RÉGIONAL */}
-              <div>
-                <span className="text-[12.5px] font-bold text-slate-900 dark:text-white block mb-2">
-                  Devise &amp; Contexte Régional
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: "fcfa", label: "FCFA", sub: "Bénin / UEMOA" },
-                    { id: "eur", label: "Euros (€)", sub: "Diaspora Europe" },
-                    { id: "usd", label: "Dollars ($)", sub: "International" },
-                  ].map((curr) => {
-                    const isSelected = currency === curr.id;
-                    return (
-                      <button
-                        key={curr.id}
-                        type="button"
-                        onClick={() => setCurrency(curr.id as CurrencyMode)}
-                        className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? "font-bold shadow-2xs"
-                            : "border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300"
-                        }`}
-                        style={{
-                          borderColor: isSelected ? "var(--brand-accent)" : undefined,
-                          backgroundColor: isSelected ? "color-mix(in srgb, var(--brand-accent) 12%, transparent)" : undefined,
-                          color: isSelected ? "var(--brand-accent)" : undefined,
-                        }}
-                      >
-                        <span className="text-[12px] block font-semibold">{curr.label}</span>
-                        <span className="text-[9.5px] opacity-75 leading-none">{curr.sub}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* SECTION 7: SIMULATEUR DE PROFIL DEV */}
-              <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
-                  Mode Simulateur : Rôle Actif
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: "bailleur", label: "Bailleur" },
-                    { id: "agence", label: "Agence Immobilière" },
-                    { id: "locataire", label: "Locataire" },
-                    { id: "admin", label: "Admin HQ" },
-                  ].map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => setDevRole(r.id as any)}
-                      className={`p-2 rounded-lg border text-left text-[12px] font-semibold transition-all cursor-pointer ${
-                        devRole === r.id
-                          ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200"
-                          : "border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
-                      }`}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
-            {/* ─── 3. FOOTER : RESET TOTAL ─── */}
-            <div className="p-4 border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="text-[12px] font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
-              >
-                Réinitialiser tout
-              </button>
+            {/* ─── 3. FOOTER ACTIONS ─── */}
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-elevated)] flex items-center justify-between">
+              <span className="text-[11px] text-[var(--text-secondary)]">
+                Lokka Design System v2.1
+              </span>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12.5px] font-semibold rounded-lg hover:opacity-90 transition shadow-xs cursor-pointer"
+                className="px-4 py-1.5 rounded-lg text-[12px] font-semibold transition cursor-pointer bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90"
               >
-                Fermer
+                Terminer
               </button>
             </div>
           </motion.div>

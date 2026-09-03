@@ -29,9 +29,7 @@ export function RevenueChart({
   xAxisKey = "month",
   dataKeys,
   colors = [
-    "#059669", // Lokka Primary (Émeraude Dense)
-    "#10B981", // Lokka Secondary (Émeraude Claire)
-    "#34D399", // Lokka Accent
+    "var(--primary)", // Accent dynamique Lokka (Ambre #F59E0B par défaut)
   ],
   formatter = (val) => `${Number(val).toLocaleString("fr-FR")} FCFA`,
 }: RevenueChartProps) {
@@ -56,27 +54,26 @@ export function RevenueChart({
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12, fontWeight: 600 }}
+              tick={{ fill: "var(--text-secondary)", fontSize: 12, fontWeight: 600 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
+              tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }}
               width={48}
               tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                borderColor: "hsl(var(--border))",
+                backgroundColor: "var(--surface-elevated)",
+                borderColor: "var(--border)",
                 borderRadius: 12,
                 padding: "8px 12px",
-                boxShadow: "var(--shadow-modal)",
-                color: "hsl(var(--card-foreground))",
+                color: "var(--foreground)",
               }}
-              labelStyle={{ color: "hsl(var(--card-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
-              itemStyle={{ color: "hsl(var(--card-foreground))", fontSize: 12, fontWeight: 600 }}
-              cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
+              labelStyle={{ color: "var(--foreground)", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: "var(--foreground)", fontSize: 12, fontWeight: 600 }}
+              cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
               formatter={(val: any, name: any) => [formatter(val), name]}
             />
             {dataKeys.map((key, i) => (
@@ -99,12 +96,12 @@ export function RevenueChart({
               dataKey={xAxisKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12, fontWeight: 600 }}
+              tick={{ fill: "var(--text-secondary)", fontSize: 12, fontWeight: 600 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 500 }}
+              tick={{ fill: "var(--text-secondary)", fontSize: 11, fontWeight: 500 }}
               width={48}
               tickFormatter={(val) => {
                 if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
@@ -114,16 +111,15 @@ export function RevenueChart({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--card))",
-                borderColor: "hsl(var(--border))",
+                backgroundColor: "var(--surface-elevated)",
+                borderColor: "var(--border)",
                 borderRadius: 12,
                 padding: "8px 12px",
-                boxShadow: "var(--shadow-modal)",
-                color: "hsl(var(--card-foreground))",
+                color: "var(--foreground)",
               }}
-              labelStyle={{ color: "hsl(var(--card-foreground))", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
-              itemStyle={{ color: "hsl(var(--card-foreground))", fontSize: 12, fontWeight: 600 }}
-              cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
+              labelStyle={{ color: "var(--foreground)", fontSize: 11, fontWeight: 700, marginBottom: 4 }}
+              itemStyle={{ color: "var(--foreground)", fontSize: 12, fontWeight: 600 }}
+              cursor={{ fill: "var(--surface-secondary)" }}
               formatter={(val: any, name: any) => [formatter(val), name]}
             />
             {dataKeys.map((key, i) => (

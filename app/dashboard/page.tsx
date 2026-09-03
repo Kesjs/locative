@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBiens } from "@/lib/hooks/useBiens";
 import { useLoyers } from "@/lib/hooks/useLoyers";
@@ -417,7 +417,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-card border border-border rounded-2xl shadow-xs">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
               Espace Propriétaire Bailleur
             </span>
             <span className="text-[11px] text-muted-foreground font-medium">Bénin &amp; Diaspora</span>
@@ -440,7 +440,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setIsAddBienOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl text-[13px] font-bold transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             Ajouter un bien
@@ -579,7 +579,7 @@ export default function DashboardPage() {
                     <p className="text-[12px] text-muted-foreground">Historique réel des encaissements sur les 6 derniers mois (FCFA)</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary" />
                     <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Revenus</span>
                   </div>
                 </div>

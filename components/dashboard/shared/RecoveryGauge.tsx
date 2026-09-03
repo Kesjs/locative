@@ -12,9 +12,9 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
-  let strokeColor = "hsl(var(--success))"; // Emerald
-  if (percentage < 50) strokeColor = "hsl(var(--destructive))"; // Rose
-  else if (percentage <= 80) strokeColor = "hsl(var(--warning))"; // Amber
+  let strokeColor = "var(--success)"; // Emerald #22C55E
+  if (percentage < 50) strokeColor = "var(--danger)"; // Rouge #EF4444
+  else if (percentage <= 80) strokeColor = "var(--warning)"; // Ambre #F59E0B
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -26,7 +26,7 @@ export function RecoveryGauge({ percentage, label = "Taux de Recouvrement", anim
             cy="60"
             r={radius}
             fill="transparent"
-            stroke="hsl(var(--border))"
+            stroke="var(--border)"
             strokeWidth="10"
           />
           {/* Progress Ring */}

@@ -68,7 +68,7 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme, isPrivacyMode, togglePrivacyMode } = useSidebar();
+  const { theme, setTheme, isPrivacyMode, togglePrivacyMode, navLayout } = useSidebar();
 
   const currentTheme =
     theme === "dark" ||
@@ -188,39 +188,79 @@ export default function Header({
     <>
       <header className="mb-6">
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-zinc-800">
+        <div className="flex items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
           
-          {/* Left: SidebarTrigger + Separator + Breadcrumb */}
+          {/* Left: TopNav Links OU (SidebarTrigger + Separator + Breadcrumb) */}
           <div className="flex items-center gap-3 min-w-0">
-            <SidebarTrigger className="h-8.5 w-8.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shrink-0 text-slate-800 dark:text-zinc-100 shadow-2xs cursor-pointer" />
-            <Separator orientation="vertical" className="h-4 bg-slate-200 dark:bg-zinc-800 shrink-0" />
+            {navLayout === "topnav" ? (
+              <div className="flex items-center gap-5">
+                <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+                  <div className="size-7 rounded-md bg-white border border-[var(--border)] shrink-0 shadow-2xs overflow-hidden">
+                    <img src="/logo.png" alt="Lokka" className="w-full h-full object-contain p-0.5" />
+                  </div>
+                  <span className="font-extrabold text-[15px] tracking-tight text-[var(--foreground)]">
+                    Lokka
+                  </span>
+                </Link>
+                <nav className="hidden md:flex items-center gap-1">
+                  {[
+                    { label: "Vue d'ensemble", href: "/dashboard" },
+                    { label: "Patrimoine", href: "/dashboard/patrimoine" },
+                    { label: "Locataires", href: "/dashboard/locataires" },
+                    { label: "Loyers", href: "/dashboard/loyers" },
+                    { label: "Maintenance", href: "/dashboard/maintenance" },
+                    { label: "Paramètres", href: "/dashboard/parametres" },
+                  ].map((tab) => {
+                    const active = tab.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(tab.href);
+                    return (
+                      <Link
+                        key={tab.href}
+                        href={tab.href}
+                        className={`px-3 py-1.5 rounded-md text-[12.5px] font-medium transition-all ${
+                          active
+                            ? "bg-[var(--primary-subtle)] text-[var(--primary)] font-semibold"
+                            : "text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+                        }`}
+                      >
+                        {tab.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            ) : (
+              <>
+                <SidebarTrigger className="h-8.5 w-8.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-colors shrink-0 text-[var(--foreground)] shadow-2xs cursor-pointer" />
+                <Separator orientation="vertical" className="h-4 bg-[var(--border)] shrink-0" />
 
-            <Breadcrumb className="hidden sm:block">
-              <BreadcrumbList className="text-[13px] font-medium text-slate-500 dark:text-zinc-400">
-                {currentCrumbs.map((crumb, i) => {
-                  const isLast = i === currentCrumbs.length - 1;
-                  return (
-                    <React.Fragment key={i}>
-                      {i > 0 && <BreadcrumbSeparator className="text-slate-400 dark:text-zinc-600" />}
-                      <BreadcrumbItem>
-                        {isLast ? (
-                          <BreadcrumbPage className="font-bold text-slate-900 dark:text-white">
-                            {crumb}
-                          </BreadcrumbPage>
-                        ) : (
-                          <BreadcrumbLink
-                            href="/dashboard"
-                            className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-                          >
-                            {crumb}
-                          </BreadcrumbLink>
-                        )}
-                      </BreadcrumbItem>
-                    </React.Fragment>
-                  );
-                })}
-              </BreadcrumbList>
-            </Breadcrumb>
+                <Breadcrumb className="hidden sm:block">
+                  <BreadcrumbList className="text-[13px] font-medium text-[var(--text-secondary)]">
+                    {currentCrumbs.map((crumb, i) => {
+                      const isLast = i === currentCrumbs.length - 1;
+                      return (
+                        <React.Fragment key={i}>
+                          {i > 0 && <BreadcrumbSeparator className="text-[var(--text-tertiary)]" />}
+                          <BreadcrumbItem>
+                            {isLast ? (
+                              <BreadcrumbPage className="font-bold text-[var(--foreground)]">
+                                {crumb}
+                              </BreadcrumbPage>
+                            ) : (
+                              <BreadcrumbLink
+                                href="/dashboard"
+                                className="hover:text-[var(--foreground)] transition-colors cursor-pointer"
+                              >
+                                {crumb}
+                              </BreadcrumbLink>
+                            )}
+                          </BreadcrumbItem>
+                        </React.Fragment>
+                      );
+                    })}
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </>
+            )}
           </div>
 
           {/* Right: Search + Notifications + Theme Toggler + Profile */}
@@ -229,7 +269,7 @@ export default function Header({
             <button
               type="button"
               onClick={() => setIsSearchOpen(true)}
-              className="h-8.5 w-8.5 flex sm:hidden items-center justify-center bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-zinc-200 transition-all shadow-2xs cursor-pointer"
+              className="h-8.5 w-8.5 flex sm:hidden items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
               title="Rechercher (⌘K)"
             >
               <MagnifyingGlassIcon className="h-4 w-4" />
@@ -238,13 +278,13 @@ export default function Header({
             {/* Barre complète desktop */}
             <div
               onClick={() => setIsSearchOpen(true)}
-              className="group relative hidden sm:flex items-center h-8.5 w-[190px] md:w-[240px] px-2.5 bg-white dark:bg-[#18181B] hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 rounded-lg transition-all shadow-2xs cursor-pointer"
+              className="group relative hidden sm:flex items-center h-8.5 w-[190px] md:w-[240px] px-2.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg transition-all shadow-2xs cursor-pointer"
             >
-              <MagnifyingGlassIcon className="h-4 w-4 text-slate-400 dark:text-zinc-400 transition-colors shrink-0" />
-              <span className="ml-2 text-[12.5px] text-slate-500 dark:text-zinc-400 select-none truncate flex-1 font-medium">
+              <MagnifyingGlassIcon className="h-4 w-4 text-[var(--text-secondary)] transition-colors shrink-0" />
+              <span className="ml-2 text-[12.5px] text-[var(--text-secondary)] select-none truncate flex-1 font-medium">
                 Rechercher...
               </span>
-              <kbd className="inline-flex items-center px-1.5 py-0.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-[10px] font-mono text-slate-500 dark:text-zinc-400 rounded">
+              <kbd className="inline-flex items-center px-1.5 py-0.5 bg-[var(--surface-secondary)] border border-[var(--border)] text-[10px] font-mono text-[var(--text-secondary)] rounded">
                 ⌘K
               </kbd>
             </div>
@@ -254,11 +294,11 @@ export default function Header({
               <button
                 type="button"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="h-8.5 w-8.5 flex items-center justify-center bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-zinc-200 transition-all shadow-2xs cursor-pointer"
+                className="h-8.5 w-8.5 flex items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
                 title="Notifications"
               >
                 <BellIcon className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
               </button>
 
               {/* Notifications Popover */}
@@ -268,21 +308,21 @@ export default function Header({
                     initial={{ opacity: 0, y: 6, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.96 }}
-                    className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#18181B] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-2xl p-3 z-50 text-[12px] text-slate-900 dark:text-zinc-100 animate-in fade-in-50"
+                    className="absolute right-0 mt-2 w-80 bg-[var(--surface-elevated)] border border-[var(--border)] rounded-xl shadow-2xl p-3 z-50 text-[12px] text-[var(--foreground)] animate-in fade-in-50"
                   >
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-zinc-800 font-bold text-slate-900 dark:text-white">
+                    <div className="flex items-center justify-between pb-2 border-b border-[var(--border)] font-bold text-[var(--foreground)]">
                       <span>Notifications récentes</span>
-                      <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      <span className="text-[10px] text-[var(--success)] font-bold bg-[var(--success-subtle)] px-2 py-0.5 rounded border border-[var(--success)]/20">
                         ● MoMo Live
                       </span>
                     </div>
                     <div className="py-2 space-y-2">
-                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/80">
-                        <div className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                      <div className="p-2.5 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
+                        <div className="font-bold text-[var(--foreground)] flex items-center justify-between">
                           <span>Loyer reçu (MTN MoMo)</span>
-                          <span className="text-[10px] text-slate-400">09:42</span>
+                          <span className="text-[10px] text-[var(--text-secondary)]">09:42</span>
                         </div>
-                        <p className="text-[11.5px] text-slate-600 dark:text-zinc-300 mt-0.5">
+                        <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">
                           Koudjo Dossou a réglé 350 000 FCFA avec succès.
                         </p>
                       </div>
@@ -298,10 +338,10 @@ export default function Header({
               onClick={togglePrivacyMode}
               className={`h-8.5 w-8.5 flex items-center justify-center border rounded-lg transition-all shadow-2xs cursor-pointer ${
                 isPrivacyMode
-                  ? "bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400/20"
-                  : "bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-200"
+                  ? "bg-[var(--primary-subtle)] border-[var(--primary)] text-[var(--primary)] ring-2 ring-[var(--primary-subtle)]"
+                  : "bg-[var(--surface)] hover:bg-[var(--surface-hover)] border-[var(--border)] text-[var(--foreground)]"
               }`}
-              title={isPrivacyMode ? "Désactiver le mode masquage (Montants masqués)" : "Activer le mode masquage (Masquer les loyers sensibles)"}
+              title={isPrivacyMode ? "Désactiver le mode masquage (Montants masqués)" : "Activer le mode masquage"}
             >
               {isPrivacyMode ? (
                 <EyeSlashIcon className="h-4 w-4" />
@@ -316,38 +356,38 @@ export default function Header({
               onThemeChange={(newTheme) => setTheme(newTheme)}
               variant="circle"
               duration={450}
-              className="h-8.5 w-8.5 border border-slate-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-[#18181B] cursor-pointer"
+              className="h-8.5 w-8.5 border border-[var(--border)] rounded-lg bg-[var(--surface)] cursor-pointer text-[var(--foreground)]"
             />
 
             {/* 5. Layout Customizer Button (Desktop uniquement - masqué sur mobile) */}
             <button
               type="button"
               onClick={() => setIsCustomizerOpen(true)}
-              className="hidden sm:flex h-8.5 w-8.5 items-center justify-center bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-700 dark:text-zinc-200 transition-all shadow-2xs cursor-pointer"
+              className="hidden sm:flex h-8.5 w-8.5 items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
               title="Personnaliser l'affichage"
             >
               <AdjustmentsHorizontalIcon className="h-4 w-4" />
             </button>
 
-            {/* 5. User Profile Dropdown */}
+            {/* 6. User Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 bg-white dark:bg-[#18181B] hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg transition-all shadow-2xs cursor-pointer outline-none"
+                  className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg transition-all shadow-2xs cursor-pointer outline-none"
                   aria-label="Menu utilisateur"
                 >
-                  <Avatar className="h-6.5 w-6.5 rounded-full border border-slate-200 dark:border-zinc-700 shrink-0">
+                  <Avatar className="h-6.5 w-6.5 rounded-full border border-[var(--border)] shrink-0">
                     <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                    <AvatarFallback className="bg-emerald-600 text-white text-[10.5px] font-bold">
+                    <AvatarFallback className="bg-[var(--primary)] text-[var(--primary-foreground)] text-[10.5px] font-bold">
                       {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:flex flex-col text-left leading-tight">
-                    <span className="text-[12px] font-bold text-slate-900 dark:text-white truncate max-w-[110px]">
+                    <span className="text-[12px] font-bold text-[var(--foreground)] truncate max-w-[110px]">
                       {userProfile.name || "Alexandre K."}
                     </span>
-                    <span className="text-[10px] text-slate-500 dark:text-zinc-400 truncate max-w-[110px] font-semibold">
+                    <span className="text-[10px] text-[var(--text-secondary)] truncate max-w-[110px] font-semibold">
                       {userProfile.role || "Bailleur"}
                     </span>
                   </div>
