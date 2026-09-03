@@ -30,7 +30,7 @@ export default function AuthLayout({
 
         {/* Bottom Minimal Footer */}
         <footer className="pt-6 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-slate-500">
-          <span className="font-medium">© 2026 Lokka. Fait pour le Bénin 🇧🇯</span>
+          <span className="font-medium">© 2026 Lokka · Fait pour le Bénin</span>
           <div className="flex gap-4 font-semibold">
             <Link href="/produit" className="hover:text-emerald-700 transition-colors">
               Fonctionnalités

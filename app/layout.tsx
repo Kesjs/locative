@@ -4,7 +4,7 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lokka — Gestion locative simplifiée au Bénin 🇧🇯",
+  title: "Lokka — Gestion locative simplifiée au Bénin",
   description:
     "Lokka est la plateforme de gestion locative pensée pour les propriétaires exigeants. Suivi des loyers MTN MoMo, quittances certifiées Loi 2022-30 et mini-sites vitrines.",
   icons: {

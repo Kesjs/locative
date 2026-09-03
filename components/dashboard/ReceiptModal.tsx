@@ -93,7 +93,7 @@ export default function ReceiptModal({ isOpen, onClose, receiptData }: ReceiptMo
             <div className="text-right">
               <div className="text-[13px] font-bold text-[#0F172A]">LOKKA BÉNIN</div>
               <div className="text-[11px] text-[#64635F]">Régime Loi n° 2022-30</div>
-              <div className="text-[11px] text-[#0F172A] font-semibold">République du Bénin 🇧🇯</div>
+              <div className="text-[11px] text-[#0F172A] font-semibold">République du Bénin</div>
             </div>
           </div>
 

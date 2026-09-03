@@ -138,7 +138,7 @@ export default function LoginPage() {
                   disabled={isLoading || !email}
                   className="w-full h-12 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-[13.5px] font-semibold rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                 >
-                  {isLoading ? "Envoi du code..." : "Continuer avec un code OTP"}
+                  {isLoading ? "Envoi en cours..." : "Continuer par email"}
                   <ArrowRightIcon className="h-3.5 w-3.5" />
                 </button>
               </form>

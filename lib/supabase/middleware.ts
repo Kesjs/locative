@@ -40,6 +40,16 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
+
+  // Si un code OAuth (ex: retour Google) atterrit sur la racine ou une autre page au lieu de /auth/callback
+  if (request.nextUrl.searchParams.has('code') && pathname !== '/auth/callback') {
+    const code = request.nextUrl.searchParams.get('code')!
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/callback'
+    url.searchParams.set('code', code)
+    return NextResponse.redirect(url)
+  }
+
   const isProtectedPath = pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/locataire')
   const isAuthPath = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')
   const isOnboardingPath = pathname === '/onboarding'

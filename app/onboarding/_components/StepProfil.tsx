@@ -189,8 +189,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             })
           }
           options={[
-            { value: "benin", label: "Au Bénin 🇧🇯" },
-            { value: "diaspora", label: "Diaspora 🌍" },
+            { value: "benin", label: "Au Bénin" },
+            { value: "diaspora", label: "Diaspora" },
           ]}
         />
       </FormField>
