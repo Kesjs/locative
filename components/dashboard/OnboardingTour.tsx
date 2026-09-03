@@ -154,7 +154,7 @@ export function OnboardingTour({
       {/* Progress Bar */}
       <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-3.5 overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
         <div
-          className="bg-emerald-600 dark:bg-emerald-500 h-full transition-all duration-500 rounded-full"
+          className="bg-primary h-full transition-all duration-500 rounded-full"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>

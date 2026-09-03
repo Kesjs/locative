@@ -74,6 +74,7 @@ export function applyAccentColor(hexColor: string) {
 
     const root = document.documentElement;
     root.style.setProperty("--primary", hexColor);
+    root.style.setProperty("--brand-accent", hexColor);
     root.style.setProperty("--primary-hover", hoverColor);
     root.style.setProperty("--primary-active", activeColor);
     root.style.setProperty("--primary-subtle", subtleColor);

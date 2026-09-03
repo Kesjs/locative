@@ -52,6 +52,8 @@ export async function GET(request: Request) {
         // Détermination de la cible selon l'état d'onboarding et le rôle
         if (!profile || !profile.onboarding_completed) {
           targetPath = '/onboarding';
+        } else if (next && next !== '/dashboard' && !next.startsWith('/auth')) {
+          targetPath = next;
         } else if (profile.role === 'tenant') {
           targetPath = '/locataire';
         } else if (profile.role === 'super_admin') {
@@ -62,12 +64,13 @@ export async function GET(request: Request) {
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
+      const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
       const isLocalEnv = process.env.NODE_ENV === 'development';
 
       if (isLocalEnv) {
         return NextResponse.redirect(`${origin}${targetPath}`);
       } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${targetPath}`);
+        return NextResponse.redirect(`${forwardedProto}://${forwardedHost}${targetPath}`);
       } else {
         return NextResponse.redirect(`${origin}${targetPath}`);
       }

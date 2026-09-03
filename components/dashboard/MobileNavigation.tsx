@@ -21,12 +21,12 @@ import {
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { XMarkIcon, ArrowLeftOnRectangleIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useBiens } from "@/lib/hooks/useBiens";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, Sliders } from "lucide-react";
 
 export function MobileNavigation() {
   const router = useRouter();
   const pathname = usePathname();
-  const { openMobile, setOpenMobile, devRole } = useSidebar();
+  const { openMobile, setOpenMobile, devRole, setIsCustomizerOpen } = useSidebar();
   const userProfile = useUserProfile();
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -159,13 +159,13 @@ export function MobileNavigation() {
                           key={item.title}
                           href={item.url}
                           onClick={handleClose}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all ${
+                          className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13.5px] font-medium transition-all ${
                             active
-                              ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                              ? "bg-[var(--primary-subtle)] text-[var(--primary)] font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-[var(--primary)] before:rounded-r-sm shadow-2xs"
                               : "text-foreground hover:bg-muted hover:text-foreground"
                           }`}
                         >
-                          <Icon className={`h-4.5 w-4.5 shrink-0 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                          <Icon className={`h-4.5 w-4.5 shrink-0 transition-colors ${active ? "text-[var(--primary)]" : "text-muted-foreground"}`} />
                           <span className="truncate flex-1">{item.title}</span>
                           {item.badge && (
                             <span
@@ -251,22 +251,34 @@ export function MobileNavigation() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="grid grid-cols-3 gap-1.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleClose();
+                      setIsCustomizerOpen(true);
+                    }}
+                    className="flex items-center justify-center gap-1.5 py-2 px-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-[11.5px] font-semibold transition cursor-pointer"
+                  >
+                    <Sliders className="h-3.5 w-3.5 text-[var(--primary)]" />
+                    <span>Thème</span>
+                  </button>
+
                   <Link
                     href="/dashboard/parametres"
                     onClick={handleClose}
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-[12px] font-semibold transition"
+                    className="flex items-center justify-center gap-1.5 py-2 px-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-[11.5px] font-semibold transition"
                   >
-                    <Cog6ToothIcon className="h-4 w-4 text-muted-foreground" />
+                    <Cog6ToothIcon className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>Réglages</span>
                   </Link>
 
                   <button
                     type="button"
                     onClick={() => setShowLogoutDialog(true)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg bg-destructive/10 hover:bg-destructive/15 text-destructive text-[12px] font-semibold transition cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 py-2 px-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/15 text-destructive text-[11.5px] font-semibold transition cursor-pointer"
                   >
-                    <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                    <ArrowLeftOnRectangleIcon className="h-3.5 w-3.5" />
                     <span>Quitter</span>
                   </button>
                 </div>

@@ -476,7 +476,7 @@ export function AddBienModal({
                 <div
                   className="h-1.5 rounded-full transition-all duration-300"
                   style={{
-                    backgroundColor: i <= step ? "var(--brand-accent, #059669)" : "hsl(var(--muted))",
+                    backgroundColor: i <= step ? "var(--primary)" : "var(--border)",
                   }}
                 />
               </div>
@@ -965,7 +965,7 @@ export function AddBienModal({
               type="button"
               disabled={isPending}
               onClick={handleSubmit}
-              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-semibold disabled:opacity-50 transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              className="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground text-[12.5px] font-semibold disabled:opacity-50 transition cursor-pointer shadow-xs flex items-center gap-1.5"
             >
               {isPending ? (
                 <>

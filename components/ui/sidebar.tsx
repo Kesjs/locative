@@ -96,6 +96,8 @@ type SidebarContext = {
   setMobileNavVariant: (v: MobileNavVariant) => void;
   devRole: DevRole;
   setDevRole: (role: DevRole) => void;
+  isCustomizerOpen: boolean;
+  setIsCustomizerOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -159,6 +161,7 @@ export const SidebarProvider = React.forwardRef<
     const [density, setDensityState] = React.useState<DensityMode>("comfort");
     const [mobileNavVariant, _setMobileNavVariant] = React.useState<MobileNavVariant>("dynamic");
     const [devRole, _setDevRole] = React.useState<DevRole>("bailleur");
+    const [isCustomizerOpen, setIsCustomizerOpen] = React.useState<boolean>(false);
 
     const applyColor = (c: ColorTheme, customHex?: string) => {
       let hex = COLOR_THEMES[c]?.hex || COLOR_THEMES.amber.hex;
@@ -369,6 +372,8 @@ export const SidebarProvider = React.forwardRef<
         setMobileNavVariant,
         devRole,
         setDevRole,
+        isCustomizerOpen,
+        setIsCustomizerOpen,
       }),
       [
         state,
@@ -389,6 +394,7 @@ export const SidebarProvider = React.forwardRef<
         density,
         mobileNavVariant,
         devRole,
+        isCustomizerOpen,
       ]
     );
 

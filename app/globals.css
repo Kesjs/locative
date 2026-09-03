@@ -109,6 +109,7 @@
 
   /* Couleur d'accent dynamique (Ambre #F59E0B par défaut pour Lokka) */
   --primary: #F59E0B;
+  --brand-accent: var(--primary);
   --primary-hover: #D97706;
   --primary-active: #B45309;
   --primary-subtle: rgba(245, 158, 11, 0.12);
@@ -163,6 +164,7 @@
 
   /* Couleur d'accent dynamique (Ambre #F59E0B par défaut) */
   --primary: #F59E0B;
+  --brand-accent: var(--primary);
   --primary-hover: #D97706;
   --primary-active: #B45309;
   --primary-subtle: rgba(245, 158, 11, 0.15);

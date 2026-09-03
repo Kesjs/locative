@@ -25,6 +25,12 @@ import {
   Layout,
   Layers,
   ChevronDown,
+  Building2,
+  Users,
+  Shield,
+  Coins,
+  Globe,
+  Monitor,
 } from "lucide-react";
 import { ACCENT_PRESETS } from "@/lib/theme/color-utils";
 import { toast } from "@/components/ui/toast";
@@ -58,7 +64,8 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setDevRole,
   } = useSidebar();
 
-  const [devSectionOpen, setDevSectionOpen] = React.useState(false);
+  // Onglet actif pour une ergonomie optimale sur mobile et compacte
+  const [activeTab, setActiveTab] = React.useState<"all" | "theme" | "layout" | "region">("all");
 
   const activeHex =
     colorTheme === "custom"
@@ -73,479 +80,651 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setLayoutMode("push");
     setCurrency("fcfa");
     setDensity("comfort");
-    toast.success("Préférences réinitialisées", "Configuration par défaut Lokka appliquée.");
+    toast.success("Préférences réinitialisées", {
+      description: "Configuration par défaut Lokka appliquée.",
+    });
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity flex justify-end">
-          {/* Backdrop */}
-          <div className="flex-1 cursor-pointer" onClick={onClose} />
+        <div className="fixed inset-0 z-50 pointer-events-none flex justify-end">
+          {/* Backdrop 100% transparent SANS AUCUN FLOU pour voir le dashboard changer en direct */}
+          <div
+            className="flex-1 pointer-events-auto cursor-pointer bg-black/10 transition-opacity"
+            onClick={onClose}
+            title="Cliquer pour fermer"
+          />
 
-          {/* Drawer Panel */}
+          {/* Drawer Panel interactif avec ombrage profond */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="w-full max-w-[390px] h-full flex flex-col justify-between overflow-hidden select-none border-l shadow-2xl bg-[var(--surface)] border-[var(--border)] text-[var(--foreground)]"
+            className="pointer-events-auto w-full max-w-[430px] h-full flex flex-col justify-between overflow-hidden select-none border-l shadow-2xl bg-[var(--surface)] border-[var(--border)] text-[var(--foreground)]"
           >
             {/* ─── 1. HEADER ─── */}
-            <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--surface-elevated)]">
-              <div>
-                <h2 className="text-[14px] font-bold tracking-tight text-[var(--foreground)] flex items-center gap-2">
-                  <Sliders className="h-4 w-4 text-[var(--primary)]" />
-                  Affichage & Préférences
-                </h2>
-                <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">
-                  Personnalisez votre interface et vos outils Lokka.
-                </p>
+            <div className="px-5 py-3.5 border-b border-[var(--border)] bg-[var(--surface-elevated)] shrink-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-[14.5px] font-bold tracking-tight text-[var(--foreground)] flex items-center gap-2">
+                    <Sliders className="h-4 w-4 text-[var(--primary)]" />
+                    Affichage &amp; Préférences
+                  </h2>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                    Modifications appliquées en temps réel sur l&apos;écran.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    title="Réinitialiser tous les paramètres"
+                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    title="Fermer la barre latérale"
+                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  title="Réinitialiser les préférences"
-                  className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-secondary)] transition cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+              {/* Onglets tactiles supérieurs pour navigation rapide */}
+              <div className="flex items-center gap-1 mt-3 p-1 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border)]">
+                {[
+                  { id: "all", label: "Tout voir" },
+                  { id: "theme", label: "Thème & Couleurs" },
+                  { id: "layout", label: "Layout & Menu" },
+                  { id: "region", label: "Devises & Rôles" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all cursor-pointer truncate ${
+                      activeTab === tab.id
+                        ? "bg-[var(--surface)] text-[var(--primary)] shadow-2xs border border-[var(--border)]"
+                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* ─── 2. SECTIONS LIST ─── */}
-            <div className="p-5 space-y-6 flex-1 overflow-y-auto no-scrollbar">
+            <div className="p-5 space-y-6 flex-1 overflow-y-auto sidebar-scrollbar">
 
-              {/* SECTION A: THÈME D'APPARENCE */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
-                    <Moon className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    Thème Visuel
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)] capitalize">
-                    {theme === "dark" ? "Sombre" : theme === "light" ? "Clair" : "Système"}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
-                  <button
-                    type="button"
-                    onClick={() => setTheme("light")}
-                    className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      theme === "light"
-                        ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <Sun className="h-3.5 w-3.5" />
-                    Clair
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setTheme("dark")}
-                    className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      theme === "dark"
-                        ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <Moon className="h-3.5 w-3.5" />
-                    Sombre
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setTheme("system")}
-                    className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      theme === "system"
-                        ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                        : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <Laptop className="h-3.5 w-3.5" />
-                    Auto
-                  </button>
-                </div>
-              </div>
-
-              {/* SECTION B: COULEUR D'ACCENT PERSONNALISABLE */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
-                    <Palette className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    Couleur d&apos;Accent
-                  </span>
-                  <span className="text-[11px] font-mono text-[var(--text-secondary)] uppercase">
-                    {activeHex}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-7 gap-2 items-center">
-                  {ACCENT_PRESETS.map((preset) => {
-                    const isSelected = colorTheme === preset.id;
-                    return (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        onClick={() => setColorTheme(preset.id as ColorTheme)}
-                        title={preset.name}
-                        className={`h-9 w-full rounded-lg border transition-all flex items-center justify-center cursor-pointer relative ${
-                          isSelected
-                            ? "border-[var(--foreground)] ring-2 ring-[var(--primary-subtle)] scale-105"
-                            : "border-[var(--border)] hover:scale-102 opacity-85 hover:opacity-100"
-                        }`}
-                        style={{ backgroundColor: preset.hex }}
-                      >
-                        {isSelected && (
-                          <Check
-                            className="h-3.5 w-3.5 stroke-[3]"
-                            style={{
-                              color:
-                                preset.id === "amber" || preset.id === "cyan"
-                                  ? "#000000"
-                                  : "#FFFFFF",
-                            }}
-                          />
-                        )}
-                      </button>
-                    );
-                  })}
-
-                  {/* Sélecteur Personnalisé (Color Picker) */}
-                  <label
-                    title="Couleur Personnalisée"
-                    className={`h-9 w-full rounded-lg border transition-all flex items-center justify-center cursor-pointer relative overflow-hidden ${
-                      colorTheme === "custom"
-                        ? "border-[var(--foreground)] ring-2 ring-[var(--primary-subtle)] scale-105"
-                        : "border-[var(--border)] hover:scale-102 opacity-85 hover:opacity-100"
-                    }`}
-                    style={{
-                      background:
-                        colorTheme === "custom"
-                          ? customColorHex
-                          : "conic-gradient(from 0deg, #f59e0b, #3b82f6, #6366f1, #8b5cf6, #10b981, #06b6d4, #f59e0b)",
-                    }}
-                  >
-                    <input
-                      type="color"
-                      value={customColorHex}
-                      onChange={(e) => setCustomColorHex(e.target.value)}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    />
-                    {colorTheme === "custom" && (
-                      <Check className="h-3.5 w-3.5 text-white stroke-[3] drop-shadow-sm" />
-                    )}
-                  </label>
-                </div>
-              </div>
-
-              {/* SECTION C: DISPOSITION GLOBALE (SIDEBAR VS TOP NAV) */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
-                    <Layout className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                    Navigation Principale
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)]">
-                    {navLayout === "sidebar" ? "Barre latérale" : "Top Nav horizontale"}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  {/* Miniature Sidebar */}
-                  <button
-                    type="button"
-                    onClick={() => setNavLayout("sidebar")}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                      navLayout === "sidebar"
-                        ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-1 ring-[var(--primary)]"
-                        : "border-[var(--border)] hover:bg-[var(--surface-secondary)]"
-                    }`}
-                  >
-                    <div className="h-14 w-full rounded-md border border-[var(--border)] bg-[var(--surface-elevated)] flex overflow-hidden">
-                      <div className="w-1/3 h-full border-r border-[var(--border)] bg-[var(--primary-subtle)] p-1 flex flex-col gap-1">
-                        <div className="w-full h-1.5 rounded-xs bg-[var(--primary)]" />
-                        <div className="w-3/4 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
-                        <div className="w-2/3 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
-                      </div>
-                      <div className="flex-1 p-1.5 flex flex-col gap-1">
-                        <div className="w-full h-1.5 rounded-xs bg-[var(--surface-secondary)]" />
-                        <div className="w-full h-4 rounded-xs bg-[var(--surface-secondary)]" />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11.5px] font-semibold text-[var(--foreground)]">
-                        Barre latérale
-                      </span>
-                      {navLayout === "sidebar" && (
-                        <Check className="h-3 w-3 text-[var(--primary)] stroke-[3]" />
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Miniature Top Nav */}
-                  <button
-                    type="button"
-                    onClick={() => setNavLayout("topnav")}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                      navLayout === "topnav"
-                        ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-1 ring-[var(--primary)]"
-                        : "border-[var(--border)] hover:bg-[var(--surface-secondary)]"
-                    }`}
-                  >
-                    <div className="h-14 w-full rounded-md border border-[var(--border)] bg-[var(--surface-elevated)] flex flex-col overflow-hidden">
-                      <div className="h-3 w-full border-b border-[var(--border)] bg-[var(--primary-subtle)] px-1.5 flex items-center gap-1">
-                        <div className="w-2 h-1.5 rounded-xs bg-[var(--primary)]" />
-                        <div className="w-4 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
-                        <div className="w-4 h-1 rounded-xs bg-[var(--text-secondary)] opacity-40" />
-                      </div>
-                      <div className="flex-1 p-1.5 flex flex-col gap-1">
-                        <div className="w-full h-1.5 rounded-xs bg-[var(--surface-secondary)]" />
-                        <div className="w-full h-4 rounded-xs bg-[var(--surface-secondary)]" />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11.5px] font-semibold text-[var(--foreground)]">
-                        Top Nav
-                      </span>
-                      {navLayout === "topnav" && (
-                        <Check className="h-3 w-3 text-[var(--primary)] stroke-[3]" />
-                      )}
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* SECTION D: STYLE DE BARRE LATÉRALE (CONSERVÉ) */}
-              {navLayout === "sidebar" && (
-                <div className="space-y-2.5">
+              {/* SECTION 1: COULEURS D'ACCENT */}
+              {(activeTab === "all" || activeTab === "theme") && (
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                    <span className="text-[12.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                      <Palette className="h-3.5 w-3.5 text-[var(--primary)]" />
+                      Couleur d&apos;Accent Dynamique
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-[var(--primary)] uppercase">
+                      {activeHex}
+                    </span>
+                  </div>
+
+                  {/* Swatches presets */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {ACCENT_PRESETS.map((preset) => {
+                      const isSelected = colorTheme === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => setColorTheme(preset.id as ColorTheme)}
+                          className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer ${
+                            isSelected
+                              ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                              : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]"
+                          }`}
+                        >
+                          <span
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-white shadow-2xs mb-1"
+                            style={{ backgroundColor: preset.hex }}
+                          >
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" style={{ color: preset.hex === "#F59E0B" || preset.hex === "#06B6D4" ? "#000" : "#FFF" }} />}
+                          </span>
+                          <span className="text-[10.5px] font-semibold text-[var(--foreground)] truncate w-full text-center">
+                            {preset.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {/* Sélecteur personnalisé libre */}
+                    <label
+                      className={`relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer ${
+                        colorTheme === "custom"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]"
+                      }`}
+                    >
+                      <input
+                        type="color"
+                        value={customColorHex}
+                        onChange={(e) => {
+                          setCustomColorHex(e.target.value);
+                          setColorTheme("custom");
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center shadow-2xs border border-white/40 mb-1"
+                        style={{ backgroundColor: customColorHex }}
+                      >
+                        {colorTheme === "custom" && <Check className="w-3 h-3 stroke-[3] text-white" />}
+                      </span>
+                      <span className="text-[10.5px] font-semibold text-[var(--foreground)]">
+                        Libre
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: MODE DE THÈME AVEC MINIATURES ILLUSTRÉES D'ORIGINE */}
+              {(activeTab === "all" || activeTab === "theme") && (
+                <div className="space-y-3 pt-2 border-t border-[var(--border)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                      <Sun className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                      Mode de Thème
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)] capitalize">
+                      {theme === "dark" ? "Sombre" : theme === "light" ? "Clair" : "Automatique"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Thème Clair */}
+                    <div
+                      onClick={() => setTheme("light")}
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
+                        theme === "light"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
+                      }`}
+                    >
+                      <div className="relative w-full h-[54px] rounded-lg overflow-hidden flex items-center justify-center p-1.5 bg-[#F4F4F5] border border-[#E4E4E7]">
+                        {theme === "light" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1">
+                          <div className="w-1/4 h-full bg-white rounded-xs border border-[#E4E4E7]" />
+                          <div className="w-3/4 h-full bg-white rounded-xs border border-[#E4E4E7] p-1 flex flex-col justify-between">
+                            <div className="w-2/3 h-1 bg-slate-300 rounded-xs" />
+                            <div className="flex gap-1">
+                              <div className="w-1.5 h-3.5 rounded-xs" style={{ backgroundColor: "var(--primary)" }} />
+                              <div className="w-1.5 h-2.5 bg-slate-300 rounded-xs" />
+                              <div className="w-1.5 h-4.5 bg-slate-400 rounded-xs" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Clair</span>
+                    </div>
+
+                    {/* Thème Sombre */}
+                    <div
+                      onClick={() => setTheme("dark")}
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
+                        theme === "dark"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
+                      }`}
+                    >
+                      <div className="relative w-full h-[54px] rounded-lg overflow-hidden flex items-center justify-center p-1.5 bg-[#0B0B0D] border border-[#27272A]">
+                        {theme === "dark" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1">
+                          <div className="w-1/4 h-full bg-[#111113] rounded-xs border border-[#27272A]" />
+                          <div className="w-3/4 h-full bg-[#18181B] rounded-xs border border-[#27272A] p-1 flex flex-col justify-between">
+                            <div className="w-2/3 h-1 bg-zinc-700 rounded-xs" />
+                            <div className="flex gap-1">
+                              <div className="w-1.5 h-3.5 rounded-xs" style={{ backgroundColor: "var(--primary)" }} />
+                              <div className="w-1.5 h-2.5 bg-zinc-700 rounded-xs" />
+                              <div className="w-1.5 h-4.5 bg-zinc-600 rounded-xs" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Sombre</span>
+                    </div>
+
+                    {/* Thème Système Partagé */}
+                    <div
+                      onClick={() => setTheme("system")}
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
+                        theme === "system"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
+                      }`}
+                    >
+                      <div className="relative w-full h-[54px] rounded-lg overflow-hidden flex items-center justify-center p-1.5 bg-gradient-to-r from-[#F4F4F5] to-[#0B0B0D] border border-[var(--border)]">
+                        {theme === "system" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1">
+                          <div className="w-1/2 h-full bg-white/90 rounded-xs border border-slate-300 p-0.5 flex flex-col justify-between">
+                            <div className="w-3 h-1 bg-slate-400 rounded-xs" />
+                            <div className="w-1.5 h-3" style={{ backgroundColor: "var(--primary)" }} />
+                          </div>
+                          <div className="w-1/2 h-full bg-[#18181B] rounded-xs border border-zinc-700 p-0.5 flex flex-col justify-between">
+                            <div className="w-3 h-1 bg-zinc-600 rounded-xs" />
+                            <div className="w-1.5 h-3" style={{ backgroundColor: "var(--primary)" }} />
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Système</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 3: DISPOSITION PRINCIPALE (TOP NAV vs BARRE LATÉRALE) */}
+              {(activeTab === "all" || activeTab === "layout") && (
+                <div className="space-y-3 pt-2 border-t border-[var(--border)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                      <Layout className="h-3.5 w-3.5 text-[var(--primary)]" />
+                      Structure de Navigation
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)]">
+                      {navLayout === "topnav" ? "Top Navigation Haute" : "Barre Latérale Standard"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {/* Option 1 : Barre latérale */}
+                    <div
+                      onClick={() => setNavLayout("sidebar")}
+                      className={`cursor-pointer group flex flex-col items-center p-2 rounded-xl border transition-all ${
+                        navLayout === "sidebar"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
+                      }`}
+                    >
+                      <div className="relative w-full h-[60px] rounded-lg overflow-hidden flex items-center justify-center p-1.5 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {navLayout === "sidebar" && (
+                          <div className="absolute top-1.5 right-1.5 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1.5">
+                          <div className="w-1/3 h-full rounded-xs flex flex-col justify-between p-1 bg-[var(--primary-subtle)] border border-[var(--primary-border)]">
+                            <div className="w-full h-1.5 rounded-xs" style={{ backgroundColor: "var(--primary)" }} />
+                            <div className="w-3/4 h-1 bg-[var(--text-secondary)] opacity-50 rounded-xs" />
+                            <div className="w-full h-1 bg-[var(--text-secondary)] opacity-50 rounded-xs" />
+                          </div>
+                          <div className="flex-1 h-full rounded-xs bg-[var(--surface)] border border-[var(--border)] p-1 flex flex-col gap-1">
+                            <div className="w-full h-2 rounded-xs bg-[var(--surface-secondary)]" />
+                            <div className="w-1/2 h-2 rounded-xs bg-[var(--surface-secondary)]" />
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[11.5px] font-bold mt-2 text-[var(--foreground)]">
+                        Barre Latérale
+                      </span>
+                    </div>
+
+                    {/* Option 2 : Top Nav */}
+                    <div
+                      onClick={() => setNavLayout("topnav")}
+                      className={`cursor-pointer group flex flex-col items-center p-2 rounded-xl border transition-all ${
+                        navLayout === "topnav"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
+                      }`}
+                    >
+                      <div className="relative w-full h-[60px] rounded-lg overflow-hidden flex items-center justify-center p-1.5 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {navLayout === "topnav" && (
+                          <div className="absolute top-1.5 right-1.5 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex flex-col w-full h-full gap-1.5">
+                          <div className="w-full h-3 rounded-xs flex items-center justify-between px-1 bg-[var(--primary-subtle)] border border-[var(--primary-border)]">
+                            <div className="w-2.5 h-1.5 rounded-xs" style={{ backgroundColor: "var(--primary)" }} />
+                            <div className="flex gap-1">
+                              <div className="w-3 h-1 bg-[var(--text-secondary)] opacity-60 rounded-xs" />
+                              <div className="w-3 h-1 bg-[var(--text-secondary)] opacity-60 rounded-xs" />
+                            </div>
+                          </div>
+                          <div className="flex-1 rounded-xs bg-[var(--surface)] border border-[var(--border)] p-1 flex flex-col gap-1">
+                            <div className="w-full h-2 rounded-xs bg-[var(--surface-secondary)]" />
+                            <div className="w-2/3 h-2 rounded-xs bg-[var(--surface-secondary)]" />
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[11.5px] font-bold mt-2 text-[var(--foreground)]">
+                        Top Nav (Plein Écran)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 4: STYLE DU MENU LATÉRAL D'ORIGINE AVEC MINIATURES ILLUSTRÉES */}
+              {(activeTab === "all" || activeTab === "layout") && navLayout === "sidebar" && (
+                <div className="space-y-3 pt-2 border-t border-[var(--border)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
                       <Layers className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                       Style du Menu Latéral
                     </span>
                     <span className="text-[11px] text-[var(--text-secondary)] capitalize">
-                      {sidebarVariant === "sidebar"
-                        ? "Classique"
-                        : sidebarVariant === "floating"
-                        ? "Flottant"
-                        : "Encadré"}
+                      {sidebarVariant === "sidebar" ? "Classique" : sidebarVariant === "floating" ? "Flottante" : "Encadrée"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1.5 p-1 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
-                    <button
-                      type="button"
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Classique */}
+                    <div
                       onClick={() => setVariant("sidebar")}
-                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
                         sidebarVariant === "sidebar"
-                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
                       }`}
                     >
-                      Classique
-                    </button>
+                      <div className="relative w-full h-[52px] rounded-lg overflow-hidden flex items-center justify-center p-1 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {sidebarVariant === "sidebar" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1">
+                          <div className="w-1/3 h-full rounded-xs" style={{ backgroundColor: "var(--primary)" }} />
+                          <div className="w-2/3 h-full rounded-xs border border-[var(--border)] bg-[var(--surface)]" />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Classique</span>
+                    </div>
 
-                    <button
-                      type="button"
+                    {/* Flottante */}
+                    <div
                       onClick={() => setVariant("floating")}
-                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
                         sidebarVariant === "floating"
-                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
                       }`}
                     >
-                      Flottant
-                    </button>
+                      <div className="relative w-full h-[52px] rounded-lg overflow-hidden flex items-center justify-center p-1 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {sidebarVariant === "floating" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1 p-0.5">
+                          <div className="w-1/3 h-full rounded-md shadow-xs" style={{ backgroundColor: "var(--primary)" }} />
+                          <div className="w-2/3 h-full rounded-md border border-[var(--border)] bg-[var(--surface)]" />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Flottante</span>
+                    </div>
 
-                    <button
-                      type="button"
+                    {/* Encadrée / Inset */}
+                    <div
                       onClick={() => setVariant("inset")}
-                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
                         sidebarVariant === "inset"
-                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
                       }`}
                     >
-                      Encadré
-                    </button>
+                      <div className="relative w-full h-[52px] rounded-lg overflow-hidden flex items-center justify-center p-1 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {sidebarVariant === "inset" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1 p-0.5">
+                          <div className="w-1/4 h-full rounded-xs opacity-75" style={{ backgroundColor: "var(--primary)" }} />
+                          <div className="flex-1 h-full rounded-md border-2 border-[var(--primary)] p-0.5 bg-[var(--surface)]" />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Encadrée</span>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* SECTION E: MODE D'AGENCEMENT (PUSH VS OVERLAY - CONSERVÉ) */}
-              {navLayout === "sidebar" && (
-                <div className="space-y-2.5">
+              {/* SECTION 5: MODE D'AFFICHAGE D'ORIGINE AVEC MINIATURES ILLUSTRÉES */}
+              {(activeTab === "all" || activeTab === "layout") && navLayout === "sidebar" && (
+                <div className="space-y-3 pt-2 border-t border-[var(--border)]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold text-[var(--foreground)]">
-                      Comportement d&apos;Ouverture
+                    <span className="text-[12.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                      <Monitor className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                      Mode d&apos;Affichage
                     </span>
-                    <span className="text-[11px] text-[var(--text-secondary)]">
-                      {layoutMode === "push" ? "Repousser (Push)" : "Superposer (Overlay)"}
+                    <span className="text-[11px] text-[var(--text-secondary)] capitalize">
+                      {layoutMode === "push" ? "Pousser (Push)" : layoutMode === "overlay" ? "Superposition" : "Plein Écran"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)]">
-                    <button
-                      type="button"
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Push */}
+                    <div
                       onClick={() => setLayoutMode("push")}
-                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
-                        layoutMode === "push"
-                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
+                        layoutMode === "push" || layoutMode === "default"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
                       }`}
                     >
-                      Pousser le contenu
-                    </button>
+                      <div className="relative w-full h-[52px] rounded-lg overflow-hidden flex items-center justify-center p-1 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {(layoutMode === "push" || layoutMode === "default") && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="flex w-full h-full gap-1">
+                          <div className="w-1/3 h-full rounded-xs" style={{ backgroundColor: "var(--primary)" }} />
+                          <div className="w-2/3 h-full rounded-xs border border-[var(--border)] bg-[var(--surface)]" />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Pousser</span>
+                    </div>
 
-                    <button
-                      type="button"
+                    {/* Overlay */}
+                    <div
                       onClick={() => setLayoutMode("overlay")}
-                      className={`py-1.5 px-2 rounded-md text-[11.5px] font-medium transition-all cursor-pointer ${
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
                         layoutMode === "overlay"
-                          ? "bg-[var(--surface)] text-[var(--foreground)] shadow-xs font-semibold"
-                          : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
                       }`}
                     >
-                      Superposition
-                    </button>
+                      <div className="relative w-full h-[52px] rounded-lg overflow-hidden flex items-center justify-center p-1 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {layoutMode === "overlay" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="relative flex w-full h-full">
+                          <div className="w-2/5 h-full rounded-xs z-10 shadow-md" style={{ backgroundColor: "var(--primary)" }} />
+                          <div className="w-full h-full rounded-xs border border-[var(--border)] bg-[var(--surface)] opacity-50 absolute inset-0" />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Superposer</span>
+                    </div>
+
+                    {/* Full */}
+                    <div
+                      onClick={() => setLayoutMode("full")}
+                      className={`cursor-pointer group flex flex-col items-center p-1 rounded-xl border transition-all ${
+                        layoutMode === "full"
+                          ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                          : "border-[var(--border)] bg-[var(--surface-secondary)] hover:border-[var(--text-tertiary)]"
+                      }`}
+                    >
+                      <div className="relative w-full h-[52px] rounded-lg overflow-hidden flex items-center justify-center p-1 bg-[var(--surface-elevated)] border border-[var(--border)]">
+                        {layoutMode === "full" && (
+                          <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full text-black flex items-center justify-center text-[8px] shadow-xs z-20 bg-[var(--primary)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          </div>
+                        )}
+                        <div className="w-full h-full rounded-xs border border-[var(--border)] bg-[var(--surface)] flex items-center justify-center">
+                          <div className="w-3/4 h-2 rounded-xs opacity-75" style={{ backgroundColor: "var(--primary)" }} />
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-semibold mt-1.5 text-[var(--foreground)]">Complet</span>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* SECTION F: DEVISES EN PILULES RAPIDES */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-bold text-[var(--foreground)]">
-                    Devise Principale
-                  </span>
-                  <span className="text-[11px] font-semibold text-[var(--primary)] uppercase">
-                    {currency}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {(["fcfa", "eur", "usd"] as CurrencyMode[]).map((cur) => {
-                    const isCur = currency === cur;
-                    return (
-                      <button
-                        key={cur}
-                        type="button"
-                        onClick={() => setCurrency(cur)}
-                        className={`py-1.5 px-3 rounded-full text-[12px] font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                          isCur
-                            ? "bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)] shadow-xs"
-                            : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border)] hover:text-[var(--foreground)]"
-                        }`}
-                      >
-                        {cur.toUpperCase()}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* SECTION G: MODE CONFIDENTIALITÉ (MASQUAGE SOLDES) */}
-              <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-1.5 rounded-md bg-[var(--surface)] border border-[var(--border)] text-[var(--primary)]">
-                      {isPrivacyMode ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-[var(--text-secondary)]" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-[12px] font-semibold text-[var(--foreground)]">
-                        Masquer les montants
-                      </p>
-                      <p className="text-[10.5px] text-[var(--text-secondary)]">
-                        Remplace les soldes par ••••••
-                      </p>
-                    </div>
+              {/* SECTION 6: DEVISES & CONTEXTE RÉGIONAL D'ORIGINE */}
+              {(activeTab === "all" || activeTab === "region") && (
+                <div className="space-y-3 pt-2 border-t border-[var(--border)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                      <Coins className="h-3.5 w-3.5 text-[var(--primary)]" />
+                      Devise &amp; Contexte Régional
+                    </span>
+                    <span className="text-[11px] font-bold text-[var(--primary)] uppercase">
+                      {currency}
+                    </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={togglePrivacyMode}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                      isPrivacyMode ? "bg-[var(--primary)]" : "bg-[var(--border)]"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                        isPrivacyMode ? "translate-x-4" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {/* SECTION H: OPTIONS DÉVELOPPEUR DISCRÈTES */}
-              <div className="border border-[var(--border)] rounded-xl overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setDevSectionOpen(!devSectionOpen)}
-                  className="w-full px-3.5 py-2.5 bg-[var(--surface-secondary)] text-left flex items-center justify-between cursor-pointer"
-                >
-                  <span className="text-[11.5px] font-semibold text-[var(--text-secondary)]">
-                    Simulateur de Rôle Dev
-                  </span>
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 text-[var(--text-secondary)] transition-transform duration-200 ${
-                      devSectionOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {devSectionOpen && (
-                  <div className="p-3 bg-[var(--surface)] border-t border-[var(--border)] space-y-1.5">
-                    <p className="text-[10.5px] text-[var(--text-secondary)] mb-2">
-                      Permutez l&apos;interface pour tester les différentes vues métiers :
-                    </p>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {(["bailleur", "gestionnaire", "agence"] as const).map((r) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: "fcfa", label: "FCFA", sub: "Bénin / UEMOA" },
+                      { id: "eur", label: "Euros (€)", sub: "Diaspora Europe" },
+                      { id: "usd", label: "Dollars ($)", sub: "International" },
+                    ].map((curr) => {
+                      const isSelected = currency === curr.id;
+                      return (
                         <button
-                          key={r}
+                          key={curr.id}
                           type="button"
-                          onClick={() => setDevRole(r as any)}
-                          className={`py-1 px-2 rounded-md text-[11px] font-medium border capitalize cursor-pointer transition ${
-                            devRole === r
-                              ? "bg-[var(--primary-subtle)] text-[var(--primary)] border-[var(--primary)]"
-                              : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--foreground)]"
+                          onClick={() => setCurrency(curr.id as CurrencyMode)}
+                          className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? "border-[var(--primary)] bg-[var(--primary-subtle)] ring-2 ring-[var(--primary-subtle)] shadow-2xs"
+                              : "border-[var(--border)] bg-[var(--surface-secondary)] hover:bg-[var(--surface-hover)] text-[var(--foreground)]"
                           }`}
                         >
-                          {r}
+                          <span className="text-[12px] block font-bold text-[var(--foreground)]">{curr.label}</span>
+                          <span className="text-[9.5px] text-[var(--text-secondary)] leading-tight block">{curr.sub}</span>
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* SECTION 7: MODE CONFIDENTIALITÉ */}
+              {(activeTab === "all" || activeTab === "region") && (
+                <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--primary)]">
+                        {isPrivacyMode ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-[var(--text-secondary)]" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-[12px] font-bold text-[var(--foreground)]">
+                          Mode Confidentialité
+                        </p>
+                        <p className="text-[10.5px] text-[var(--text-secondary)]">
+                          Masque les montants de loyers en public
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={togglePrivacyMode}
+                      className={`relative inline-flex h-5.5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isPrivacyMode ? "bg-[var(--primary)]" : "bg-[var(--border)]"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow-sm transition duration-200 ease-in-out ${
+                          isPrivacyMode ? "translate-x-4.5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  {isPrivacyMode && (
+                    <div className="p-2 rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary-border)] text-[11px] font-mono font-bold text-[var(--primary)] text-center">
+                      Aperçu : •••••••• {currency.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECTION 8: SIMULATEUR DE RÔLE DEV D'ORIGINE */}
+              {(activeTab === "all" || activeTab === "region") && (
+                <div className="space-y-2.5 pt-2 border-t border-[var(--border)]">
+                  <span className="text-[11.5px] font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5" />
+                    Simulateur de Rôle (Environnement Dev)
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "bailleur", label: "Bailleur" },
+                      { id: "agence", label: "Agence Immobilière" },
+                      { id: "locataire", label: "Locataire" },
+                      { id: "admin", label: "Admin HQ" },
+                    ].map((r) => {
+                      const isSelected = devRole === r.id;
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => setDevRole(r.id as any)}
+                          className={`p-2 rounded-xl border text-left text-[11.5px] font-bold transition-all cursor-pointer ${
+                            isSelected
+                              ? "border-amber-500 bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30"
+                              : "border-[var(--border)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
+                          }`}
+                        >
+                          {r.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
             </div>
 
-            {/* ─── 3. FOOTER ACTIONS ─── */}
-            <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-elevated)] flex items-center justify-between">
-              <span className="text-[11px] text-[var(--text-secondary)]">
+            {/* ─── 3. FOOTER ─── */}
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-elevated)] flex items-center justify-between shrink-0">
+              <span className="text-[11px] font-medium text-[var(--text-secondary)]">
                 Lokka Design System v2.1
               </span>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-1.5 rounded-lg text-[12px] font-semibold transition cursor-pointer bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90"
+                className="px-4 py-2 rounded-xl text-[12px] font-bold transition cursor-pointer bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 shadow-xs active:scale-95"
               >
                 Terminer
               </button>

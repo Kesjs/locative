@@ -68,7 +68,7 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { theme, setTheme, isPrivacyMode, togglePrivacyMode, navLayout } = useSidebar();
+  const { theme, setTheme, isPrivacyMode, togglePrivacyMode, navLayout, isCustomizerOpen, setIsCustomizerOpen } = useSidebar();
 
   const currentTheme =
     theme === "dark" ||
@@ -81,7 +81,6 @@ export default function Header({
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [showNotifications, setShowNotifications] = React.useState(false);
-  const [isCustomizerOpen, setIsCustomizerOpen] = React.useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
@@ -359,11 +358,11 @@ export default function Header({
               className="h-8.5 w-8.5 border border-[var(--border)] rounded-lg bg-[var(--surface)] cursor-pointer text-[var(--foreground)]"
             />
 
-            {/* 5. Layout Customizer Button (Desktop uniquement - masqué sur mobile) */}
+            {/* 5. Layout Customizer Button (Accessible Mobile & Desktop) */}
             <button
               type="button"
               onClick={() => setIsCustomizerOpen(true)}
-              className="hidden sm:flex h-8.5 w-8.5 items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
+              className="flex h-8.5 w-8.5 items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
               title="Personnaliser l'affichage"
             >
               <AdjustmentsHorizontalIcon className="h-4 w-4" />

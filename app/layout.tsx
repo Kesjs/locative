@@ -51,6 +51,7 @@ export default function RootLayout({
               var lum=0.299*red + 0.587*green + 0.114*blue;
               var fg=lum>145?'#000000':'#FFFFFF';
               e.style.setProperty('--primary', c);
+              e.style.setProperty('--brand-accent', c);
               e.style.setProperty('--primary-foreground', fg);
               e.style.setProperty('--primary-subtle', 'rgba('+red+','+green+','+blue+',0.14)');
               e.style.setProperty('--primary-border', 'rgba('+red+','+green+','+blue+',0.28)');

@@ -198,7 +198,7 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 <div
                   className="h-1.5 rounded-full transition-all duration-300"
                   style={{
-                    backgroundColor: i <= step ? "var(--brand-accent, #059669)" : "hsl(var(--muted))",
+                    backgroundColor: i <= step ? "var(--primary)" : "var(--border)",
                   }}
                 />
               </div>
@@ -519,7 +519,7 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
               type="button"
               disabled={isPending}
               onClick={handleSubmit}
-              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-semibold disabled:opacity-50 transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              className="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground text-[12.5px] font-semibold disabled:opacity-50 transition cursor-pointer shadow-xs flex items-center gap-1.5"
             >
               <CheckIcon className="w-4 h-4 stroke-[2.5]" />
               <span>{isCandidatSansLogement ? "Créer le dossier candidat" : "Créer le locataire et le bail"}</span>
