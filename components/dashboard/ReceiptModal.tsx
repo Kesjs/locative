@@ -13,25 +13,28 @@ import {
 interface ReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
-  receiptData: {
-    receiptNo: string;
-    date: string;
-    month: string;
-    tenantName: string;
-    propertyTitle: string;
-    propertyAddress: string;
-    amountFcfa: number;
+  receiptData?: {
+    receiptNo?: string;
+    date?: string;
+    month?: string;
+    tenantName?: string;
+    propertyTitle?: string;
+    propertyAddress?: string;
+    amountFcfa?: number;
     amountEuros?: number;
-    channel: string;
-    ownerName: string;
+    channel?: string;
+    ownerName?: string;
     depositMonths?: number;
+    [key: string]: any;
   };
+  data?: any;
 }
 
-export default function ReceiptModal({ isOpen, onClose, receiptData }: ReceiptModalProps) {
+export default function ReceiptModal({ isOpen, onClose, receiptData: receiptDataProp, data }: ReceiptModalProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const receiptData = receiptDataProp || data;
 
-  if (!isOpen) return null;
+  if (!isOpen || !receiptData) return null;
 
   const handlePrint = () => {
     window.print();

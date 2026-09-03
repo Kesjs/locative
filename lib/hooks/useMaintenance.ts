@@ -16,6 +16,7 @@ export interface Artisan {
   specialite: string;
   telephone: string;
   note: string;
+  zone?: string;
   created_at?: string;
 }
 
