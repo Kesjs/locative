@@ -9,12 +9,14 @@ interface GoogleAuthButtonProps {
   label?: string;
   onError?: (msg: string) => void;
   className?: string;
+  next?: string;
 }
 
 export default function GoogleAuthButton({
   label = "Continuer avec Google",
   onError,
   className = "",
+  next,
 }: GoogleAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,10 +29,15 @@ export default function GoogleAuthButton({
       }
 
       const supabase = createClient();
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      if (next) {
+        callbackUrl.searchParams.set("next", next);
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: callbackUrl.toString(),
           queryParams: {
             access_type: "offline",
             prompt: "consent",

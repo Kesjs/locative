@@ -101,6 +101,7 @@ export default function RegisterPage() {
             {/* Google Social Register */}
             <GoogleAuthButton
               label="S'inscrire avec Google"
+              next="/onboarding"
               onError={(msg) => setErrorMessage(msg)}
             />
 

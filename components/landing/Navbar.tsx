@@ -12,6 +12,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string>("owner");
   const pathname = usePathname();
 
   useEffect(() => {
@@ -26,17 +27,44 @@ export default function Navbar() {
   useEffect(() => {
     if (isSupabaseConfigured()) {
       const supabase = createClient();
-      supabase.auth.getUser().then(({ data }) => {
-        if (data?.user) setUser(data.user);
+
+      const checkRole = async (userId: string) => {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", userId)
+          .maybeSingle();
+        if (prof?.role) setRole(prof.role);
+      };
+
+      // 1. Session instantanée
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+          checkRole(session.user.id);
+        }
       });
+
+      // 2. Auth state change listener
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((_event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          checkRole(session.user.id);
+        }
       });
+
       return () => subscription.unsubscribe();
     }
   }, []);
+
+  const dashboardHref =
+    role === "tenant"
+      ? "/locataire"
+      : role === "super_admin"
+      ? "/admin"
+      : "/dashboard";
 
   const navLinks = [
     { href: "/produit", label: "Produit" },
@@ -83,7 +111,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <Link
-              href="/dashboard"
+              href={dashboardHref}
               className="inline-flex items-center gap-2 text-[13px] font-semibold text-white bg-emerald-700 hover:bg-emerald-800 px-4 py-2 rounded-xl transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
             >
               <span>Mon Dashboard</span>
@@ -175,7 +203,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 pt-1">
               {user ? (
                 <Link
-                  href="/dashboard"
+                  href={dashboardHref}
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-600 text-white font-semibold rounded-xl text-[14px] shadow-sm cursor-pointer"
                 >

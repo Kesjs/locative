@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toast";
 import QueryProvider from "@/components/providers/QueryProvider";
+import OAuthRedirectHandler from "@/components/auth/OAuthRedirectHandler";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -75,6 +76,7 @@ export default function RootLayout({
       </head>
       <body>
         <QueryProvider>
+          <OAuthRedirectHandler />
           {children}
           <Toaster />
         </QueryProvider>

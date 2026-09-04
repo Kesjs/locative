@@ -26,11 +26,14 @@ const STEPS = [
   { id: "express", label: "Saisie Express", icon: DocumentTextIcon },
 ];
 
+const ONBOARDING_DRAFT_KEY = "lokka_onboarding_draft";
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<0 | 1 | 2>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const [state, setState] = useState<OnboardingState>({
     profil: {
@@ -44,22 +47,77 @@ export default function OnboardingPage() {
     saisieExpress: {},
   });
 
+  // 1. Restauration de l'état (brouillon sauvé ou profil Google)
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem("lokka_user_profile");
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        setState((prev) => ({
-          ...prev,
-          profil: {
-            ...prev.profil,
-            nom: parsed.name || "",
-            profileType: parsed.accountType === "agence" ? "agence" : "bailleur",
-          },
-        }));
+      // Vérifier si un brouillon d'onboarding existe déjà
+      const draft = localStorage.getItem(ONBOARDING_DRAFT_KEY);
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        if (parsed.state) setState(parsed.state);
+        if (typeof parsed.currentStep === "number" && [0, 1, 2].includes(parsed.currentStep)) {
+          setCurrentStep(parsed.currentStep as 0 | 1 | 2);
+        }
+      } else {
+        // Fallback sur profil d'inscription
+        const savedUser = localStorage.getItem("lokka_user_profile");
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          setState((prev) => ({
+            ...prev,
+            profil: {
+              ...prev.profil,
+              nom: parsed.name || "",
+              profileType: parsed.accountType === "agence" ? "agence" : "bailleur",
+            },
+          }));
+        }
       }
     } catch (_) {}
+
+    // Pré-remplissage avec le compte Supabase / Google si le nom est encore vide
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          const googleName =
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            (user.email ? user.email.split("@")[0] : "");
+
+          setState((prev) => {
+            if (!prev.profil.nom && googleName) {
+              return {
+                ...prev,
+                profil: {
+                  ...prev.profil,
+                  nom: googleName,
+                },
+              };
+            }
+            return prev;
+          });
+        }
+      });
+    }
+
+    setIsHydrated(true);
   }, []);
+
+  // 2. Sauvegarde automatique à chaque changement
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(
+        ONBOARDING_DRAFT_KEY,
+        JSON.stringify({
+          currentStep,
+          state,
+          savedAt: Date.now(),
+        })
+      );
+    } catch (_) {}
+  }, [currentStep, state, isHydrated]);
 
   const handleNext = () => {
     setDirection("forward");
@@ -89,10 +147,13 @@ export default function OnboardingPage() {
           data: { user },
         } = await supabase.auth.getUser();
 
+        let activeOrgId: string | null = null;
+
         if (user) {
           // 1. Tenter d'exécuter la RPC complete_onboarding_organization
-          const { error: rpcError } = await supabase.rpc("complete_onboarding_organization", {
-            p_name: state.profil.nom || (isAgency ? "Mon Agence Immobilière" : "Mon Portefeuille"),
+          const orgName = state.profil.nom || (isAgency ? "Mon Agence Immobilière" : "Mon Portefeuille");
+          const { data: orgData, error: rpcError } = await supabase.rpc("complete_onboarding_organization", {
+            p_name: orgName,
             p_type: isAgency ? "agency" : "owner",
             p_portfolio_size: "1-5",
             p_role: canonicalRole,
@@ -100,6 +161,8 @@ export default function OnboardingPage() {
 
           if (rpcError) {
             console.warn("RPC complete_onboarding_organization notice:", rpcError.message);
+          } else if (orgData) {
+            activeOrgId = orgData;
           }
 
           // 2. Mettre à jour le profil avec le rôle canonique et onboarding_completed
@@ -112,22 +175,118 @@ export default function OnboardingPage() {
             })
             .eq("id", user.id);
 
-          // Sauvegarder dans le localStorage pour l'UX client
-          localStorage.setItem(
-            "lokka_onboarding_objectifs",
-            JSON.stringify(state.objectifs)
+          // 3. ENREGISTREMENT RÉEL DES INFORMATIONS DE LA SAISIE EXPRESS
+          const { saisieExpress } = state;
+          const isTrouverLocataires = state.objectifs.includes("trouver_locataires");
+
+          // Détermination du nom, loyer et locataire du premier bien
+          let bienNom = isAgency
+            ? `Lot 101 - ${state.profil.nom || "Agence"}`
+            : `Bien principal - ${state.profil.nom || "Bailleur"}`;
+
+          let bienType = "Appartement 3P (2 chambres)";
+          if (saisieExpress.typeBienVacant) {
+            bienNom = saisieExpress.typeBienVacant;
+            bienType = saisieExpress.typeBienVacant;
+          } else if (saisieExpress.proprietaireMandantNom) {
+            bienNom = `Appartement mandat (${saisieExpress.proprietaireMandantNom})`;
+          }
+
+          const montantLoyer = Number(
+            saisieExpress.loyerActuel ||
+            saisieExpress.loyerSouhaite ||
+            saisieExpress.loyerActuelMandat ||
+            150000
           );
+
+          const bienStatut: "loué" | "vacant" = (isTrouverLocataires && !saisieExpress.locataireEnPlaceNom)
+            ? "vacant"
+            : "loué";
+
+          const locataireNom = saisieExpress.locataireEnPlaceNom || (bienStatut === "loué" ? "Locataire principal" : undefined);
+
+          // Insertion du premier bien dans la table `biens`
+          const { data: insertedBien, error: bienError } = await supabase
+            .from("biens")
+            .insert({
+              nom: bienNom,
+              adresse: "Haie Vive, Zone Résidentielle",
+              ville: "Cotonou",
+              type: bienType,
+              loyer_mensuel: montantLoyer,
+              charges: 0,
+              statut: bienStatut,
+              locataire_nom: locataireNom || null,
+              photos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
+              photo_principale: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
+              archive: false,
+              organization_id: activeOrgId,
+            })
+            .select()
+            .maybeSingle();
+
+          if (bienError) {
+            console.warn("Notice insertion bien onboarding:", bienError.message);
+          }
+
+          // Cache local immédiat du bien créé pour un affichage instantané sur le dashboard
+          const cachedBien = {
+            id: insertedBien?.id || "bien_" + Date.now().toString(36),
+            nom: bienNom,
+            adresse: "Haie Vive, Zone Résidentielle",
+            ville: "Cotonou",
+            type: bienType,
+            loyer_mensuel: montantLoyer,
+            charges: 0,
+            statut: bienStatut,
+            locataire_nom: locataireNom,
+            photos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
+            photo_principale: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
+            archive: false,
+            created_at: new Date().toISOString(),
+          };
+          const existingBiens = JSON.parse(localStorage.getItem("lokka_biens_cache") || "[]");
+          localStorage.setItem("lokka_biens_cache", JSON.stringify([cachedBien, ...existingBiens]));
+
+          // Si le bien est loué, générer une première échéance de loyer
+          if (bienStatut === "loué" && locataireNom) {
+            const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+            const paymentTx = {
+              id: "tx_" + Date.now().toString(36),
+              bien_nom: bienNom,
+              locataire_nom: locataireNom,
+              montant: montantLoyer,
+              methode: (state.profil.moyenReception === "virement" ? "Virement" : "MTN MoMo") as any,
+              statut: "en_attente" as const,
+              echeance,
+            };
+
+            try {
+              await supabase.from("loyers_transactions").insert(paymentTx);
+            } catch (_) {}
+
+            const existingLoyers = JSON.parse(localStorage.getItem("lokka_loyers_cache") || "[]");
+            localStorage.setItem("lokka_loyers_cache", JSON.stringify([paymentTx, ...existingLoyers]));
+          }
+
+          // Sauvegarder dans le localStorage pour l'UX client
+          localStorage.setItem("lokka_onboarding_objectifs", JSON.stringify(state.objectifs));
           localStorage.setItem("lokka_dev_role", isAgency ? "Agence" : "Propriétaire Bailleur");
           localStorage.setItem("lokka_dev_plan", isAgency ? "agence" : "pro");
         }
       }
     } catch (err) {
       console.warn("Supabase onboarding sync notice:", err);
+    } finally {
+      // 4. Nettoyage du brouillon après finalisation réussie
+      try {
+        localStorage.removeItem(ONBOARDING_DRAFT_KEY);
+      } catch (_) {}
     }
 
     setTimeout(() => {
       router.push("/dashboard");
-    }, 800);
+    }, 600);
   };
 
   // Animation variants inspired by 21st.dev multistep pattern
