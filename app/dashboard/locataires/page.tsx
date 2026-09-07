@@ -5,12 +5,15 @@ import { UsersIcon, PlusIcon, MagnifyingGlassIcon, EnvelopeIcon } from "@heroico
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { useLeases, statutPaiement, joursAvantEcheanceBail, type LeaseWithDetails } from "@/lib/hooks/useLocataires";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { AddLocataireModal } from "./_components/AddLocataireModal";
 import { LocatairesKpis } from "./_components/LocatairesKpis";
 import { LocataireDetailDrawer } from "./_components/LocataireDetailDrawer";
 import TenantInvitationModal from "@/components/dashboard/TenantInvitationModal";
 
 export default function LocatairesPage() {
+  const userProfile = useUserProfile();
+  const isAgency = userProfile.role === "Agence" || userProfile.plan === "agence";
   const { data: leases = [], isLoading } = useLeases();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLease, setSelectedLease] = useState<LeaseWithDetails | null>(null);
@@ -171,7 +174,9 @@ export default function LocatairesPage() {
             tenantName: invitingLease.tenant.full_name,
             tenantEmail: invitingLease.tenant.email || undefined,
             tenantPhone: invitingLease.tenant.phone_number,
-            ownerName: "Alexandre K. (Bailleur)",
+            ownerName: userProfile.name || "Bailleur",
+            agencyName: isAgency ? (userProfile.name || "Cabinet de Gestion Immobilière") : undefined,
+            isAgency,
             propertyTitle: invitingLease.bien?.nom || "Logement Lokka",
             propertyAddress: invitingLease.bien?.adresse || "Cotonou, Bénin",
             rentAmount: invitingLease.rent_amount,

@@ -23,6 +23,8 @@ interface TenantInvitationModalProps {
     tenantEmail?: string;
     tenantPhone?: string;
     ownerName: string;
+    agencyName?: string;
+    isAgency?: boolean;
     propertyTitle: string;
     propertyAddress: string;
     rentAmount: number;
@@ -40,14 +42,27 @@ export default function TenantInvitationModal({
   const [emailSent, setEmailSent] = useState(false);
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
 
+  // Expéditeur dynamique : Agence ou Bailleur
+  const senderDisplayName = tenantData.isAgency
+    ? (tenantData.agencyName || tenantData.ownerName || "Cabinet de Gestion Immobilière")
+    : (tenantData.ownerName || "Votre bailleur");
+
+  const senderRoleLabel = tenantData.isAgency
+    ? "Votre agence immobilière mandatée"
+    : "Votre bailleur";
+
   // Editable Form Fields for Live Customization
   const [recipientEmail, setRecipientEmail] = useState(tenantData.tenantEmail || "");
   const [recipientName, setRecipientName] = useState(tenantData.tenantName || "");
   const [emailSubject, setEmailSubject] = useState(
-    `Votre Espace Locataire Lokka est prêt — ${tenantData.propertyTitle}`
+    tenantData.isAgency
+      ? `Votre Espace Locataire Lokka — Gérance par ${senderDisplayName}`
+      : `Votre Espace Locataire Lokka est prêt — ${tenantData.propertyTitle}`
   );
   const [customMessage, setCustomMessage] = useState(
-    "Voici vos identifiants d'accès à votre espace locataire pour télécharger vos quittances certifiées et suivre vos paiements de loyer en toute simplicité."
+    tenantData.isAgency
+      ? `Votre agence ${senderDisplayName} a le plaisir de mettre à votre disposition votre portail locataire conforme Loi 2022-30 pour vos quittances certifiées et vos règlements MoMo / Moov.`
+      : "Voici vos identifiants d'accès à votre espace locataire pour télécharger vos quittances certifiées et suivre vos paiements de loyer en toute simplicité."
   );
 
   if (!isOpen) return null;
@@ -57,7 +72,7 @@ export default function TenantInvitationModal({
   const depositAmount = Number(tenantData.rentAmount) * Number(tenantData.depositMonths || 3);
   const formattedDeposit = depositAmount.toLocaleString("fr-FR");
 
-  const whatsappMessage = `*LOKKA BÉNIN — Votre Espace Locataire est prêt !* 🇧🇯\n\nBonjour *${recipientName}*,\nVotre bailleur *${tenantData.ownerName}* vous a activé votre accès pour *${tenantData.propertyTitle}*.\n\n• *Loyer mensuel :* ${formattedRent} FCFA\n• *Caution légale (Loi 2022-30) :* ${formattedDeposit} FCFA (${tenantData.depositMonths} mois)\n${customMessage ? `\n💬 *Note :* "${customMessage}"\n` : ""}\n👉 *Lien d'accès immédiat :* ${portalUrl}\n\n_Connectez-vous pour télécharger vos quittances PDF officielles et payer votre loyer par MTN MoMo / Moov Money._`;
+  const whatsappMessage = `*LOKKA BÉNIN — Votre Espace Locataire est prêt !* 🇧🇯\n\nBonjour *${recipientName}*,\n${senderRoleLabel} *${senderDisplayName}* vous a activé votre accès sécurisé pour *${tenantData.propertyTitle}*.\n\n• *Loyer mensuel :* ${formattedRent} FCFA\n• *Caution légale (Loi 2022-30) :* ${formattedDeposit} FCFA (${tenantData.depositMonths} mois)\n${customMessage ? `\n💬 *Note :* "${customMessage}"\n` : ""}\n👉 *Lien d'accès immédiat :* ${portalUrl}\n\n_Connectez-vous pour télécharger vos quittances PDF officielles et payer votre loyer en toute sécurité par MTN MoMo / Moov Money._`;
 
   const handleSendEmail = async () => {
     if (!recipientEmail || !recipientEmail.includes("@")) {
@@ -75,6 +90,8 @@ export default function TenantInvitationModal({
           tenantEmail: recipientEmail,
           customMessage,
           subject: emailSubject,
+          isAgency: Boolean(tenantData.isAgency),
+          agencyName: senderDisplayName,
         }),
       });
       const data = await res.json();
@@ -292,7 +309,11 @@ export default function TenantInvitationModal({
                 </p>
 
                 <p className="text-[#64635F] leading-relaxed text-[12px]">
-                  Votre bailleur <strong>{tenantData.ownerName}</strong> vous a activé un accès sécurisé à votre <strong>Portail Locataire Lokka</strong> pour le logement :
+                  {tenantData.isAgency ? (
+                    <>Votre agence immobilière mandatée <strong>{senderDisplayName}</strong> vous a activé un accès sécurisé à votre <strong>Portail Locataire Lokka (Loi 2022-30)</strong> pour le logement :</>
+                  ) : (
+                    <>Votre bailleur <strong>{senderDisplayName}</strong> vous a activé un accès sécurisé à votre <strong>Portail Locataire Lokka</strong> pour le logement :</>
+                  )}
                 </p>
 
                 {/* Box Logement */}
@@ -310,7 +331,7 @@ export default function TenantInvitationModal({
                   <div className="bg-[#F8F6F0] border-l-3 border-[#087F5B] p-3 rounded text-[11.5px] italic text-[#1C1C1C]">
                     &quot;{customMessage}&quot;
                     <div className="not-italic font-bold text-[10px] text-[#64635F] mt-1">
-                      — Note de votre bailleur {tenantData.ownerName}
+                      — Note de {tenantData.isAgency ? `votre agence ${senderDisplayName}` : `votre bailleur ${senderDisplayName}`}
                     </div>
                   </div>
                 )}

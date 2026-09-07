@@ -3,7 +3,12 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams, origin: rawOrigin } = new URL(request.url);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const safeOrigin = rawOrigin.includes('0.0.0.0')
+    ? (siteUrl && !siteUrl.includes('0.0.0.0') ? siteUrl : rawOrigin.replace('0.0.0.0', 'localhost'))
+    : rawOrigin;
+
   const code = searchParams.get('code');
   const next = searchParams.get('next');
 
@@ -75,10 +80,10 @@ export async function GET(request: Request) {
         const isLocalEnv = process.env.NODE_ENV === 'development';
 
         const redirectUrl = isLocalEnv
-          ? `${origin}${targetPath}`
+          ? `${safeOrigin}${targetPath}`
           : forwardedHost
           ? `${forwardedProto}://${forwardedHost}${targetPath}`
-          : `${origin}${targetPath}`;
+          : `${safeOrigin}${targetPath}`;
 
         const response = NextResponse.redirect(redirectUrl);
 
@@ -97,6 +102,6 @@ export async function GET(request: Request) {
   }
 
   // Si erreur ou pas de code, renvoyer vers la page de login avec un paramètre d'erreur
-  return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);
+  return NextResponse.redirect(`${safeOrigin}/auth/login?error=auth_failed`);
 }
 

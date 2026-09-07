@@ -29,7 +29,11 @@ export default function GoogleAuthButton({
       }
 
       const supabase = createClient();
-      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      let currentOrigin = window.location.origin;
+      if (currentOrigin.includes("0.0.0.0")) {
+        currentOrigin = currentOrigin.replace("0.0.0.0", "localhost");
+      }
+      const callbackUrl = new URL("/auth/callback", currentOrigin);
       if (next) {
         callbackUrl.searchParams.set("next", next);
       }

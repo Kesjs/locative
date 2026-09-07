@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useBiens, plafondCaution } from "@/lib/hooks/useBiens";
 import { useAddTenantWithLease } from "@/lib/hooks/useLocataires";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { Building2, Sparkles, KeyRound, Mail, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,10 +58,10 @@ const EMPTY_FORM: FormState = {
   emergency_contact_phone: "",
   bien_id: "",
   rent_amount: "",
-  charges_amount: "",
+  charges_amount: "0",
   deposit_months: "3",
   due_day: "5",
-  start_date: new Date().toISOString().split("T")[0],
+  start_date: new Date().toISOString().slice(0, 10),
   end_date: "",
   lease_contract_url: "",
   temporary_password: "",
@@ -72,6 +73,8 @@ function generateTempPassword(): string {
 }
 
 export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const userProfile = useUserProfile();
+  const isAgency = userProfile.role === "Agence" || userProfile.plan === "agence";
   const { data: biens = [] } = useBiens();
   const { mutateAsync: addTenantWithLease, isPending } = useAddTenantWithLease();
 
@@ -195,6 +198,9 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
               tenantName: form.full_name.trim(),
               tenantEmail: form.email.trim(),
               tenantPhone: form.phone_number.trim(),
+              ownerName: userProfile.name || "Votre bailleur",
+              agencyName: isAgency ? (userProfile.name || "Cabinet de Gestion Immobilière") : undefined,
+              isAgency,
               propertyTitle: bienSelectionne?.nom || "Votre logement Lokka",
               propertyAddress: (bienSelectionne?.adresse || "") + (bienSelectionne?.ville ? ", " + bienSelectionne.ville : ""),
               rentAmount: Number(form.rent_amount) || 0,
@@ -616,7 +622,11 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                     <div>
                       <p className="font-bold text-slate-900">Bonjour {form.full_name || "Locataire"},</p>
                       <p className="text-slate-600 text-[12px] mt-0.5">
-                        Votre bailleur vous a activé un accès sécurisé à votre Espace Locataire pour le logement :
+                        {isAgency ? (
+                          <>Votre agence immobilière mandatée <strong>{userProfile.name || "Cabinet de Gestion Immobilière"}</strong> vous a activé un accès sécurisé à votre Espace Locataire (Loi 2022-30) pour le logement :</>
+                        ) : (
+                          <>Votre bailleur <strong>{userProfile.name || "Votre bailleur"}</strong> vous a activé un accès sécurisé à votre Espace Locataire pour le logement :</>
+                        )}
                       </p>
                     </div>
 

@@ -29,7 +29,7 @@ export default function LoginPage() {
       if (emailParam) setEmail(emailParam);
       if (params.get("sent") === "true") setCodeSent(true);
       if (params.get("error") === "auth_failed") {
-        setErrorMessage("La connexion a échoué ou le lien a expiré. Veuillez réessayer.");
+        setErrorMessage("La connexion Google n'a pas abouti. Vous pouvez vous connecter instantanément par code sécurisé avec votre adresse email ci-dessous.");
       }
     }
   }, []);

@@ -111,6 +111,8 @@ export async function sendTenantInvitationEmail({
   customMessage,
   subject,
   portalUrl = 'https://codeo-ui.com/auth/locataire',
+  isAgency = false,
+  agencyName,
 }: {
   to: string;
   tenantName: string;
@@ -123,16 +125,21 @@ export async function sendTenantInvitationEmail({
   customMessage?: string;
   subject?: string;
   portalUrl?: string;
+  isAgency?: boolean;
+  agencyName?: string;
 }) {
   const formattedRent = new Intl.NumberFormat('fr-FR').format(rentAmountFcfa);
   const depositAmount = rentAmountFcfa * depositMonths;
   const formattedDeposit = new Intl.NumberFormat('fr-FR').format(depositAmount);
+  const senderLabel = isAgency
+    ? (agencyName || ownerName || 'Cabinet de Gestion Immobilière')
+    : ownerName;
 
   const customMessageBlock = customMessage?.trim()
     ? `
     <div style="background-color: #F8F6F0; border-left: 3px solid #087F5B; padding: 14px 16px; margin: 18px 0; border-radius: 4px; font-style: italic; color: #1C1C1C; font-size: 13.5px;">
       "${customMessage.replace(/\n/g, '<br/>')}"
-      <div style="font-style: normal; font-weight: 700; font-size: 11.5px; margin-top: 6px; color: #64635F;">— Note de votre bailleur ${ownerName}</div>
+      <div style="font-style: normal; font-weight: 700; font-size: 11.5px; margin-top: 6px; color: #64635F;">— Note de ${isAgency ? `votre agence ${senderLabel}` : `votre bailleur ${senderLabel}`}</div>
     </div>
     `
     : '';
@@ -174,12 +181,12 @@ export async function sendTenantInvitationEmail({
   <div class="card">
     <div class="header">
       <div class="logo">Lokka</div>
-      <div class="badge">Espace Locataire Sécurisé · Loi 2022-30 🇧🇯</div>
+      <div class="badge">${isAgency ? 'Espace Locataire · Gérance Immobilière Loi 2022-30 🇧🇯' : 'Espace Locataire Sécurisé · Loi 2022-30 🇧🇯'}</div>
     </div>
 
     <p style="font-size: 16px; color: #0F172A; font-weight: 700; margin-bottom: 12px;">Bonjour ${tenantName},</p>
     <p style="font-size: 14px; color: #64635F; line-height: 1.6;">
-      Votre bailleur / gestionnaire <strong>${ownerName}</strong> vous a activé un accès sécurisé à votre <strong>Portail Locataire Lokka</strong> pour le logement :
+      ${isAgency ? `Votre agence immobilière mandatée <strong>${senderLabel}</strong> (mandat de gérance Loi 2022-30) vous a activé un accès sécurisé à votre <strong>Portail Locataire Lokka</strong> pour le logement :` : `Votre bailleur <strong>${senderLabel}</strong> vous a activé un accès sécurisé à votre <strong>Portail Locataire Lokka</strong> pour le logement :`}
     </p>
 
     <div class="box">
