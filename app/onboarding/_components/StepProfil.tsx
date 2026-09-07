@@ -3,11 +3,8 @@
 import React from "react";
 import { type ProfilStepData } from "../_types";
 import { ProfileCard } from "./ProfileCard";
-import { CustomCountrySelect } from "./CustomCountrySelect";
-import { FormField } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Home, Building2, Smartphone, Landmark, ShieldCheck } from "lucide-react";
+import { Home, Building2, Smartphone, Landmark, ShieldCheck, Check } from "lucide-react";
 
 interface StepProfilProps {
   data: ProfilStepData;
@@ -192,36 +189,30 @@ export function StepProfil({ data, onChange, error }: StepProfilProps) {
         </div>
       )}
 
-      {/* Zone géographique */}
-      <div className="space-y-2">
-        <label className="text-[13px] font-bold text-slate-900 block">
-          Localisation de votre activité
-        </label>
-        <BrandedToggleGroup
-          value={data.zoneGeo}
-          onChange={(v) =>
-            updateData({
-              zoneGeo: v as "benin" | "diaspora",
-              paysDiaspora: v === "diaspora" ? "France" : undefined,
-            })
-          }
-          options={[
-            { value: "benin", label: "Bénin (National)" },
-            { value: "diaspora", label: "Diaspora (International)" },
-          ]}
-        />
-      </div>
-
-      {/* Sélecteur de pays diaspora sur-mesure (sans <select> natif) */}
-      {data.zoneGeo === "diaspora" && (
-        <div className="space-y-2 animate-in fade-in-50 duration-200">
-          <label className="text-[12.5px] font-semibold text-slate-900 block">
-            Pays de résidence actuel
-          </label>
-          <CustomCountrySelect
-            value={data.paysDiaspora || "France"}
-            onChange={(country) => updateData({ paysDiaspora: country })}
-          />
+      {/* Carte explicative dynamique de la formule choisie */}
+      {!isAgency ? (
+        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/90 rounded-xl space-y-1.5 text-[12.5px]">
+          <div className="flex items-center gap-2 font-bold text-emerald-800">
+            <Check className="w-4 h-4 text-emerald-600 stroke-[3] shrink-0" />
+            <span>Spécificités du parcours Bailleur Direct :</span>
+          </div>
+          <ul className="space-y-1 pl-6 text-[12px] text-slate-600 list-disc">
+            <li><strong>100% de vos loyers</strong> encaissés sans commission ni intermédiaire.</li>
+            <li><strong>Quittances officielles conformes</strong> à la Loi n° 2022-30 générées en 1 clic.</li>
+            <li><strong>Cockpit patrimonial direct</strong> : suivi de vos logements, locataires et impayés.</li>
+          </ul>
+        </div>
+      ) : (
+        <div className="p-3.5 bg-blue-50/70 border border-blue-200/90 rounded-xl space-y-1.5 text-[12.5px]">
+          <div className="flex items-center gap-2 font-bold text-blue-900">
+            <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>Spécificités du parcours Agence & Mandats :</span>
+          </div>
+          <ul className="space-y-1 pl-6 text-[12px] text-slate-600 list-disc">
+            <li><strong>Plafonnement légal à 10%</strong> d'honoraires de gestion (Loi 2022-30 Bénin).</li>
+            <li><strong>Reversements mandants (90%)</strong> calculés et tracés automatiquement.</li>
+            <li><strong>Cockpit multi-propriétaires</strong> : gestion des contrats de mandat et CRG.</li>
+          </ul>
         </div>
       )}
     </div>
