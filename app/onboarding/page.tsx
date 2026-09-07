@@ -361,23 +361,24 @@ export default function OnboardingPage() {
             // d'un aller-retour réseau séquentiel par lot), avec leurs
             // métadonnées associées pour créer ensuite les échéances de
             // loyer correspondantes en un seul batch également.
+            // L'onboarding ne fait que déclarer la structure (résidence + lots + statut
+            // approximatif loué/vacant). Il ne crée plus de nom de locataire ni de
+            // transaction : un lot "loué" sans locataire réel apparaîtra dans le
+            // Dashboard avec un badge "à compléter", et c'est là que la vraie fiche
+            // locataire + bail sera créée (source unique de vérité : useAddTenantWithLease).
             const lotsMeta = lotsToInsert.map((lot) => {
               const lotNomComplet = `${nomPatrimoine} - ${lot.nom.trim()}`;
               const lotStatut: "loué" | "vacant" = lot.statut === "loue" ? "loué" : "vacant";
-              const lotLocataire = lotStatut === "loué"
-                ? (lot.locataireNom?.trim() || "Locataire en place")
-                : null;
               const lotLoyer = Number(lot.loyer) || 0;
               return {
                 lotNomComplet,
                 lotStatut,
-                lotLocataire,
                 lotLoyer,
                 type: lot.type || lot.nom.trim(),
               };
             });
 
-            const { data: insertedBiens, error: bienError } = await supabase
+            const { error: bienError } = await supabase
               .from("biens")
               .insert(
                 lotsMeta.map((lot) => ({
@@ -388,7 +389,7 @@ export default function OnboardingPage() {
                   loyer_mensuel: lot.lotLoyer,
                   charges: 0,
                   statut: lot.lotStatut,
-                  locataire_nom: lot.lotLocataire,
+                  locataire_nom: null,
                   photos: [],
                   photo_principale: null,
                   archive: false,
@@ -402,34 +403,6 @@ export default function OnboardingPage() {
             if (bienError) {
               console.error("Erreur insertion lots (batch):", bienError);
               insertionErrorsCount = lotsMeta.length;
-            } else if (insertedBiens) {
-              // Échéances de loyer pour tous les lots loués, en un seul insert
-              const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
-              const methode = (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any;
-
-              const transactionsToInsert = insertedBiens
-                .map((insertedBien, index) => ({ insertedBien, meta: lotsMeta[index] }))
-                .filter(({ meta }) => meta?.lotStatut === "loué")
-                .map(({ insertedBien, meta }) => ({
-                  bien_id: insertedBien.id,
-                  bien_nom: meta.lotNomComplet,
-                  locataire_nom: meta.lotLocataire || "Locataire en place",
-                  montant: meta.lotLoyer,
-                  methode,
-                  statut: "en_attente" as const,
-                  echeance,
-                  organization_id: activeOrgId,
-                }));
-
-              if (transactionsToInsert.length > 0) {
-                const { error: txError } = await supabase
-                  .from("loyers_transactions")
-                  .insert(transactionsToInsert);
-
-                if (txError) {
-                  console.warn("Notice insertion loyers transactions (batch):", txError.message);
-                }
-              }
             }
 
             if (insertionErrorsCount > 0 && insertionErrorsCount === lotsToInsert.length) {
@@ -443,8 +416,9 @@ export default function OnboardingPage() {
 
           // Mettre à jour l'état local du profil
           localStorage.setItem("lokka_onboarding_objectifs", JSON.stringify(state.objectifs));
-          localStorage.setItem("lokka_dev_role", isAgency ? "Agence" : "Propriétaire Bailleur");
-          localStorage.setItem("lokka_dev_plan", isAgency ? "agence" : "pro");
+          // Le rôle réel vient uniquement de profiles.role en base (Supabase) — on n'écrit
+          // plus lokka_dev_role/lokka_dev_plan ici : c'est un outil de bascule réservé au
+          // dev local (voir DevPlanSwitcher), il ne doit jamais influencer un vrai compte.
           if (resolvedLogoUrl) {
             localStorage.setItem("lokka_custom_logo", resolvedLogoUrl);
           }
