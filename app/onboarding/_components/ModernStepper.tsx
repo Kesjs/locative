@@ -2,21 +2,20 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Check, User, Target, Sparkles } from "lucide-react";
+import { Check, User, Building2 } from "lucide-react";
 
 interface ModernStepperProps {
-  currentStep: 0 | 1 | 2;
-  onStepClick?: (step: 0 | 1 | 2) => void;
+  currentStep: 0 | 1;
+  onStepClick?: (step: 0 | 1) => void;
 }
 
 const STEPS_DATA = [
-  { id: 0, title: "Profil", desc: "Structure & Coordonnées", icon: User },
-  { id: 1, title: "Objectifs", desc: "Besoins prioritaires", icon: Target },
-  { id: 2, title: "Démarrage", desc: "Configuration express", icon: Sparkles },
+  { id: 0, title: "Profil & Perception", desc: "Statut & Coordonnées", icon: User },
+  { id: 1, title: "Patrimoine & Biens", desc: "Résidence & Logements", icon: Building2 },
 ];
 
 export function ModernStepper({ currentStep }: ModernStepperProps) {
-  const progressPercentage = (currentStep / (STEPS_DATA.length - 1)) * 100;
+  const progressPercentage = currentStep === 0 ? 50 : 100;
 
   return (
     <div className="w-full space-y-4">
@@ -24,14 +23,14 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
       <div className="relative w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
         <motion.div
           className="absolute left-0 top-0 bottom-0 bg-emerald-600 rounded-full"
-          initial={{ width: "0%" }}
+          initial={{ width: "50%" }}
           animate={{ width: `${progressPercentage}%` }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         />
       </div>
 
       {/* Étapes numérotées */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         {STEPS_DATA.map((step) => {
           const isCompleted = currentStep > step.id;
           const isCurrent = currentStep === step.id;
@@ -40,7 +39,7 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
           return (
             <div
               key={step.id}
-              className={`flex items-center gap-2.5 p-2 rounded-xl transition-all duration-200 ${
+              className={`flex items-center gap-2.5 p-2.5 rounded-xl transition-all duration-200 ${
                 isCurrent
                   ? "bg-emerald-50 border border-emerald-300 shadow-2xs"
                   : isCompleted
@@ -66,9 +65,9 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
               </div>
 
               {/* Textes de l'étape */}
-              <div className="min-w-0 hidden sm:block">
+              <div className="min-w-0">
                 <div
-                  className={`text-[12px] font-bold truncate leading-tight ${
+                  className={`text-[12.5px] font-bold truncate leading-tight ${
                     isCurrent || isCompleted
                       ? "text-slate-900"
                       : "text-slate-500"
@@ -76,7 +75,7 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
                 >
                   {step.title}
                 </div>
-                <div className="text-[10.5px] text-slate-500 truncate leading-tight mt-0.5">
+                <div className="text-[11px] text-slate-500 truncate leading-tight mt-0.5">
                   {step.desc}
                 </div>
               </div>

@@ -18,7 +18,6 @@ import {
 
 import { type OnboardingState, type ProfilStepData } from "./_types";
 import { StepProfil } from "./_components/StepProfil";
-import { StepObjectifs } from "./_components/StepObjectifs";
 import { StepSaisieExpress } from "./_components/StepSaisieExpress";
 import { ModernStepper } from "./_components/ModernStepper";
 
@@ -26,7 +25,7 @@ const ONBOARDING_DRAFT_KEY = "lokka_onboarding_draft";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<0 | 1 | 2>(0);
+  const [currentStep, setCurrentStep] = useState<0 | 1>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [isHydrated, setIsHydrated] = useState(false);
@@ -51,8 +50,8 @@ export default function OnboardingPage() {
       if (draft) {
         const parsed = JSON.parse(draft);
         if (parsed.state) setState(parsed.state);
-        if (typeof parsed.currentStep === "number" && [0, 1, 2].includes(parsed.currentStep)) {
-          setCurrentStep(parsed.currentStep as 0 | 1 | 2);
+        if (typeof parsed.currentStep === "number" && [0, 1].includes(parsed.currentStep)) {
+          setCurrentStep(parsed.currentStep as 0 | 1);
         }
       } else {
         const savedUser = localStorage.getItem("lokka_user_profile");
@@ -135,26 +134,18 @@ export default function OnboardingPage() {
         return;
       }
       setErrors({});
+      setCurrentStep(1);
     }
-    if (currentStep === 1) {
-      if (state.objectifs.length === 0) {
-        toast.error("Veuillez sélectionner au moins un objectif.");
-        return;
-      }
-      setErrors({});
-    }
-    if (currentStep < 2) setCurrentStep((prev) => (prev + 1) as 0 | 1 | 2);
   };
 
   const handleBack = () => {
     setDirection("back");
     setErrors({});
-    if (currentStep > 0) setCurrentStep((prev) => (prev - 1) as 0 | 1 | 2);
+    if (currentStep === 1) setCurrentStep(0);
   };
 
   const isStepValid = () => {
     if (currentStep === 0) return state.profil.nom.trim().length > 0;
-    if (currentStep === 1) return state.objectifs.length > 0;
     return true;
   };
 
@@ -503,7 +494,7 @@ export default function OnboardingPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (currentStep === 2) {
+            if (currentStep === 1) {
               handleSubmit();
             } else {
               handleNext();
@@ -532,13 +523,6 @@ export default function OnboardingPage() {
                 />
               )}
               {currentStep === 1 && (
-                <StepObjectifs
-                  profileType={state.profil.profileType}
-                  selected={state.objectifs}
-                  onChange={(objectifs) => setState({ ...state, objectifs })}
-                />
-              )}
-              {currentStep === 2 && (
                 <StepSaisieExpress
                   profileType={state.profil.profileType}
                   objectifs={state.objectifs}
@@ -574,7 +558,7 @@ export default function OnboardingPage() {
           <Button
             type="button"
             disabled={!isStepValid() || isSubmitting}
-            onClick={currentStep === 2 ? handleSubmit : handleNext}
+            onClick={currentStep === 1 ? handleSubmit : handleNext}
             className="h-11 px-5 sm:px-7 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] sm:text-[13.5px] transition-all shadow-xs cursor-pointer truncate disabled:opacity-50"
           >
             {isSubmitting ? (
@@ -582,14 +566,14 @@ export default function OnboardingPage() {
                 <Spinner size="sm" className="mr-2" />
                 Configuration en cours…
               </>
-            ) : currentStep === 2 ? (
+            ) : currentStep === 1 ? (
               <>
                 <span>Accéder au dashboard</span>
                 <CheckCircleIcon className="w-4 h-4 ml-1.5 sm:ml-2" />
               </>
             ) : (
               <>
-                <span>Continuer</span>
+                <span>Continuer vers mon patrimoine</span>
                 <ArrowRightIcon className="w-4 h-4 ml-1.5 sm:ml-2" />
               </>
             )}

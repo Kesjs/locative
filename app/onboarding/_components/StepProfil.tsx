@@ -61,10 +61,10 @@ export function StepProfil({ data, onChange, error }: StepProfilProps) {
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            Étape 1 sur 3
+            Étape 1 sur 2
           </span>
           <span className="text-[11px] text-slate-500 font-medium">
-            Configuration initiale
+            Profil &amp; Perception
           </span>
         </div>
         <h2 className="text-[22px] sm:text-[25px] font-extrabold text-slate-900 tracking-tight">

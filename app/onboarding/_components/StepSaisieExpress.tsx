@@ -23,14 +23,31 @@ export function StepSaisieExpress({
 }: StepSaisieExpressProps) {
   const isAgency = profileType === "agence";
 
-  // Initialisation par défaut avec au moins 1 lot
+  // Helper pour déduire un nom de lot cohérent
+  const getDefaultLotName = (tp: string, index: number) => {
+    switch (tp) {
+      case "villa":
+        return index === 0 ? "Villa principale" : `Dépendance ${index + 1}`;
+      case "immeuble":
+        return `Appartement ${index + 1}`;
+      case "commercial":
+        return `Boutique ${index + 1}`;
+      case "concession":
+      default:
+        return `Chambre ${index + 1}`;
+    }
+  };
+
+  const currentTypePatrimoine = data.typePatrimoine || "concession";
+
+  // Initialisation par défaut avec au moins 1 lot sans montant arbitraire imposé
   const lots: LotItem[] = (data.lots && data.lots.length > 0)
     ? data.lots
     : [
         {
           id: "1",
-          nom: data.typeLot || "Chambre 1",
-          loyer: data.loyerMensuel || 75000,
+          nom: data.typeLot || getDefaultLotName(currentTypePatrimoine, 0),
+          loyer: data.loyerMensuel || 0,
           statut: data.statutOccupation || "loue",
           locataireNom: data.locataireEnPlaceNom || "",
         },
@@ -71,11 +88,11 @@ export function StepSaisieExpress({
   };
 
   const handleAddLot = () => {
-    const nextIndex = lots.length + 1;
+    const nextIndex = lots.length;
     const newLot: LotItem = {
       id: String(Date.now()),
-      nom: `Chambre ${nextIndex}`,
-      loyer: 75000,
+      nom: getDefaultLotName(data.typePatrimoine || "concession", nextIndex),
+      loyer: 0,
       statut: "vacant",
       locataireNom: "",
     };
@@ -93,10 +110,11 @@ export function StepSaisieExpress({
       updateLots(lots.slice(0, count));
     } else {
       const diff = count - lots.length;
+      const tp = data.typePatrimoine || "concession";
       const created: LotItem[] = Array.from({ length: diff }, (_, i) => ({
         id: String(Date.now() + i),
-        nom: `Chambre ${lots.length + i + 1}`,
-        loyer: 75000,
+        nom: getDefaultLotName(tp, lots.length + i),
+        loyer: 0,
         statut: "vacant",
         locataireNom: "",
       }));
@@ -118,7 +136,7 @@ export function StepSaisieExpress({
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            Étape 3 sur 3
+            Étape 2 sur 2
           </span>
           <span className="text-[11px] text-slate-500 font-medium">
             Configuration initiale
@@ -180,10 +198,10 @@ export function StepSaisieExpress({
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
-                { id: "concession", label: "Concession", sub: "Chambres / Boutiques", defaultPrefix: "Chambre" },
-                { id: "immeuble", label: "Immeuble", sub: "Appartements / Studios", defaultPrefix: "Appartement" },
-                { id: "villa", label: "Villa", sub: "Maison & Dépendance", defaultPrefix: "Pièce / Dépendance" },
-                { id: "commercial", label: "Commercial", sub: "Boutiques / Bureaux", defaultPrefix: "Boutique" },
+                { id: "concession", label: "Concession", sub: "Chambres / Salons" },
+                { id: "immeuble", label: "Immeuble", sub: "Appartements / Studios" },
+                { id: "villa", label: "Villa", sub: "Villa entière / Maison" },
+                { id: "commercial", label: "Commercial", sub: "Boutiques / Bureaux" },
               ].map((tp) => {
                 const isSelected = (data.typePatrimoine || "concession") === tp.id;
                 return (
@@ -193,9 +211,7 @@ export function StepSaisieExpress({
                     onClick={() => {
                       const updatedLots = lots.map((l, i) => ({
                         ...l,
-                        nom: l.nom.startsWith("Chambre") || l.nom.startsWith("Appartement") || l.nom.startsWith("Boutique") || l.nom.startsWith("Lot")
-                          ? `${tp.defaultPrefix} ${i + 1}`
-                          : l.nom,
+                        nom: getDefaultLotName(tp.id, i),
                       }));
                       onChange({ ...data, typePatrimoine: tp.id as any, lots: updatedLots });
                     }}
@@ -304,12 +320,12 @@ export function StepSaisieExpress({
                         <input
                           type="text"
                           inputMode="numeric"
-                          value={lot.loyer ? Number(lot.loyer).toLocaleString("fr-FR") : ""}
+                          value={lot.loyer && Number(lot.loyer) > 0 ? Number(lot.loyer).toLocaleString("fr-FR") : ""}
                           onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, "");
                             handleUpdateLot(lot.id, { loyer: val ? parseInt(val, 10) : 0 });
                           }}
-                          placeholder="Loyer"
+                          placeholder={data.typePatrimoine === "villa" ? "Ex: 250 000" : "Ex: 50 000"}
                           className={cn(
                             "w-full px-3 py-2 pr-20 bg-white border rounded-xl text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all shadow-2xs",
                             errors[`lot_${lot.id}_loyer`]
