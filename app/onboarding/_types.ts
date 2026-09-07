@@ -23,6 +23,7 @@ export interface LotItem {
 export interface SaisieExpressData {
   // Hiérarchie Patrimoine & Multi-Lots (Bailleur & Agence)
   nomPatrimoine?: string;         // Ex: "Résidence Les Cocotiers", "Villa Haie Vive"
+  typePatrimoine?: "concession" | "immeuble" | "villa" | "commercial"; // Type d'ensemble
   nombreLots?: number;            // Nombre de lots/chambres dans l'ensemble
   lots?: LotItem[];               // Liste des lots configurés avec statut et locataire
 

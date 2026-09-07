@@ -107,9 +107,10 @@ export async function sendTenantInvitationEmail({
   propertyAddress,
   rentAmountFcfa,
   depositMonths = 3,
+  temporaryPassword,
   customMessage,
   subject,
-  portalUrl = 'https://lokka.bj/locataire',
+  portalUrl = 'https://codeo-ui.com/auth/locataire',
 }: {
   to: string;
   tenantName: string;
@@ -118,6 +119,7 @@ export async function sendTenantInvitationEmail({
   propertyAddress: string;
   rentAmountFcfa: number;
   depositMonths?: number;
+  temporaryPassword?: string;
   customMessage?: string;
   subject?: string;
   portalUrl?: string;
@@ -135,6 +137,23 @@ export async function sendTenantInvitationEmail({
     `
     : '';
 
+  const credentialsBlock = temporaryPassword
+    ? `
+    <div style="background-color: #F0FDF4; border: 1.5px solid #10B981; border-radius: 8px; padding: 18px; margin: 20px 0;">
+      <p style="margin: 0 0 10px; font-weight: 800; color: #065F46; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">🔐 Vos Identifiants d'Accès</p>
+      <p style="margin: 6px 0; font-size: 14px; color: #1E293B;">• <strong>Identifiant :</strong> <code style="font-family: monospace; background: #E2E8F0; padding: 2px 7px; border-radius: 4px; font-size: 13px;">${to}</code></p>
+      <p style="margin: 6px 0; font-size: 14px; color: #1E293B;">• <strong>Mot de passe temporaire :</strong> <code style="font-family: monospace; background: #FEF3C7; color: #92400E; padding: 2px 7px; border-radius: 4px; font-size: 13.5px; font-weight: bold;">${temporaryPassword}</code></p>
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #A7F3D0; font-size: 12px; color: #047857; line-height: 1.5;">
+        ⚠️ <strong>Consigne de sécurité importante :</strong> Pour des raisons de confidentialité, nous vous recommandons de personnaliser votre mot de passe dès votre première connexion dans les paramètres de votre compte.
+      </div>
+    </div>
+    `
+    : `
+    <div style="background-color: #E6F5EF; border-radius: 6px; padding: 12px; font-size: 12px; color: #087F5B; text-align: center; margin: 18px 0;">
+      🔒 <strong>Connexion simplifiée :</strong> Cliquez sur le bouton ci-dessous pour vous connecter par code de sécurité instantané.
+    </div>
+    `;
+
   const html = `
 <!DOCTYPE html>
 <html lang="fr">
@@ -147,7 +166,7 @@ export async function sendTenantInvitationEmail({
     .logo { font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
     .badge { display: inline-block; background-color: #E6F5EF; color: #087F5B; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-top: 8px; }
     .box { background-color: #FAF9F6; border: 1px solid #E8E5E0; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 14px; }
-    .btn { display: inline-block; background-color: #0F172A; color: #FFFFFF !important; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 700; font-size: 14px; margin-top: 10px; }
+    .btn { display: inline-block; background-color: #059669; color: #FFFFFF !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-top: 10px; }
     .footer { font-size: 12px; color: #9C9A95; margin-top: 32px; border-top: 1px solid #F0EDE8; padding-top: 16px; text-align: center; }
   </style>
 </head>
@@ -172,25 +191,22 @@ export async function sendTenantInvitationEmail({
       </div>
     </div>
 
+    ${credentialsBlock}
     ${customMessageBlock}
 
     <p style="font-size: 14px; color: #0F172A; font-weight: 700; margin-top: 20px;">Depuis votre Espace Locataire, vous pouvez :</p>
     <ul style="font-size: 14px; color: #64635F; line-height: 1.7; padding-left: 20px;">
       <li>Télécharger directement vos <strong>Quittances PDF officielles</strong> avec QR Code certifié</li>
       <li>Régler votre loyer en 1 clic par <strong>MTN MoMo ou Moov Money</strong></li>
-      <li>Consulter votre bail et signaler une panne avec photos</li>
+      <li>Consulter votre contrat de bail et signaler toute demande d'intervention</li>
     </ul>
 
     <div style="text-align: center; margin: 28px 0;">
-      <a href="${portalUrl}" class="btn">Accéder à mon Espace Locataire</a>
-    </div>
-
-    <div style="background-color: #E6F5EF; border-radius: 6px; padding: 12px; font-size: 12px; color: #087F5B; text-align: center;">
-      🔒 <strong>Connexion simplifiée :</strong> Entrez simplement votre email ou numéro de téléphone pour recevoir un code d'accès à 6 chiffres (aucun mot de passe requis).
+      <a href="${portalUrl}" class="btn">Accéder à mon Espace Locataire &rarr;</a>
     </div>
 
     <div class="footer">
-      Lokka • Plateforme conforme à la Loi n° 2022-30 de la République du Bénin • <a href="https://lokka.bj" style="color: #64635F;">lokka.bj</a>
+      Lokka • Plateforme conforme à la Loi n° 2022-30 de la République du Bénin • <a href="https://codeo-ui.com" style="color: #64635F;">codeo-ui.com</a>
     </div>
   </div>
 </body>

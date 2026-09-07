@@ -173,6 +173,47 @@ export function StepSaisieExpress({
             )}
           </div>
 
+          {/* 1 bis. Type d'Ensemble / Patrimoine */}
+          <div className="space-y-1.5 pt-0.5">
+            <label className="text-[12.5px] font-bold text-slate-800">
+              Type d'ensemble immobilier
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { id: "concession", label: "Concession", sub: "Chambres / Boutiques", defaultPrefix: "Chambre" },
+                { id: "immeuble", label: "Immeuble", sub: "Appartements / Studios", defaultPrefix: "Appartement" },
+                { id: "villa", label: "Villa", sub: "Maison & Dépendance", defaultPrefix: "Pièce / Dépendance" },
+                { id: "commercial", label: "Commercial", sub: "Boutiques / Bureaux", defaultPrefix: "Boutique" },
+              ].map((tp) => {
+                const isSelected = (data.typePatrimoine || "concession") === tp.id;
+                return (
+                  <button
+                    key={tp.id}
+                    type="button"
+                    onClick={() => {
+                      const updatedLots = lots.map((l, i) => ({
+                        ...l,
+                        nom: l.nom.startsWith("Chambre") || l.nom.startsWith("Appartement") || l.nom.startsWith("Boutique") || l.nom.startsWith("Lot")
+                          ? `${tp.defaultPrefix} ${i + 1}`
+                          : l.nom,
+                      }));
+                      onChange({ ...data, typePatrimoine: tp.id as any, lots: updatedLots });
+                    }}
+                    className={cn(
+                      "p-2.5 rounded-xl border text-left transition-all cursor-pointer",
+                      isSelected
+                        ? "bg-emerald-50/80 border-emerald-500 text-emerald-950 ring-1 ring-emerald-500/25"
+                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                    )}
+                  >
+                    <div className="text-[12px] font-bold">{tp.label}</div>
+                    <div className="text-[10px] text-slate-500 line-clamp-1">{tp.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* 2. Nombre de lots / chambres dans cette résidence */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between">

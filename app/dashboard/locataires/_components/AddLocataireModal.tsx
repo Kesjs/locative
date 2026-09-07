@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
@@ -10,12 +10,16 @@ import {
   UserPlusIcon,
   BuildingOffice2Icon,
   UserIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import { useBiens, plafondCaution } from "@/lib/hooks/useBiens";
 import { useAddTenantWithLease } from "@/lib/hooks/useLocataires";
-import { UserCheck, Sparkles } from "lucide-react";
+import { Building2, Sparkles, KeyRound, Mail, Eye, EyeOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const STEPS = ["Locataire", "Affectation Logement", "Conditions du bail", "Confirmation"] as const;
+const STEPS = ["Locataire", "Affectation Logement", "Conditions du bail", "Invitation & Accès"] as const;
 type StepIndex = 0 | 1 | 2 | 3;
 
 const ID_CARD_TYPES = ["CIP (Bénin)", "CNI", "Passeport", "Permis de conduire", "Carte consulaire", "Autre"];
@@ -38,6 +42,7 @@ interface FormState {
   start_date: string;
   end_date: string;
   lease_contract_url: string;
+  temporary_password: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -58,7 +63,13 @@ const EMPTY_FORM: FormState = {
   start_date: new Date().toISOString().split("T")[0],
   end_date: "",
   lease_contract_url: "",
+  temporary_password: "",
 };
+
+function generateTempPassword(): string {
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return "Lokka#" + num;
+}
 
 export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { data: biens = [] } = useBiens();
@@ -67,14 +78,34 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const [step, setStep] = useState<StepIndex>(0);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [isCandidatSansLogement, setIsCandidatSansLogement] = useState(false);
+  const [selectedPatrimoineFilter, setSelectedPatrimoineFilter] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const biensVacants = biens.filter((b) => b.statut === "vacant");
-  const bienSelectionne = biens.find((b) => b.id === form.bien_id);
+  const biensVacants = useMemo(() => biens.filter((b) => b.statut === "vacant"), [biens]);
+  const bienSelectionne = useMemo(() => biens.find((b) => b.id === form.bien_id), [biens, form.bien_id]);
+
+  // Groupement des biens vacants par Patrimoine parent
+  const patrimoinesVacantsMap = useMemo(() => {
+    const map = new Map<string, typeof biensVacants>();
+    biensVacants.forEach((b) => {
+      const p = b.nom.includes(" - ")
+        ? b.nom.split(" - ")[0].trim()
+        : b.nom.includes(" (")
+        ? b.nom.split(" (")[0].trim()
+        : "Autre patrimoine";
+      if (!map.has(p)) map.set(p, []);
+      map.get(p)!.push(b);
+    });
+    return map;
+  }, [biensVacants]);
+
+  const patrimoinesList = useMemo(() => Array.from(patrimoinesVacantsMap.keys()).sort(), [patrimoinesVacantsMap]);
 
   useEffect(() => {
     if (isOpen) {
-      setForm(EMPTY_FORM);
+      setForm({ ...EMPTY_FORM, temporary_password: generateTempPassword() });
       setIsCandidatSansLogement(false);
+      setSelectedPatrimoineFilter(null);
       setStep(0);
     }
   }, [isOpen]);
@@ -110,7 +141,6 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
   const handleNext = () => {
     if (step === 1 && isCandidatSansLogement) {
-      // Si sans logement, aller directement à la confirmation
       setStep(3);
     } else {
       setStep((s) => (s + 1) as StepIndex);
@@ -127,6 +157,7 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
 
   const handleSubmit = async () => {
     try {
+      // 1. Enregistrement du locataire et du bail dans Supabase
       await addTenantWithLease({
         tenant: {
           full_name: form.full_name.trim(),
@@ -154,15 +185,38 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
           : undefined,
       });
 
+      // 2. Envoi automatique de l'email d'invitation avec identifiants et mot de passe temporaire
+      if (form.email && form.email.includes("@")) {
+        try {
+          await fetch("/api/send-tenant-invitation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tenantName: form.full_name.trim(),
+              tenantEmail: form.email.trim(),
+              tenantPhone: form.phone_number.trim(),
+              propertyTitle: bienSelectionne?.nom || "Votre logement Lokka",
+              propertyAddress: (bienSelectionne?.adresse || "") + (bienSelectionne?.ville ? ", " + bienSelectionne.ville : ""),
+              rentAmount: Number(form.rent_amount) || 0,
+              depositMonths: Number(form.deposit_months) || 3,
+              temporaryPassword: form.temporary_password,
+            }),
+          });
+          toast.success("Invitation officielle envoyée par email au locataire avec ses identifiants !");
+        } catch (invErr) {
+          console.warn("Notice envoi invitation email:", invErr);
+        }
+      }
+
       toast.success(
         isCandidatSansLogement
           ? "Candidat enregistré avec succès (en attente d'attribution)"
           : 'Locataire et bail créés — le bien passe en "loué"'
       );
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Erreur lors de l'enregistrement du locataire");
+      toast.error(err?.message || "Erreur lors de l'enregistrement du locataire");
     }
   };
 
@@ -173,77 +227,84 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[92vh] sm:max-h-[85vh] flex flex-col shadow-2xl border border-border overflow-hidden"
+        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl border border-border overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div>
-            <h3 className="text-[16px] font-bold text-card-foreground">
-              {isCandidatSansLogement ? "Nouveau dossier candidat" : "Nouveau locataire + bail"}
-            </h3>
-            <p className="text-[11.5px] text-muted-foreground mt-0.5">
-              Enregistrez un locataire avec ou sans logement immédiat.
+            <h2 className="text-[16px] font-bold text-card-foreground">Nouveau Locataire</h2>
+            <p className="text-[11.5px] text-muted-foreground">
+              {STEPS[step]} · Étape {step + 1} sur 4
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"
+          >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Progress Bar */}
-        <div className="px-5 pt-3.5 shrink-0 bg-card">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            {STEPS.map((label, i) => (
-              <div key={label} className="flex-1">
-                <div
-                  className="h-1.5 rounded-full transition-all duration-300"
-                  style={{
-                    backgroundColor: i <= step ? "var(--primary)" : "var(--border)",
-                  }}
-                />
+        {/* Stepper horizontal */}
+        <div className="flex items-center px-5 py-2.5 bg-muted/30 border-b border-border gap-1 overflow-x-auto shrink-0">
+          {STEPS.map((label, idx) => (
+            <div key={label} className="flex items-center gap-1 shrink-0">
+              <div
+                className={cn(
+                  "w-5 h-5 rounded-full flex items-center justify-center text-[10.5px] font-bold transition-all",
+                  idx < step
+                    ? "bg-emerald-600 text-white"
+                    : idx === step
+                    ? "bg-primary text-primary-foreground ring-2 ring-primary/20"
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                {idx < step ? "✓" : idx + 1}
               </div>
-            ))}
-          </div>
-          <p className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wider">
-            Étape {step + 1}/{STEPS.length} — {STEPS[step]}
-          </p>
+              <span className={cn("text-[11px] font-semibold mr-2", idx === step ? "text-foreground" : "text-muted-foreground")}>
+                {label}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-3.5">
+        {/* Corps défilable */}
+        <div className="p-5 overflow-y-auto flex-1 space-y-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              initial={{ opacity: 0, x: 12 }}
+              initial={{ opacity: 0, x: 8 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -12 }}
+              exit={{ opacity: 0, x: -8 }}
               transition={{ duration: 0.15 }}
-              className="space-y-3.5"
+              className="space-y-4"
             >
-              {/* ÉTAPE 0 : LOCATAIRE */}
+              {/* ÉTAPE 0 : IDENTITÉ */}
               {step === 0 && (
                 <>
                   <Field label="Nom complet du locataire *">
                     <input
-                      autoFocus
                       type="text"
+                      required
                       value={form.full_name}
                       onChange={(e) => update({ full_name: e.target.value })}
-                      placeholder="Ex. Koudjo Dossou"
+                      placeholder="Ex. Koffi Mensah, Dr. Dossou..."
                       className="w-full border border-border rounded-lg px-3 py-2 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                     />
                   </Field>
                   <div className="grid grid-cols-2 gap-2.5">
-                    <Field label="Téléphone / Appel *">
+                    <Field label="Téléphone appel (MoMo) *">
                       <input
                         type="tel"
+                        required
                         value={form.phone_number}
                         onChange={(e) => update({ phone_number: e.target.value })}
-                        placeholder="+229 97 12 34 56"
+                        placeholder="+229 97 00 00 00"
                         className="w-full border border-border rounded-lg px-3 py-2 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring bg-background"
                       />
                     </Field>
-                    <Field label="WhatsApp (si différent)">
+                    <Field label="Numéro WhatsApp">
                       <input
                         type="tel"
                         value={form.whatsapp_number}
@@ -254,9 +315,10 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                     </Field>
                   </div>
                   <div className="grid grid-cols-2 gap-2.5">
-                    <Field label="Email">
+                    <Field label="Adresse Email (Obligatoire pour accès espace) *">
                       <input
                         type="email"
+                        required
                         value={form.email}
                         onChange={(e) => update({ email: e.target.value })}
                         placeholder="locataire@gmail.com"
@@ -300,11 +362,11 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 </>
               )}
 
-              {/* ÉTAPE 1 : LOGEMENT OU CANDIDAT */}
+              {/* ÉTAPE 1 : LOGEMENT HIÉRARCHIQUE (Patrimoine -> Lot) */}
               {step === 1 && (
-                <div className="space-y-2.5">
-                  <p className="text-[12px] font-semibold text-foreground">
-                    Sélectionnez un logement vacant ou enregistrez le locataire comme candidat :
+                <div className="space-y-3">
+                  <p className="text-[12.5px] font-semibold text-foreground">
+                    Sélectionnez le patrimoine et le lot vacant à lui attribuer :
                   </p>
 
                   {/* Option Candidat libre sans logement */}
@@ -314,73 +376,129 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                       setIsCandidatSansLogement(true);
                       update({ bien_id: "" });
                     }}
-                    className={`w-full text-left flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={cn(
+                      "w-full text-left flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer",
                       isCandidatSansLogement
                         ? "border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/20"
                         : "border-border hover:bg-muted/40"
-                    }`}
+                    )}
                   >
-                    <div className="w-11 h-11 rounded-lg bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
                       <UserPlusIcon className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-bold text-card-foreground">
                         Candidat libre (Sans logement immédiat)
                       </p>
-                      <p className="text-[11.5px] text-muted-foreground">
-                        Enregistre le profil dans la base en attente d&apos;attribution future.
+                      <p className="text-[11px] text-muted-foreground">
+                        Enregistre le profil en base sans créer de bail actif.
                       </p>
                     </div>
                   </button>
 
-                  <div className="pt-2">
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase mb-2">
-                      Ou attribuer un logement vacant :
+                  <div className="pt-1 space-y-2">
+                    <p className="text-[11px] font-bold text-muted-foreground uppercase">
+                      Ou choisir parmi les résidences & lots vacants :
                     </p>
 
                     {biensVacants.length === 0 ? (
-                      <p className="text-[12px] text-muted-foreground text-center py-5 border border-dashed border-border rounded-lg">
-                        Aucun logement vacant disponible actuellement. Vous pouvez enregistrer le locataire comme candidat ci-dessus.
+                      <p className="text-[12px] text-muted-foreground text-center py-6 border border-dashed border-border rounded-xl">
+                        Aucun lot vacant disponible actuellement. Vous pouvez enregistrer le locataire comme candidat ci-dessus.
                       </p>
                     ) : (
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {biensVacants.map((b) => {
-                          const isSelected = !isCandidatSansLogement && form.bien_id === b.id;
-                          return (
+                      <div className="space-y-3">
+                        {/* Filtre par Patrimoine */}
+                        {patrimoinesList.length > 1 && (
+                          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                             <button
-                              key={b.id}
                               type="button"
-                              onClick={() => {
-                                setIsCandidatSansLogement(false);
-                                update({ bien_id: b.id });
-                              }}
-                              className={`w-full text-left flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
-                                isSelected
-                                  ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/5 ring-1 ring-[var(--brand-accent)]/20"
-                                  : "border-border hover:bg-muted/40"
-                              }`}
+                              onClick={() => setSelectedPatrimoineFilter(null)}
+                              className={cn(
+                                "px-2.5 py-1 rounded-lg text-[11px] font-bold border shrink-0 transition-all cursor-pointer",
+                                selectedPatrimoineFilter === null
+                                  ? "bg-emerald-600 text-white border-emerald-600"
+                                  : "bg-card text-muted-foreground border-border hover:bg-muted"
+                              )}
                             >
-                              <img
-                                src={b.photo_principale || b.photos?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=100&q=80"}
-                                alt=""
-                                className="w-10 h-10 rounded-lg object-cover shrink-0"
-                              />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-[13px] font-bold text-card-foreground truncate">{b.nom}</p>
-                                <p className="text-[11px] text-muted-foreground truncate">
-                                  {b.quartier ? `${b.quartier}, ` : ""}{b.ville} — {b.loyer_mensuel.toLocaleString("fr-FR")} FCFA/mois
-                                </p>
-                              </div>
+                              Tous ({biensVacants.length})
                             </button>
-                          );
-                        })}
+                            {patrimoinesList.map((p) => {
+                              const cnt = patrimoinesVacantsMap.get(p)?.length || 0;
+                              const isSel = selectedPatrimoineFilter === p;
+                              return (
+                                <button
+                                  key={p}
+                                  type="button"
+                                  onClick={() => setSelectedPatrimoineFilter(isSel ? null : p)}
+                                  className={cn(
+                                    "px-2.5 py-1 rounded-lg text-[11px] font-bold border shrink-0 transition-all cursor-pointer flex items-center gap-1",
+                                    isSel
+                                      ? "bg-emerald-600 text-white border-emerald-600"
+                                      : "bg-card text-muted-foreground border-border hover:bg-muted"
+                                  )}
+                                >
+                                  <Building2 className="w-3 h-3" />
+                                  <span>{p}</span>
+                                  <span className={cn("text-[9.5px] px-1 rounded-full", isSel ? "bg-white/20" : "bg-muted")}>
+                                    {cnt}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Liste des Lots vacants filtrés */}
+                        <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                          {biensVacants
+                            .filter((b) => {
+                              if (!selectedPatrimoineFilter) return true;
+                              return b.nom.startsWith(selectedPatrimoineFilter);
+                            })
+                            .map((b) => {
+                              const isSelected = !isCandidatSansLogement && form.bien_id === b.id;
+                              return (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setIsCandidatSansLogement(false);
+                                    update({ bien_id: b.id });
+                                  }}
+                                  className={cn(
+                                    "w-full text-left flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer",
+                                    isSelected
+                                      ? "border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-500/20 text-slate-900"
+                                      : "border-border hover:bg-muted/40 text-card-foreground"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                      <KeyRound className="w-4 h-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-[12.5px] font-bold truncate">{b.nom}</p>
+                                      <p className="text-[11px] text-muted-foreground truncate">
+                                        {b.ville} {b.quartier ? "· " + b.quartier : ""}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span className="text-[12px] font-bold font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                      {b.loyer_mensuel.toLocaleString("fr-FR")} F
+                                    </span>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* ÉTAPE 2 : CONDITIONS DU BAIL (Seulement si logement attribué) */}
+              {/* ÉTAPE 2 : CONDITIONS DU BAIL */}
               {step === 2 && !isCandidatSansLogement && (
                 <>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -428,11 +546,12 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                   </div>
 
                   <div
-                    className={`rounded-lg p-2 text-[11.5px] flex items-start gap-1.5 ${
+                    className={cn(
+                      "rounded-xl p-2.5 text-[11.5px] flex items-start gap-1.5",
                       cautionDepasse
                         ? "bg-destructive/10 text-destructive border border-destructive/20 font-semibold"
-                        : "bg-muted/40 text-muted-foreground"
-                    }`}
+                        : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    )}
                   >
                     {cautionDepasse ? (
                       <ExclamationTriangleIcon className="w-4 h-4 shrink-0 mt-0.5" />
@@ -440,7 +559,7 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                       <CheckIcon className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
                     )}
                     <span>
-                      Caution totale : <strong>{depositAmount.toLocaleString("fr-FR")} FCFA</strong> (Plafond légal 3 mois : {plafond.toLocaleString("fr-FR")} FCFA)
+                      Caution légale calculée : <strong>{depositAmount.toLocaleString("fr-FR")} FCFA</strong> (Plafond Loi 2022-30 : {plafond.toLocaleString("fr-FR")} FCFA)
                     </span>
                   </div>
 
@@ -465,25 +584,88 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 </>
               )}
 
-              {/* ÉTAPE 3 : CONFIRMATION */}
+              {/* ÉTAPE 3 : APERÇU DU MAIL & IDENTIFIANTS DU LOCATAIRE */}
               {step === 3 && (
-                <div className="space-y-3">
-                  <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-2">
-                    <p className="text-[13px] font-bold text-card-foreground">Récapitulatif du dossier :</p>
-                    <p className="text-[12px] text-foreground flex items-center gap-1.5">
-                      <UserIcon className="w-4 h-4 text-[var(--brand-accent)]" />
-                      <strong>Locataire :</strong> {form.full_name} ({form.phone_number})
-                    </p>
-                    <p className="text-[12px] text-foreground flex items-center gap-1.5">
-                      <BuildingOffice2Icon className="w-4 h-4 text-[var(--brand-accent)]" />
-                      <strong>Logement :</strong>{" "}
-                      {isCandidatSansLogement ? "Candidat (En attente d'affectation)" : bienSelectionne?.nom || "Non assigné"}
-                    </p>
-                    {!isCandidatSansLogement && (
-                      <p className="text-[12px] text-foreground">
-                        💰 <strong>Loyer :</strong> {Number(form.rent_amount).toLocaleString("fr-FR")} FCFA / mois (Caution : {depositAmount.toLocaleString("fr-FR")} FCFA)
+                <div className="space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-[13.5px] font-bold text-slate-900">Aperçu du Courriel d'Invitation</h3>
+                      <p className="text-[11.5px] text-slate-500">
+                        Ce message sera automatiquement envoyé à l'adresse du locataire.
                       </p>
-                    )}
+                    </div>
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      Resend Certifié
+                    </span>
+                  </div>
+
+                  {/* CARTE DE PRÉVISUALISATION DIRECTE DU MAIL */}
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3 text-slate-800 text-[12.5px]">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center">
+                          L
+                        </div>
+                        <span className="font-extrabold text-[13px] text-slate-900">Lokka</span>
+                      </div>
+                      <span className="text-[10.5px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        Loi n° 2022-30 · Bénin
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="font-bold text-slate-900">Bonjour {form.full_name || "Locataire"},</p>
+                      <p className="text-slate-600 text-[12px] mt-0.5">
+                        Votre bailleur vous a activé un accès sécurisé à votre Espace Locataire pour le logement :
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1 text-[11.5px]">
+                      <p className="font-bold text-slate-900">{bienSelectionne?.nom || "Logement attribué"}</p>
+                      <p className="text-slate-500">📍 {bienSelectionne?.adresse || "Cotonou, Bénin"}</p>
+                      <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between">
+                        <span>Loyer mensuel : <strong>{Number(form.rent_amount).toLocaleString("fr-FR")} FCFA</strong></span>
+                        <span>Caution : <strong>{depositAmount.toLocaleString("fr-FR")} FCFA</strong></span>
+                      </div>
+                    </div>
+
+                    {/* Bloc Identifiants */}
+                    <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200/90 space-y-1.5">
+                      <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1">
+                        <LockClosedIcon className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>Identifiants Personnels de Connexion</span>
+                      </p>
+                      <div className="text-[12px] space-y-1 text-slate-800">
+                        <p>• <strong>Identifiant :</strong> <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-slate-900">{form.email || "Email non renseigné"}</code></p>
+                        <div className="flex items-center gap-2">
+                          <span>• <strong>Mot de passe temporaire :</strong></span>
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={form.temporary_password}
+                            onChange={(e) => update({ temporary_password: e.target.value })}
+                            className="font-mono bg-white px-2 py-0.5 rounded border border-emerald-300 font-bold text-emerald-800 text-[12px] w-28 focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="p-1 text-slate-400 hover:text-slate-700"
+                          >
+                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-[10.5px] text-emerald-800 pt-1 border-t border-emerald-200/60">
+                        ⚠️ <em>Consigne : Le locataire sera invité à personnaliser ce mot de passe dès sa 1ère connexion pour sa sécurité.</em>
+                      </p>
+                    </div>
+
+                    {/* Bouton du mail */}
+                    <div className="text-center pt-1">
+                      <span className="inline-block px-4 py-2 bg-emerald-600 text-white font-bold text-[12px] rounded-xl shadow-xs">
+                        Accéder à mon Espace Locataire &rarr;
+                      </span>
+                      <p className="text-[10px] text-slate-400 mt-1">Lien direct vers https://codeo-ui.com/auth/locataire</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -510,19 +692,23 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
               type="button"
               disabled={!canAdvance()}
               onClick={handleNext}
-              className="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12.5px] font-semibold hover:opacity-90 disabled:opacity-50 transition cursor-pointer shadow-xs"
+              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-semibold disabled:opacity-50 transition cursor-pointer shadow-xs"
             >
               Suivant
             </button>
           ) : (
             <button
               type="button"
-              disabled={isPending}
+              disabled={isPending || (!form.email && !isCandidatSansLogement)}
               onClick={handleSubmit}
-              className="px-5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-primary-foreground text-[12.5px] font-semibold disabled:opacity-50 transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12.5px] font-bold disabled:opacity-50 transition cursor-pointer shadow-xs flex items-center gap-1.5"
             >
               <CheckIcon className="w-4 h-4 stroke-[2.5]" />
-              <span>{isCandidatSansLogement ? "Créer le dossier candidat" : "Créer le locataire et le bail"}</span>
+              <span>
+                {isCandidatSansLogement
+                  ? "Créer le dossier candidat"
+                  : "Créer le bail & envoyer l'invitation"}
+              </span>
             </button>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendTenantInvitationEmail } from '@/lib/email';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
       propertyAddress,
       rentAmount,
       depositMonths = 3,
+      temporaryPassword,
       customMessage,
       subject,
     } = body;
@@ -24,13 +26,67 @@ export async function POST(request: Request) {
       );
     }
 
-    const portalUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lokka.bj'}/locataire`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://codeo-ui.com';
+    const portalUrl = tenantEmail
+      ? `${siteUrl}/auth/locataire?email=${encodeURIComponent(tenantEmail)}`
+      : `${siteUrl}/auth/locataire`;
 
-    // WhatsApp Message Text template
-    const customNoteText = customMessage ? `\n\n💬 *Note :* "${customMessage}"` : '';
-    const whatsappMessage = `*LOKKA BÉNIN — Votre Espace Locataire est prêt !* 🇧🇯\n\nBonjour ${tenantName},\nVotre propriétaire/gestionnaire *${ownerName || 'votre bailleur'}* vous a créé un accès à votre espace pour *${propertyTitle}*.\n\n• *Loyer mensuel :* ${Number(rentAmount).toLocaleString('fr-FR')} FCFA\n• *Caution légale (Loi 2022-30) :* ${(Number(rentAmount) * Number(depositMonths)).toLocaleString('fr-FR')} FCFA (${depositMonths} mois)${customNoteText}\n\n👉 *Accéder à votre espace :* ${portalUrl}\n\n_Connectez-vous avec votre numéro (+229) et votre code de sécurité pour télécharger vos quittances PDF et payer votre loyer par MoMo._`;
+    // 1. Provisionner automatiquement le compte Supabase Auth pour le locataire si mot de passe fourni
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // Send email via Resend if email is provided
+    if (supabaseUrl && serviceRoleKey && tenantEmail && temporaryPassword) {
+      try {
+        const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        });
+
+        // Tenter de créer l'utilisateur
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: tenantEmail,
+          password: temporaryPassword,
+          email_confirm: true,
+          user_metadata: {
+            full_name: tenantName,
+            phone_number: tenantPhone || '',
+            role: 'tenant',
+          },
+        });
+
+        if (createError) {
+          // Si l'utilisateur existe déjà, mettre à jour son mot de passe
+          if (createError.message?.toLowerCase().includes('already') || createError.message?.toLowerCase().includes('exists')) {
+            const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
+            const existing = userList?.users?.find((u) => u.email?.toLowerCase() === tenantEmail.toLowerCase());
+            if (existing) {
+              await supabaseAdmin.auth.admin.updateUserById(existing.id, {
+                password: temporaryPassword,
+                user_metadata: { ...existing.user_metadata, role: 'tenant', full_name: tenantName },
+              });
+              await supabaseAdmin.from('profiles').update({ role: 'tenant', full_name: tenantName }).eq('id', existing.id);
+            }
+          } else {
+            console.warn('Supabase Admin createUser notice:', createError.message);
+          }
+        } else if (newUser?.user) {
+          // Garantir son profil locataire
+          await supabaseAdmin
+            .from('profiles')
+            .upsert({
+              id: newUser.user.id,
+              email: tenantEmail,
+              full_name: tenantName,
+              phone_number: tenantPhone || '',
+              role: 'tenant',
+              onboarding_completed: true,
+            });
+        }
+      } catch (authErr: any) {
+        console.warn('Supabase Admin provisioning warning:', authErr?.message);
+      }
+    }
+
+    // 2. Envoyer l'email officiel d'invitation avec identifiants et consignes de sécurité
     let emailResult = null;
     if (tenantEmail && tenantEmail.includes('@')) {
       emailResult = await sendTenantInvitationEmail({
@@ -41,6 +97,7 @@ export async function POST(request: Request) {
         propertyAddress: propertyAddress || 'Cotonou, Bénin',
         rentAmountFcfa: Number(rentAmount) || 0,
         depositMonths: Number(depositMonths) || 3,
+        temporaryPassword,
         customMessage,
         subject,
         portalUrl,
@@ -50,7 +107,6 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       emailResult,
-      whatsappMessage,
       portalUrl,
     });
   } catch (error: any) {
