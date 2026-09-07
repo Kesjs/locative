@@ -15,35 +15,103 @@ import {
   Clock,
   MessageSquare,
   X,
+  Lock,
+  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export default function MonLoyerPage() {
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [selectedOperator, setSelectedOperator] = useState<"mtn" | "moov">("mtn");
   const [copiedNumber, setCopiedNumber] = useState(false);
+  const [dismissSecurityBanner, setDismissSecurityBanner] = useState(false);
 
-  // Données dynamiques du bail locataire
+  // Données dynamiques du bail locataire connectées à Supabase
   const { data: rentInfo, isLoading } = useQuery({
     queryKey: ["locataire-loyer-status"],
     queryFn: async () => {
-      // Simule chargement réel ou récupération locale/Supabase
-      await new Promise((r) => setTimeout(r, 300));
-      return {
-        montantLoyer: 150000,
-        charges: 10000,
-        totalDu: 160000,
+      let defaultData = {
+        montantLoyer: 75000,
+        charges: 0,
+        totalDu: 75000,
         echeanceDate: "05/10/2026",
         moisConcerne: "Septembre 2026",
         statut: "a_payer" as "a_payer" | "a_jour",
-        bailleurNom: "Patrimoine Lokka (Gestionnaire)",
+        bailleurNom: "Propriétaire Bailleur Lokka",
         bailleurMomoMtn: "+229 97 00 11 22",
         bailleurMoov: "+229 95 00 33 44",
         bailleurWhatsapp: "22997001122",
-        logementNom: "Villa Les Cocotiers - Apt 2B",
+        logementNom: "Logement Lokka",
       };
+
+      if (!isSupabaseConfigured()) return defaultData;
+
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          // Chercher le locataire correspondant
+          const { data: tenant } = await supabase
+            .from("tenants")
+            .select("id, full_name, phone_number")
+            .or("email.eq." + user.email + ",full_name.ilike.%" + (user.user_metadata?.full_name || "") + "%")
+            .limit(1)
+            .maybeSingle();
+
+          // Chercher le bail lié
+          let lease = null;
+          if (tenant) {
+            const { data: l } = await supabase
+              .from("leases")
+              .select("*, bien:biens(*)")
+              .eq("tenant_id", tenant.id)
+              .eq("is_active", true)
+              .maybeSingle();
+            lease = l;
+          }
+
+          // Si pas de bail trouvé par tenant_id, chercher le premier bien assigné à ce locataire
+          if (!lease) {
+            const { data: assignedBien } = await supabase
+              .from("biens")
+              .select("*")
+              .ilike("locataire_nom", "%" + (user.user_metadata?.full_name || user.email?.split("@")[0]) + "%")
+              .limit(1)
+              .maybeSingle();
+
+            if (assignedBien) {
+              const montant = Number(assignedBien.loyer_mensuel) || 75000;
+              return {
+                ...defaultData,
+                montantLoyer: montant,
+                totalDu: montant,
+                logementNom: assignedBien.nom,
+              };
+            }
+          }
+
+          if (lease && lease.bien) {
+            const montant = Number(lease.rent_amount) || Number(lease.bien.loyer_mensuel) || 75000;
+            const charges = Number(lease.charges_amount) || Number(lease.bien.charges) || 0;
+            return {
+              ...defaultData,
+              montantLoyer: montant,
+              charges,
+              totalDu: montant + charges,
+              logementNom: lease.bien.nom,
+            };
+          }
+        }
+      } catch (err) {
+        console.warn("Notice chargement bail locataire:", err);
+      }
+
+      return defaultData;
     },
   });
 
@@ -57,9 +125,9 @@ export default function MonLoyerPage() {
   const handleNotifyWhatsapp = () => {
     if (!rentInfo) return;
     const msg = encodeURIComponent(
-      `Bonjour ${rentInfo.bailleurNom},\nJe viens d'effectuer le règlement de mon loyer de ${rentInfo.totalDu.toLocaleString("fr-FR")} FCFA pour "${rentInfo.logementNom}" via ${selectedOperator === "mtn" ? "MTN MoMo" : "Moov Money"}.\nMerci de valider et d'émettre la quittance certifiée Lokka.\nBien cordialement.`
+      "Bonjour " + rentInfo.bailleurNom + ",\nJe viens d'effectuer le règlement de mon loyer de " + rentInfo.totalDu.toLocaleString("fr-FR") + " FCFA pour \"" + rentInfo.logementNom + "\" via " + (selectedOperator === "mtn" ? "MTN MoMo" : "Moov Money") + ".\nMerci de valider et d'émettre la quittance certifiée Lokka.\nBien cordialement."
     );
-    window.open(`https://wa.me/${rentInfo.bailleurWhatsapp}?text=${msg}`, "_blank");
+    window.open("https://wa.me/" + rentInfo.bailleurWhatsapp + "?text=" + msg, "_blank");
     toast.success("Discussion WhatsApp ouverte avec le bailleur !");
     setIsPayModalOpen(false);
   };
@@ -79,13 +147,48 @@ export default function MonLoyerPage() {
 
   return (
     <div className="space-y-6">
+      {/* ── BANNIÈRE DE SÉCURITÉ & BIENVENUE ── */}
+      {!dismissSecurityBanner && (
+        <div className="p-4 bg-emerald-50/90 border border-emerald-200/90 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-emerald-950 shadow-2xs">
+          <div className="flex items-start gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shrink-0 mt-0.5 sm:mt-0">
+              <ShieldCheck className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <p className="text-[13px] font-bold">
+                Bienvenue sur votre Espace Sécurisé Lokka
+              </p>
+              <p className="text-[12px] text-emerald-800">
+                Vous venez de vous connecter avec un mot de passe temporaire ? Définissez votre mot de passe personnel pour sécuriser votre compte.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <Link
+              href="/locataire/compte#securite"
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[12px] font-bold transition-all shadow-2xs cursor-pointer"
+            >
+              Modifier mon mot de passe &rarr;
+            </Link>
+            <button
+              type="button"
+              onClick={() => setDismissSecurityBanner(true)}
+              className="p-1 text-emerald-600 hover:text-emerald-900 rounded-lg"
+              title="Fermer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── HEADER ÉDITORIAL ── */}
       <div className="p-5 sm:p-6 bg-card border border-border rounded-2xl shadow-xs">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
             {rentInfo.logementNom}
           </span>
-          <span className="text-[11px] text-muted-foreground font-medium">Bail en cours</span>
+          <span className="text-[11px] text-muted-foreground font-medium">Bail en cours · Loi 2022-30</span>
         </div>
         <h1 className="font-serif text-2xl sm:text-3xl font-normal text-foreground tracking-tight">
           Mon Loyer &amp; Échéances
@@ -114,7 +217,7 @@ export default function MonLoyerPage() {
               </span>
             </div>
             <div className="text-[12px] text-muted-foreground mt-1">
-              Détail : {rentInfo.montantLoyer.toLocaleString("fr-FR")} FCFA (loyer) + {rentInfo.charges.toLocaleString("fr-FR")} FCFA (charges)
+              Détail : {rentInfo.montantLoyer.toLocaleString("fr-FR")} FCFA (loyer) {rentInfo.charges > 0 ? "+ " + rentInfo.charges.toLocaleString("fr-FR") + " FCFA (charges)" : ""}
             </div>
           </div>
 
@@ -136,7 +239,7 @@ export default function MonLoyerPage() {
                 className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[15px] font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Smartphone className="w-5 h-5" />
-                <span>Payer via Mobile Money</span>
+                <span>Payer via Mobile Money (MoMo / Flooz)</span>
               </button>
             </div>
           )}
@@ -191,36 +294,36 @@ export default function MonLoyerPage() {
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
-            {/* Sélecteur Opérateur */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setSelectedOperator("mtn")}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={cn(
+                  "p-3 rounded-xl border text-left transition-all cursor-pointer",
                   selectedOperator === "mtn"
                     ? "bg-amber-500/10 border-amber-500 text-amber-900 dark:text-amber-200 font-bold"
                     : "bg-muted/30 border-border text-muted-foreground"
-                }`}
+                )}
               >
                 <div className="text-[12px] uppercase tracking-wider font-bold">MTN Bénin</div>
-                <div className="text-[13px] font-semibold mt-0.5">Mobile Money</div>
+                <div className="text-[13px] font-semibold mt-0.5">Mobile Money (*880#)</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setSelectedOperator("moov")}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={cn(
+                  "p-3 rounded-xl border text-left transition-all cursor-pointer",
                   selectedOperator === "moov"
                     ? "bg-blue-500/10 border-blue-500 text-blue-900 dark:text-blue-200 font-bold"
                     : "bg-muted/30 border-border text-muted-foreground"
-                }`}
+                )}
               >
                 <div className="text-[12px] uppercase tracking-wider font-bold">Moov Bénin</div>
-                <div className="text-[13px] font-semibold mt-0.5">Moov Money (Flooz)</div>
+                <div className="text-[13px] font-semibold mt-0.5">Moov Money (*855#)</div>
               </button>
             </div>
 
-            {/* Numéro Marchand / Réception du Bailleur */}
             <div className="p-4 rounded-xl bg-muted/40 border border-border space-y-2">
               <span className="text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground block">
                 Numéro de réception du bailleur
@@ -243,7 +346,6 @@ export default function MonLoyerPage() {
               </p>
             </div>
 
-            {/* Bouton d'envoi de confirmation WhatsApp */}
             <button
               type="button"
               onClick={handleNotifyWhatsapp}
