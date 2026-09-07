@@ -15,14 +15,17 @@ export interface UserProfile {
   quotaBiens: { current: number; max: number };
 }
 
+// État affiché brièvement le temps que le vrai profil Supabase soit chargé —
+// volontairement vide (pas de nom/plan factice) pour ne jamais afficher une
+// fausse identité à la place du vrai propriétaire.
 const DEFAULT_PROFILE: UserProfile = {
-  name: "Alexandre Koudjo",
-  email: "alexandre@lokka.bj",
+  name: "",
+  email: "",
   avatar: "",
   customLogo: "",
   role: "Propriétaire Bailleur",
   plan: "pro",
-  quotaBiens: { current: 4, max: 10 },
+  quotaBiens: { current: 0, max: 10 },
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -50,9 +53,14 @@ export function useUserProfile(): UserProfile & {
 } {
   const [profile, setProfile] = useState<UserProfile>(() => {
     if (typeof window !== "undefined") {
-      const savedPlan = localStorage.getItem("lokka_dev_plan") as LokkaPlan;
-      const savedRole = localStorage.getItem("lokka_dev_role");
       const savedLogo = localStorage.getItem("lokka_custom_logo");
+      // lokka_dev_role / lokka_dev_plan sont une bascule réservée au dev local
+      // (DevPlanSwitcher, déjà masqué en production) : elles ne doivent jamais
+      // déterminer le rôle ou le plan d'un vrai compte. Le rôle réel vient
+      // exclusivement de profiles.role en base, chargé juste après par load().
+      const isDev = process.env.NODE_ENV !== "production";
+      const savedPlan = isDev ? (localStorage.getItem("lokka_dev_plan") as LokkaPlan) : null;
+      const savedRole = isDev ? localStorage.getItem("lokka_dev_role") : null;
       if (savedPlan || savedRole || savedLogo) {
         const plan = savedPlan || "pro";
         return {
@@ -88,7 +96,9 @@ export function useUserProfile(): UserProfile & {
       if (data && isMounted) {
         const role = ROLE_LABELS[data.role as string] || "Propriétaire Bailleur";
         const isAgencyRole = data.role === "agence" || data.role === "agency_admin";
-        const savedPlan = (localStorage.getItem("lokka_dev_plan") as LokkaPlan) || (isAgencyRole ? "agence" : "pro");
+        const isDev = process.env.NODE_ENV !== "production";
+        const devPlan = isDev ? (localStorage.getItem("lokka_dev_plan") as LokkaPlan) : null;
+        const savedPlan = devPlan || (isAgencyRole ? "agence" : "pro");
         const customLogo = data.logo_url || localStorage.getItem("lokka_custom_logo") || "";
         
         setProfile({
