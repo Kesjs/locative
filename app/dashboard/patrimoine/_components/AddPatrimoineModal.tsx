@@ -234,6 +234,11 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
             </label>
             <input
               type="text"
+              name="ensemble_patrimoine_nom"
+              id="ensemble_patrimoine_nom"
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
               value={nomPatrimoine}
               onChange={(e) => {
                 setNomPatrimoine(e.target.value);
@@ -446,6 +451,11 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
                       <div className="pt-0.5">
                         <input
                           type="text"
+                          name={`locataire_lot_entry_${lot.id}`}
+                          id={`locataire_lot_entry_${lot.id}`}
+                          autoComplete="off"
+                          data-1p-ignore
+                          data-lpignore="true"
                           value={lot.locataireNom || ""}
                           onChange={(e) => handleUpdateLot(lot.id, { locataireNom: e.target.value })}
                           placeholder="Nom du locataire (optionnel, à titre indicatif)"

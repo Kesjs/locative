@@ -15,8 +15,8 @@ export default function StripeAuthLogo() {
       onMouseLeave={() => setIsHovered(false)}
       className="group relative inline-flex items-center gap-2.5 p-1.5 -ml-1.5 rounded-xl transition-all duration-200 hover:bg-slate-100 border border-transparent select-none cursor-pointer"
     >
-      {/* Icon Box with Morphing Animation */}
-      <div className="relative w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center overflow-hidden shrink-0 transition-transform duration-200 group-hover:scale-95 shadow-xs">
+      {/* Icon Box with Smooth Morphing */}
+      <div className="relative w-9 h-9 rounded-xl bg-transparent flex items-center justify-center overflow-hidden shrink-0 transition-transform duration-200 group-hover:scale-105">
         <AnimatePresence mode="wait" initial={false}>
           {!isHovered ? (
             <motion.div
@@ -25,7 +25,7 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="flex h-full w-full items-center justify-center overflow-hidden text-white"
+              className="flex h-full w-full items-center justify-center overflow-hidden"
             >
               <img src="/logo-icon.png" alt="Lokka" className="h-full w-full object-contain" />
             </motion.div>
@@ -36,9 +36,9 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="flex items-center justify-center text-white"
+              className="flex items-center justify-center text-slate-800"
             >
-              <ArrowLeftIcon className="w-4 h-4" />
+              <ArrowLeftIcon className="w-5 h-5" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -54,9 +54,9 @@ export default function StripeAuthLogo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="font-serif text-[22px] font-bold text-slate-900 tracking-tight"
+              className="font-serif text-[22px] font-extrabold text-slate-900 tracking-[-0.04em]"
             >
-              LOKKA.
+              LOKKA<span className="text-[#9D6B3C]">.</span>
             </motion.span>
           ) : (
             <motion.span

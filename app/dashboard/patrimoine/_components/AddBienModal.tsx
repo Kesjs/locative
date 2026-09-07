@@ -508,6 +508,11 @@ export function AddBienModal({
                     <Input
                       autoFocus
                       type="text"
+                      name="bien_designation_nom"
+                      id="bien_designation_nom"
+                      autoComplete="off"
+                      data-1p-ignore
+                      data-lpignore="true"
                       value={form.nom}
                       onChange={(e) => update({ nom: e.target.value })}
                       placeholder="Ex. Villa Fidjrossè Plage ou Boutique N°4"
@@ -638,9 +643,12 @@ export function AddBienModal({
                       <Input
                         type="number"
                         min={0}
+                        name="charges_mensuelles_val"
+                        id="charges_mensuelles_val"
+                        autoComplete="off"
                         value={form.charges}
                         onChange={(e) => update({ charges: e.target.value })}
-                        placeholder="Ex. 10000 (Gardien/Eau)"
+                        placeholder="Ex. 10000 (Eau / Électricité commune)"
                         className="rounded-lg"
                       />
                     </Field>
@@ -696,6 +704,11 @@ export function AddBienModal({
                             <div className="relative">
                               <Input
                                 type="text"
+                                name="locataire_nom_nouveau"
+                                id="locataire_nom_nouveau"
+                                autoComplete="off"
+                                data-1p-ignore
+                                data-lpignore="true"
                                 value={form.locataire_nom}
                                 onChange={(e) => update({ locataire_nom: e.target.value })}
                                 placeholder="Ex. Marc Mensah"
@@ -710,6 +723,11 @@ export function AddBienModal({
                               <div className="relative">
                                 <Input
                                   type="tel"
+                                  name="locataire_telephone_nouveau"
+                                  id="locataire_telephone_nouveau"
+                                  autoComplete="off"
+                                  data-1p-ignore
+                                  data-lpignore="true"
                                   value={form.locataire_telephone}
                                   onChange={(e) => update({ locataire_telephone: e.target.value })}
                                   placeholder="+229 97 00 00 00"
