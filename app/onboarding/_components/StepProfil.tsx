@@ -1,90 +1,52 @@
+"use client";
+
 import React from "react";
 import { type ProfilStepData } from "../_types";
 import { ProfileCard } from "./ProfileCard";
-import { HomeModernIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
+import { CustomCountrySelect } from "./CustomCountrySelect";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { Home, Building2, Smartphone, Landmark, ShieldCheck } from "lucide-react";
 
 interface StepProfilProps {
   data: ProfilStepData;
   onChange: (data: ProfilStepData) => void;
 }
 
-const COUNTRIES = [
-  { code: "FR", name: "France" },
-  { code: "CI", name: "Côte d'Ivoire" },
-  { code: "TG", name: "Togo" },
-  { code: "SN", name: "Sénégal" },
-  { code: "US", name: "États-Unis" },
-  { code: "CA", name: "Canada" },
-  { code: "BE", name: "Belgique" },
-  { code: "GB", name: "Royaume-Uni" },
-  { code: "GA", name: "Gabon" },
-  { code: "CG", name: "Congo" },
-  { code: "CM", name: "Cameroun" },
-  { code: "ML", name: "Mali" },
-  { code: "NG", name: "Nigeria" },
-  { code: "DE", name: "Allemagne" },
-  { code: "CH", name: "Suisse" },
-  { code: "IT", name: "Italie" },
-];
-
-/** Pill-style toggle buttons (Mobile Money / Banque, zone géo, provider) */
-function ToggleGroup({
+/** Pill-style toggle buttons */
+function BrandedToggleGroup({
   options,
   value,
   onChange,
 }: {
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; icon?: React.ElementType }[];
   value: string;
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex gap-1.5 p-1 bg-muted/50 border border-border rounded-xl">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={cn(
-            "flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all",
-            value === opt.value
-              ? "bg-card text-foreground shadow-sm ring-1 ring-border"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100/80 border border-slate-200/80 rounded-2xl">
+      {options.map((opt) => {
+        const isSelected = value === opt.value;
+        const Icon = opt.icon;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              "flex items-center justify-center gap-2 py-2.5 px-3 text-[13px] font-bold rounded-xl transition-all duration-200 cursor-pointer",
+              isSelected
+                ? "bg-card text-foreground shadow-2xs ring-1 ring-border"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {Icon && <Icon className="w-4 h-4" />}
+            <span>{opt.label}</span>
+          </button>
+        );
+      })}
     </div>
-  );
-}
-
-/** Pill-button pour Mobile provider */
-function PillButton({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex-1 py-2 text-[13px] font-semibold rounded-xl border transition-all capitalize",
-        active
-          ? "bg-primary/10 text-primary border-primary/40"
-          : "bg-card text-muted-foreground border-border hover:border-primary/40"
-      )}
-    >
-      {label}
-    </button>
   );
 }
 
@@ -93,41 +55,63 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
     onChange({ ...data, ...updates });
   };
 
+  const isAgency = data.profileType === "agence";
+
   return (
     <div className="space-y-6">
-      {/* Heading */}
+      {/* En-tête */}
       <div>
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            Étape 1 sur 3
+          </span>
+          <span className="text-[11px] text-muted-foreground font-medium">
+            Configuration initiale
+          </span>
+        </div>
         <h2 className="text-[22px] sm:text-[26px] font-extrabold text-foreground tracking-tight">
-          Quel est votre profil ?
+          Quel est votre statut d'activité ?
         </h2>
         <p className="text-[13px] text-muted-foreground mt-1">
-          Lokka s'adapte à votre mode de gestion.
+          Lokka adapte son interface, ses calculs de commissions et ses baux légaux à votre métier.
         </p>
       </div>
 
-      {/* Type de profil */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Cartes de sélection de Profil */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <ProfileCard
           id="bailleur"
-          title="Bailleur"
-          subtitle="Je gère mes propres biens"
-          icon={HomeModernIcon}
+          title="Bailleur Privé"
+          subtitle="Je gère mon propre patrimoine immobilier en direct"
+          badge="Direct"
+          icon={Home}
           isSelected={data.profileType === "bailleur"}
-          onSelect={(id) => updateData({ profileType: id, nom: "" })}
+          onSelect={(id) => updateData({ profileType: id })}
         />
         <ProfileCard
           id="agence"
-          title="Agence"
-          subtitle="Je gère des mandats pour des tiers"
-          icon={BuildingOffice2Icon}
+          title="Agence & Cabinet"
+          subtitle="Je gère des mandats de location pour le compte de tiers"
+          badge="Loi 2022-30 (10%)"
+          icon={Building2}
           isSelected={data.profileType === "agence"}
-          onSelect={(id) => updateData({ profileType: id, nom: "" })}
+          onSelect={(id) => updateData({ profileType: id })}
         />
       </div>
 
-      {/* Nom */}
+      {/* Bannière d'encadrement légal pour l'agence */}
+      {isAgency && (
+        <div className="flex items-center gap-3 p-3 bg-blue-50/70 border border-blue-200/70 rounded-xl text-blue-900 text-[12px]">
+          <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
+          <div className="leading-snug">
+            <span className="font-bold">Cadre légal Loi n° 2022-30 :</span> Vos mandats et reversements seront automatiquement plafonnés au barème officiel de 10% d'honoraires.
+          </div>
+        </div>
+      )}
+
+      {/* Nom ou Raison Sociale */}
       <FormField
-        label={data.profileType === "bailleur" ? "Votre nom" : "Raison sociale du cabinet"}
+        label={isAgency ? "Raison sociale du cabinet ou de l'agence" : "Votre nom complet"}
         htmlFor="onboarding-nom"
         required
       >
@@ -138,16 +122,20 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
           value={data.nom}
           onChange={(e) => updateData({ nom: e.target.value })}
           placeholder={
-            data.profileType === "bailleur"
-              ? "Ex: Koudjo Dossou"
-              : "Ex: Agence Immobilière du Golfe"
+            isAgency
+              ? "Ex: Cabinet Immobilier du Golfe, Agence Bénin Prestige"
+              : "Ex: Koudjo Dossou, Claudine Mensah"
           }
+          className="h-11 rounded-xl text-[14px]"
         />
       </FormField>
 
-      {/* Moyen de réception */}
-      <FormField label="Moyen de réception des fonds privilégié" htmlFor="moyen-reception">
-        <ToggleGroup
+      {/* Moyen de réception des fonds privilégié */}
+      <div className="space-y-2">
+        <label className="text-[13px] font-bold text-foreground block">
+          Moyen de réception des loyers privilégié
+        </label>
+        <BrandedToggleGroup
           value={data.moyenReception}
           onChange={(v) =>
             updateData({
@@ -156,31 +144,51 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             })
           }
           options={[
-            { value: "mobile_money", label: "📱 Mobile Money" },
-            { value: "banque", label: "🏦 Virement Bancaire" },
+            { value: "mobile_money", label: "Mobile Money", icon: Smartphone },
+            { value: "banque", label: "Virement Bancaire", icon: Landmark },
           ]}
         />
-      </FormField>
+      </div>
 
-      {/* Réseau mobile */}
+      {/* Opérateur Mobile Money avec design soigné */}
       {data.moyenReception === "mobile_money" && (
-        <FormField label="Réseau mobile" htmlFor="mobile-provider">
-          <div className="flex gap-2">
-            {(["mtn", "moov", "celtiis"] as const).map((provider) => (
-              <PillButton
-                key={provider}
-                label={provider.toUpperCase()}
-                active={data.mobileProvider === provider}
-                onClick={() => updateData({ mobileProvider: provider })}
-              />
-            ))}
+        <div className="space-y-2 animate-in fade-in-50 duration-200">
+          <label className="text-[12.5px] font-semibold text-slate-700 block">
+            Réseau Mobile Money principal
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: "mtn", label: "MTN MoMo", color: "hover:border-amber-400 active:bg-amber-50" },
+              { id: "moov", label: "Moov Money", color: "hover:border-blue-400 active:bg-blue-50" },
+              { id: "celtiis", label: "Celtiis Cash", color: "hover:border-emerald-400 active:bg-emerald-50" },
+            ].map((prov) => {
+              const active = data.mobileProvider === prov.id;
+              return (
+                <button
+                  key={prov.id}
+                  type="button"
+                  onClick={() => updateData({ mobileProvider: prov.id as any })}
+                  className={cn(
+                    "py-2.5 px-2 text-[12px] font-bold rounded-xl border transition-all text-center cursor-pointer",
+                    active
+                      ? "bg-slate-900 text-white border-slate-900 shadow-2xs ring-1 ring-emerald-500/30"
+                      : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-slate-50"
+                  )}
+                >
+                  {prov.label}
+                </button>
+              );
+            })}
           </div>
-        </FormField>
+        </div>
       )}
 
       {/* Zone géographique */}
-      <FormField label="Zone géographique actuelle" htmlFor="zone-geo">
-        <ToggleGroup
+      <div className="space-y-2">
+        <label className="text-[13px] font-bold text-foreground block">
+          Localisation de votre activité
+        </label>
+        <BrandedToggleGroup
           value={data.zoneGeo}
           onChange={(v) =>
             updateData({
@@ -189,32 +197,23 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
             })
           }
           options={[
-            { value: "benin", label: "Au Bénin" },
-            { value: "diaspora", label: "Diaspora" },
+            { value: "benin", label: "Bénin (National)" },
+            { value: "diaspora", label: "Diaspora (International)" },
           ]}
         />
-      </FormField>
+      </div>
 
-      {/* Pays diaspora */}
+      {/* Sélecteur de pays diaspora sur-mesure (sans <select> natif) */}
       {data.zoneGeo === "diaspora" && (
-        <FormField label="Pays de résidence" htmlFor="pays-diaspora">
-          <Select
+        <div className="space-y-2 animate-in fade-in-50 duration-200">
+          <label className="text-[12.5px] font-semibold text-slate-700 block">
+            Pays de résidence actuel
+          </label>
+          <CustomCountrySelect
             value={data.paysDiaspora || "France"}
-            onValueChange={(v) => updateData({ paysDiaspora: v })}
-          >
-            <SelectTrigger id="pays-diaspora">
-              <SelectValue placeholder="Sélectionner un pays..." />
-            </SelectTrigger>
-            <SelectContent>
-              {COUNTRIES.map((c) => (
-                <SelectItem key={c.code} value={c.name}>
-                  {c.name}
-                </SelectItem>
-              ))}
-              <SelectItem value="Autre">Autre pays</SelectItem>
-            </SelectContent>
-          </Select>
-        </FormField>
+            onChange={(country) => updateData({ paysDiaspora: country })}
+          />
+        </div>
       )}
     </div>
   );

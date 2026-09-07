@@ -80,9 +80,7 @@ export function LayoutCustomizer({ isOpen, onClose }: LayoutCustomizerProps) {
     setLayoutMode("push");
     setCurrency("fcfa");
     setDensity("comfort");
-    toast.success("Préférences réinitialisées", {
-      description: "Configuration par défaut Lokka appliquée.",
-    });
+    toast.success("Préférences réinitialisées", "Configuration par défaut Lokka appliquée.");
   };
 
   return (

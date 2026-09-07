@@ -20,16 +20,13 @@ export interface SaisieExpressData {
   // Bailleur + trouver_locataires
   typeBienVacant?: string;
   loyerSouhaite?: number;
-  fraisVisiteEnLigne?: number;
 
   // Agence + digitaliser
   proprietaireMandantNom?: string;
-  tauxCommission?: number;        // %
   loyerActuelMandat?: number;
 
   // Agence + trouver_locataires
   nomDomainePersonnalise?: string;
-  fraisVisiteEnLigneAgence?: number;
 }
 
 export interface OnboardingState {

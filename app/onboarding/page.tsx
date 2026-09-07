@@ -7,24 +7,19 @@ import Logo from "@/components/ui/Logo";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 import {
-  UserCircleIcon,
   CheckCircleIcon,
-  CheckIcon,
-  FlagIcon,
-  DocumentTextIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 import { type OnboardingState, type ProfilStepData } from "./_types";
 import { StepProfil } from "./_components/StepProfil";
 import { StepObjectifs } from "./_components/StepObjectifs";
 import { StepSaisieExpress } from "./_components/StepSaisieExpress";
-
-const STEPS = [
-  { id: "profil", label: "Profil", icon: UserCircleIcon },
-  { id: "objectifs", label: "Objectifs", icon: FlagIcon },
-  { id: "express", label: "Saisie Express", icon: DocumentTextIcon },
-];
+import { ModernStepper } from "./_components/ModernStepper";
 
 const ONBOARDING_DRAFT_KEY = "lokka_onboarding_draft";
 
@@ -43,14 +38,13 @@ export default function OnboardingPage() {
       mobileProvider: "mtn",
       zoneGeo: "benin",
     },
-    objectifs: [],
+    objectifs: ["digitaliser"],
     saisieExpress: {},
   });
 
   // 1. Restauration de l'état (brouillon sauvé ou profil Google)
   useEffect(() => {
     try {
-      // Vérifier si un brouillon d'onboarding existe déjà
       const draft = localStorage.getItem(ONBOARDING_DRAFT_KEY);
       if (draft) {
         const parsed = JSON.parse(draft);
@@ -59,7 +53,6 @@ export default function OnboardingPage() {
           setCurrentStep(parsed.currentStep as 0 | 1 | 2);
         }
       } else {
-        // Fallback sur profil d'inscription
         const savedUser = localStorage.getItem("lokka_user_profile");
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
@@ -140,6 +133,13 @@ export default function OnboardingPage() {
     const isAgency = state.profil.profileType === "agence";
     const canonicalRole = isAgency ? "agency_admin" : "owner";
 
+    // Si profil diaspora, initialiser la devise locale sur EUR
+    if (state.profil.zoneGeo === "diaspora") {
+      try {
+        localStorage.setItem("lokka_currency", "eur");
+      } catch (_) {}
+    }
+
     try {
       if (isSupabaseConfigured()) {
         const supabase = createClient();
@@ -155,70 +155,118 @@ export default function OnboardingPage() {
           const { data: orgData, error: rpcError } = await supabase.rpc("complete_onboarding_organization", {
             p_name: orgName,
             p_type: isAgency ? "agency" : "owner",
-            p_portfolio_size: "1-5",
+            p_portfolio_size: isAgency ? "6-20" : "1-5",
             p_role: canonicalRole,
           });
 
           if (rpcError) {
             console.warn("RPC complete_onboarding_organization notice:", rpcError.message);
+            // Si l'utilisateur possède déjà une organisation, récupérer son ID existant
+            const { data: profileCheck } = await supabase
+              .from("profiles")
+              .select("organization_id")
+              .eq("id", user.id)
+              .maybeSingle();
+
+            if (profileCheck?.organization_id) {
+              activeOrgId = profileCheck.organization_id;
+            }
           } else if (orgData) {
             activeOrgId = orgData;
           }
 
           // 2. Mettre à jour le profil avec le rôle canonique et onboarding_completed
-          await supabase
+          const { error: profileError } = await supabase
             .from("profiles")
             .update({
               full_name: state.profil.nom,
               role: canonicalRole,
+              preferred_payment_channel: state.profil.moyenReception,
               onboarding_completed: true,
             })
             .eq("id", user.id);
+
+          if (profileError) {
+            console.error("Erreur profil onboarding:", profileError);
+            toast.error("Erreur lors de la mise à jour de votre profil", {
+              description: profileError.message,
+            });
+            setIsSubmitting(false);
+            return;
+          }
 
           // 3. ENREGISTREMENT RÉEL DES INFORMATIONS DE LA SAISIE EXPRESS
           const { saisieExpress } = state;
           const isTrouverLocataires = state.objectifs.includes("trouver_locataires");
 
+          const montantLoyer = Number(
+            saisieExpress.loyerActuelMandat ||
+            saisieExpress.loyerActuel ||
+            saisieExpress.loyerSouhaite ||
+            200000
+          );
+
+          // Si Agence : enregistrement d'un mandat réel dans Supabase
+          if (isAgency) {
+            const mandantNom = saisieExpress.proprietaireMandantNom || "M. Mensah (Mandant)";
+            const soldeMandant = Math.round(montantLoyer * 0.9); // 90% reversés
+
+            const { error: mandatError } = await supabase
+              .from("mandats")
+              .insert({
+                proprietaire: mandantNom,
+                biens: 1,
+                commission: "10%",
+                commission_pct: 10,
+                solde: soldeMandant,
+                organization_id: activeOrgId,
+                created_by: user.id,
+              });
+
+            if (mandatError) {
+              console.warn("Notice insertion mandat onboarding:", mandatError.message);
+            }
+          }
+
           // Détermination du nom, loyer et locataire du premier bien
           let bienNom = isAgency
-            ? `Lot 101 - ${state.profil.nom || "Agence"}`
+            ? `Lot 101 (${saisieExpress.proprietaireMandantNom || state.profil.nom})`
             : `Bien principal - ${state.profil.nom || "Bailleur"}`;
 
           let bienType = "Appartement 3P (2 chambres)";
           if (saisieExpress.typeBienVacant) {
             bienNom = saisieExpress.typeBienVacant;
             bienType = saisieExpress.typeBienVacant;
-          } else if (saisieExpress.proprietaireMandantNom) {
-            bienNom = `Appartement mandat (${saisieExpress.proprietaireMandantNom})`;
           }
 
-          const montantLoyer = Number(
-            saisieExpress.loyerActuel ||
-            saisieExpress.loyerSouhaite ||
-            saisieExpress.loyerActuelMandat ||
-            150000
-          );
-
-          const bienStatut: "loué" | "vacant" = (isTrouverLocataires && !saisieExpress.locataireEnPlaceNom)
+          const bienStatut: "loué" | "vacant" = (isTrouverLocataires && !saisieExpress.locataireEnPlaceNom && !isAgency)
             ? "vacant"
             : "loué";
 
-          const locataireNom = saisieExpress.locataireEnPlaceNom || (bienStatut === "loué" ? "Locataire principal" : undefined);
+          const locataireNom = isAgency
+            ? "Locataire en place"
+            : (saisieExpress.locataireEnPlaceNom || (bienStatut === "loué" ? "Locataire principal" : undefined));
 
-          // Insertion du premier bien dans la table `biens`
+          const isDiaspora = state.profil.zoneGeo === "diaspora";
+          const bienVille = isDiaspora ? (state.profil.paysDiaspora || "International") : "Cotonou";
+          const bienAdresse = isDiaspora
+            ? `Résidence (${state.profil.paysDiaspora || "Diaspora"})`
+            : (isAgency ? "Boulevard de la Marina, Cotonou" : "Cotonou, Bénin");
+
+          // Insertion du bien dans la table `biens`
           const { data: insertedBien, error: bienError } = await supabase
             .from("biens")
             .insert({
               nom: bienNom,
-              adresse: "Haie Vive, Zone Résidentielle",
-              ville: "Cotonou",
+              adresse: bienAdresse,
+              ville: bienVille,
               type: bienType,
               loyer_mensuel: montantLoyer,
               charges: 0,
               statut: bienStatut,
               locataire_nom: locataireNom || null,
-              photos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
-              photo_principale: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
+              photos: [],
+              photo_principale: null,
               archive: false,
               organization_id: activeOrgId,
             })
@@ -226,157 +274,104 @@ export default function OnboardingPage() {
             .maybeSingle();
 
           if (bienError) {
-            console.warn("Notice insertion bien onboarding:", bienError.message);
+            console.error("Erreur insertion bien onboarding:", bienError);
+            toast.error("Erreur lors de la configuration de votre premier lot", {
+              description: bienError.message || "Veuillez vérifier vos données et réessayer.",
+            });
+            setIsSubmitting(false);
+            return;
           }
 
-          // Cache local immédiat du bien créé pour un affichage instantané sur le dashboard
-          const cachedBien = {
-            id: insertedBien?.id || "bien_" + Date.now().toString(36),
-            nom: bienNom,
-            adresse: "Haie Vive, Zone Résidentielle",
-            ville: "Cotonou",
-            type: bienType,
-            loyer_mensuel: montantLoyer,
-            charges: 0,
-            statut: bienStatut,
-            locataire_nom: locataireNom,
-            photos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
-            photo_principale: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"],
-            archive: false,
-            created_at: new Date().toISOString(),
-          };
-          const existingBiens = JSON.parse(localStorage.getItem("lokka_biens_cache") || "[]");
-          localStorage.setItem("lokka_biens_cache", JSON.stringify([cachedBien, ...existingBiens]));
-
-          // Si le bien est loué, générer une première échéance de loyer
-          if (bienStatut === "loué" && locataireNom) {
+          // Si le bien est loué, générer une première échéance de loyer réelle
+          if (insertedBien) {
             const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
             const paymentTx = {
-              id: "tx_" + Date.now().toString(36),
               bien_nom: bienNom,
-              locataire_nom: locataireNom,
+              locataire_nom: locataireNom || "Locataire en place",
               montant: montantLoyer,
-              methode: (state.profil.moyenReception === "virement" ? "Virement" : "MTN MoMo") as any,
+              methode: (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any,
               statut: "en_attente" as const,
               echeance,
+              organization_id: activeOrgId,
             };
 
-            try {
-              await supabase.from("loyers_transactions").insert(paymentTx);
-            } catch (_) {}
+            const { error: txError } = await supabase
+              .from("loyers_transactions")
+              .insert(paymentTx);
 
-            const existingLoyers = JSON.parse(localStorage.getItem("lokka_loyers_cache") || "[]");
-            localStorage.setItem("lokka_loyers_cache", JSON.stringify([paymentTx, ...existingLoyers]));
+            if (txError) {
+              console.warn("Notice insertion loyer onboarding:", txError.message);
+            }
           }
 
-          // Sauvegarder dans le localStorage pour l'UX client
+          // Mettre à jour l'état local du profil
           localStorage.setItem("lokka_onboarding_objectifs", JSON.stringify(state.objectifs));
           localStorage.setItem("lokka_dev_role", isAgency ? "Agence" : "Propriétaire Bailleur");
           localStorage.setItem("lokka_dev_plan", isAgency ? "agence" : "pro");
+          localStorage.setItem(
+            "lokka_user_profile",
+            JSON.stringify({
+              name: state.profil.nom,
+              role: canonicalRole,
+              accountType: isAgency ? "agence" : "bailleur",
+            })
+          );
         }
       }
-    } catch (err) {
-      console.warn("Supabase onboarding sync notice:", err);
-    } finally {
-      // 4. Nettoyage du brouillon après finalisation réussie
+
+      // Nettoyage du brouillon après finalisation réussie
       try {
         localStorage.removeItem(ONBOARDING_DRAFT_KEY);
       } catch (_) {}
-    }
 
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 600);
+      toast.success(
+        isAgency
+          ? "Cabinet configuré avec succès ! Bienvenue sur votre cockpit Agence."
+          : "Espace configuré avec succès ! Bienvenue sur votre tableau de bord."
+      );
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 500);
+    } catch (err: any) {
+      console.error("Supabase onboarding critical error:", err);
+      toast.error("Une erreur inattendue est survenue", {
+        description: err?.message || "Impossible de finaliser la configuration.",
+      });
+      setIsSubmitting(false);
+    }
   };
 
-  // Animation variants inspired by 21st.dev multistep pattern
   const variants = {
     enter: (dir: "forward" | "back") => ({
-      x: dir === "forward" ? 32 : -32,
+      x: dir === "forward" ? 28 : -28,
       opacity: 0,
     }),
     center: { x: 0, opacity: 1 },
     exit: (dir: "forward" | "back") => ({
-      x: dir === "forward" ? -32 : 32,
+      x: dir === "forward" ? -28 : 28,
       opacity: 0,
     }),
   };
 
-  const progressPct = Math.round(((currentStep) / (STEPS.length - 1)) * 100);
-
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center py-8 px-4 bg-background">
-      <div className="w-full max-w-lg flex flex-col gap-8">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-[#F8FAF9]">
+      <div className="w-full max-w-xl flex flex-col gap-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between pb-5 border-b border-border">
+        {/* Top Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200/80">
           <Logo size="sm" variant="dark" />
-          <span className="text-[12px] font-bold text-muted-foreground">
-            Configuration de votre espace
-          </span>
-        </div>
-
-        {/* Stepper — style 21st.dev with animated progress bar */}
-        <div className="space-y-4">
-          {/* Progress bar */}
-          <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
-            <motion.div
-              className="absolute inset-y-0 left-0 bg-primary rounded-full"
-              initial={false}
-              animate={{ width: `${progressPct}%` }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            />
-          </div>
-
-          {/* Step dots */}
-          <div className="flex items-start justify-between px-0">
-            {STEPS.map((s, index) => {
-              const isCompleted = index < currentStep;
-              const isCurrent = index === currentStep;
-              const Icon = s.icon;
-
-              return (
-                <div key={index} className="flex flex-col items-center gap-1.5 flex-1">
-                  <motion.div
-                    className={[
-                      "h-9 w-9 rounded-full flex items-center justify-center transition-all border-2",
-                      isCompleted
-                        ? "bg-primary border-primary text-primary-foreground"
-                        : isCurrent
-                        ? "border-primary bg-card text-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]"
-                        : "border-border bg-card text-muted-foreground",
-                    ].join(" ")}
-                    animate={{
-                      scale: isCurrent ? 1.08 : 1,
-                    }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  >
-                    {isCompleted ? (
-                      <CheckIcon className="h-4 w-4 stroke-[2.5]" />
-                    ) : (
-                      <Icon className="h-4 w-4" />
-                    )}
-                  </motion.div>
-                  <span
-                    className={[
-                      "text-[11px] font-bold hidden sm:block transition-colors",
-                      isCurrent
-                        ? "text-foreground"
-                        : isCompleted
-                        ? "text-muted-foreground"
-                        : "text-muted-foreground/60",
-                    ].join(" ")}
-                  >
-                    {s.label}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 text-[11.5px] font-bold">
+            <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Loi n° 2022-30 · Bénin</span>
           </div>
         </div>
 
-        {/* Card */}
-        <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+        {/* Stepper moderne 21st.dev */}
+        <ModernStepper currentStep={currentStep} />
+
+        {/* Card Conteneur Principal */}
+        <div className="bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentStep}
@@ -385,7 +380,7 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.22, ease: "easeInOut" }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
             >
               {currentStep === 0 && (
                 <StepProfil
@@ -395,6 +390,7 @@ export default function OnboardingPage() {
               )}
               {currentStep === 1 && (
                 <StepObjectifs
+                  profileType={state.profil.profileType}
                   selected={state.objectifs}
                   onChange={(objectifs) => setState({ ...state, objectifs })}
                 />
@@ -413,16 +409,18 @@ export default function OnboardingPage() {
           </AnimatePresence>
         </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between">
+        {/* Navigation Actions */}
+        <div className="flex items-center justify-between gap-3 pt-2">
           {currentStep > 0 ? (
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               onClick={handleBack}
               disabled={isSubmitting}
+              className="h-11 px-4 sm:px-5 rounded-xl border-border hover:bg-slate-50 text-[13px] font-bold cursor-pointer shrink-0"
             >
-              Retour
+              <ArrowLeftIcon className="w-4 h-4 mr-1 sm:mr-2" />
+              <span>Précédent</span>
             </Button>
           ) : (
             <div />
@@ -432,28 +430,30 @@ export default function OnboardingPage() {
             type="button"
             disabled={!isStepValid() || isSubmitting}
             onClick={currentStep === 2 ? handleSubmit : handleNext}
-            size="lg"
-            className="px-8"
+            className="h-11 px-5 sm:px-7 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[13px] sm:text-[13.5px] transition-all shadow-xs cursor-pointer truncate"
           >
             {isSubmitting ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Configuration…
+                Initialisation…
               </>
             ) : currentStep === 2 ? (
               <>
-                Terminer la configuration
-                <CheckCircleIcon className="w-4 h-4 ml-2" />
+                <span>Accéder au dashboard</span>
+                <CheckCircleIcon className="w-4 h-4 ml-1.5 sm:ml-2" />
               </>
             ) : (
-              "Continuer"
+              <>
+                <span>Continuer</span>
+                <ArrowRightIcon className="w-4 h-4 ml-1.5 sm:ml-2" />
+              </>
             )}
           </Button>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-muted-foreground">
-          Étape {currentStep + 1} sur {STEPS.length} · Vous pourrez modifier ces informations plus tard
+        <p className="text-center text-[11.5px] text-muted-foreground">
+          Configuration certifiée conforme à la réglementation béninoise des baux d'habitation.
         </p>
       </div>
     </div>

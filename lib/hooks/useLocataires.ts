@@ -169,11 +169,9 @@ export function useAddTenantWithLease() {
         bien: null,
       };
 
-      // Toujours enregistrer localement pour la résilience instantanée
-      const local = getLocalLeases();
-      saveLocalLeases([createdLeaseWithDetails, ...local]);
-
       if (!isSupabaseConfigured()) {
+        const local = getLocalLeases();
+        saveLocalLeases([createdLeaseWithDetails, ...local]);
         return createdLeaseWithDetails;
       }
 
@@ -185,7 +183,9 @@ export function useAddTenantWithLease() {
           .select()
           .single();
 
-        if (tenantError) return createdLeaseWithDetails;
+        if (tenantError) {
+          throw new Error(`Erreur lors de la création du locataire: ${tenantError.message}`);
+        }
 
         if (hasBien) {
           const { data: lease, error: leaseError } = await supabase
@@ -194,7 +194,9 @@ export function useAddTenantWithLease() {
             .select()
             .single();
 
-          if (leaseError) return createdLeaseWithDetails;
+          if (leaseError) {
+            throw new Error(`Erreur lors de la création du bail: ${leaseError.message}`);
+          }
 
           // Synchronise le statut du bien
           await supabase
@@ -202,12 +204,18 @@ export function useAddTenantWithLease() {
             .update({ statut: "loué", locataire_nom: tenant.full_name })
             .eq("id", payload.lease!.bien_id);
 
-          return lease;
+          const fullLease = { ...lease, tenant, bien: null };
+          const local = getLocalLeases();
+          saveLocalLeases([fullLease, ...local]);
+          return fullLease;
         }
 
-        return createdLeaseWithDetails;
-      } catch (err) {
-        return createdLeaseWithDetails;
+        const fullLeaseWithoutBien = { ...createdLeaseWithDetails, tenant };
+        const local = getLocalLeases();
+        saveLocalLeases([fullLeaseWithoutBien, ...local]);
+        return fullLeaseWithoutBien;
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible de créer le bail et le locataire.");
       }
     },
     onSuccess: () => {

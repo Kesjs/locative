@@ -25,10 +25,10 @@ export function useMandats() {
       const supabase = createClient();
       const { data, error } = await supabase.from("mandats").select("*").order("created_at", { ascending: false });
       if (error) {
-        console.warn("Supabase fetch error, fallback to demo:", error);
-        return DEMO_MANDATS;
+        console.warn("Supabase fetch mandats error:", error);
+        return [];
       }
-      return (data as Mandat[]) || DEMO_MANDATS;
+      return (data as Mandat[]) || [];
     },
   });
 }

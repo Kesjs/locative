@@ -1,6 +1,10 @@
+"use client";
+
 import React from "react";
 import { type ProfileType, type Objectif, type SaisieExpressData } from "../_types";
 import { getExpressFields, type ExpressField } from "../_config/expressFieldsMatrix";
+import { AgencyCalculatorPreview } from "./AgencyCalculatorPreview";
+import { Sparkles, Calendar, DollarSign, UserCheck, Building } from "lucide-react";
 
 interface StepSaisieExpressProps {
   profileType: ProfileType;
@@ -21,14 +25,27 @@ export function StepSaisieExpress({
     onChange({ ...data, [key]: value });
   };
 
+  const isAgency = profileType === "agence";
+  const agencyLoyer = Number(data.loyerActuelMandat || data.loyerSouhaite || 200000);
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-[#0F172A] tracking-tight leading-tight">
-          Saisie Express
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            Étape 3 sur 3
+          </span>
+          <span className="text-[11px] text-muted-foreground font-medium">
+            Configuration opérationnelle
+          </span>
+        </div>
+        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-foreground tracking-tight leading-tight">
+          {isAgency ? "Configuration de votre premier mandat" : "Saisie Express de votre premier bien"}
         </h2>
-        <p className="text-[13px] text-[#64635F] mt-1.5">
-          Quelques informations pour paramétrer votre espace selon vos objectifs.
+        <p className="text-[13px] text-muted-foreground mt-1.5">
+          {isAgency
+            ? "Renseignez le premier lot sous mandat confié à votre agence pour initialiser vos reversements."
+            : "Quelques informations simples pour initialiser vos tableaux de bord avec de vraies données."}
         </p>
       </div>
 
@@ -41,9 +58,18 @@ export function StepSaisieExpress({
             onChange={(val) => updateField(field.key, val)}
           />
         ))}
+
+        {/* Prévisualisation calculatrice pour profil Agence */}
+        {isAgency && (
+          <AgencyCalculatorPreview
+            loyer={agencyLoyer}
+            mandantNom={data.proprietaireMandantNom || "Propriétaire mandant"}
+          />
+        )}
+
         {fields.length === 0 && (
-          <div className="text-[13px] text-[#64635F] italic p-4 bg-[#FAF9F6] rounded-xl border border-[#E8E5E0] text-center">
-            Aucune information supplémentaire requise.
+          <div className="text-[13px] text-muted-foreground p-4 bg-slate-50 rounded-2xl border border-border text-center">
+            Aucune information supplémentaire requise pour cette sélection.
           </div>
         )}
       </div>
@@ -61,8 +87,8 @@ function ExpressInput({
   onChange: (val: string | number | undefined) => void;
 }) {
   return (
-    <div>
-      <label className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
+    <div className="space-y-1.5">
+      <label className="block text-[13px] font-bold text-foreground">
         {field.label}
       </label>
       <div className="relative">
@@ -78,14 +104,16 @@ function ExpressInput({
               onChange(e.target.value);
             }
           }}
-          className={`w-full px-3.5 py-2.5 bg-white border border-[#E8E5E0] rounded-lg text-[14px] text-[#0F172A] focus:outline-none focus:border-[#0F172A] focus:ring-1 focus:ring-[#0F172A]/10 shadow-sm transition-shadow ${
-            field.suffix ? "pr-12" : ""
+          className={`w-full px-3.5 py-2.5 bg-card border border-border rounded-xl text-[14px] text-foreground focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs transition-all ${
+            field.suffix ? "pr-16" : ""
           }`}
           placeholder={field.placeholder}
         />
         {field.suffix && (
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-            <span className="text-[#9C9A95] text-[13px] font-medium">{field.suffix}</span>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-1 rounded-md border border-border">
+              {field.suffix}
+            </span>
           </div>
         )}
       </div>

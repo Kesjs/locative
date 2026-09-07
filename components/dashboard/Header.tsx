@@ -53,6 +53,8 @@ import {
   ShieldCheckIcon,
   EyeIcon,
   EyeSlashIcon,
+  PlusIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 interface HeaderProps {
@@ -262,8 +264,40 @@ export default function Header({
             )}
           </div>
 
-          {/* Right: Search + Notifications + Theme Toggler + Profile */}
+          {/* Right: Role Badge + Quick Action + Search + Notifications + Theme Toggler + Profile */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Badge de Conformité Contextuel */}
+            {userProfile.role === "Agence" || userProfile.plan === "agence" ? (
+              <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                <ShieldCheckIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>Cabinet Agréé · Loi 2022-30 🇧🇯</span>
+              </div>
+            ) : (
+              <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Bailleur Certifié 🇧🇯</span>
+              </div>
+            )}
+
+            {/* Bouton d'action rapide contextuel */}
+            {userProfile.role === "Agence" || userProfile.plan === "agence" ? (
+              <Link
+                href="/dashboard/mandats"
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[12px] font-bold transition-all shadow-2xs cursor-pointer shrink-0"
+              >
+                <PlusIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Nouveau Mandat</span>
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard/patrimoine"
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[12px] font-bold transition-all shadow-2xs cursor-pointer shrink-0"
+              >
+                <PlusIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Ajouter un bien</span>
+              </Link>
+            )}
+
             {/* 1. Global Search — icône seule sur mobile (< sm), barre complète sur sm+ */}
             <button
               type="button"
@@ -424,7 +458,7 @@ export default function Header({
                     className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-800"
                   >
                     <UserCircleIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    <span>Mon Profil Bailleur</span>
+                    <span>{userProfile.role === "Agence" || userProfile.plan === "agence" ? "Fiche Cabinet & Mandats" : "Mon Profil Bailleur"}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => router.push("/dashboard/parametres")}

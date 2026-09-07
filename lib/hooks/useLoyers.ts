@@ -86,10 +86,20 @@ export function useEncaisserLoyer() {
           .select()
           .single();
 
-        if (error) return { success: true };
+        if (error) {
+          throw new Error(`Erreur lors de l'encaissement: ${error.message}`);
+        }
+        // Mise à jour du cache local de confort seulement après succès réel Supabase
+        const local = getLocalLoyers();
+        const updatedLocal = local.map((l) =>
+          l.id === payload.id
+            ? { ...l, statut: "payé" as const, methode: payload.methode, date_reglement: new Date().toISOString() }
+            : l
+        );
+        saveLocalLoyers(updatedLocal);
         return data;
-      } catch {
-        return { success: true };
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible de valider l'encaissement.");
       }
     },
     onSuccess: () => {
@@ -109,20 +119,19 @@ export function useAddPaymentDirect() {
       methode: LoyerTransaction["methode"];
       echeance?: string;
     }) => {
-      const local = getLocalLoyers();
-      const newTx: LoyerTransaction = {
-        id: "tx_" + Date.now().toString(36),
-        bien_nom: payload.bien_nom,
-        locataire_nom: payload.locataire_nom,
-        montant: payload.montant,
-        methode: payload.methode,
-        statut: "payé",
-        date_reglement: new Date().toISOString(),
-        echeance: payload.echeance || new Date().toISOString().split("T")[0],
-      };
-      saveLocalLoyers([newTx, ...local]);
-
       if (!isSupabaseConfigured()) {
+        const local = getLocalLoyers();
+        const newTx: LoyerTransaction = {
+          id: "tx_" + Date.now().toString(36),
+          bien_nom: payload.bien_nom,
+          locataire_nom: payload.locataire_nom,
+          montant: payload.montant,
+          methode: payload.methode,
+          statut: "payé",
+          date_reglement: new Date().toISOString(),
+          echeance: payload.echeance || new Date().toISOString().split("T")[0],
+        };
+        saveLocalLoyers([newTx, ...local]);
         return newTx;
       }
 
@@ -157,13 +166,14 @@ export function useAddPaymentDirect() {
           .single();
 
         if (error) {
-          console.warn("Direct payment insert notice:", error.message);
-          return newTx;
+          throw new Error(`Erreur lors de l'enregistrement du paiement: ${error.message}`);
         }
+        
+        const local = getLocalLoyers();
+        saveLocalLoyers([data as LoyerTransaction, ...local]);
         return data;
-      } catch (err) {
-        console.warn("Direct payment error:", err);
-        return newTx;
+      } catch (err: any) {
+        throw new Error(err?.message || "Échec de l'enregistrement du paiement.");
       }
     },
     onSuccess: () => {

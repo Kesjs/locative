@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { getNavItems } from "@/components/dashboard/AppSidebar";
+import { getNavItems, type NavItem } from "@/components/dashboard/AppSidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
@@ -33,8 +33,8 @@ export function MobileNavigation() {
 
   const currentRole = devRole || userProfile.role || "bailleur";
   // On retire "Paramètres" de la nav mobile — accessible via "Réglages" en bas
-  const navItems = getNavItems(currentRole).filter(
-    (item) => item.title !== "Paramètres"
+  const navItems: NavItem[] = getNavItems(currentRole).filter(
+    (item: NavItem) => item.title !== "Paramètres"
   );
 
   const { data: biens = [] } = useBiens();
@@ -150,7 +150,7 @@ export function MobileNavigation() {
               <div className="flex-1 overflow-y-auto px-3 py-4 sidebar-scrollbar">
                 <div>
                   <nav className="space-y-1">
-                    {navItems.map((item) => {
+                    {navItems.map((item: NavItem) => {
                       const active = isLinkActive(item.url);
                       const Icon = item.icon;
 

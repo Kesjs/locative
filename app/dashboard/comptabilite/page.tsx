@@ -1,53 +1,105 @@
 "use client";
 
-import { useState } from "react";
-import Header from "@/components/dashboard/Header";
+import React, { useMemo, useState } from "react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { BorderBeam } from "@/components/ui/border-beam";
 import {
   ArrowDownTrayIcon,
-  CalculatorIcon,
   ShieldCheckIcon,
-  DocumentCheckIcon,
-  BuildingOffice2Icon,
-  BanknotesIcon,
 } from "@heroicons/react/24/outline";
+import { useLoyers } from "@/lib/hooks/useLoyers";
+import { useTickets } from "@/lib/hooks/useMaintenance";
+import { toast } from "sonner";
 
 export default function AccountingPage() {
   const [selectedYear, setSelectedYear] = useState("2026");
+  const { data: loyers = [], isLoading: isLoadingLoyers } = useLoyers();
+  const { data: tickets = [], isLoading: isLoadingTickets } = useTickets();
+
+  const stats = useMemo(() => {
+    // Total encaissé réel
+    const payes = loyers.filter((l) => l.statut === "payé");
+    const totalEncaisse = payes.reduce((sum, l) => sum + (Number(l.montant) || 0), 0);
+
+    // Total dépenses travaux réelles
+    const totalTravaux = tickets.reduce(
+      (sum, t) => sum + (Number(t.cout_reel) || Number(t.cout_estime) || 0),
+      0
+    );
+
+    // Commission d'agence estimée (10% max Loi 2022-30)
+    const commissions10 = Math.round(totalEncaisse * 0.1);
+
+    // TFU estimée DGI Bénin (5% des revenus locatifs bruts)
+    const tfuEstimee = Math.round(totalEncaisse * 0.05);
+
+    // Total des charges déductibles
+    const totalCharges = totalTravaux + commissions10;
+
+    // Revenu net foncier
+    const revenuNet = Math.max(0, totalEncaisse - totalCharges - tfuEstimee);
+
+    const margeNette = totalEncaisse > 0 ? Math.round((revenuNet / totalEncaisse) * 100) : 100;
+
+    return {
+      totalEncaisse,
+      totalTravaux,
+      commissions10,
+      tfuEstimee,
+      totalCharges,
+      revenuNet,
+      margeNette,
+    };
+  }, [loyers, tickets]);
 
   const accountingLines = [
     {
       label: "Loyers bruts encaissés (Total annuel)",
-      val: 58200000,
-      note: "Total des encaissements Mobile Money & Virements",
+      val: stats.totalEncaisse,
+      note: "Total réel des encaissements enregistrés",
       type: "income",
     },
     {
       label: "Dépenses d'entretien, plomberie et réfection",
-      val: 3450000,
-      note: "Travaux d'urgence et rénovations justifiées",
+      val: stats.totalTravaux,
+      note: "Montant cumulé des tickets de maintenance",
       type: "expense",
     },
     {
-      label: "Charges de gardiennage et entretien parties communes",
-      val: 2800000,
-      note: "Contrats prestataires et sécurité",
-      type: "expense",
-    },
-    {
-      label: "Commissions de gestion d'agence (Plafonné à 10% — Loi 2022-30)",
-      val: 5820000,
+      label: "Commissions de gestion mandataire (10% — Loi 2022-30)",
+      val: stats.commissions10,
       note: "Honoraires de gestion mandataire déductibles",
       type: "expense",
     },
     {
       label: "Taxe Foncière Unique estimée (TFU DGI Bénin)",
-      val: 2910000,
-      note: "Estimation fiscale conforme au Code Général des Impôts",
+      val: stats.tfuEstimee,
+      note: "Estimation fiscale conforme au Code Général des Impôts (5%)",
       type: "tax",
     },
   ];
+
+  const handleExportPdf = () => {
+    toast.success("Export comptable préparé", {
+      description: "Le récapitulatif annuel certifié a été préparé pour impression.",
+    });
+    window.print();
+  };
+
+  const isLoading = isLoadingLoyers || isLoadingTickets;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12">
+        <div className="h-20 bg-muted/60 animate-pulse rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="h-36 bg-muted/60 animate-pulse rounded-xl" />
+          <div className="h-36 bg-muted/60 animate-pulse rounded-xl" />
+          <div className="h-36 bg-muted/60 animate-pulse rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-12">
@@ -57,97 +109,80 @@ export default function AccountingPage() {
             Comptabilité &amp; Fiscalité Immobilière
           </h1>
           <p className="text-[13px] text-muted-foreground mt-1">
-            Bilan financier, suivi des charges d&apos;entretien et estimation officielle TFU conforme DGI Bénin.
+            Bilan financier réel, suivi des charges d&apos;entretien et estimation officielle TFU conforme DGI Bénin.
           </p>
         </div>
       </div>
 
       {/* 3 Summary Bento Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-card border border-border rounded-xl p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="text-[12px] text-[var(--text-secondary)] font-medium mb-1">
-              Revenus bruts perçus (YTD {selectedYear})
+            <div className="text-[12px] text-muted-foreground font-medium mb-1">
+              Revenus bruts perçus ({selectedYear})
             </div>
-            <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-2 flex items-baseline gap-1">
-              <NumberTicker value={58200000} />
-              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">FCFA</span>
+            <div className="text-[26px] font-extrabold text-card-foreground tracking-tight mb-2 flex items-baseline gap-1">
+              <NumberTicker value={stats.totalEncaisse} />
+              <span className="text-[14px] font-semibold text-muted-foreground">FCFA</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)]">
-            100% des loyers enregistrés avec reçu
+          <div className="pt-2 border-t border-border text-[11px] text-muted-foreground">
+            {loyers.filter((l) => l.statut === "payé").length} loyer(s) réglé(s) avec reçu
           </div>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-card border border-border rounded-xl p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="text-[12px] text-[var(--text-secondary)] font-medium mb-1">
-              Charges &amp; Réparations déductibles
+            <div className="text-[12px] text-muted-foreground font-medium mb-1">
+              Charges &amp; Travaux déductibles
             </div>
-            <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-2 flex items-baseline gap-1">
-              <NumberTicker value={6250000} />
-              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">FCFA</span>
+            <div className="text-[26px] font-extrabold text-card-foreground tracking-tight mb-2 flex items-baseline gap-1">
+              <NumberTicker value={stats.totalCharges} />
+              <span className="text-[14px] font-semibold text-muted-foreground">FCFA</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)]">
-            10.7% du chiffre d&apos;affaires brut
+          <div className="pt-2 border-t border-border text-[11px] text-muted-foreground">
+            {tickets.length} intervention(s) de maintenance
           </div>
         </div>
 
-        <div className="relative bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-5 shadow-xs flex flex-col justify-between overflow-hidden">
-          <BorderBeam size={160} duration={12} colorFrom="#C5A880" colorTo="#FAF9F6" />
+        <div className="relative bg-card border border-border rounded-xl p-5 shadow-xs flex flex-col justify-between overflow-hidden">
+          <BorderBeam size={160} duration={12} colorFrom="#10B981" colorTo="#FAF9F6" />
           <div>
-            <div className="text-[12px] text-[var(--text-secondary)] font-medium mb-1">
+            <div className="text-[12px] text-muted-foreground font-medium mb-1">
               Revenu net foncier estimé
             </div>
-            <div className="text-[26px] font-extrabold text-[var(--text-primary)] tracking-tight mb-2 flex items-baseline gap-1">
-              <NumberTicker value={51950000} className="text-[var(--text-primary)]" />
-              <span className="text-[14px] font-semibold text-[var(--text-secondary)]">FCFA</span>
+            <div className="text-[26px] font-extrabold text-card-foreground tracking-tight mb-2 flex items-baseline gap-1">
+              <NumberTicker value={stats.revenuNet} className="text-card-foreground" />
+              <span className="text-[14px] font-semibold text-muted-foreground">FCFA</span>
             </div>
           </div>
-          <div className="pt-2 border-t border-[var(--border-subtle)] text-[11px] text-[#22C55E] font-bold">
-            Marge nette d&apos;exploitation : 89.3%
+          <div className="pt-2 border-t border-border text-[11px] text-emerald-600 font-bold">
+            Marge nette estimée : {stats.margeNette}%
           </div>
         </div>
       </div>
 
       {/* Main Breakdown Section */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[12px] p-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--border-default)] mb-5">
+      <div className="bg-card border border-border rounded-xl p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border mb-5">
           <div>
-            <h3 className="text-[17px] font-bold text-[var(--text-primary)]">
+            <h3 className="text-[17px] font-bold text-card-foreground">
               Synthèse Comptable &amp; Déclaration TFU {selectedYear}
             </h3>
-            <p className="text-[12px] text-[var(--text-secondary)]">
-              Ventilation des postes conforme aux règles fiscales de la République du Bénin
+            <p className="text-[12px] text-muted-foreground">
+              Ventilation calculée sur les flux réels de vos locations au Bénin
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-[6px] bg-[var(--bg-canvas)] border border-[var(--border-default)] p-0.5">
-              {["2024", "2025", "2026"].map((yr) => (
-                <button
-                  key={yr}
-                  type="button"
-                  onClick={() => setSelectedYear(yr)}
-                  className={`px-3 py-1 text-[11px] font-semibold rounded-[4px] transition cursor-pointer ${
-                    selectedYear === yr
-                      ? "bg-[var(--color-brand-primary)] text-[var(--text-inverse)] shadow-xs"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  {yr}
-                </button>
-              ))}
-            </div>
-
             <button
               type="button"
-              onClick={() => alert("Génération du bilan certifié PDF...")}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--color-brand-primary)] hover:bg-[#F5F5DC] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] border border-transparent text-[var(--text-inverse)] text-[12px] font-semibold rounded-[6px] transition cursor-pointer"
+              onClick={handleExportPdf}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-[12px] font-semibold rounded-lg transition cursor-pointer shadow-xs"
             >
               <ArrowDownTrayIcon className="h-3.5 w-3.5" />
-              <span>Exporter le bilan annuel (PDF)</span>
+              <span>Imprimer / Exporter (PDF)</span>
             </button>
           </div>
         </div>
@@ -156,22 +191,22 @@ export default function AccountingPage() {
           {accountingLines.map((item, i) => (
             <div
               key={i}
-              className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-[8px] bg-[var(--bg-canvas)] border border-[var(--border-default)] gap-2 hover:border-[#0F172A] transition-colors"
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-lg bg-muted/30 border border-border gap-2 hover:border-primary/40 transition-colors"
             >
               <div>
-                <span className="font-semibold text-[var(--text-primary)] text-[13px] block">
+                <span className="font-semibold text-card-foreground text-[13px] block">
                   {item.label}
                 </span>
-                <span className="text-[11px] text-[var(--text-secondary)]">{item.note}</span>
+                <span className="text-[11px] text-muted-foreground">{item.note}</span>
               </div>
               <div className="text-right shrink-0">
                 <span
                   className={`text-[15px] font-bold ${
                     item.type === "income"
-                      ? "text-[var(--text-primary)]"
+                      ? "text-emerald-600"
                       : item.type === "tax"
-                      ? "text-[#E67700]"
-                      : "text-[var(--text-secondary)]"
+                      ? "text-amber-600"
+                      : "text-card-foreground"
                   }`}
                 >
                   {item.type === "expense" && "- "}
@@ -182,28 +217,29 @@ export default function AccountingPage() {
           ))}
         </div>
 
-        <div className="mt-5 p-4 rounded-[8px] bg-[var(--bg-canvas)] border border-[var(--border-default)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="mt-5 p-4 rounded-xl bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+            <div className="h-8 w-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shrink-0">
               <ShieldCheckIcon className="h-4 w-4" />
             </div>
             <div>
-              <div className="text-[13px] font-bold text-[var(--text-primary)]">
-                Calcul certifié conforme Loi n° 2022-30 &amp; Code Général des Impôts
+              <div className="text-[13px] font-bold text-card-foreground">
+                Calcul conforme Loi n° 2022-30 &amp; Code Général des Impôts
               </div>
-              <div className="text-[11px] text-[var(--text-secondary)]">
+              <div className="text-[11px] text-muted-foreground">
                 TFU déclarable en ligne auprès de la Direction Générale des Impôts (DGI Bénin)
               </div>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => alert("Ouverture du portail télépaiement DGI Bénin...")}
-            className="px-3.5 py-1.5 bg-[var(--bg-surface)] hover:bg-[var(--bg-canvas)] border border-[var(--border-default)] text-[var(--text-primary)] text-[12px] font-semibold rounded-[6px] shadow-2xs transition cursor-pointer shrink-0"
+          <a
+            href="https://dgi.bj"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-1.5 bg-card hover:bg-muted border border-border text-card-foreground text-[12px] font-semibold rounded-lg shadow-2xs transition cursor-pointer shrink-0"
           >
-            Guide Télédéclaration DGI →
-          </button>
+            Portail Officiel DGI Bénin →
+          </a>
         </div>
       </div>
     </div>

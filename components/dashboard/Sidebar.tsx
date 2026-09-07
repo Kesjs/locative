@@ -14,32 +14,54 @@ import {
   MegaphoneIcon,
   Cog6ToothIcon,
   EllipsisVerticalIcon,
+  BriefcaseIcon,
 } from "@heroicons/react/24/outline";
-
-const mainNav = [
-  { name: "Vue d'ensemble", href: "/dashboard", icon: HomeIcon },
-  { name: "Mes Biens", href: "/dashboard/biens", icon: BuildingOfficeIcon },
-  { name: "Locataires", href: "/dashboard/locataires", icon: UsersIcon },
-  { name: "Loyers & Paiements", href: "/dashboard/loyers", icon: CreditCardIcon },
-];
-
-const managementNav = [
-  { name: "Comptabilité", href: "/dashboard/comptabilite", icon: CalculatorIcon },
-  { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
-  { name: "Documents", href: "/dashboard/documents", icon: DocumentDuplicateIcon },
-];
-
-const secondaryNav = [
-  { name: "Annonces", href: "/dashboard/annonces", icon: MegaphoneIcon },
-  { name: "Paramètres", href: "/dashboard/parametres", icon: Cog6ToothIcon },
-];
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useBiens } from "@/lib/hooks/useBiens";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { isCollapsed } = useSidebar();
+  const userProfile = useUserProfile();
+  const { data: biens = [] } = useBiens();
+
+  const isAgency = userProfile.role === "Agence" || userProfile.plan === "agence";
+  const userName = userProfile.name || (isAgency ? "Agence Immobilière" : "Propriétaire");
+  const userInitials = userName
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || (isAgency ? "AG" : "LK");
+  const biensCount = biens.filter((b) => !b.archive).length;
+  const subtitle = isAgency
+    ? `${biensCount} lot${biensCount > 1 ? "s" : ""} · Agence`
+    : `${biensCount} bien${biensCount > 1 ? "s" : ""} géré${biensCount > 1 ? "s" : ""}`;
+
+  const mainNav = [
+    { name: "Vue d'ensemble", href: "/dashboard", icon: HomeIcon },
+    { name: isAgency ? "Lots sous Gestion" : "Mes Biens", href: "/dashboard/patrimoine", icon: BuildingOfficeIcon },
+    { name: "Locataires", href: "/dashboard/locataires", icon: UsersIcon },
+    { name: "Loyers & Paiements", href: "/dashboard/loyers", icon: CreditCardIcon },
+  ];
+
+  const managementNav = [
+    ...(isAgency ? [{ name: "Mandats de Gérance", href: "/dashboard/mandats", icon: BriefcaseIcon }] : []),
+    { name: "Comptabilité", href: "/dashboard/comptabilite", icon: CalculatorIcon },
+    { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
+    { name: "Baux & Contrats", href: "/dashboard/baux", icon: DocumentDuplicateIcon },
+    ...(isAgency ? [{ name: "Équipe & Accès", href: "/dashboard/equipe", icon: UsersIcon }] : []),
+  ];
+
+  const secondaryNav = [
+    { name: "Annonces", href: "/dashboard/annonces", icon: MegaphoneIcon },
+    { name: "Paramètres", href: "/dashboard/parametres", icon: Cog6ToothIcon },
+  ];
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/dashboard/patrimoine") return pathname.startsWith("/dashboard/patrimoine") || pathname.startsWith("/dashboard/biens");
     return pathname.startsWith(href);
   };
 
@@ -264,7 +286,7 @@ export default function Sidebar() {
 
       {/* User profile section at bottom */}
       <div
-        data-tip={isCollapsed ? "Alexandre K. — 12 biens" : undefined}
+        data-tip={isCollapsed ? `${userName} — ${subtitle}` : undefined}
         style={{
           borderTop: "1px solid var(--color-border-primary)",
           paddingTop: 14,
@@ -293,7 +315,7 @@ export default function Sidebar() {
               flexShrink: 0,
             }}
           >
-            AK
+            {userInitials}
           </div>
           <div
             style={{
@@ -302,8 +324,8 @@ export default function Sidebar() {
               transition: "opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
-            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary)", lineHeight: 1.2 }}>Alexandre K.</div>
-            <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>12 biens gérés</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary)", lineHeight: 1.2 }}>{userName}</div>
+            <div style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>{subtitle}</div>
           </div>
         </div>
 

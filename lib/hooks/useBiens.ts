@@ -122,22 +122,14 @@ export function useBiens() {
           .order("created_at", { ascending: false });
 
         if (error) {
-          console.warn("Supabase fetch (falling back to local cache):", error.message);
-          return local;
+          console.warn("Supabase fetch error:", error.message);
+          return [];
         }
 
-        const supaBiens = (data as Bien[]) || [];
-        // Combiner Supabase + Biens locaux de test s'il y en a
-        const combined = [...supaBiens];
-        for (const loc of local) {
-          if (!combined.some((b) => b.id === loc.id)) {
-            combined.push(loc);
-          }
-        }
-        return combined;
+        return (data as Bien[]) || [];
       } catch (err) {
-        console.warn("Supabase error (using local):", err);
-        return local;
+        console.warn("Supabase error:", err);
+        return [];
       }
     },
   });
@@ -147,15 +139,14 @@ export function useAddBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newBien: Omit<Bien, "id">) => {
-      const localId = "bien_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 6);
-      const createdBien: Bien = {
-        ...newBien,
-        id: localId,
-        archive: false,
-        created_at: new Date().toISOString(),
-      };
-
       if (!isSupabaseConfigured()) {
+        const localId = "bien_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 6);
+        const createdBien: Bien = {
+          ...newBien,
+          id: localId,
+          archive: false,
+          created_at: new Date().toISOString(),
+        };
         const local = getLocalBiens();
         saveLocalBiens([createdBien, ...local]);
         return createdBien;
@@ -168,25 +159,20 @@ export function useAddBien() {
           data: { user },
         } = await supabase.auth.getUser();
 
-        // Si l'utilisateur n'est pas authentifié avec Supabase (accès direct /dashboard), stocker localement
-        if (!user) {
-          const local = getLocalBiens();
-          saveLocalBiens([createdBien, ...local]);
-          return createdBien;
-        }
-
         let organizationId: string | null = null;
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("organization_id")
-          .eq("id", user.id)
-          .maybeSingle();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", user.id)
+            .maybeSingle();
 
-        if (profile?.organization_id) {
-          organizationId = profile.organization_id;
-        } else {
-          const { data: org } = await supabase.from("organizations").select("id").limit(1).maybeSingle();
-          if (org?.id) organizationId = org.id;
+          if (profile?.organization_id) {
+            organizationId = profile.organization_id;
+          } else {
+            const { data: org } = await supabase.from("organizations").select("id").limit(1).maybeSingle();
+            if (org?.id) organizationId = org.id;
+          }
         }
 
         const payload: Record<string, any> = {
@@ -214,18 +200,15 @@ export function useAddBien() {
         const { data, error } = await supabase.from("biens").insert([payload]).select().single();
 
         if (error) {
-          console.warn("Supabase insert error, saving locally:", error.message);
-          const local = getLocalBiens();
-          saveLocalBiens([createdBien, ...local]);
-          return createdBien;
+          throw new Error(`Erreur lors de la création du bien: ${error.message}`);
         }
 
-        return data;
-      } catch (err) {
-        console.warn("Save catch, fallback local:", err);
+        // Cache local de confort uniquement après confirmation Supabase
         const local = getLocalBiens();
-        saveLocalBiens([createdBien, ...local]);
-        return createdBien;
+        saveLocalBiens([data as Bien, ...local]);
+        return data as Bien;
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible d'enregistrer le bien.");
       }
     },
     onSuccess: () => {
@@ -238,12 +221,10 @@ export function useUpdateBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<Bien> & { id: string }) => {
-      // Mettre à jour localement d'abord
-      const local = getLocalBiens();
-      const updatedLocal = local.map((b) => (b.id === id ? { ...b, ...patch } : b));
-      saveLocalBiens(updatedLocal);
-
       if (!isSupabaseConfigured()) {
+        const local = getLocalBiens();
+        const updatedLocal = local.map((b) => (b.id === id ? { ...b, ...patch } : b));
+        saveLocalBiens(updatedLocal);
         return { id, ...patch } as Bien;
       }
 
@@ -251,12 +232,13 @@ export function useUpdateBien() {
       try {
         const { data, error } = await supabase.from("biens").update(patch).eq("id", id).select().single();
         if (error) {
-          console.warn("Supabase update error:", error.message);
-          return { id, ...patch } as Bien;
+          throw new Error(`Erreur de mise à jour du bien: ${error.message}`);
         }
-        return data;
-      } catch (err) {
-        return { id, ...patch } as Bien;
+        const local = getLocalBiens();
+        saveLocalBiens(local.map((b) => (b.id === id ? { ...b, ...data } : b)));
+        return data as Bien;
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible de mettre à jour le bien.");
       }
     },
     onSuccess: () => {
@@ -269,20 +251,21 @@ export function useUpdateBienStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: Bien["statut"] }) => {
-      const local = getLocalBiens();
-      const updatedLocal = local.map((b) => (b.id === id ? { ...b, statut } : b));
-      saveLocalBiens(updatedLocal);
-
       if (!isSupabaseConfigured()) {
+        const local = getLocalBiens();
+        const updatedLocal = local.map((b) => (b.id === id ? { ...b, statut } : b));
+        saveLocalBiens(updatedLocal);
         return { id, statut };
       }
       const supabase = createClient();
       try {
         const { data, error } = await supabase.from("biens").update({ statut }).eq("id", id).select().single();
-        if (error) return { id, statut };
+        if (error) {
+          throw new Error(`Erreur lors du changement de statut: ${error.message}`);
+        }
         return data;
-      } catch {
-        return { id, statut };
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible de changer le statut.");
       }
     },
     onSuccess: () => {
@@ -295,19 +278,22 @@ export function useArchiveBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const local = getLocalBiens();
-      const updatedLocal = local.map((b) => (b.id === id ? { ...b, archive: true } : b));
-      saveLocalBiens(updatedLocal);
-
       if (!isSupabaseConfigured()) {
-        return true;
+        const local = getLocalBiens();
+        saveLocalBiens(local.map((b) => (b.id === id ? { ...b, archive: true } : b)));
+        return;
       }
       const supabase = createClient();
       try {
-        await supabase.from("biens").update({ archive: true }).eq("id", id);
-        return true;
-      } catch {
-        return true;
+        const { error } = await supabase
+          .from("biens")
+          .update({ archive: true, archived_at: new Date().toISOString() })
+          .eq("id", id);
+        if (error) {
+          throw new Error(`Erreur d'archivage du bien: ${error.message}`);
+        }
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible d'archiver le bien.");
       }
     },
     onSuccess: () => {

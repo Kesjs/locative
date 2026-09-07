@@ -87,11 +87,12 @@ export function useUserProfile(): UserProfile & {
 
       if (data && isMounted) {
         const role = ROLE_LABELS[data.role as string] || "Propriétaire Bailleur";
-        const savedPlan = (localStorage.getItem("lokka_dev_plan") as LokkaPlan) || (data.role === "agence" ? "agence" : "pro");
+        const isAgencyRole = data.role === "agence" || data.role === "agency_admin";
+        const savedPlan = (localStorage.getItem("lokka_dev_plan") as LokkaPlan) || (isAgencyRole ? "agence" : "pro");
         const customLogo = data.logo_url || localStorage.getItem("lokka_custom_logo") || "";
         
         setProfile({
-          name: data.full_name || "Alexandre K.",
+          name: data.full_name || (isAgencyRole ? "Agence Immobilière" : "Propriétaire"),
           email: data.email || user.email || "",
           avatar: data.avatar_url || "",
           customLogo,

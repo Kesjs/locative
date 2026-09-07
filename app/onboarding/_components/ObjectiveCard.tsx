@@ -1,11 +1,14 @@
+"use client";
+
 import React from "react";
 import { type Objectif } from "../_types";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { Check } from "lucide-react";
 
 interface ObjectiveCardProps {
   id: Objectif;
   title: string;
   subtitle: string;
+  icon?: React.ElementType;
   isChecked: boolean;
   onToggle: (id: Objectif) => void;
 }
@@ -14,41 +17,56 @@ export function ObjectiveCard({
   id,
   title,
   subtitle,
+  icon: Icon,
   isChecked,
   onToggle,
 }: ObjectiveCardProps) {
   return (
-    <label
-      className={`relative flex flex-col p-5 rounded-xl border cursor-pointer transition-all ${
+    <div
+      onClick={() => onToggle(id)}
+      className={`relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-200 ${
         isChecked
-          ? "bg-[#F5F5DC]/40 border-[#0F172A] ring-1 ring-[#0F172A] shadow-sm"
-          : "bg-white border-[#E8E5E0] hover:border-[#0F172A] hover:shadow-sm"
+          ? "bg-emerald-50/70 border-emerald-600 ring-1 ring-emerald-500/30 shadow-xs"
+          : "bg-card border-border hover:border-slate-300 hover:shadow-2xs"
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="font-bold text-[15px] text-[#0F172A] mb-1">{title}</div>
-          <div className="text-[13px] text-[#64635F] leading-relaxed">{subtitle}</div>
+      {/* Icon optional */}
+      {Icon && (
+        <div
+          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+            isChecked
+              ? "bg-emerald-600 text-white shadow-2xs"
+              : "bg-slate-100 text-slate-700 border border-slate-200/60"
+          }`}
+        >
+          <Icon className="w-5 h-5" />
         </div>
-        
-        <div className="pt-0.5">
-          <input
-            type="checkbox"
-            className="peer sr-only"
-            checked={isChecked}
-            onChange={() => onToggle(id)}
-          />
-          <div
-            className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
-              isChecked
-                ? "bg-[#0F172A] text-white"
-                : "bg-[#FAF9F6] border border-[#E8E5E0] text-transparent peer-hover:border-[#0F172A]"
-            }`}
-          >
-            <CheckIcon className="w-4 h-4 stroke-[3]" />
-          </div>
+      )}
+
+      {/* Main Text */}
+      <div className="flex-1 min-w-0 pr-2">
+        <div
+          className={`font-bold text-[14.5px] sm:text-[15.5px] mb-1 leading-tight ${
+            isChecked ? "text-emerald-950" : "text-foreground"
+          }`}
+        >
+          {title}
+        </div>
+        <div className="text-[12.5px] text-muted-foreground leading-relaxed">
+          {subtitle}
         </div>
       </div>
-    </label>
+
+      {/* Checkbox badge */}
+      <div
+        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+          isChecked
+            ? "bg-emerald-600 text-white shadow-2xs ring-2 ring-emerald-500/20"
+            : "bg-slate-100 border border-slate-300 text-transparent"
+        }`}
+      >
+        <Check className={`w-3.5 h-3.5 stroke-[3] ${isChecked ? "opacity-100" : "opacity-0"}`} />
+      </div>
+    </div>
   );
 }

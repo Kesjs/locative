@@ -7,6 +7,8 @@ export interface Ticket {
   bien: string;
   urgence: "Haute" | "Moyenne" | "Basse";
   statut: "Nouveau" | "En cours" | "Résolu";
+  cout_estime?: number;
+  cout_reel?: number;
   created_at?: string;
 }
 
@@ -42,6 +44,8 @@ export function useTickets() {
           bien: t.description || t.bien || "Bien concerné",
           urgence: t.urgency === "high" ? "Haute" : t.urgency === "low" ? "Basse" : "Moyenne",
           statut: t.status === "resolved" ? "Résolu" : t.status === "in_progress" ? "En cours" : "Nouveau",
+          cout_estime: Number(t.cout_estime) || 0,
+          cout_reel: Number(t.cout_reel) || 0,
           created_at: t.created_at,
         }));
       } catch {
@@ -56,7 +60,7 @@ export function useAddTicket() {
   return useMutation({
     mutationFn: async (newTicket: Omit<Ticket, "id">) => {
       if (!isSupabaseConfigured()) {
-        return { ...newTicket, id: Date.now().toString() };
+        return { ...newTicket, id: "ticket_" + Date.now().toString(36) };
       }
       const supabase = createClient();
       try {
@@ -87,6 +91,8 @@ export function useAddTicket() {
           description: newTicket.bien,
           urgency: urgencyMap[newTicket.urgence] || "medium",
           status: statusMap[newTicket.statut] || "open",
+          cout_estime: Number(newTicket.cout_estime) || 0,
+          cout_reel: Number(newTicket.cout_reel) || 0,
         };
         if (orgId) payload.organization_id = orgId;
 
@@ -97,8 +103,7 @@ export function useAddTicket() {
           .single();
 
         if (error) {
-          console.warn("Ticket insert notice:", error.message);
-          return { ...newTicket, id: Date.now().toString() };
+          throw new Error(`Erreur lors de la création du ticket: ${error.message}`);
         }
         return {
           id: data.id,
@@ -106,11 +111,12 @@ export function useAddTicket() {
           bien: data.description,
           urgence: newTicket.urgence,
           statut: newTicket.statut,
+          cout_estime: Number(data.cout_estime) || 0,
+          cout_reel: Number(data.cout_reel) || 0,
           created_at: data.created_at,
         };
-      } catch (err) {
-        console.warn("Ticket error:", err);
-        return { ...newTicket, id: Date.now().toString() };
+      } catch (err: any) {
+        throw new Error(err?.message || "Impossible d'enregistrer le ticket d'incident.");
       }
     },
     onSuccess: () => {

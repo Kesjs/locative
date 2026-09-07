@@ -19,16 +19,13 @@ export const EXPRESS_FIELDS_MATRIX: Record<MatrixKey, ExpressField[]> = {
   "bailleur:trouver_locataires": [
     { key: "typeBienVacant", label: "Type de bien vacant", type: "text", placeholder: "Ex: Villa 3 chambres" },
     { key: "loyerSouhaite", label: "Loyer souhaité", type: "number", suffix: "FCFA" },
-    { key: "fraisVisiteEnLigne", label: "Frais de visite en ligne", type: "number", suffix: "FCFA" },
   ],
   "agence:digitaliser": [
-    { key: "proprietaireMandantNom", label: "Nom du propriétaire (mandant)", type: "text" },
-    { key: "tauxCommission", label: "Taux de commission prélevé", type: "number", suffix: "%" },
+    { key: "proprietaireMandantNom", label: "Nom du propriétaire (mandant)", type: "text", placeholder: "Ex: M. Mensah" },
     { key: "loyerActuelMandat", label: "Loyer actuel du locataire", type: "number", suffix: "FCFA" },
   ],
   "agence:trouver_locataires": [
     { key: "nomDomainePersonnalise", label: "Nom de domaine pour votre vitrine", type: "text", placeholder: "Ex: monagence" },
-    { key: "fraisVisiteEnLigneAgence", label: "Frais de visite en ligne", type: "number", suffix: "FCFA" },
   ],
 };
 

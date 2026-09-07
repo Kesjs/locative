@@ -1,27 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import StripeAuthLogo from "@/components/auth/StripeAuthLogo";
+import OtpVerification from "@/components/auth/OtpVerification";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { EnvelopeIcon, ArrowRightIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsLoading(true);
-    // Simulation OTP for now
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      if (!isSupabaseConfigured()) {
+        throw new Error("Configuration Supabase manquante.");
+      }
+
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          shouldCreateUser: false,
+        },
+      });
+
+      if (error) throw error;
+      setCodeSent(true);
+    } catch (err: any) {
+      setErrorMessage(
+        err.message || "Erreur lors de l'envoi du code d'authentification administrateur."
+      );
+    } finally {
       setIsLoading(false);
-      // Redirect to Admin dashboard
-      router.push("/dashboard/admin");
-    }, 1200);
+    }
   };
 
   return (
@@ -47,35 +67,53 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSendCode} className="space-y-4">
-            <div>
-              <label className="block text-[12.5px] font-bold text-[#18181B] mb-1.5">
-                Adresse email administrateur
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#71717A]">
-                  <EnvelopeIcon className="h-4 w-4" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  placeholder="admin@lokka.bj"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 h-12 bg-white border border-[#E8E3DC] rounded-xl text-[14px] font-medium text-[#18181B] placeholder-[#71717A] focus:outline-none focus:border-[#9D6B3C] focus:ring-4 focus:ring-[#9D6B3C]/15 transition shadow-2xs"
-                />
-              </div>
+          {errorMessage && (
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[13px] font-medium flex items-start gap-2">
+              <span className="font-bold">!</span>
+              <span>{errorMessage}</span>
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={isLoading || !email}
-              className="w-full h-12 px-4 bg-[#18181B] hover:bg-[#9D6B3C] text-white text-[13.5px] font-bold rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
-            >
-              {isLoading ? "Authentification..." : "Accéder au HQ"}
-              <ArrowRightIcon className="h-3.5 w-3.5" />
-            </button>
-          </form>
+          {!codeSent ? (
+            <form onSubmit={handleSendCode} className="space-y-4">
+              <div>
+                <label className="block text-[12.5px] font-bold text-[#18181B] mb-1.5">
+                  Adresse email administrateur
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#71717A]">
+                    <EnvelopeIcon className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    placeholder="admin@lokka.bj"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-3.5 h-12 bg-white border border-[#E8E3DC] rounded-xl text-[14px] font-medium text-[#18181B] placeholder-[#71717A] focus:outline-none focus:border-[#9D6B3C] focus:ring-4 focus:ring-[#9D6B3C]/15 transition shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || !email}
+                className="w-full h-12 px-4 bg-[#18181B] hover:bg-[#9D6B3C] text-white text-[13.5px] font-bold rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              >
+                {isLoading ? "Envoi du code..." : "Recevoir mon code sécurisé"}
+                <ArrowRightIcon className="h-3.5 w-3.5" />
+              </button>
+            </form>
+          ) : (
+            <OtpVerification
+              email={email}
+              length={6}
+              onSuccess={() => {
+                window.location.href = "/admin";
+              }}
+              onChangeEmail={() => setCodeSent(false)}
+            />
+          )}
 
           <p className="text-center text-[12px] text-[#71717A] mt-8 pt-4 border-t border-[#E8E3DC]">
             Veuillez utiliser un terminal autorisé.

@@ -15,6 +15,8 @@ import { UrgentActionsList, type UrgentActionItem } from "@/components/dashboard
 import { AddBienModal } from "@/app/dashboard/patrimoine/_components/AddBienModal";
 import { AddPaiementModal } from "@/app/dashboard/loyers/_components/AddPaiementModal";
 import { AddTicketModal } from "@/app/dashboard/maintenance/_components/AddTicketModal";
+import ReceiptModal from "@/components/dashboard/ReceiptModal";
+import { useSidebar, type CurrencyMode } from "@/components/ui/sidebar";
 import DashboardLoading from "./loading";
 import { ArrowRightIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import {
@@ -30,10 +32,18 @@ import {
   ArrowUpRight,
   Receipt,
   PlusCircle,
+  Globe,
+  CheckCircle2,
+  Calendar,
+  Download,
+  Clock,
+  ArrowDownRight,
 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { role } = useUserProfile();
+  const userProfile = useUserProfile();
+  const role = userProfile.role;
+  const { currency, setCurrency } = useSidebar();
 
   const { data: biens = [], isLoading: isLoadingBiens } = useBiens();
   const { data: loyers = [], isLoading: isLoadingLoyers } = useLoyers();
@@ -44,6 +54,59 @@ export default function DashboardPage() {
   const [isAddBienOpen, setIsAddBienOpen] = useState(false);
   const [isAddPaiementOpen, setIsAddPaiementOpen] = useState(false);
   const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+
+  // Filtre de temporalité
+  const [periode, setPeriode] = useState<"mois" | "trimestre" | "annee">("mois");
+
+  // Suivi persistant des reversements validés pour les Agences
+  const [validatedReversements, setValidatedReversements] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("lokka_validated_reversements") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  const handleValidateReversement = (loyerId: string, montantNet: number) => {
+    const updated = [...validatedReversements, loyerId];
+    setValidatedReversements(updated);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lokka_validated_reversements", JSON.stringify(updated));
+    }
+    toast.success(
+      "Ordre de virement validé",
+      `Reversement de ${montantNet.toLocaleString("fr-FR")} FCFA enregistré et comptabilisé.`
+    );
+  };
+
+  const handleOpenReceipt = (l: {
+    id?: string;
+    locataire_nom?: string;
+    bien_nom?: string;
+    montant?: number;
+    methode?: string;
+    date_reglement?: string;
+    echeance?: string;
+  }) => {
+    const montantNum = Number(l.montant) || 0;
+    setSelectedReceipt({
+      receiptNo: `LOK-2026-${l.id ? l.id.slice(0, 6).toUpperCase() : Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      date: l.date_reglement ? new Date(l.date_reglement).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR"),
+      month: "Septembre 2026",
+      tenantName: l.locataire_nom || "Locataire",
+      propertyTitle: l.bien_nom || "Logement Lokka",
+      propertyAddress: "Cotonou, République du Bénin",
+      amountFcfa: montantNum,
+      amountEuros: Math.round(montantNum / 655.957),
+      channel: l.methode || "MTN MoMo",
+      ownerName: userProfile.name || "Propriétaire Bailleur Lokka",
+      depositMonths: 3,
+    });
+    setIsReceiptOpen(true);
+  };
 
   // Compute live stats from 100% real Supabase records
   const stats = useMemo(() => {
@@ -69,8 +132,11 @@ export default function DashboardPage() {
     const totalDu = totalEncasse + resteRecouvrer;
     const tauxRecouvrement = totalDu > 0 ? Math.round((totalEncasse / totalDu) * 100) : (totalBiens > 0 ? 100 : 0);
 
-    // Dépenses travaux réelles (estimation à partir des tickets en cours ou résolus)
-    const depensesTravaux = tickets.length > 0 ? tickets.length * 25000 : 0;
+    // Dépenses travaux réelles issues des tickets réels (coût réel ou coût estimé)
+    const depensesTravaux = tickets.reduce(
+      (acc, t) => acc + (Number(t.cout_reel) || Number(t.cout_estime) || 0),
+      0
+    );
 
     // Actions urgentes réelles basées sur les retards effectifs
     const urgentActions: UrgentActionItem[] = loyersEnRetard.map((l, index) => {
@@ -129,7 +195,10 @@ export default function DashboardPage() {
 
     // Calculs spécifiques agence
     const commissions10Pct = Math.round(totalEncasse * 0.1);
-    const reversementsAttente = totalEncasse - commissions10Pct;
+    const montantDejaReverse = loyersPayes
+      .filter((l) => validatedReversements.includes(l.id))
+      .reduce((sum, l) => sum + Math.round((Number(l.montant) || 0) * 0.9), 0);
+    const reversementsAttente = Math.max(0, totalEncasse - commissions10Pct - montantDejaReverse);
 
     return {
       totalBiens,
@@ -146,8 +215,10 @@ export default function DashboardPage() {
       revenueData,
       commissions10Pct,
       reversementsAttente,
+      montantDejaReverse,
+      loyersPayes,
     };
-  }, [biens, loyers, tickets, leases]);
+  }, [biens, loyers, tickets, leases, validatedReversements]);
 
   const handleRelance = (item: UrgentActionItem) => {
     if (!item.phone || item.phone.includes("00000000")) {
@@ -192,7 +263,44 @@ export default function DashboardPage() {
               Pilotage des mandats de gérance, perception des honoraires légaux (10%) et reversements périodiques aux propriétaires mandants.
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Sélecteur de Devise Agence & Mandants Internationaux */}
+            <div className="inline-flex items-center p-1 bg-muted/60 border border-border rounded-xl">
+              <button
+                type="button"
+                onClick={() => setCurrency("fcfa")}
+                className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
+                  currency === "fcfa"
+                    ? "bg-card text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                FCFA
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrency("eur")}
+                className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
+                  currency === "eur"
+                    ? "bg-blue-600 text-white shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                EUR (€)
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrency("usd")}
+                className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
+                  currency === "usd"
+                    ? "bg-blue-600 text-white shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                USD ($)
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={() => setIsAddPaiementOpen(true)}
@@ -237,7 +345,7 @@ export default function DashboardPage() {
             currency="FCFA"
             icon={AlertCircle}
             iconColor="amber"
-            trend="90% aux mandants"
+            trend={stats.reversementsAttente === 0 ? "Tous réglés" : "À transférer"}
           />
           <KpiCard
             title="Lots sous Gestion"
@@ -270,7 +378,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[15px] font-bold text-card-foreground">Reversements Prioritaires aux Mandants</h3>
-                  <p className="text-[12px] text-muted-foreground">États des sommes à virer aux propriétaires après prélèvement des honoraires</p>
+                  <p className="text-[12px] text-muted-foreground">États des sommes à virer aux propriétaires après prélèvement des honoraires légaux</p>
                 </div>
                 <Link
                   href="/dashboard/comptabilite"
@@ -301,11 +409,12 @@ export default function DashboardPage() {
                     <tbody className="divide-y divide-border">
                       {loyers
                         .filter((l) => l.statut === "payé")
-                        .slice(0, 4)
+                        .slice(0, 5)
                         .map((l) => {
                           const montant = Number(l.montant) || 0;
                           const com = Math.round(montant * 0.1);
                           const net = montant - com;
+                          const isReversed = validatedReversements.includes(l.id);
 
                           return (
                             <tr key={l.id} className="hover:bg-muted/30 transition-colors">
@@ -319,15 +428,20 @@ export default function DashboardPage() {
                                 {net.toLocaleString("fr-FR")} FCFA
                               </td>
                               <td className="py-3 text-right">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    toast.success(`Ordre de reversement de ${net.toLocaleString("fr-FR")} FCFA validé !`);
-                                  }}
-                                  className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
-                                >
-                                  Valider reversement
-                                </button>
+                                {isReversed ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 rounded-lg text-[11px] font-bold">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    Virement exécuté
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleValidateReversement(l.id, net)}
+                                    className="px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-500/20 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                                  >
+                                    Valider virement
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           );
@@ -373,6 +487,21 @@ export default function DashboardPage() {
                   <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => setIsAddBienOpen(true)}
+                  className="w-full flex items-center gap-3.5 p-3 rounded-xl bg-muted/40 hover:bg-muted border border-border hover:border-primary/40 transition-all text-left group cursor-pointer"
+                >
+                  <div className="bg-primary/10 text-primary p-2 rounded-lg group-hover:scale-105 transition-transform">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-bold text-card-foreground">Ajouter un bien mandataire</div>
+                    <div className="text-[11px] text-muted-foreground truncate">Villa, appartement ou local</div>
+                  </div>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </button>
+
                 <Link
                   href="/dashboard/comptabilite"
                   className="w-full flex items-center gap-3.5 p-3 rounded-xl bg-muted/40 hover:bg-muted border border-border hover:border-amber-500/40 transition-all text-left group"
@@ -405,7 +534,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        <AddBienModal isOpen={isAddBienOpen} onClose={() => setIsAddBienOpen(false)} />
         <AddPaiementModal isOpen={isAddPaiementOpen} onClose={() => setIsAddPaiementOpen(false)} transactions={loyers} />
+        <AddTicketModal isOpen={isAddTicketOpen} onClose={() => setIsAddTicketOpen(false)} />
+        <ReceiptModal isOpen={isReceiptOpen} onClose={() => setIsReceiptOpen(false)} receiptData={selectedReceipt} />
       </div>
     );
   }
@@ -421,22 +553,69 @@ export default function DashboardPage() {
               Espace Propriétaire Bailleur
             </span>
             <span className="text-[11px] text-muted-foreground font-medium">Bénin &amp; Diaspora</span>
+            {currency !== "fcfa" && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 animate-pulse">
+                <Globe className="w-3 h-3" />
+                Mode Diaspora actif
+              </span>
+            )}
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-normal text-foreground tracking-tight">
             Performances de votre patrimoine
           </h1>
           <p className="text-[13px] text-muted-foreground max-w-2xl">
-            Suivi des encaissements en FCFA, quittances certifiées et respect du plafond de caution (Loi 2022-30).
+            Suivi des encaissements, quittances certifiées Loi 2022-30 et conversion devises en temps réel.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Link
-            href="/dashboard/loyers"
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Sélecteur de Devise Intégré (Bénin & Diaspora) */}
+          <div className="inline-flex items-center p-1 bg-muted/60 border border-border rounded-xl">
+            <button
+              type="button"
+              onClick={() => setCurrency("fcfa")}
+              className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
+                currency === "fcfa"
+                  ? "bg-card text-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Francs CFA (UEMOA)"
+            >
+              FCFA
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrency("eur")}
+              className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
+                currency === "eur"
+                  ? "bg-primary text-primary-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Conversion automatique en Euros (1 € = 655,957 F)"
+            >
+              EUR (€)
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrency("usd")}
+              className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
+                currency === "usd"
+                  ? "bg-primary text-primary-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Conversion automatique en Dollars (1 $ = 600 F)"
+            >
+              USD ($)
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsAddPaiementOpen(true)}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-card hover:bg-muted text-card-foreground border border-border rounded-xl text-[13px] font-bold transition-all shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
           >
-            <Receipt className="w-4 h-4 text-muted-foreground" />
-            Échéancier &amp; Quittances
-          </Link>
+            <Wallet className="w-4 h-4 text-emerald-600" />
+            Encaisser
+          </button>
           <button
             type="button"
             onClick={() => setIsAddBienOpen(true)}
@@ -605,6 +784,72 @@ export default function DashboardPage() {
                   onMarkPaid={handleMarkPaid}
                 />
               </div>
+
+              {/* Derniers Encaissements & Quittances Certifiées */}
+              <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-xs">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-[15px] font-bold text-card-foreground">Derniers Encaissements &amp; Quittances</h3>
+                    <p className="text-[12px] text-muted-foreground">Paiements récents avec quittance officielle téléchargeable (Loi 2022-30)</p>
+                  </div>
+                  <Link
+                    href="/dashboard/loyers"
+                    className="text-[12px] font-bold text-primary hover:text-primary-hover flex items-center gap-1 transition-colors"
+                  >
+                    <span>Tout l'échéancier</span>
+                    <ArrowRightIcon className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+
+                {stats.loyersPayes.length === 0 ? (
+                  <div className="p-6 text-center text-[13px] text-muted-foreground italic border border-dashed border-border rounded-xl bg-muted/20">
+                    Aucun encaissement validé pour le moment. Enregistrez un paiement pour générer votre première quittance.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {stats.loyersPayes.slice(0, 4).map((l) => {
+                      const amount = Number(l.montant) || 0;
+                      return (
+                        <div
+                          key={l.id}
+                          className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-muted/20 px-2 rounded-xl transition-colors"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 mt-0.5 shrink-0">
+                              <Receipt className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-[13.5px] text-card-foreground">{l.locataire_nom}</span>
+                                <span className="text-[10.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                                  {l.methode || "Mobile Money"}
+                                </span>
+                              </div>
+                              <p className="text-[12px] text-muted-foreground mt-0.5">
+                                {l.bien_nom} · {l.date_reglement ? new Date(l.date_reglement).toLocaleDateString("fr-FR") : "Récent"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                            <span className="font-mono font-bold text-[14px] text-emerald-600">
+                              {amount.toLocaleString("fr-FR")} FCFA
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenReceipt(l)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 rounded-lg text-[12px] font-bold transition-all cursor-pointer"
+                            >
+                              <FileCheck className="w-3.5 h-3.5" />
+                              <span>Quittance PDF</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Colonne latérale droite : Jauge & Raccourcis */}
@@ -692,6 +937,7 @@ export default function DashboardPage() {
       <AddBienModal isOpen={isAddBienOpen} onClose={() => setIsAddBienOpen(false)} />
       <AddPaiementModal isOpen={isAddPaiementOpen} onClose={() => setIsAddPaiementOpen(false)} transactions={loyers} />
       <AddTicketModal isOpen={isAddTicketOpen} onClose={() => setIsAddTicketOpen(false)} />
+      <ReceiptModal isOpen={isReceiptOpen} onClose={() => setIsReceiptOpen(false)} receiptData={selectedReceipt} />
     </div>
   );
 }

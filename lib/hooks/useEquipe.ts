@@ -24,10 +24,10 @@ export function useEquipe() {
       const supabase = createClient();
       const { data, error } = await supabase.from("equipe").select("*").order("created_at", { ascending: false });
       if (error) {
-        console.warn("Supabase fetch error, fallback to demo:", error);
-        return DEMO_EQUIPE;
+        console.warn("Supabase fetch equipe error:", error);
+        return [];
       }
-      return (data as EquipeMember[]) || DEMO_EQUIPE;
+      return (data as EquipeMember[]) || [];
     },
   });
 }

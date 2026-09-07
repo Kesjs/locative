@@ -23,7 +23,7 @@ export async function getPostAuthRedirect(fallbackEmail?: string): Promise<strin
     .single();
 
   if (profile?.onboarding_completed) {
-    if (profile.role === "tenant") return "/dashboard/locataire";
+    if (profile.role === "tenant") return "/locataire";
     if (profile.role === "super_admin") return "/admin";
     return "/dashboard";
   }

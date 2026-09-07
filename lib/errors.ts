@@ -15,14 +15,25 @@ type SupabaseLikeError = {
   status?: number;
 };
 
-// Messages Supabase connus -> message FR compréhensible
+// Messages Supabase connus -> message FR compréhensible et clair
 const KNOWN_MESSAGES: Record<string, string> = {
-  "Invalid login credentials": "Identifiants invalides. Vérifiez votre email.",
-  "Email not confirmed": "Adresse email non confirmée.",
-  "User already registered": "Un compte existe déjà avec cet email.",
-  "Token has expired or is invalid": "Le code a expiré. Demandez-en un nouveau.",
+  "Invalid login credentials": "Identifiants invalides. Vérifiez votre adresse email.",
+  "Email not confirmed": "Adresse email non confirmée. Vérifiez votre boîte de réception.",
+  "User already registered": "Un compte existe déjà avec cette adresse email.",
+  "Token has expired or is invalid": "Le code de vérification a expiré ou est incorrect. Demandez un nouveau code.",
+  "Token has expired": "Le code de vérification a expiré. Demandez un nouveau code.",
+  "Invalid OTP": "Le code de vérification est incorrect. Vérifiez le code reçu par email.",
+  "otp_expired": "Le code de vérification a expiré. Demandez un nouveau code.",
   "For security purposes, you can only request this after":
-    "Merci de patienter avant de redemander un code.",
+    "Par mesure de sécurité, veuillez patienter une minute avant de redemander un code.",
+  "over_email_send_rate_limit": "Trop de tentatives d'envoi. Veuillez patienter une minute avant de réessayer.",
+  "Email rate limit exceeded": "Limite d'envoi d'emails atteinte. Veuillez patienter un instant avant de réessayer.",
+  "Error sending confirmation email": "Erreur lors de l'envoi de l'email. Veuillez réessayer dans un instant.",
+  "Signup requires a valid password": "Le mot de passe doit respecter les critères de sécurité.",
+  "User not found": "Aucun compte associé à cette adresse email.",
+  "Database error": "Une erreur temporaire est survenue sur la base de données. Veuillez réessayer.",
+  "row-level security": "Action non autorisée. Vos droits d'accès sont insuffisants.",
+  "JWT expired": "Votre session a expiré. Veuillez vous reconnecter.",
 };
 
 function isOffline() {
@@ -41,6 +52,15 @@ export function getErrorMessage(err: unknown, fallback: string): string {
   if (!err) return fallback;
 
   const e = err as SupabaseLikeError;
+
+  // Détection explicite des Rate Limits (HTTP 429 ou message Supabase)
+  if (
+    e?.status === 429 ||
+    (typeof e?.message === "string" &&
+      /429|rate limit|too many requests|over_email_send_rate_limit|rate_limit_exceeded/i.test(e.message))
+  ) {
+    return "Trop de demandes en peu de temps. Par mesure de sécurité, veuillez patienter 60 secondes avant de demander un nouveau code.";
+  }
 
   // Config Supabase manquante : message déjà clair, on le laisse passer tel quel
   if (typeof e?.message === "string" && e.message.includes("Configuration Supabase manquante")) {

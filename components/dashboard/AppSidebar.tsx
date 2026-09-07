@@ -11,6 +11,7 @@ import {
   SidebarFooter,
   SidebarRail,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -69,7 +70,7 @@ interface SubItem {
   url: string;
 }
 
-interface NavItem {
+export interface NavItem {
   title: string;
   url: string;
   icon: any;
@@ -95,52 +96,115 @@ export const SIDEBAR_DATA = {
   ],
 };
 
-export function getNavItems(profileType: string): NavItem[] {
+export interface NavGroup {
+  groupLabel?: string;
+  items: NavItem[];
+}
+
+export function getNavGroups(profileType: string): NavGroup[] {
   const norm = (profileType || "").toLowerCase();
 
   if (norm.includes("agence")) {
     return [
-      { title: "Aperçu", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Mandats", url: "/dashboard/mandats", icon: Briefcase },
-      { title: "Lots", url: "/dashboard/patrimoine", icon: Building2 },
-      { title: "Locataires", url: "/dashboard/locataires", icon: Users },
-      { title: "Reversements", url: "/dashboard/comptabilite", icon: Wallet },
-      { title: "Vitrine", url: "/dashboard/annonces", icon: Globe, badge: "Bientôt", badgeType: "warning" },
-      { title: "Incidents", url: "/dashboard/maintenance", icon: Wrench },
-      { title: "Équipe", url: "/dashboard/equipe", icon: Users2 },
-      { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
+      {
+        groupLabel: "Activité & Lots",
+        items: [
+          { title: "Aperçu Cockpit", url: "/dashboard", icon: LayoutDashboard },
+          { title: "Lots sous Gestion", url: "/dashboard/patrimoine", icon: Building2 },
+          { title: "Locataires", url: "/dashboard/locataires", icon: Users },
+        ],
+      },
+      {
+        groupLabel: "Gérance & Mandats",
+        items: [
+          { title: "Mandats de Gérance", url: "/dashboard/mandats", icon: Briefcase },
+          { title: "Reversements Mandants", url: "/dashboard/comptabilite", icon: Wallet },
+          { title: "Baux & Contrats", url: "/dashboard/baux", icon: ShieldCheck },
+        ],
+      },
+      {
+        groupLabel: "Opérations",
+        items: [
+          { title: "Loyers & Encaissements", url: "/dashboard/loyers", icon: CreditCard },
+          { title: "Maintenance & Pannes", url: "/dashboard/maintenance", icon: Wrench },
+          { title: "Vitrine Publique", url: "/dashboard/annonces", icon: Globe, badge: "Bientôt", badgeType: "warning" },
+        ],
+      },
+      {
+        groupLabel: "Cabinet",
+        items: [
+          { title: "Équipe & Gestionnaires", url: "/dashboard/equipe", icon: Users2 },
+          { title: "Paramètres du Cabinet", url: "/dashboard/parametres", icon: Settings },
+        ],
+      },
     ];
   }
 
   if (norm.includes("admin")) {
     return [
-      { title: "Global", url: "/dashboard/admin", icon: LayoutDashboard },
-      { title: "Utilisateurs", url: "/dashboard/admin/utilisateurs", icon: Users },
-      { title: "Abonnements", url: "/dashboard/admin/abonnements", icon: CreditCard },
-      { title: "Système", url: "/dashboard/admin/systeme", icon: Settings },
+      {
+        groupLabel: "Administration Centrale",
+        items: [
+          { title: "Global", url: "/dashboard/admin", icon: LayoutDashboard },
+          { title: "Utilisateurs", url: "/dashboard/admin/utilisateurs", icon: Users },
+          { title: "Abonnements", url: "/dashboard/admin/abonnements", icon: CreditCard },
+          { title: "Système", url: "/dashboard/admin/systeme", icon: Settings },
+        ],
+      },
     ];
   }
 
   if (norm.includes("locataire")) {
     return [
-      { title: "Espace", url: "/dashboard/locataire", icon: LayoutDashboard },
-      { title: "Loyers", url: "/dashboard/locataire/loyers", icon: CreditCard },
-      { title: "Documents", url: "/dashboard/locataire/documents", icon: Globe },
-      { title: "Pannes", url: "/dashboard/locataire/maintenance", icon: Wrench },
-      { title: "Paramètres", url: "/dashboard/locataire/parametres", icon: Settings },
+      {
+        groupLabel: "Mon Logement",
+        items: [
+          { title: "Espace Locataire", url: "/dashboard/locataire", icon: LayoutDashboard },
+          { title: "Loyers & Quittances", url: "/dashboard/locataire/loyers", icon: CreditCard },
+          { title: "Documents & Bail", url: "/dashboard/locataire/documents", icon: Globe },
+          { title: "Pannes & Signalements", url: "/dashboard/locataire/maintenance", icon: Wrench },
+          { title: "Paramètres", url: "/dashboard/locataire/parametres", icon: Settings },
+        ],
+      },
     ];
   }
 
   // Profil Par Défaut : Propriétaire Bailleur
   return [
-    { title: "Accueil", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Logements", url: "/dashboard/patrimoine", icon: Building2 },
-    { title: "Locations", url: "/dashboard/locataires", icon: Users },
-    { title: "Loyers", url: "/dashboard/loyers", icon: CreditCard },
-    { title: "Vitrine", url: "/dashboard/annonces", icon: Megaphone, badge: "Bientôt", badgeType: "warning" },
-    { title: "Travaux", url: "/dashboard/maintenance", icon: Wrench },
-    { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
+    {
+      groupLabel: "Mon Patrimoine",
+      items: [
+        { title: "Vue d'ensemble", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Mes Logements", url: "/dashboard/patrimoine", icon: Building2 },
+        { title: "Mes Locataires", url: "/dashboard/locataires", icon: Users },
+      ],
+    },
+    {
+      groupLabel: "Finances & Loyers",
+      items: [
+        { title: "Échéancier & Loyers", url: "/dashboard/loyers", icon: CreditCard },
+        { title: "Comptabilité & Bilan", url: "/dashboard/comptabilite", icon: Wallet },
+      ],
+    },
+    {
+      groupLabel: "Gestion Locative",
+      items: [
+        { title: "Baux & Quittances", url: "/dashboard/baux", icon: ShieldCheck },
+        { title: "Travaux & Dépannages", url: "/dashboard/maintenance", icon: Wrench },
+        { title: "Annonces & Vitrine", url: "/dashboard/annonces", icon: Megaphone, badge: "Bientôt", badgeType: "warning" },
+      ],
+    },
+    {
+      groupLabel: "Mon Compte",
+      items: [
+        { title: "Paramètres", url: "/dashboard/parametres", icon: Settings },
+      ],
+    },
   ];
+}
+
+export function getNavItems(profileType: string): NavItem[] {
+  return getNavGroups(profileType).flatMap((g) => g.items);
 }
 
 /**
@@ -257,9 +321,18 @@ export function AppSidebar() {
 
   const userProfile = useUserProfile();
   const currentRole = devRole || userProfile.role || "bailleur";
-  const navItems = getNavItems(currentRole);
+  const isAgency = currentRole.toLowerCase().includes("agence");
+  const navGroups = getNavGroups(currentRole);
   const isNormalizedAdminOrLocataire =
     currentRole.toLowerCase().includes("admin") || currentRole.toLowerCase().includes("locataire");
+
+  const workspaceName = isAgency
+    ? userProfile.name || "Cabinet Immobilier"
+    : userProfile.name || activeTeam.name;
+
+  const workspaceSubtitle = isAgency
+    ? `${activeBiensCount} lot${activeBiensCount > 1 ? "s" : ""} · Cabinet Agréé 🇧🇯`
+    : `${activeBiensCount} bien${activeBiensCount > 1 ? "s" : ""} · Patrimoine Privé`;
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -288,9 +361,9 @@ export function AppSidebar() {
   };
 
   // Calcul du quota selon le plan
-  const planMaxBiens = 3;
+  const planMaxBiens = isAgency ? 999 : 10;
   const planUsagePercent = Math.min(100, Math.round((activeBiensCount / planMaxBiens) * 100));
-  const isPlanFull = activeBiensCount >= planMaxBiens;
+  const isPlanFull = !isAgency && activeBiensCount >= planMaxBiens;
 
   if (navLayout === "topnav" && !isMobile) {
     return null;
@@ -302,7 +375,7 @@ export function AppSidebar() {
         collapsible="icon"
         className="border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--foreground)] z-30"
       >
-        {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE ─── */}
+        {/* ─── 1. HEADER : LOGO & SÉLECTEUR PATRIMOINE / CABINET ─── */}
         <SidebarHeader className="border-b border-[var(--sidebar-border)] p-2">
           {isNormalizedAdminOrLocataire ? (
             <div className="flex items-center gap-2.5 px-2.5 py-1.5 h-[44px] rounded-lg">
@@ -334,20 +407,20 @@ export function AppSidebar() {
                       <div
                         className="flex aspect-square size-7 items-center justify-center rounded-md border border-[var(--border)] shrink-0 shadow-2xs overflow-hidden"
                         style={{
-                          backgroundColor: "var(--primary-subtle)",
-                          color: "var(--primary)",
+                          backgroundColor: isAgency ? "rgba(37, 99, 235, 0.12)" : "var(--primary-subtle)",
+                          color: isAgency ? "#2563EB" : "var(--primary)",
                         }}
                       >
-                        <Building2 className="size-4" />
+                        {isAgency ? <Briefcase className="size-4" /> : <Building2 className="size-4" />}
                       </div>
                       {!isCollapsed && (
                         <>
                           <div className="grid flex-1 text-left text-sm leading-tight">
                             <span className="truncate font-bold text-[var(--foreground)] text-[13px]">
-                              {activeTeam.name}
+                              {workspaceName}
                             </span>
                             <span className="truncate text-[10.5px] text-[var(--text-secondary)] font-medium">
-                              {activeBiensCount} bien{activeBiensCount > 1 ? "s" : ""} · {activeTeam.plan}
+                              {workspaceSubtitle}
                             </span>
                           </div>
                           <ChevronsUpDown className="ml-auto size-4 text-[var(--text-secondary)]" />
@@ -357,48 +430,58 @@ export function AppSidebar() {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent
-                    className="w-60 rounded-lg p-1 shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#18181B] text-slate-900 dark:text-zinc-100 z-50 animate-in fade-in-50 zoom-in-95"
+                    className="w-64 rounded-xl p-1.5 shadow-xl border border-border bg-card text-foreground z-50 animate-in fade-in-50 zoom-in-95"
                     align="start"
                     side={isMobile ? "bottom" : "right"}
                     sideOffset={6}
                   >
-                    <DropdownMenuLabel className="text-[10px] text-slate-400 dark:text-zinc-500 px-2 py-1 font-bold uppercase tracking-wider">
-                      Vos Patrimoines &amp; SCI
+                    <DropdownMenuLabel className="text-[10px] text-muted-foreground px-2 py-1 font-bold uppercase tracking-wider">
+                      {isAgency ? "Votre Cabinet & Mandats" : "Vos Patrimoines & SCI"}
                     </DropdownMenuLabel>
-                    {SIDEBAR_DATA.teams.map((team, index) => (
-                      <DropdownMenuItem
-                        key={team.name}
-                        onClick={() => setActiveTeam(team)}
-                        className={`gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer ${
-                          activeTeam.name === team.name
-                            ? "bg-slate-100 dark:bg-zinc-800 text-[var(--brand-accent)] font-semibold"
-                            : "text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
-                        }`}
-                      >
-                        <div
-                          className="flex size-5 items-center justify-center rounded border border-slate-200 dark:border-zinc-700"
-                          style={{
-                            backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
-                            color: "var(--brand-accent)",
-                          }}
+                    {isAgency ? (
+                      <>
+                        <DropdownMenuItem className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer bg-blue-500/10 text-blue-700 dark:text-blue-400 font-semibold">
+                          <Building2 className="size-4 text-blue-600" />
+                          <span className="truncate flex-1">{workspaceName}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">Actif</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium text-muted-foreground hover:bg-muted cursor-pointer">
+                          <Briefcase className="size-4" />
+                          <span className="truncate flex-1">Mandats Exclusifs UEMOA</span>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      SIDEBAR_DATA.teams.map((team, index) => (
+                        <DropdownMenuItem
+                          key={team.name}
+                          onClick={() => setActiveTeam(team)}
+                          className={`gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer ${
+                            activeTeam.name === team.name
+                              ? "bg-muted text-[var(--primary)] font-semibold"
+                              : "text-foreground hover:bg-muted"
+                          }`}
                         >
-                          <team.logo className="size-3" />
-                        </div>
-                        <span className="truncate flex-1">{team.name}</span>
-                        <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
+                          <div
+                            className="flex size-5 items-center justify-center rounded border border-border"
+                            style={{
+                              backgroundColor: "var(--primary-subtle)",
+                              color: "var(--primary)",
+                            }}
+                          >
+                            <team.logo className="size-3" />
+                          </div>
+                          <span className="truncate flex-1">{team.name}</span>
+                          <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                    <DropdownMenuSeparator className="bg-border my-1" />
                     <DropdownMenuItem
-                      onClick={() =>
-                        alert("Pour ajouter une SCI ou un nouveau portefeuille dédié, rendez-vous dans vos Paramètres Patrimoine.")
-                      }
-                      className="gap-2 p-1.5 rounded-md text-[11.5px] font-medium text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
+                      onClick={() => router.push("/dashboard/parametres")}
+                      className="gap-2 p-2 rounded-lg text-[11.5px] font-medium text-muted-foreground hover:bg-muted cursor-pointer"
                     >
-                      <div className="flex size-5 items-center justify-center rounded border border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800">
-                        <Plus className="size-3 text-slate-600 dark:text-zinc-300" />
-                      </div>
-                      <span>Ajouter une SCI / Portefeuille</span>
+                      <Plus className="size-3.5 text-muted-foreground" />
+                      <span>{isAgency ? "Paramétrer une nouvelle antenne" : "Ajouter une SCI / Portefeuille"}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -407,71 +490,78 @@ export function AppSidebar() {
           )}
         </SidebarHeader>
 
-        {/* ─── 2. NAV GROUPS (SANS LABEL NAVIGATION PRINCIPALE) ─── */}
-        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-2 space-y-1">
-          <SidebarGroup className="p-0">
-            <SidebarMenu className="gap-1">
-              {navItems.map((item) => {
-                const active = isLinkActive(item.url);
+        {/* ─── 2. GROUPES DE NAVIGATION HIÉRARCHISÉS ─── */}
+        <SidebarContent className="sidebar-scrollbar flex-1 overflow-y-auto px-2 py-3 space-y-3">
+          {navGroups.map((group, gIdx) => (
+            <SidebarGroup key={group.groupLabel || gIdx} className="p-0">
+              {!isCollapsed && group.groupLabel && (
+                <SidebarGroupLabel className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/80 px-3 py-1 mb-1 select-none">
+                  {group.groupLabel}
+                </SidebarGroupLabel>
+              )}
+              <SidebarMenu className="gap-0.5">
+                {group.items.map((item) => {
+                  const active = isLinkActive(item.url);
 
-                if (item.items && item.items.length > 0) {
+                  if (item.items && item.items.length > 0) {
+                    return (
+                      <CollapsibleNavItem
+                        key={item.title}
+                        item={item}
+                        isActive={active}
+                        pathname={pathname}
+                        isCollapsed={isCollapsed}
+                        isMobile={isMobile}
+                        setOpenMobile={setOpenMobile}
+                      />
+                    );
+                  }
+
                   return (
-                    <CollapsibleNavItem
-                      key={item.title}
-                      item={item}
-                      isActive={active}
-                      pathname={pathname}
-                      isCollapsed={isCollapsed}
-                      isMobile={isMobile}
-                      setOpenMobile={setOpenMobile}
-                    />
-                  );
-                }
-
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      tooltip={item.title}
-                      isActive={active}
-                      className={`w-full relative flex items-center ${
-                        isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
-                      } rounded-lg text-[13px] font-medium transition-colors cursor-pointer ${
-                        active
-                          ? "bg-[var(--primary-subtle)] text-[var(--primary)] font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[var(--primary)] before:rounded-r-sm shadow-2xs"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
-                      }`}
-                    >
-                      <Link
-                        href={item.url}
-                        className={isCollapsed ? "flex items-center justify-center w-full h-full cursor-pointer" : "cursor-pointer"}
-                        onClick={() => isMobile && setOpenMobile(false)}
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.title}
+                        isActive={active}
+                        className={`w-full relative flex items-center ${
+                          isCollapsed ? "justify-center p-0 h-9" : "gap-3 px-3 py-2"
+                        } rounded-xl text-[13px] font-medium transition-colors cursor-pointer ${
+                          active
+                            ? "bg-[var(--primary-subtle)] text-[var(--primary)] font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-[var(--primary)] before:rounded-r-sm shadow-2xs"
+                            : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
+                        }`}
                       >
-                        <item.icon
-                          className="size-4 shrink-0 transition-colors"
-                          style={{ color: active ? "var(--primary)" : undefined }}
-                        />
-                        {!isCollapsed && <span className="truncate flex-1 font-medium">{item.title}</span>}
-                        {!isCollapsed && item.badge && (
-                          <span
-                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                              item.badgeType === "danger"
-                                ? "bg-red-500/15 text-red-500"
-                                : item.badgeType === "warning" || item.badgeType === "soon"
-                                ? "bg-amber-500/15 text-amber-500 border border-amber-500/30"
-                                : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border border-[var(--border)]"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
+                        <Link
+                          href={item.url}
+                          className={isCollapsed ? "flex items-center justify-center w-full h-full cursor-pointer" : "cursor-pointer"}
+                          onClick={() => isMobile && setOpenMobile(false)}
+                        >
+                          <item.icon
+                            className="size-4 shrink-0 transition-colors"
+                            style={{ color: active ? "var(--primary)" : undefined }}
+                          />
+                          {!isCollapsed && <span className="truncate flex-1 font-medium">{item.title}</span>}
+                          {!isCollapsed && item.badge && (
+                            <span
+                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                                item.badgeType === "danger"
+                                  ? "bg-red-500/15 text-red-500"
+                                  : item.badgeType === "warning" || item.badgeType === "soon"
+                                  ? "bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                                  : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700"
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroup>
+          ))}
         </SidebarContent>
 
         {/* ─── 3. FOOTER : CARTE D'UPGRADE PLAN + PROFIL UTILISATEUR ─── */}
