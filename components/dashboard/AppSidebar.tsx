@@ -320,7 +320,12 @@ export function AppSidebar() {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const userProfile = useUserProfile();
-  const currentRole = devRole || userProfile.role || "bailleur";
+  // Le rôle réel du profil (base de données) doit toujours primer sur
+  // "devRole", qui est un résidu localStorage d'un ancien sélecteur de
+  // rôle de test jamais nettoyé (clé "lokka:sidebar_devRole") — sinon un
+  // compte fraîchement créé en bailleur pouvait hériter du menu Agence
+  // laissé par un test précédent sur le même navigateur.
+  const currentRole = userProfile.role || devRole || "bailleur";
   const isAgency = currentRole.toLowerCase().includes("agence");
   const navGroups = getNavGroups(currentRole);
   const isNormalizedAdminOrLocataire =
