@@ -5,6 +5,7 @@ export type Objectif = "digitaliser" | "trouver_locataires";
 export interface ProfilStepData {
   profileType: ProfileType;
   nom: string;                    // Nom (bailleur) ou Raison sociale (agence)
+  logo_url?: string;              // Logo personnalisé (Bailleur ou Agence)
   moyenReception: "mobile_money" | "banque";
   mobileProvider?: "mtn" | "moov" | "celtiis";
   zoneGeo: "benin" | "diaspora";

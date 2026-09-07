@@ -35,6 +35,7 @@ export default function OnboardingPage() {
     profil: {
       profileType: "bailleur",
       nom: "",
+      logo_url: "",
       moyenReception: "mobile_money",
       mobileProvider: "mtn",
       zoneGeo: "benin",
@@ -243,7 +244,7 @@ export default function OnboardingPage() {
             activeOrgId = orgData;
           }
 
-          // 2. Mettre à jour le profil avec le rôle canonique et onboarding_completed
+          // 2. Mettre à jour le profil avec le rôle canonique, onboarding_completed et logo_url
           const { error: profileError } = await supabase
             .from("profiles")
             .update({
@@ -251,6 +252,7 @@ export default function OnboardingPage() {
               role: canonicalRole,
               preferred_payment_channel: state.profil.moyenReception,
               onboarding_completed: true,
+              logo_url: state.profil.logo_url || null,
             })
             .eq("id", user.id);
 
@@ -412,14 +414,21 @@ export default function OnboardingPage() {
           localStorage.setItem("lokka_onboarding_objectifs", JSON.stringify(state.objectifs));
           localStorage.setItem("lokka_dev_role", isAgency ? "Agence" : "Propriétaire Bailleur");
           localStorage.setItem("lokka_dev_plan", isAgency ? "agence" : "pro");
+          if (state.profil.logo_url) {
+            localStorage.setItem("lokka_custom_logo", state.profil.logo_url);
+          }
           localStorage.setItem(
             "lokka_user_profile",
             JSON.stringify({
               name: state.profil.nom,
               role: canonicalRole,
               accountType: isAgency ? "agence" : "bailleur",
+              logo_url: state.profil.logo_url || "",
             })
           );
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("storage"));
+          }
         }
       }
 

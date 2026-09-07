@@ -407,11 +407,17 @@ export function AppSidebar() {
                       <div
                         className="flex aspect-square size-7 items-center justify-center rounded-md border border-[var(--border)] shrink-0 shadow-2xs overflow-hidden"
                         style={{
-                          backgroundColor: isAgency ? "rgba(37, 99, 235, 0.12)" : "var(--primary-subtle)",
+                          backgroundColor: userProfile.customLogo ? "transparent" : isAgency ? "rgba(37, 99, 235, 0.12)" : "var(--primary-subtle)",
                           color: isAgency ? "#2563EB" : "var(--primary)",
                         }}
                       >
-                        {isAgency ? <Briefcase className="size-4" /> : <Building2 className="size-4" />}
+                        {userProfile.customLogo ? (
+                          <img src={userProfile.customLogo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                        ) : isAgency ? (
+                          <Briefcase className="size-4" />
+                        ) : (
+                          <Building2 className="size-4" />
+                        )}
                       </div>
                       {!isCollapsed && (
                         <>
