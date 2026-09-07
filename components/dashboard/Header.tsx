@@ -452,6 +452,18 @@ export default function Header({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
+                {(userProfile.role?.toLowerCase().includes("admin") || userProfile.email?.toLowerCase().includes("kenkenbabatounde")) && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => router.push("/admin")}
+                      className="gap-2 p-1.5 rounded-md text-[12px] cursor-pointer bg-slate-900 text-white hover:bg-slate-800 font-bold"
+                    >
+                      <ShieldCheckIcon className="h-4 w-4 text-emerald-400" />
+                      <span>Console Super Admin HQ 🇧🇯</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-zinc-800 my-1" />
+                  </>
+                )}
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     onClick={() => router.push("/dashboard/parametres")}
