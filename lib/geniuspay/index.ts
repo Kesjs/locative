@@ -4,6 +4,8 @@
  * Supporte : MTN Mobile Money (*880#), Moov Money (*855#), Wave, Cartes bancaires (Visa/Mastercard)
  */
 
+import crypto from "crypto";
+
 export interface GeniusPayInitiateParams {
   amount: number; // Montant en FCFA (XOF)
   currency?: string; // Par défaut XOF
@@ -38,7 +40,8 @@ export interface GeniusPaySessionResult {
 
 const GENIUSPAY_API_URL = process.env.GENIUSPAY_API_URL || "https://api.genius.ci/v1";
 const GENIUSPAY_API_KEY = process.env.GENIUSPAY_API_KEY || "";
-const GENIUSPAY_SECRET_KEY = process.env.GENIUSPAY_SECRET_KEY || "";
+const GENIUSPAY_SECRET_KEY = process.env.GENIUSPAY_API_SECRET || process.env.GENIUSPAY_SECRET_KEY || "";
+const GENIUSPAY_WEBHOOK_SECRET = process.env.GENIUSPAY_WEBHOOK_SECRET || "";
 
 /**
  * Initialise une session de paiement Genius Pay
@@ -96,9 +99,11 @@ export async function initiateGeniusPayPayment(
     transactionId,
     checkoutUrl: undefined,
     status: "pending",
-    mode: "sandbox",
+    mode: isLive ? "live" : "sandbox",
     operator: params.metadata?.operator || "mtn",
-    message: "Session Genius Pay initialisée avec succès (Mode Sandbox / UEMOA).",
+    message: isLive
+      ? "Session Genius Pay Live initialisée."
+      : "Session Genius Pay initialisée avec succès (Mode Sandbox / UEMOA).",
   };
 }
 
@@ -106,6 +111,13 @@ export async function initiateGeniusPayPayment(
  * Valide la signature d'un Webhook Genius Pay
  */
 export function verifyGeniusPaySignature(payload: string, signature: string): boolean {
-  if (!GENIUSPAY_SECRET_KEY) return true;
-  return true;
+  if (!GENIUSPAY_WEBHOOK_SECRET) return true;
+  if (!signature) return false;
+  try {
+    const hmac = crypto.createHmac("sha256", GENIUSPAY_WEBHOOK_SECRET);
+    const expected = hmac.update(payload).digest("hex");
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  } catch (_) {
+    return true;
+  }
 }

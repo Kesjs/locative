@@ -20,10 +20,10 @@ export async function POST(req: Request) {
         await adminClient
           .from("loyers_transactions")
           .update({
-            statut: "paye",
-            date_reglement: new Date().toISOString().split("T")[0],
+            statut: "payé",
+            date_reglement: new Date().toISOString(),
           })
-          .eq("reference_transaction", transaction_id);
+          .eq("reference_paiement", transaction_id);
       }
     }
 

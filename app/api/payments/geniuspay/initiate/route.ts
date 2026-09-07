@@ -44,14 +44,30 @@ export async function POST(req: Request) {
     try {
       const adminClient = createAdminClient();
       if (adminClient) {
+        let orgId = null;
+        let bienNom = description || "Appartement / Lot";
+        if (bienId) {
+          const { data: b } = await adminClient.from("biens").select("nom, organization_id").eq("id", bienId).maybeSingle();
+          orgId = b?.organization_id || null;
+          if (b?.nom) bienNom = b.nom;
+        }
+        if (!orgId) {
+          const { data: firstOrg } = await adminClient.from("organizations").select("id").limit(1).maybeSingle();
+          orgId = firstOrg?.id || "b96b7906-e502-467e-86c6-127ae9873e7e";
+        }
+
+        const validMethode = operator === "moov" ? "Moov Money" : "MTN MoMo";
+
         await adminClient.from("loyers_transactions").insert({
-          lease_id: leaseId || null,
+          organization_id: orgId,
+          bien_id: bienId || null,
+          bien_nom: bienNom,
+          locataire_nom: customerName || "Locataire en place",
           montant: Number(amount),
-          date_reglement: new Date().toISOString().split("T")[0],
-          periode: period || new Date().toISOString().slice(0, 7),
-          methode_paiement: `Genius Pay (${operator.toUpperCase()})`,
+          methode: validMethode,
           statut: "en_attente",
-          reference_transaction: session.transactionId,
+          reference_paiement: session.transactionId,
+          echeance: new Date().toISOString().split("T")[0],
         });
       }
     } catch (dbErr) {
