@@ -167,12 +167,27 @@ export default function OnboardingPage() {
       if (!saisieExpress.nomPatrimoine?.trim()) {
         errs.nomPatrimoine = "Le nom de l'ensemble ou résidence est obligatoire.";
       }
-      if (!saisieExpress.typeLot?.trim()) {
-        errs.typeLot = "La désignation du premier lot est obligatoire.";
-      }
-      if (!saisieExpress.loyerMensuel || Number(saisieExpress.loyerMensuel) <= 0) {
-        errs.loyerMensuel = "Veuillez indiquer un montant de loyer valide.";
-      }
+
+      const lotsToValidate = (saisieExpress.lots && saisieExpress.lots.length > 0)
+        ? saisieExpress.lots
+        : [
+            {
+              id: "1",
+              nom: saisieExpress.typeLot || "Chambre 1",
+              loyer: Number(saisieExpress.loyerMensuel) || 0,
+              statut: saisieExpress.statutOccupation || "loue",
+              locataireNom: saisieExpress.locataireEnPlaceNom || "",
+            },
+          ];
+
+      lotsToValidate.forEach((lot, idx) => {
+        if (!lot.nom?.trim()) {
+          errs[`lot_${lot.id}_nom`] = `Nom du lot #${idx + 1} obligatoire.`;
+        }
+        if (!lot.loyer || Number(lot.loyer) <= 0) {
+          errs[`lot_${lot.id}_loyer`] = `Loyer invalide pour le lot #${idx + 1}.`;
+        }
+      });
     } else {
       if (!saisieExpress.proprietaireMandantNom?.trim()) {
         errs.proprietaireMandantNom = "Le nom du propriétaire mandant est obligatoire.";
@@ -264,14 +279,14 @@ export default function OnboardingPage() {
             return;
           }
 
-          // 3. ENREGISTREMENT RÉEL : PATRIMOINE & LOT
+          // 3. ENREGISTREMENT RÉEL : PATRIMOINE & LOTS
           const { saisieExpress } = state;
-          const montantLoyer = isAgency
-            ? Number(saisieExpress.loyerActuelMandat || 250000)
-            : Number(saisieExpress.loyerMensuel || 250000);
+          const isDiaspora = state.profil.zoneGeo === "diaspora";
+          const bienVille = isDiaspora ? (state.profil.paysDiaspora || "International") : "Cotonou";
 
-          // Si Agence : enregistrement d'un mandat réel dans Supabase
+          // CAS A : AGENCE (Mandat + Lot sous gestion)
           if (isAgency) {
+            const montantLoyer = Number(saisieExpress.loyerActuelMandat || 250000);
             const mandantNom = saisieExpress.proprietaireMandantNom || "M. Mensah (Mandant)";
             const soldeMandant = Math.round(montantLoyer * 0.9); // 90% reversés
 
@@ -290,73 +305,123 @@ export default function OnboardingPage() {
             if (mandatError) {
               console.warn("Notice insertion mandat onboarding:", mandatError.message);
             }
-          }
 
-          // Hiérarchie : Patrimoine -> Lot
-          const nomPatrimoine = saisieExpress.nomPatrimoine?.trim() || (isAgency ? "Résidence Marina" : "Résidence Principale");
-          const typeLot = saisieExpress.typeLot?.trim() || "Appartement 3 pièces";
-          const bienNom = `${nomPatrimoine} (${typeLot})`;
+            const nomPatrimoine = saisieExpress.nomPatrimoine?.trim() || "Résidence Marina";
+            const typeLot = saisieExpress.typeLot?.trim() || "Appartement 3 pièces";
+            const bienNom = `${nomPatrimoine} (${typeLot})`;
+            const bienAdresse = `${nomPatrimoine}, ${bienVille}`;
 
-          const bienStatut: "loué" | "vacant" = isAgency
-            ? "loué"
-            : (saisieExpress.statutOccupation === "vacant" ? "vacant" : "loué");
+            const { data: insertedBien, error: bienError } = await supabase
+              .from("biens")
+              .insert({
+                nom: bienNom,
+                adresse: bienAdresse,
+                ville: bienVille,
+                type: typeLot,
+                loyer_mensuel: montantLoyer,
+                charges: 0,
+                statut: "loué",
+                locataire_nom: "Locataire en place",
+                photos: [],
+                photo_principale: null,
+                archive: false,
+                organization_id: activeOrgId,
+              })
+              .select()
+              .maybeSingle();
 
-          const locataireNom = isAgency
-            ? "Locataire en place"
-            : (bienStatut === "loué" ? (saisieExpress.locataireEnPlaceNom?.trim() || "Locataire en place") : null);
+            if (bienError) {
+              console.error("Erreur insertion bien onboarding:", bienError);
+            } else if (insertedBien) {
+              const echeance = new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+              await supabase.from("loyers_transactions").insert({
+                bien_id: insertedBien.id,
+                bien_nom: bienNom,
+                locataire_nom: "Locataire en place",
+                montant: montantLoyer,
+                methode: (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any,
+                statut: "en_attente" as const,
+                echeance,
+                organization_id: activeOrgId,
+              });
+            }
+          } else {
+            // CAS B : BAILLEUR (Résidence Multi-Lots : Chambres / Appartements)
+            const nomPatrimoine = saisieExpress.nomPatrimoine?.trim() || "Résidence Principale";
+            const bienAdresse = `${nomPatrimoine}, ${bienVille}`;
 
-          const isDiaspora = state.profil.zoneGeo === "diaspora";
-          const bienVille = isDiaspora ? (state.profil.paysDiaspora || "International") : "Cotonou";
-          const bienAdresse = `${nomPatrimoine}, ${bienVille}`;
+            const lotsToInsert = (saisieExpress.lots && saisieExpress.lots.length > 0)
+              ? saisieExpress.lots
+              : [
+                  {
+                    id: "1",
+                    nom: saisieExpress.typeLot?.trim() || "Chambre 1",
+                    loyer: Number(saisieExpress.loyerMensuel) || 75000,
+                    statut: (saisieExpress.statutOccupation === "vacant" ? "vacant" : "loue") as "loue" | "vacant",
+                    locataireNom: saisieExpress.locataireEnPlaceNom?.trim() || "",
+                  },
+                ];
 
-          // Insertion du lot dans la table `biens`
-          const { data: insertedBien, error: bienError } = await supabase
-            .from("biens")
-            .insert({
-              nom: bienNom,
-              adresse: bienAdresse,
-              ville: bienVille,
-              type: typeLot,
-              loyer_mensuel: montantLoyer,
-              charges: 0,
-              statut: bienStatut,
-              locataire_nom: locataireNom,
-              photos: [],
-              photo_principale: null,
-              archive: false,
-              organization_id: activeOrgId,
-            })
-            .select()
-            .maybeSingle();
+            let insertionErrorsCount = 0;
 
-          if (bienError) {
-            console.error("Erreur insertion bien onboarding:", bienError);
-            toast.error("Erreur lors de la configuration de votre premier lot", {
-              description: bienError.message || "Veuillez vérifier vos données et réessayer.",
-            });
-            setIsSubmitting(false);
-            return;
-          }
+            for (const lot of lotsToInsert) {
+              const lotNomComplet = `${nomPatrimoine} - ${lot.nom.trim()}`;
+              const lotStatut: "loué" | "vacant" = lot.statut === "loue" ? "loué" : "vacant";
+              const lotLocataire = lotStatut === "loué"
+                ? (lot.locataireNom?.trim() || "Locataire en place")
+                : null;
+              const lotLoyer = Number(lot.loyer) || 0;
 
-          // Si le bien est loué, générer une première échéance de loyer réelle
-          if (insertedBien && bienStatut === "loué") {
-            const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
-            const paymentTx = {
-              bien_nom: bienNom,
-              locataire_nom: locataireNom || "Locataire en place",
-              montant: montantLoyer,
-              methode: (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any,
-              statut: "en_attente" as const,
-              echeance,
-              organization_id: activeOrgId,
-            };
+              const { data: insertedBien, error: bienError } = await supabase
+                .from("biens")
+                .insert({
+                  nom: lotNomComplet,
+                  adresse: bienAdresse,
+                  ville: bienVille,
+                  type: lot.type || lot.nom.trim(),
+                  loyer_mensuel: lotLoyer,
+                  charges: 0,
+                  statut: lotStatut,
+                  locataire_nom: lotLocataire,
+                  photos: [],
+                  photo_principale: null,
+                  archive: false,
+                  organization_id: activeOrgId,
+                })
+                .select()
+                .maybeSingle();
 
-            const { error: txError } = await supabase
-              .from("loyers_transactions")
-              .insert(paymentTx);
+              if (bienError) {
+                console.error("Erreur insertion lot:", lotNomComplet, bienError);
+                insertionErrorsCount++;
+              } else if (insertedBien && lotStatut === "loué") {
+                // Créer une première échéance de loyer pour chaque lot loué
+                const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+                const { error: txError } = await supabase
+                  .from("loyers_transactions")
+                  .insert({
+                    bien_id: insertedBien.id,
+                    bien_nom: lotNomComplet,
+                    locataire_nom: lotLocataire || "Locataire en place",
+                    montant: lotLoyer,
+                    methode: (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any,
+                    statut: "en_attente" as const,
+                    echeance,
+                    organization_id: activeOrgId,
+                  });
 
-            if (txError) {
-              console.warn("Notice insertion loyer onboarding:", txError.message);
+                if (txError) {
+                  console.warn("Notice insertion loyer transaction:", txError.message);
+                }
+              }
+            }
+
+            if (insertionErrorsCount > 0 && insertionErrorsCount === lotsToInsert.length) {
+              toast.error("Erreur lors de la création de vos logements", {
+                description: "Veuillez vérifier votre connexion et réessayer.",
+              });
+              setIsSubmitting(false);
+              return;
             }
           }
 
