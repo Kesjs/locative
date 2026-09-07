@@ -6,46 +6,52 @@ import {
   Wallet,
   CheckCircle2,
   AlertCircle,
-  Copy,
-  Check,
   Smartphone,
-  Landmark,
-  ArrowRight,
   ShieldCheck,
   Clock,
   MessageSquare,
   X,
   Lock,
-  KeyRound,
+  ArrowRight,
+  Download,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { GeniusPayModal } from "./_components/GeniusPayModal";
+import ReceiptModal from "@/components/dashboard/ReceiptModal";
 
 export default function MonLoyerPage() {
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
-  const [selectedOperator, setSelectedOperator] = useState<"mtn" | "moov">("mtn");
-  const [copiedNumber, setCopiedNumber] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [dismissSecurityBanner, setDismissSecurityBanner] = useState(false);
 
   // Données dynamiques du bail locataire connectées à Supabase
-  const { data: rentInfo, isLoading } = useQuery({
+  const { data: rentInfo, isLoading, refetch } = useQuery({
     queryKey: ["locataire-loyer-status"],
     queryFn: async () => {
+      const currentDate = new Date();
+      const currentMonthStr = currentDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+      const formattedMonth = currentMonthStr.charAt(0).toUpperCase() + currentMonthStr.slice(1);
+
       let defaultData = {
+        leaseId: undefined as string | undefined,
+        bienId: undefined as string | undefined,
         montantLoyer: 75000,
         charges: 0,
         totalDu: 75000,
-        echeanceDate: "05/10/2026",
-        moisConcerne: "Septembre 2026",
+        echeanceDate: "05/" + String(currentDate.getMonth() + 1).padStart(2, "0") + "/" + currentDate.getFullYear(),
+        moisConcerne: formattedMonth,
         statut: "a_payer" as "a_payer" | "a_jour",
         bailleurNom: "Propriétaire Bailleur Lokka",
-        bailleurMomoMtn: "+229 97 00 11 22",
-        bailleurMoov: "+229 95 00 33 44",
+        bailleurTel: "+22997001122",
         bailleurWhatsapp: "22997001122",
         logementNom: "Logement Lokka",
+        tenantName: "Locataire Lokka",
+        tenantEmail: "",
+        tenantPhone: "+229",
       };
 
       if (!isSupabaseConfigured()) return defaultData;
@@ -55,6 +61,10 @@ export default function MonLoyerPage() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (user) {
+          defaultData.tenantEmail = user.email || "";
+          defaultData.tenantName = user.user_metadata?.full_name || user.email?.split("@")[0] || "Locataire";
+          defaultData.tenantPhone = user.user_metadata?.phone_number || "+229";
+
           // Chercher le locataire correspondant
           const { data: tenant } = await supabase
             .from("tenants")
@@ -63,9 +73,11 @@ export default function MonLoyerPage() {
             .limit(1)
             .maybeSingle();
 
-          // Chercher le bail lié
           let lease = null;
           if (tenant) {
+            defaultData.tenantName = tenant.full_name || defaultData.tenantName;
+            defaultData.tenantPhone = tenant.phone_number || defaultData.tenantPhone;
+
             const { data: l } = await supabase
               .from("leases")
               .select("*, bien:biens(*)")
@@ -75,7 +87,6 @@ export default function MonLoyerPage() {
             lease = l;
           }
 
-          // Si pas de bail trouvé par tenant_id, chercher le premier bien assigné à ce locataire
           if (!lease) {
             const { data: assignedBien } = await supabase
               .from("biens")
@@ -86,25 +97,36 @@ export default function MonLoyerPage() {
 
             if (assignedBien) {
               const montant = Number(assignedBien.loyer_mensuel) || 75000;
-              return {
-                ...defaultData,
-                montantLoyer: montant,
-                totalDu: montant,
-                logementNom: assignedBien.nom,
-              };
+              defaultData.montantLoyer = montant;
+              defaultData.totalDu = montant;
+              defaultData.logementNom = assignedBien.nom;
+              defaultData.bienId = assignedBien.id;
             }
-          }
-
-          if (lease && lease.bien) {
+          } else if (lease && lease.bien) {
             const montant = Number(lease.rent_amount) || Number(lease.bien.loyer_mensuel) || 75000;
             const charges = Number(lease.charges_amount) || Number(lease.bien.charges) || 0;
-            return {
-              ...defaultData,
-              montantLoyer: montant,
-              charges,
-              totalDu: montant + charges,
-              logementNom: lease.bien.nom,
-            };
+            defaultData.leaseId = lease.id;
+            defaultData.bienId = lease.bien.id;
+            defaultData.montantLoyer = montant;
+            defaultData.charges = charges;
+            defaultData.totalDu = montant + charges;
+            defaultData.logementNom = lease.bien.nom;
+          }
+
+          // Vérifier si une transaction payée existe déjà pour la période courante
+          if (defaultData.leaseId) {
+            const { data: paidTx } = await supabase
+              .from("loyers_transactions")
+              .select("id, statut")
+              .eq("lease_id", defaultData.leaseId)
+              .eq("statut", "paye")
+              .order("date_reglement", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (paidTx) {
+              defaultData.statut = "a_jour";
+            }
           }
         }
       } catch (err) {
@@ -115,27 +137,10 @@ export default function MonLoyerPage() {
     },
   });
 
-  const handleCopyNumber = (num: string) => {
-    navigator.clipboard.writeText(num.replace(/[^0-9+]/g, ""));
-    setCopiedNumber(true);
-    toast.success("Numéro de paiement copié !");
-    setTimeout(() => setCopiedNumber(false), 2000);
-  };
-
-  const handleNotifyWhatsapp = () => {
-    if (!rentInfo) return;
-    const msg = encodeURIComponent(
-      "Bonjour " + rentInfo.bailleurNom + ",\nJe viens d'effectuer le règlement de mon loyer de " + rentInfo.totalDu.toLocaleString("fr-FR") + " FCFA pour \"" + rentInfo.logementNom + "\" via " + (selectedOperator === "mtn" ? "MTN MoMo" : "Moov Money") + ".\nMerci de valider et d'émettre la quittance certifiée Lokka.\nBien cordialement."
-    );
-    window.open("https://wa.me/" + rentInfo.bailleurWhatsapp + "?text=" + msg, "_blank");
-    toast.success("Discussion WhatsApp ouverte avec le bailleur !");
-    setIsPayModalOpen(false);
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-28 bg-muted/60 animate-pulse rounded-2xl" />
+        <div className="h-24 bg-muted/60 animate-pulse rounded-2xl" />
         <div className="h-64 bg-muted/60 animate-pulse rounded-2xl" />
       </div>
     );
@@ -194,169 +199,124 @@ export default function MonLoyerPage() {
           Mon Loyer &amp; Échéances
         </h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          Suivi de votre situation locative, règlement direct Mobile Money et téléchargement des quittances certifiées.
+          Suivi de vos règlements, paiement automatisé via Genius Pay et téléchargement instantané de quittance.
         </p>
       </div>
 
-      {/* ── CARTE MAÎTRESSE : STATUT DU LOYER ── */}
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden shadow-xs">
-        <div className="max-w-md mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-wide bg-muted border border-border text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span>Échéance {rentInfo.moisConcerne}</span>
-          </div>
-
+      {/* ── CARTE HÉROÏQUE LOYER & STATUT ── */}
+      <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
           <div>
-            <div className="text-[13px] text-muted-foreground font-medium mb-1">
-              Montant total exigible (Loyer + Charges)
+            <div className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-emerald-600" />
+              <span>Période : {rentInfo.moisConcerne}</span>
             </div>
-            <div className="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-              {rentInfo.totalDu.toLocaleString("fr-FR")}{" "}
-              <span className="text-xl sm:text-2xl font-sans font-semibold text-muted-foreground">
-                FCFA
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="font-mono text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+                {rentInfo.totalDu.toLocaleString("fr-FR")}
+              </span>
+              <span className="text-base sm:text-lg font-bold text-muted-foreground">
+                FCFA / mois
               </span>
             </div>
             <div className="text-[12px] text-muted-foreground mt-1">
-              Détail : {rentInfo.montantLoyer.toLocaleString("fr-FR")} FCFA (loyer) {rentInfo.charges > 0 ? "+ " + rentInfo.charges.toLocaleString("fr-FR") + " FCFA (charges)" : ""}
+              Loyer net : {rentInfo.montantLoyer.toLocaleString("fr-FR")} FCFA {rentInfo.charges > 0 ? "+ " + rentInfo.charges.toLocaleString("fr-FR") + " FCFA charges" : ""}
             </div>
           </div>
 
+          <div>
+            {isUpToDate ? (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-[13px]">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Loyer Réglé &amp; À Jour</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 font-bold text-[13px]">
+                <Clock className="w-4 h-4" />
+                <span>À régler avant le 5 du mois</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action de Paiement */}
+        <div className="pt-6">
           {isUpToDate ? (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-2 font-bold text-[14px]">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span>Votre loyer est entièrement à jour</span>
+            <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p className="text-[13.5px] font-bold text-emerald-950 dark:text-emerald-200">
+                  Votre quittance certifiée conforme Loi 2022-30 est disponible
+                </p>
+                <p className="text-[12px] text-emerald-800 dark:text-emerald-400">
+                  Règlement validé par votre bailleur. Vous pouvez la télécharger à tout moment.
+                </p>
+              </div>
+              <Link
+                href="/locataire/quittances"
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-bold transition shadow-xs flex items-center justify-center gap-1.5 shrink-0"
+              >
+                <Download className="w-4 h-4" />
+                <span>Consulter mes quittances</span>
+              </Link>
             </div>
           ) : (
-            <div className="space-y-3 pt-2">
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-[13px] flex items-center justify-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
-                <span>À régler au plus tard le <strong>{rentInfo.echeanceDate}</strong></span>
-              </div>
-
+            <div className="space-y-3">
               <button
                 type="button"
                 onClick={() => setIsPayModalOpen(true)}
-                className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[15px] font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-[15px] font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 cursor-pointer"
               >
                 <Smartphone className="w-5 h-5" />
-                <span>Payer via Mobile Money (MoMo / Flooz)</span>
+                <span>Payer mon loyer avec Genius Pay (MTN MoMo / Moov)</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
               </button>
+              <p className="text-center text-[11.5px] text-muted-foreground flex items-center justify-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Paiement sécurisé crypté par Genius Pay · Quittance certifiée générée immédiatement</span>
+              </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── ACCÈS RAPIDES UTILES ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Link
-          href="/locataire/quittances"
-          className="p-5 bg-card border border-border rounded-2xl hover:border-emerald-500/40 transition-all flex items-center justify-between group shadow-xs"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="font-bold text-[14px] text-foreground">Mes Quittances Certifiées</div>
-              <div className="text-[12px] text-muted-foreground">Télécharger vos reçus officiels Loi 2022-30</div>
-            </div>
-          </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
-        </Link>
+      {/* ── MODALE GENIUS PAY ── */}
+      <GeniusPayModal
+        isOpen={isPayModalOpen}
+        onClose={() => setIsPayModalOpen(false)}
+        rentAmount={rentInfo.montantLoyer}
+        chargesAmount={rentInfo.charges}
+        logementNom={rentInfo.logementNom}
+        leaseId={rentInfo.leaseId}
+        bienId={rentInfo.bienId}
+        tenantName={rentInfo.tenantName}
+        tenantEmail={rentInfo.tenantEmail}
+        tenantPhone={rentInfo.tenantPhone}
+        onPaymentSuccess={() => {
+          refetch();
+        }}
+        onOpenReceipt={(tx) => {
+          setSelectedReceipt({
+            receiptNo: tx?.transactionId || "GP-LOK-VERIFIED",
+            date: new Date().toLocaleDateString("fr-FR"),
+            month: rentInfo.moisConcerne,
+            tenantName: rentInfo.tenantName || "Locataire Lokka",
+            propertyTitle: rentInfo.logementNom,
+            propertyAddress: "Quartier Haie Vive, Cotonou, Bénin",
+            amountFcfa: rentInfo.totalDu,
+            amountEuros: Math.round(rentInfo.totalDu / 655.957),
+            channel: "Genius Pay (" + (tx?.operator || "mtn").toUpperCase() + ")",
+            ownerName: rentInfo.bailleurNom,
+            depositMonths: 3,
+          });
+        }}
+      />
 
-        <Link
-          href="/locataire/assistance"
-          className="p-5 bg-card border border-border rounded-2xl hover:border-emerald-500/40 transition-all flex items-center justify-between group shadow-xs"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-700 dark:text-blue-400">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="font-bold text-[14px] text-foreground">Signaler une Panne</div>
-              <div className="text-[12px] text-muted-foreground">Demande d'intervention SBEE, SONEB ou serrurerie</div>
-            </div>
-          </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
-        </Link>
-      </div>
-
-      {/* ── MODALE DE PAIEMENT MOBILE MONEY DIRECT ── */}
-      <Dialog open={isPayModalOpen} onOpenChange={setIsPayModalOpen}>
-        <DialogContent className="sm:max-w-md bg-card border-border p-6 rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl font-normal text-foreground">
-              Paiement Mobile Money
-            </DialogTitle>
-            <p className="text-[13px] text-muted-foreground">
-              Réglez votre loyer de <strong>{rentInfo.totalDu.toLocaleString("fr-FR")} FCFA</strong> directement sur le compte de votre bailleur.
-            </p>
-          </DialogHeader>
-
-          <div className="space-y-4 pt-2">
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setSelectedOperator("mtn")}
-                className={cn(
-                  "p-3 rounded-xl border text-left transition-all cursor-pointer",
-                  selectedOperator === "mtn"
-                    ? "bg-amber-500/10 border-amber-500 text-amber-900 dark:text-amber-200 font-bold"
-                    : "bg-muted/30 border-border text-muted-foreground"
-                )}
-              >
-                <div className="text-[12px] uppercase tracking-wider font-bold">MTN Bénin</div>
-                <div className="text-[13px] font-semibold mt-0.5">Mobile Money (*880#)</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedOperator("moov")}
-                className={cn(
-                  "p-3 rounded-xl border text-left transition-all cursor-pointer",
-                  selectedOperator === "moov"
-                    ? "bg-blue-500/10 border-blue-500 text-blue-900 dark:text-blue-200 font-bold"
-                    : "bg-muted/30 border-border text-muted-foreground"
-                )}
-              >
-                <div className="text-[12px] uppercase tracking-wider font-bold">Moov Bénin</div>
-                <div className="text-[13px] font-semibold mt-0.5">Moov Money (*855#)</div>
-              </button>
-            </div>
-
-            <div className="p-4 rounded-xl bg-muted/40 border border-border space-y-2">
-              <span className="text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground block">
-                Numéro de réception du bailleur
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-lg font-bold text-foreground">
-                  {selectedOperator === "mtn" ? rentInfo.bailleurMomoMtn : rentInfo.bailleurMoov}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleCopyNumber(selectedOperator === "mtn" ? rentInfo.bailleurMomoMtn : rentInfo.bailleurMoov)}
-                  className="px-2.5 py-1.5 rounded-lg bg-card hover:bg-muted border border-border text-[12px] font-bold text-foreground inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                >
-                  {copiedNumber ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedNumber ? "Copié" : "Copier"}</span>
-                </button>
-              </div>
-              <p className="text-[11.5px] text-muted-foreground">
-                Titulaire : {rentInfo.bailleurNom}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleNotifyWhatsapp}
-              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13.5px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>Confirmer le virement sur WhatsApp</span>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* ── MODALE QUITTANCE CERTIFIÉE ── */}
+      <ReceiptModal
+        isOpen={Boolean(selectedReceipt)}
+        onClose={() => setSelectedReceipt(null)}
+        data={selectedReceipt}
+      />
     </div>
   );
 }

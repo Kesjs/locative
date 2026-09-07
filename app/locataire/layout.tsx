@@ -8,7 +8,7 @@ import {
   Building2,
   Receipt,
   Wrench,
-  User,
+  Settings,
   ShieldCheck,
   LogOut,
 } from "lucide-react";
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { name: "Logement", href: "/locataire/logement", icon: Building2 },
   { name: "Quittances", href: "/locataire/quittances", icon: Receipt },
   { name: "Assistance", href: "/locataire/assistance", icon: Wrench },
-  { name: "Compte", href: "/locataire/compte", icon: User },
+  { name: "Paramètres", href: "/locataire/compte", icon: Settings },
 ];
 
 export default function LocataireLayout({ children }: { children: React.ReactNode }) {
@@ -103,7 +103,7 @@ export default function LocataireLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 pb-24 md:pb-8">
+      <main className="flex-1 pb-28 md:pb-10">
         <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full">
           {children}
         </div>

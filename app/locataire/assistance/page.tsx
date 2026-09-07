@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Wrench,
   Camera,
@@ -9,33 +9,52 @@ import {
   Clock,
   Send,
   Plus,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const STORAGE_KEY = "lokka_locataire_tickets";
+
+interface Ticket {
+  id: string;
+  type: string;
+  description: string;
+  date: string;
+  statut: "Nouveau" | "En cours" | "Résolu";
+  urgence: "Normale" | "Moyenne" | "Haute";
+}
+
+const DEFAULT_TICKETS: Ticket[] = [
+  {
+    id: "T-2026-01",
+    type: "Plomberie (Robinet cuisine)",
+    description: "Léger suintement sous le siphon de l'évier.",
+    date: "12 Août 2026",
+    statut: "Résolu",
+    urgence: "Normale",
+  },
+];
 
 export default function AssistancePage() {
-  const [signalements, setSignalements] = useState([
-    {
-      id: "T-2026-08",
-      type: "Plomberie (Robinet cuisine)",
-      description: "Léger suintement sous le siphon de l'évier.",
-      date: "12 Août 2026",
-      statut: "Résolu",
-      urgence: "Normale",
-    },
-    {
-      id: "T-2026-09",
-      type: "Électricité SBEE",
-      description: "Le disjoncteur différentiel du salon saute lors de la mise en marche du chauffe-eau.",
-      date: "30 Août 2026",
-      statut: "En cours",
-      urgence: "Haute",
-    },
-  ]);
-
+  const [signalements, setSignalements] = useState<Ticket[]>(DEFAULT_TICKETS);
   const [typePanne, setTypePanne] = useState("Plomberie (Fuite, robinet, canalisation)");
   const [urgence, setUrgence] = useState<"Normale" | "Moyenne" | "Haute">("Normale");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmitted, setLastSubmitted] = useState<Ticket | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSignalements(parsed);
+        }
+      }
+    } catch (_) {}
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,20 +65,33 @@ export default function AssistancePage() {
 
     setIsSubmitting(true);
     setTimeout(() => {
-      const newTicket = {
-        id: `T-2026-${String(signalements.length + 10).padStart(2, "0")}`,
+      const newTicket: Ticket = {
+        id: "T-" + new Date().getFullYear() + "-" + String(signalements.length + 1).padStart(2, "0"),
         type: typePanne,
-        description,
+        description: description.trim(),
         date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }),
         statut: "Nouveau",
         urgence,
       };
 
-      setSignalements([newTicket, ...signalements]);
+      const updated = [newTicket, ...signalements];
+      setSignalements(updated);
+      setLastSubmitted(newTicket);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (_) {}
+
       setDescription("");
       setIsSubmitting(false);
-      toast.success("Signalement transmis à votre propriétaire !");
-    }, 400);
+      toast.success("Incident enregistré ! Vous pouvez également le notifier sur WhatsApp.");
+    }, 300);
+  };
+
+  const handleSendToLandlordWhatsapp = (t: Ticket) => {
+    const msg = encodeURIComponent(
+      "Bonjour,\nJe vous signale un incident dans mon logement :\n- Type : " + t.type + "\n- Urgence : " + t.urgence + "\n- Détail : " + t.description + "\n- Référence Lokka : " + t.id + "\nMerci de m'indiquer la démarche à suivre.\nCordialement."
+    );
+    window.open("https://wa.me/22997001122?text=" + msg, "_blank");
   };
 
   return (
@@ -76,7 +108,7 @@ export default function AssistancePage() {
           Assistance &amp; Signalements
         </h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          Signalez une panne ou un incident dans votre logement. Votre propriétaire recevra immédiatement une alerte.
+          Signalez une panne ou un incident dans votre logement. Votre propriétaire recevra immédiatement l'alerte.
         </p>
       </div>
 
@@ -93,7 +125,7 @@ export default function AssistancePage() {
               <select
                 value={typePanne}
                 onChange={(e) => setTypePanne(e.target.value)}
-                className="w-full border border-border rounded-xl px-3 py-2 text-[13px] bg-card text-foreground outline-none cursor-pointer"
+                className="w-full border border-border rounded-xl px-3.5 py-2.5 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-2xs"
               >
                 <option value="Plomberie (Fuite, robinet, canalisation)">Plomberie (Fuite, robinet, canalisation)</option>
                 <option value="Électricité SBEE (Disjoncteur, prise, coupure)">Électricité SBEE (Disjoncteur, prise, coupure)</option>
@@ -113,15 +145,16 @@ export default function AssistancePage() {
                     key={u}
                     type="button"
                     onClick={() => setUrgence(u)}
-                    className={`py-2 text-[12px] font-bold rounded-xl border transition-all cursor-pointer ${
+                    className={cn(
+                      "py-2 text-[12px] font-bold rounded-xl border transition-all cursor-pointer",
                       urgence === u
                         ? u === "Haute"
-                          ? "bg-rose-500/10 border-rose-500 text-rose-700 dark:text-rose-400 font-bold"
+                          ? "bg-rose-500/10 border-rose-500 text-rose-700 dark:text-rose-400 shadow-2xs"
                           : u === "Moyenne"
-                          ? "bg-amber-500/10 border-amber-500 text-amber-700 dark:text-amber-400 font-bold"
-                          : "bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-400 font-bold"
+                          ? "bg-amber-500/10 border-amber-500 text-amber-700 dark:text-amber-400 shadow-2xs"
+                          : "bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-2xs"
                         : "bg-muted/30 border-border text-muted-foreground"
-                    }`}
+                    )}
                   >
                     {u}
                   </button>
@@ -139,12 +172,12 @@ export default function AssistancePage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Expliquez brièvement les symptômes de la panne..."
-              className="w-full border border-border rounded-xl p-3 text-[13px] bg-card text-foreground outline-none resize-none"
+              className="w-full border border-border rounded-xl p-3 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 resize-none shadow-2xs"
             />
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            <label className="inline-flex items-center gap-2 px-3.5 py-2 border border-border rounded-xl text-[12.5px] font-bold text-foreground bg-muted/40 hover:bg-muted cursor-pointer transition-colors">
+            <label className="inline-flex items-center gap-2 px-3.5 py-2.5 border border-border rounded-xl text-[12.5px] font-bold text-foreground bg-muted/40 hover:bg-muted cursor-pointer transition-colors">
               <Camera className="w-4 h-4 text-emerald-600" />
               <span>Joindre une photo</span>
               <input type="file" accept="image/*" capture="environment" className="hidden" />
@@ -153,13 +186,35 @@ export default function AssistancePage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="py-2.5 px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[13.5px] font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="py-2.5 px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[13px] font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
-              <span>{isSubmitting ? "Transmission en cours..." : "Envoyer le signalement"}</span>
+              <span>{isSubmitting ? "Transmission en cours..." : "Enregistrer le signalement"}</span>
             </button>
           </div>
         </form>
+
+        {/* Bannière de notification WhatsApp du dernier incident */}
+        {lastSubmitted && (
+          <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-emerald-950 animate-in fade-in duration-150">
+            <div>
+              <p className="text-[13px] font-bold">
+                Incident enregistré sous la référence {lastSubmitted.id}
+              </p>
+              <p className="text-[12px] text-emerald-800">
+                Vous pouvez envoyer immédiatement ce diagnostic à votre propriétaire sur WhatsApp pour une prise en charge rapide.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSendToLandlordWhatsapp(lastSubmitted)}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[12.5px] font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-2xs cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Notifier sur WhatsApp</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── HISTORIQUE DES SIGNALEMENTS ── */}
@@ -181,13 +236,25 @@ export default function AssistancePage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-[14px] text-foreground">{s.type}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${badgeClass}`}>
+                    <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border", badgeClass)}>
                       {s.statut}
+                    </span>
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      Urgence : {s.urgence}
                     </span>
                   </div>
                   <p className="text-[12.5px] text-muted-foreground mt-1">{s.description}</p>
-                  <span className="text-[11px] text-muted-foreground mt-1 block">Déclaré le {s.date}</span>
+                  <span className="text-[11px] text-muted-foreground mt-1 block">Déclaré le {s.date} · Réf: {s.id}</span>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSendToLandlordWhatsapp(s)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground border border-border rounded-lg text-[12px] font-bold transition self-end sm:self-auto cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Rappeler sur WhatsApp</span>
+                </button>
               </div>
             );
           })}

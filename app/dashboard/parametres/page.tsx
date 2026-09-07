@@ -53,6 +53,10 @@ export default function ParametresPage() {
     iban: "",
     preferredChannel: "mtn_momo",
     tauxCommission: 10, // 10% Loi 2022-30
+    geniusPayEnabled: true,
+    geniusPayMode: "lokka_managed", // "lokka_managed" | "custom_merchant"
+    geniusPayApiKey: "",
+    geniusPaySecretKey: "",
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -684,6 +688,97 @@ export default function ParametresPage() {
                   />
                 </div>
               </div>
+
+              {/* ======================================================== */}
+              {/* PASSERELLE GENIUS PAY (PAIEMENTS EN LIGNE AUTOMATISÉS)   */}
+              {/* ======================================================== */}
+              <div className="sm:col-span-2 p-5 bg-emerald-500/5 border border-emerald-500/25 rounded-2xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-500/15 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                      GP
+                    </div>
+                    <div>
+                      <span className="text-[13.5px] font-bold text-emerald-950 dark:text-emerald-200 block">
+                        Passerelle de Paiement Genius Pay (Bénin &amp; UEMOA)
+                      </span>
+                      <span className="text-[11px] text-emerald-800 dark:text-emerald-400">
+                        Encaissement automatisé MTN MoMo (*880#), Moov Money (*855#) et Cartes bancaires
+                      </span>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full w-fit">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Intégration Active
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentSettings({ ...paymentSettings, geniusPayMode: "lokka_managed" })}
+                    className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
+                      paymentSettings.geniusPayMode === "lokka_managed"
+                        ? "bg-white dark:bg-card border-emerald-500 shadow-2xs ring-1 ring-emerald-500/20"
+                        : "bg-muted/30 border-border text-muted-foreground"
+                    }`}
+                  >
+                    <div className="text-[12.5px] font-bold text-foreground">
+                      Mode 1 : Reversement Automatique Lokka (Recommandé)
+                    </div>
+                    <p className="text-[11.5px] text-muted-foreground mt-1">
+                      Vos locataires paient en 1 clic via Genius Pay. Les fonds sont automatiquement reversés sur votre numéro MoMo MTN/Moov renseigné ci-dessus.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentSettings({ ...paymentSettings, geniusPayMode: "custom_merchant" })}
+                    className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
+                      paymentSettings.geniusPayMode === "custom_merchant"
+                        ? "bg-white dark:bg-card border-emerald-500 shadow-2xs ring-1 ring-emerald-500/20"
+                        : "bg-muted/30 border-border text-muted-foreground"
+                    }`}
+                  >
+                    <div className="text-[12.5px] font-bold text-foreground">
+                      Mode 2 : Compte Marchand Genius Pay Dédié
+                    </div>
+                    <p className="text-[11.5px] text-muted-foreground mt-1">
+                      Pour agences et SCI ayant leur propre compte marchand sur pay.genius.ci. Encaissement direct sur votre solde marchand.
+                    </p>
+                  </button>
+                </div>
+
+                {paymentSettings.geniusPayMode === "custom_merchant" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white dark:bg-card rounded-xl border border-border animate-in fade-in duration-150">
+                    <div>
+                      <label className="block text-[11px] font-bold text-muted-foreground uppercase mb-1">
+                        Clé API Publique Genius Pay
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="gp_pk_live_..."
+                        value={paymentSettings.geniusPayApiKey}
+                        onChange={(e) => setPaymentSettings({ ...paymentSettings, geniusPayApiKey: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-background border border-border rounded-xl text-[12.5px] font-mono text-foreground outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-muted-foreground uppercase mb-1">
+                        Clé Secrète Genius Pay (X-Secret-Key)
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="gp_sk_live_..."
+                        value={paymentSettings.geniusPaySecretKey}
+                        onChange={(e) => setPaymentSettings({ ...paymentSettings, geniusPaySecretKey: e.target.value })}
+                        className="w-full px-3.5 py-2 bg-background border border-border rounded-xl text-[12.5px] font-mono text-foreground outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
           </div>
         )}

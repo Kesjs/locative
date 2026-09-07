@@ -13,18 +13,21 @@ import {
   EyeOff,
   CheckCircle2,
   KeyRound,
+  Smartphone,
+  Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export default function ComptePage() {
   const router = useRouter();
   const [nom, setNom] = useState("Locataire Lokka");
   const [telephone, setTelephone] = useState("+229 97 00 00 00");
   const [email, setEmail] = useState("");
-  const [contactUrgenceNom, setContactUrgenceNom] = useState("Mme Mensah Awa (Épouse)");
-  const [contactUrgenceTel, setContactUrgenceTel] = useState("+229 96 11 22 33");
+  const [preferredOperator, setPreferredOperator] = useState<"mtn" | "moov">("mtn");
+  const [whatsappReminders, setWhatsappReminders] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   // État Sécurité / Mot de passe
@@ -45,6 +48,9 @@ export default function ComptePage() {
           if (user.user_metadata?.phone_number) {
             setTelephone(user.user_metadata.phone_number);
           }
+          if (user.user_metadata?.preferred_operator) {
+            setPreferredOperator(user.user_metadata.preferred_operator);
+          }
         }
       });
     }
@@ -57,10 +63,15 @@ export default function ComptePage() {
       if (isSupabaseConfigured()) {
         const supabase = createClient();
         await supabase.auth.updateUser({
-          data: { full_name: nom, phone_number: telephone },
+          data: {
+            full_name: nom,
+            phone_number: telephone,
+            preferred_operator: preferredOperator,
+            whatsapp_reminders: whatsappReminders,
+          },
         });
       }
-      toast.success("Vos coordonnées ont été mises à jour avec succès !");
+      toast.success("Vos paramètres ont été enregistrés avec succès !");
     } catch (err) {
       toast.error("Erreur lors de la mise à jour des coordonnées.");
     } finally {
@@ -109,28 +120,31 @@ export default function ComptePage() {
     router.push("/auth/locataire");
   };
 
+  const isPasswordStrong = newPassword.length >= 8;
+  const isPasswordValid = newPassword.length >= 6;
+
   return (
     <div className="space-y-6">
       {/* ── HEADER ÉDITORIAL ── */}
       <div className="p-5 sm:p-6 bg-card border border-border rounded-2xl shadow-xs">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-            Profil &amp; Sécurité
+            Paramètres &amp; Sécurité
           </span>
           <span className="text-[11px] text-muted-foreground font-medium">Bailleur notifié</span>
         </div>
         <h1 className="font-serif text-2xl sm:text-3xl font-normal text-foreground tracking-tight">
-          Mon Compte Locataire
+          Mon Compte &amp; Préférences
         </h1>
         <p className="text-[13px] text-muted-foreground mt-0.5">
-          Consultez et mettez à jour vos coordonnées personnelles et sécurisez vos identifiants d'accès.
+          Gérez vos coordonnées personnelles, vos options de paiement Genius Pay et personnalisez votre mot de passe d'accès.
         </p>
       </div>
 
       {/* ── COORDONNÉES PRINCIPALES ── */}
       <form onSubmit={handleSaveProfile} className="space-y-6">
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-4">
-          <h3 className="text-[15px] font-bold text-foreground">Coordonnées du Locataire</h3>
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-5">
+          <h3 className="text-[15px] font-bold text-foreground">Profil &amp; Coordonnées</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -141,19 +155,19 @@ export default function ComptePage() {
                 type="text"
                 value={nom}
                 onChange={(e) => setNom(e.target.value)}
-                className="w-full border border-border rounded-xl px-3 py-2 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
               />
             </div>
 
             <div>
               <label className="block text-[12px] font-bold text-muted-foreground mb-1">
-                Numéro de téléphone / MoMo (+229)
+                Numéro Mobile Money (+229)
               </label>
               <input
                 type="tel"
                 value={telephone}
                 onChange={(e) => setTelephone(e.target.value)}
-                className="w-full border border-border rounded-xl px-3 py-2 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
               />
             </div>
 
@@ -165,25 +179,82 @@ export default function ComptePage() {
                 type="email"
                 readOnly
                 value={email}
-                className="w-full border border-border rounded-xl px-3 py-2 text-[13px] bg-muted/40 text-muted-foreground outline-none cursor-not-allowed"
+                className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-muted/40 text-muted-foreground outline-none cursor-not-allowed"
               />
             </div>
           </div>
 
-          <div className="pt-1">
+          {/* ── PRÉFÉRENCES DE PAIEMENT GENIUS PAY ── */}
+          <div className="pt-2 border-t border-border space-y-3">
+            <label className="block text-[12px] font-bold text-muted-foreground uppercase tracking-wider">
+              Opérateur favori pour vos règlements Genius Pay
+            </label>
+            <div className="grid grid-cols-2 gap-3 max-w-md">
+              <button
+                type="button"
+                onClick={() => setPreferredOperator("mtn")}
+                className={cn(
+                  "p-3 rounded-xl border text-left transition cursor-pointer",
+                  preferredOperator === "mtn"
+                    ? "bg-amber-500/10 border-amber-500 text-amber-950 dark:text-amber-200 shadow-2xs"
+                    : "bg-muted/30 border-border text-muted-foreground"
+                )}
+              >
+                <div className="text-[12px] font-bold">MTN Mobile Money</div>
+                <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">*880# Bénin</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPreferredOperator("moov")}
+                className={cn(
+                  "p-3 rounded-xl border text-left transition cursor-pointer",
+                  preferredOperator === "moov"
+                    ? "bg-blue-500/10 border-blue-500 text-blue-950 dark:text-blue-200 shadow-2xs"
+                    : "bg-muted/30 border-border text-muted-foreground"
+                )}
+              >
+                <div className="text-[12px] font-bold">Moov Money</div>
+                <div className="text-[11px] text-blue-700 dark:text-blue-400 mt-0.5">*855# Bénin (Flooz)</div>
+              </button>
+            </div>
+          </div>
+
+          {/* ── NOTIFICATIONS WHATSAPP ── */}
+          <div className="pt-2 border-t border-border flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Bell className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
+              <div>
+                <span className="text-[13px] font-bold text-foreground block">
+                  Rappels d'échéances sur WhatsApp
+                </span>
+                <span className="text-[11.5px] text-muted-foreground">
+                  Recevoir une notification bienveillante 5 jours avant le 5 du mois
+                </span>
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={whatsappReminders}
+              onChange={(e) => setWhatsappReminders(e.target.checked)}
+              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+            />
+          </div>
+
+          <div className="pt-2">
             <button
               type="submit"
               disabled={isSaving}
               className="py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-bold transition-all shadow-xs inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              <span>{isSaving ? "Enregistrement..." : "Enregistrer mes coordonnées"}</span>
+              <span>{isSaving ? "Enregistrement..." : "Enregistrer mes préférences"}</span>
             </button>
           </div>
         </div>
       </form>
 
-      {/* ── SÉCURITÉ & MOT DE PASSE (Recommandé dès la 1ère connexion) ── */}
+      {/* ── SÉCURITÉ & MOT DE PASSE ── */}
       <form id="securite" onSubmit={handleUpdatePassword} className="space-y-6">
         <div className="bg-card border border-emerald-300/80 dark:border-emerald-700/80 rounded-2xl p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
@@ -193,7 +264,7 @@ export default function ComptePage() {
                 <span>Sécurité &amp; Mot de Passe</span>
               </h3>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                Personnalisez le mot de passe temporaire qui vous a été transmis dans votre courriel d'invitation.
+                Personnalisez le mot de passe temporaire reçu par courriel pour sécuriser vos données.
               </p>
             </div>
             <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
@@ -213,7 +284,7 @@ export default function ComptePage() {
                   placeholder="Min. 6 caractères"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full border border-border rounded-xl px-3 py-2 pr-10 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full border border-border rounded-xl px-3 py-2.5 pr-10 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
                 />
                 <button
                   type="button"
@@ -223,6 +294,19 @@ export default function ComptePage() {
                   {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {newPassword && (
+                <div className="mt-1.5 flex items-center gap-1.5 text-[11px]">
+                  <div
+                    className={cn(
+                      "h-1 rounded-full flex-1 transition-all",
+                      isPasswordStrong ? "bg-emerald-500" : isPasswordValid ? "bg-amber-500" : "bg-rose-400"
+                    )}
+                  />
+                  <span className="font-semibold text-muted-foreground">
+                    {isPasswordStrong ? "Fort" : isPasswordValid ? "Moyen" : "Trop court"}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div>
@@ -235,7 +319,7 @@ export default function ComptePage() {
                 placeholder="Retapez votre mot de passe"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border border-border rounded-xl px-3 py-2 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-card text-foreground outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
               />
             </div>
           </div>
