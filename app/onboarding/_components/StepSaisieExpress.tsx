@@ -129,7 +129,7 @@ export function StepSaisieExpress({
               <input
                 type="text"
                 inputMode="numeric"
-                value={data.loyerMensuel !== undefined ? data.loyerMensuel : ""}
+                value={data.loyerMensuel ? Number(data.loyerMensuel).toLocaleString("fr-FR") : ""}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
                   updateField("loyerMensuel", val ? parseInt(val, 10) : undefined);
@@ -309,7 +309,7 @@ export function StepSaisieExpress({
               <input
                 type="text"
                 inputMode="numeric"
-                value={data.loyerActuelMandat !== undefined ? data.loyerActuelMandat : ""}
+                value={data.loyerActuelMandat ? Number(data.loyerActuelMandat).toLocaleString("fr-FR") : ""}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
                   updateField("loyerActuelMandat", val ? parseInt(val, 10) : undefined);

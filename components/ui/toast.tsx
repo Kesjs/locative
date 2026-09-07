@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Toaster as SonnerToaster, toast as sonnerToast } from "sonner";
+import { AlertCircle, CheckCircle2, AlertTriangle, Info, Loader2 } from "lucide-react";
 
 export interface ToasterProps {
   position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
@@ -9,31 +10,35 @@ export interface ToasterProps {
 
 /**
  * Toaster Sonner configuré en bas à droite (bottom-right)
- * avec styles riches et bordures douces conformes aux standards SaaS.
+ * Design Promax : carte blanche neutre, ombre soyeuse, icônes statutaires
+ * et bouton de fermeture croix (sans fond rouge agressif).
  */
 export function Toaster({ position = "bottom-right" }: ToasterProps) {
   return (
     <SonnerToaster
       position={position}
-      richColors
       closeButton
       expand={false}
       className="toaster group"
+      icons={{
+        error: <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />,
+        success: <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />,
+        warning: <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />,
+        info: <Info className="w-5 h-5 text-blue-500 shrink-0" />,
+        loading: <Loader2 className="w-5 h-5 text-emerald-600 animate-spin shrink-0" />,
+      }}
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-card group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-xl group-[.toaster]:rounded-2xl group-[.toaster]:p-4 group-[.toaster]:text-[13px] group-[.toaster]:font-sans",
-          description: "group-[.toast]:text-muted-foreground group-[.toast]:text-[12px] group-[.toast]:mt-0.5",
+            "group toast group-[.toaster]:bg-white group-[.toaster]:text-slate-900 group-[.toaster]:border group-[.toaster]:border-slate-200/90 group-[.toaster]:shadow-xl group-[.toaster]:rounded-2xl group-[.toaster]:p-4 group-[.toaster]:text-[13px] group-[.toaster]:font-sans",
+          title: "group-[.toast]:font-bold group-[.toast]:text-slate-900 group-[.toast]:text-[13px]",
+          description: "group-[.toast]:text-slate-500 group-[.toast]:text-[12px] group-[.toast]:mt-0.5",
           actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:font-bold group-[.toast]:rounded-xl",
+            "group-[.toast]:bg-emerald-600 group-[.toast]:text-white group-[.toast]:font-bold group-[.toast]:rounded-xl group-[.toast]:px-3 group-[.toast]:py-1.5 group-[.toast]:text-[12px]",
           cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground group-[.toast]:rounded-xl",
+            "group-[.toast]:bg-slate-100 group-[.toast]:text-slate-700 group-[.toast]:rounded-xl",
           closeButton:
-            "group-[.toast]:border group-[.toast]:border-border/70 group-[.toast]:bg-card group-[.toast]:hover:bg-muted group-[.toast]:text-foreground group-[.toast]:rounded-lg",
-          error: "group-[.toaster]:!bg-rose-50/95 group-[.toaster]:!text-rose-950 group-[.toaster]:!border-rose-200",
-          success: "group-[.toaster]:!bg-emerald-50/95 group-[.toaster]:!text-emerald-950 group-[.toaster]:!border-emerald-200",
-          warning: "group-[.toaster]:!bg-amber-50/95 group-[.toaster]:!text-amber-950 group-[.toaster]:!border-amber-200",
-          info: "group-[.toaster]:!bg-blue-50/95 group-[.toaster]:!text-blue-950 group-[.toaster]:!border-blue-200",
+            "group-[.toast]:border group-[.toast]:border-slate-200 group-[.toast]:bg-white group-[.toast]:hover:bg-slate-100 group-[.toast]:text-slate-400 group-[.toast]:hover:text-slate-800 group-[.toast]:rounded-lg group-[.toast]:transition-colors",
         },
       }}
     />

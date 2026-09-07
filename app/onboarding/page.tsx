@@ -411,7 +411,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-[#F8FAF9] text-slate-900 transition-colors">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center py-8 sm:py-12 px-4 sm:px-6 bg-[#F8FAF9] bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(16,185,129,0.07),transparent_70%)] text-slate-900 transition-colors">
       <div className="w-full max-w-xl flex flex-col gap-6">
 
         {/* Top Header */}
@@ -434,8 +434,18 @@ export default function OnboardingPage() {
         {/* Stepper moderne */}
         <ModernStepper currentStep={currentStep} />
 
-        {/* Card Conteneur Principal */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xs">
+        {/* Card Conteneur Principal avec soumission au clavier */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (currentStep === 2) {
+              handleSubmit();
+            } else {
+              handleNext();
+            }
+          }}
+          className="bg-white/95 backdrop-blur-xs border border-slate-200/90 rounded-3xl p-6 sm:p-9 shadow-[0_2px_8px_rgba(0,0,0,0.03),0_16px_36px_-6px_rgba(0,0,0,0.04)]"
+        >
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentStep}
@@ -477,7 +487,7 @@ export default function OnboardingPage() {
               )}
             </motion.div>
           </AnimatePresence>
-        </div>
+        </form>
 
         {/* Navigation Actions */}
         <div className="flex items-center justify-between gap-3 pt-2">
