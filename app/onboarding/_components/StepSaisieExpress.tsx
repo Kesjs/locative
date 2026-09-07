@@ -32,7 +32,7 @@ export function StepSaisieExpress({
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
             Étape 3 sur 3
           </span>
           <span className="text-[11px] text-muted-foreground font-medium">
@@ -68,7 +68,7 @@ export function StepSaisieExpress({
         )}
 
         {fields.length === 0 && (
-          <div className="text-[13px] text-muted-foreground p-4 bg-slate-50 rounded-2xl border border-border text-center">
+          <div className="text-[13px] text-muted-foreground p-4 bg-muted/40 rounded-2xl border border-border text-center">
             Aucune information supplémentaire requise pour cette sélection.
           </div>
         )}

@@ -29,8 +29,8 @@ export function ProfileCard({
       onClick={() => onSelect(id)}
       className={`relative p-4 sm:p-5 text-left rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 group ${
         isSelected
-          ? "bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-emerald-500/40"
-          : "bg-card text-foreground border-border hover:border-slate-400 hover:shadow-xs"
+          ? "bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-600 text-foreground ring-2 ring-emerald-500/30 shadow-xs"
+          : "bg-card text-foreground border-border hover:border-emerald-500/40 hover:shadow-xs"
       }`}
     >
       {/* Upper row: Icon + Checkmark */}
@@ -38,8 +38,8 @@ export function ProfileCard({
         <div
           className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
             isSelected
-              ? "bg-emerald-500 text-slate-950 font-bold"
-              : "bg-emerald-50 text-emerald-700 border border-emerald-500/20 group-hover:bg-emerald-100/70"
+              ? "bg-emerald-600 text-white font-bold shadow-2xs"
+              : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 group-hover:bg-emerald-500/20"
           }`}
         >
           <Icon className="h-5 w-5" />
@@ -49,7 +49,7 @@ export function ProfileCard({
         <div
           className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
             isSelected
-              ? "bg-emerald-400 text-slate-950"
+              ? "bg-emerald-600 text-white shadow-2xs"
               : "border border-border opacity-0 group-hover:opacity-100"
           }`}
         >
@@ -60,26 +60,22 @@ export function ProfileCard({
       {/* Content */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-[15px] sm:text-[16px] tracking-tight">
+          <span className="font-extrabold text-[15px] sm:text-[16px] text-foreground tracking-tight">
             {title}
           </span>
           {badge && (
             <span
               className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                 isSelected
-                  ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/30"
-                  : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+                  : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
               }`}
             >
               {badge}
             </span>
           )}
         </div>
-        <p
-          className={`text-[12.5px] leading-relaxed ${
-            isSelected ? "text-slate-300" : "text-muted-foreground"
-          }`}
-        >
+        <p className="text-[12.5px] text-muted-foreground leading-relaxed">
           {subtitle}
         </p>
       </div>

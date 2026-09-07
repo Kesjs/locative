@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "@/components/ui/Logo";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -68,23 +69,36 @@ export default function OnboardingPage() {
       }
     } catch (_) {}
 
-    // Pré-remplissage avec le compte Supabase / Google si le nom est encore vide
+    // Vérification du statut d'onboarding et pré-remplissage avec le compte Supabase / Google
     if (isSupabaseConfigured()) {
       const supabase = createClient();
-      supabase.auth.getUser().then(({ data: { user } }) => {
+      supabase.auth.getUser().then(async ({ data: { user } }) => {
         if (user) {
-          const googleName =
+          // Si le profil a déjà validé son onboarding, rediriger directement vers le dashboard
+          const { data: dbProfile } = await supabase
+            .from("profiles")
+            .select("full_name, onboarding_completed, role")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (dbProfile?.onboarding_completed) {
+            router.replace("/dashboard");
+            return;
+          }
+
+          const prefilledName =
+            dbProfile?.full_name ||
             user.user_metadata?.full_name ||
             user.user_metadata?.name ||
             (user.email ? user.email.split("@")[0] : "");
 
           setState((prev) => {
-            if (!prev.profil.nom && googleName) {
+            if (!prev.profil.nom && prefilledName) {
               return {
                 ...prev,
                 profil: {
                   ...prev.profil,
-                  nom: googleName,
+                  nom: prefilledName,
                 },
               };
             }
@@ -95,7 +109,7 @@ export default function OnboardingPage() {
     }
 
     setIsHydrated(true);
-  }, []);
+  }, [router]);
 
   // 2. Sauvegarde automatique à chaque changement
   useEffect(() => {
@@ -355,15 +369,23 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-[#F8FAF9]">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-background text-foreground transition-colors">
       <div className="w-full max-w-xl flex flex-col gap-6">
 
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-200/80">
-          <Logo size="sm" variant="dark" />
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 text-[11.5px] font-bold">
-            <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Loi n° 2022-30 · Bénin</span>
+        <div className="flex items-center justify-between pb-4 border-b border-border">
+          <Logo size="sm" />
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="text-[12px] font-semibold text-muted-foreground hover:text-foreground transition-colors hidden sm:inline"
+            >
+              Accéder au dashboard &rarr;
+            </Link>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[11.5px] font-bold">
+              <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Loi n° 2022-30 · Bénin</span>
+            </div>
           </div>
         </div>
 
@@ -417,7 +439,7 @@ export default function OnboardingPage() {
               variant="outline"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="h-11 px-4 sm:px-5 rounded-xl border-border hover:bg-slate-50 text-[13px] font-bold cursor-pointer shrink-0"
+              className="h-11 px-4 sm:px-5 rounded-xl border-border hover:bg-muted text-[13px] font-bold cursor-pointer shrink-0"
             >
               <ArrowLeftIcon className="w-4 h-4 mr-1 sm:mr-2" />
               <span>Précédent</span>
@@ -430,7 +452,7 @@ export default function OnboardingPage() {
             type="button"
             disabled={!isStepValid() || isSubmitting}
             onClick={currentStep === 2 ? handleSubmit : handleNext}
-            className="h-11 px-5 sm:px-7 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[13px] sm:text-[13.5px] transition-all shadow-xs cursor-pointer truncate"
+            className="h-11 px-5 sm:px-7 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] sm:text-[13.5px] transition-all shadow-xs cursor-pointer truncate disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

@@ -21,7 +21,7 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
   return (
     <div className="w-full space-y-4">
       {/* Barre de progression continue */}
-      <div className="relative w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
+      <div className="relative w-full h-1.5 bg-muted rounded-full overflow-hidden">
         <motion.div
           className="absolute left-0 top-0 bottom-0 bg-emerald-600 rounded-full"
           initial={{ width: "0%" }}
@@ -42,9 +42,9 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
               key={step.id}
               className={`flex items-center gap-2.5 p-2 rounded-xl transition-all duration-200 ${
                 isCurrent
-                  ? "bg-emerald-50/80 border border-emerald-500/25 shadow-2xs"
+                  ? "bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 shadow-2xs"
                   : isCompleted
-                  ? "bg-slate-50/60 border border-slate-200/60"
+                  ? "bg-muted/40 border border-border"
                   : "opacity-60 border border-transparent"
               }`}
             >
@@ -55,7 +55,7 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
                     ? "bg-emerald-600 text-white"
                     : isCurrent
                     ? "bg-emerald-600 text-white ring-2 ring-emerald-500/30"
-                    : "bg-slate-200 text-slate-600"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {isCompleted ? (
@@ -69,16 +69,14 @@ export function ModernStepper({ currentStep }: ModernStepperProps) {
               <div className="min-w-0 hidden sm:block">
                 <div
                   className={`text-[12px] font-bold truncate leading-tight ${
-                    isCurrent
-                      ? "text-emerald-950"
-                      : isCompleted
-                      ? "text-slate-800"
-                      : "text-slate-500"
+                    isCurrent || isCompleted
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {step.title}
                 </div>
-                <div className="text-[10.5px] text-slate-500 truncate leading-tight mt-0.5">
+                <div className="text-[10.5px] text-muted-foreground truncate leading-tight mt-0.5">
                   {step.desc}
                 </div>
               </div>

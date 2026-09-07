@@ -25,7 +25,7 @@ function BrandedToggleGroup({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100/80 border border-slate-200/80 rounded-2xl">
+    <div className="grid grid-cols-2 gap-2 p-1.5 bg-muted/60 border border-border rounded-2xl">
       {options.map((opt) => {
         const isSelected = value === opt.value;
         const Icon = opt.icon;
@@ -101,8 +101,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
 
       {/* Bannière d'encadrement légal pour l'agence */}
       {isAgency && (
-        <div className="flex items-center gap-3 p-3 bg-blue-50/70 border border-blue-200/70 rounded-xl text-blue-900 text-[12px]">
-          <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
+        <div className="flex items-center gap-3 p-3 bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/30 rounded-xl text-blue-800 dark:text-blue-300 text-[12px]">
+          <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
           <div className="leading-snug">
             <span className="font-bold">Cadre légal Loi n° 2022-30 :</span> Vos mandats et reversements seront automatiquement plafonnés au barème officiel de 10% d'honoraires.
           </div>
@@ -153,14 +153,14 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       {/* Opérateur Mobile Money avec design soigné */}
       {data.moyenReception === "mobile_money" && (
         <div className="space-y-2 animate-in fade-in-50 duration-200">
-          <label className="text-[12.5px] font-semibold text-slate-700 block">
+          <label className="text-[12.5px] font-semibold text-foreground block">
             Réseau Mobile Money principal
           </label>
           <div className="grid grid-cols-3 gap-2">
             {[
-              { id: "mtn", label: "MTN MoMo", color: "hover:border-amber-400 active:bg-amber-50" },
-              { id: "moov", label: "Moov Money", color: "hover:border-blue-400 active:bg-blue-50" },
-              { id: "celtiis", label: "Celtiis Cash", color: "hover:border-emerald-400 active:bg-emerald-50" },
+              { id: "mtn", label: "MTN MoMo" },
+              { id: "moov", label: "Moov Money" },
+              { id: "celtiis", label: "Celtiis Cash" },
             ].map((prov) => {
               const active = data.mobileProvider === prov.id;
               return (
@@ -171,8 +171,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
                   className={cn(
                     "py-2.5 px-2 text-[12px] font-bold rounded-xl border transition-all text-center cursor-pointer",
                     active
-                      ? "bg-slate-900 text-white border-slate-900 shadow-2xs ring-1 ring-emerald-500/30"
-                      : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-slate-50"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs ring-1 ring-emerald-500/30"
+                      : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-muted"
                   )}
                 >
                   {prov.label}
@@ -206,7 +206,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       {/* Sélecteur de pays diaspora sur-mesure (sans <select> natif) */}
       {data.zoneGeo === "diaspora" && (
         <div className="space-y-2 animate-in fade-in-50 duration-200">
-          <label className="text-[12.5px] font-semibold text-slate-700 block">
+          <label className="text-[12.5px] font-semibold text-foreground block">
             Pays de résidence actuel
           </label>
           <CustomCountrySelect

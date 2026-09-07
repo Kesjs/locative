@@ -36,7 +36,7 @@ export default function Logo({
         className={`flex ${currentSize.markClass} items-center justify-center rounded-lg shadow-xs transition-transform duration-200 group-hover:scale-105 ${
           isLight
             ? "bg-[#9D6B3C] text-white"
-            : "bg-[#18181B] text-white"
+            : "bg-slate-900 dark:bg-emerald-600 text-white"
         }`}
       >
         <Building2 size={currentSize.iconSize} className="stroke-[2.2]" />
@@ -47,14 +47,14 @@ export default function Logo({
         <div className="flex flex-col leading-none">
           <span
             className={`font-serif font-extrabold tracking-[-0.04em] transition-colors ${currentSize.textClass} ${
-              isLight ? "text-white" : "text-[#18181B]"
+              isLight ? "text-white" : "text-foreground"
             }`}
           >
             LOKKA<span className="text-[#9D6B3C]">.</span>
           </span>
           <span
             className={`font-sans font-bold uppercase tracking-[0.18em] ${currentSize.subClass} ${
-              isLight ? "text-[#E8E3DC]/70" : "text-[#71717A]"
+              isLight ? "text-[#E8E3DC]/70" : "text-muted-foreground"
             }`}
           >
             Bénin

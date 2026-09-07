@@ -63,7 +63,7 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-card hover:bg-slate-50 border border-border rounded-xl text-left shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-card hover:bg-muted border border-border rounded-xl text-left shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="text-[16px] leading-none shrink-0">{selectedCountry.flag}</span>
@@ -82,7 +82,7 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
       {isOpen && (
         <div className="absolute z-50 mt-1.5 w-full bg-card border border-border rounded-2xl shadow-xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
           {/* Champ de recherche */}
-          <div className="p-2 border-b border-border bg-slate-50/50">
+          <div className="p-2 border-b border-border bg-muted/40">
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -90,7 +90,7 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un pays..."
-                className="w-full pl-8 pr-3 py-1.5 bg-card border border-border rounded-lg text-[12.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-emerald-600"
+                className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-lg text-[12.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-emerald-600"
                 autoFocus
               />
             </div>
@@ -116,7 +116,7 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                       isSelected
-                        ? "bg-emerald-50 text-emerald-950 font-semibold"
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold"
                         : "text-foreground hover:bg-muted"
                     }`}
                   >
