@@ -384,8 +384,11 @@ export function AddBienModal({
           try {
             await addTenantWithLease({
               tenant: {
+                // Pas de numéro fabriqué : si le téléphone n'est pas encore connu,
+                // on laisse vide plutôt que d'enregistrer un "+229" qui ressemble
+                // à un vrai numéro — à compléter depuis la fiche locataire.
                 full_name: form.locataire_nom.trim(),
-                phone_number: form.locataire_telephone.trim() || "+229",
+                phone_number: form.locataire_telephone.trim() || "",
                 whatsapp_number: form.locataire_telephone.trim() || null,
               },
               lease: {

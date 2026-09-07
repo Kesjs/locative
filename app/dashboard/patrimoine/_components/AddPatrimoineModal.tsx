@@ -142,12 +142,16 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
 
         const baseAdresse = quartier ? (quartier + ", " + ville) : (nomPatrimoine.trim() + ", " + ville);
 
+        // Ce formulaire ne fait que déclarer la structure (résidence + lots + statut
+        // approximatif). Il n'invente plus de nom de locataire et ne crée plus de
+        // transaction fantôme : un lot "loué" sans fiche locataire réelle apparaîtra
+        // dans le Dashboard avec un badge "à compléter" (création via useAddTenantWithLease).
         for (const lot of lots) {
           const bienNom = nomPatrimoine.trim() + " - " + lot.nom.trim();
           const lotStatut = lot.statut === "loue" ? "loué" : "vacant";
-          const locataire = lotStatut === "loué" ? (lot.locataireNom?.trim() || "Locataire en place") : null;
+          const locataireIndicatif = lotStatut === "loué" ? (lot.locataireNom?.trim() || null) : null;
 
-          const { data: insertedBien, error } = await supabase
+          const { error } = await supabase
             .from("biens")
             .insert({
               nom: bienNom,
@@ -158,7 +162,7 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
               loyer_mensuel: Number(lot.loyer) || 0,
               charges: 0,
               statut: lotStatut,
-              locataire_nom: locataire,
+              locataire_nom: locataireIndicatif,
               photos: [],
               archive: false,
               organization_id: orgId,
@@ -168,18 +172,6 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
 
           if (error) {
             console.warn("Notice insertion lot:", error.message);
-          } else if (insertedBien && lotStatut === "loué") {
-            const echeance = new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
-            await supabase.from("loyers_transactions").insert({
-              bien_id: insertedBien.id,
-              bien_nom: bienNom,
-              locataire_nom: locataire || "Locataire en place",
-              montant: Number(lot.loyer) || 0,
-              methode: "MTN MoMo",
-              statut: "en_attente",
-              echeance,
-              organization_id: orgId,
-            });
           }
         }
       }
@@ -456,9 +448,12 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
                           type="text"
                           value={lot.locataireNom || ""}
                           onChange={(e) => handleUpdateLot(lot.id, { locataireNom: e.target.value })}
-                          placeholder="Nom complet du locataire en place"
+                          placeholder="Nom du locataire (optionnel, à titre indicatif)"
                           className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[12.5px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 shadow-2xs"
                         />
+                        <p className="text-[10.5px] text-slate-500 mt-1 px-0.5">
+                          La fiche complète du locataire (téléphone, bail, caution...) se crée ensuite depuis la fiche du bien.
+                        </p>
                       </div>
                     )}
                   </div>

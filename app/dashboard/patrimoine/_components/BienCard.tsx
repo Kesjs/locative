@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { MapPinIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import type { Bien } from "@/lib/hooks/useBiens";
 
 const STATUT_STYLES: Record<Bien["statut"], string> = {
@@ -12,7 +12,8 @@ const STATUT_STYLES: Record<Bien["statut"], string> = {
 };
 
 export function BienCard({ bien, onClick }: { bien: Bien; onClick: () => void }) {
-  const image = bien.photo_principale || bien.photos?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80";
+  // Pas de fallback photo générique : tant qu'aucune photo réelle n'est fournie, on affiche un visuel neutre.
+  const image = bien.photo_principale || bien.photos?.[0] || null;
 
   return (
     <motion.div
@@ -30,11 +31,17 @@ export function BienCard({ bien, onClick }: { bien: Bien; onClick: () => void })
       className="bg-card border border-border rounded-xl overflow-hidden shadow-xs cursor-pointer hover:border-primary/40 hover:shadow-card-hover transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-        <img
-          src={image}
-          alt={bien.nom}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={bien.nom}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <BuildingOffice2Icon className="w-10 h-10 text-muted-foreground/40" />
+          </div>
+        )}
         <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full backdrop-blur-sm ${STATUT_STYLES[bien.statut]}`}>
           {bien.statut}
         </span>

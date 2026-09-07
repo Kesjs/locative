@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import type { Bien } from "@/lib/hooks/useBiens";
 
 const STATUT_STYLES: Record<Bien["statut"], string> = {
@@ -37,11 +38,17 @@ export function BienListView({ biens, onSelect }: { biens: Bien[]; onSelect: (bi
               >
                 <td className="px-4 py-3 font-semibold text-card-foreground">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={bien.photo_principale || bien.photos?.[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=100&q=80"}
-                      alt=""
-                      className="w-9 h-9 rounded-lg object-cover shrink-0"
-                    />
+                    {bien.photo_principale || bien.photos?.[0] ? (
+                      <img
+                        src={bien.photo_principale || bien.photos?.[0]}
+                        alt=""
+                        className="w-9 h-9 rounded-lg object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <BuildingOffice2Icon className="w-4 h-4 text-muted-foreground/40" />
+                      </div>
+                    )}
                     <span className="truncate max-w-[160px]">{bien.nom}</span>
                   </div>
                 </td>
