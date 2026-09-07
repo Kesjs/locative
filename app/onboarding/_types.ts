@@ -12,20 +12,24 @@ export interface ProfilStepData {
 }
 
 export interface SaisieExpressData {
-  // Bailleur + digitaliser
-  locataireEnPlaceNom?: string;
+  // Hiérarchie Patrimoine & Lot (Bailleur & Agence)
+  nomPatrimoine?: string;         // Ex: "Résidence Les Cocotiers", "Villa Haie Vive"
+  typeLot?: string;               // Ex: "Appartement 3 pièces", "Villa complète", "Studio"
+
+  // Bailleur
+  loyerMensuel?: number;          // Montant du loyer en FCFA
+  statutOccupation?: "loue" | "vacant";
+  locataireEnPlaceNom?: string;   // Nom du locataire si loué
+  prochaineEcheance?: string;     // Date de prochaine échéance
+
+  // Agence
+  proprietaireMandantNom?: string; // Nom du mandant
+  loyerActuelMandat?: number;      // Loyer mensuel sous mandat
+
+  // Rétrocompatibilité
   loyerActuel?: number;
-  prochaineEcheance?: string;     // ISO date
-
-  // Bailleur + trouver_locataires
-  typeBienVacant?: string;
   loyerSouhaite?: number;
-
-  // Agence + digitaliser
-  proprietaireMandantNom?: string;
-  loyerActuelMandat?: number;
-
-  // Agence + trouver_locataires
+  typeBienVacant?: string;
   nomDomainePersonnalise?: string;
 }
 

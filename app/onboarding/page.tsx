@@ -30,6 +30,7 @@ export default function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [isHydrated, setIsHydrated] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [state, setState] = useState<OnboardingState>({
     profil: {
@@ -128,11 +129,26 @@ export default function OnboardingPage() {
 
   const handleNext = () => {
     setDirection("forward");
+    if (currentStep === 0) {
+      if (!state.profil.nom.trim()) {
+        setErrors({ nom: "Veuillez renseigner votre nom ou raison sociale." });
+        return;
+      }
+      setErrors({});
+    }
+    if (currentStep === 1) {
+      if (state.objectifs.length === 0) {
+        toast.error("Veuillez sélectionner au moins un objectif.");
+        return;
+      }
+      setErrors({});
+    }
     if (currentStep < 2) setCurrentStep((prev) => (prev + 1) as 0 | 1 | 2);
   };
 
   const handleBack = () => {
     setDirection("back");
+    setErrors({});
     if (currentStep > 0) setCurrentStep((prev) => (prev - 1) as 0 | 1 | 2);
   };
 
@@ -142,7 +158,46 @@ export default function OnboardingPage() {
     return true;
   };
 
+  const validateStep2 = () => {
+    const errs: Record<string, string> = {};
+    const isAgency = state.profil.profileType === "agence";
+    const { saisieExpress } = state;
+
+    if (!isAgency) {
+      if (!saisieExpress.nomPatrimoine?.trim()) {
+        errs.nomPatrimoine = "Le nom de l'ensemble ou résidence est obligatoire.";
+      }
+      if (!saisieExpress.typeLot?.trim()) {
+        errs.typeLot = "La désignation du premier lot est obligatoire.";
+      }
+      if (!saisieExpress.loyerMensuel || Number(saisieExpress.loyerMensuel) <= 0) {
+        errs.loyerMensuel = "Veuillez indiquer un montant de loyer valide.";
+      }
+    } else {
+      if (!saisieExpress.proprietaireMandantNom?.trim()) {
+        errs.proprietaireMandantNom = "Le nom du propriétaire mandant est obligatoire.";
+      }
+      if (!saisieExpress.nomPatrimoine?.trim()) {
+        errs.nomPatrimoine = "L'immeuble ou résidence sous mandat est obligatoire.";
+      }
+      if (!saisieExpress.typeLot?.trim()) {
+        errs.typeLot = "La désignation du lot sous mandat est obligatoire.";
+      }
+      if (!saisieExpress.loyerActuelMandat || Number(saisieExpress.loyerActuelMandat) <= 0) {
+        errs.loyerActuelMandat = "Veuillez indiquer le loyer mensuel du lot.";
+      }
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSubmit = async () => {
+    if (!validateStep2()) {
+      toast.error("Veuillez renseigner tous les champs obligatoires.");
+      return;
+    }
+
     setIsSubmitting(true);
     const isAgency = state.profil.profileType === "agence";
     const canonicalRole = isAgency ? "agency_admin" : "owner";
@@ -209,16 +264,11 @@ export default function OnboardingPage() {
             return;
           }
 
-          // 3. ENREGISTREMENT RÉEL DES INFORMATIONS DE LA SAISIE EXPRESS
+          // 3. ENREGISTREMENT RÉEL : PATRIMOINE & LOT
           const { saisieExpress } = state;
-          const isTrouverLocataires = state.objectifs.includes("trouver_locataires");
-
-          const montantLoyer = Number(
-            saisieExpress.loyerActuelMandat ||
-            saisieExpress.loyerActuel ||
-            saisieExpress.loyerSouhaite ||
-            200000
-          );
+          const montantLoyer = isAgency
+            ? Number(saisieExpress.loyerActuelMandat || 250000)
+            : Number(saisieExpress.loyerMensuel || 250000);
 
           // Si Agence : enregistrement d'un mandat réel dans Supabase
           if (isAgency) {
@@ -242,43 +292,35 @@ export default function OnboardingPage() {
             }
           }
 
-          // Détermination du nom, loyer et locataire du premier bien
-          let bienNom = isAgency
-            ? `Lot 101 (${saisieExpress.proprietaireMandantNom || state.profil.nom})`
-            : `Bien principal - ${state.profil.nom || "Bailleur"}`;
+          // Hiérarchie : Patrimoine -> Lot
+          const nomPatrimoine = saisieExpress.nomPatrimoine?.trim() || (isAgency ? "Résidence Marina" : "Résidence Principale");
+          const typeLot = saisieExpress.typeLot?.trim() || "Appartement 3 pièces";
+          const bienNom = `${nomPatrimoine} (${typeLot})`;
 
-          let bienType = "Appartement 3P (2 chambres)";
-          if (saisieExpress.typeBienVacant) {
-            bienNom = saisieExpress.typeBienVacant;
-            bienType = saisieExpress.typeBienVacant;
-          }
-
-          const bienStatut: "loué" | "vacant" = (isTrouverLocataires && !saisieExpress.locataireEnPlaceNom && !isAgency)
-            ? "vacant"
-            : "loué";
+          const bienStatut: "loué" | "vacant" = isAgency
+            ? "loué"
+            : (saisieExpress.statutOccupation === "vacant" ? "vacant" : "loué");
 
           const locataireNom = isAgency
             ? "Locataire en place"
-            : (saisieExpress.locataireEnPlaceNom || (bienStatut === "loué" ? "Locataire principal" : undefined));
+            : (bienStatut === "loué" ? (saisieExpress.locataireEnPlaceNom?.trim() || "Locataire en place") : null);
 
           const isDiaspora = state.profil.zoneGeo === "diaspora";
           const bienVille = isDiaspora ? (state.profil.paysDiaspora || "International") : "Cotonou";
-          const bienAdresse = isDiaspora
-            ? `Résidence (${state.profil.paysDiaspora || "Diaspora"})`
-            : (isAgency ? "Boulevard de la Marina, Cotonou" : "Cotonou, Bénin");
+          const bienAdresse = `${nomPatrimoine}, ${bienVille}`;
 
-          // Insertion du bien dans la table `biens`
+          // Insertion du lot dans la table `biens`
           const { data: insertedBien, error: bienError } = await supabase
             .from("biens")
             .insert({
               nom: bienNom,
               adresse: bienAdresse,
               ville: bienVille,
-              type: bienType,
+              type: typeLot,
               loyer_mensuel: montantLoyer,
               charges: 0,
               statut: bienStatut,
-              locataire_nom: locataireNom || null,
+              locataire_nom: locataireNom,
               photos: [],
               photo_principale: null,
               archive: false,
@@ -297,7 +339,7 @@ export default function OnboardingPage() {
           }
 
           // Si le bien est loué, générer une première échéance de loyer réelle
-          if (insertedBien) {
+          if (insertedBien && bienStatut === "loué") {
             const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
             const paymentTx = {
               bien_nom: bienNom,
@@ -369,31 +411,31 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-background text-foreground transition-colors">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-[#F8FAF9] text-slate-900 transition-colors">
       <div className="w-full max-w-xl flex flex-col gap-6">
 
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-border">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
           <Logo size="sm" />
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="text-[12px] font-semibold text-muted-foreground hover:text-foreground transition-colors hidden sm:inline"
+              className="text-[12px] font-semibold text-slate-500 hover:text-slate-900 transition-colors hidden sm:inline"
             >
               Accéder au dashboard &rarr;
             </Link>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[11.5px] font-bold">
-              <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11.5px] font-bold">
+              <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
               <span>Loi n° 2022-30 · Bénin</span>
             </div>
           </div>
         </div>
 
-        {/* Stepper moderne 21st.dev */}
+        {/* Stepper moderne */}
         <ModernStepper currentStep={currentStep} />
 
         {/* Card Conteneur Principal */}
-        <div className="bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xs">
+        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xs">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentStep}
@@ -407,7 +449,11 @@ export default function OnboardingPage() {
               {currentStep === 0 && (
                 <StepProfil
                   data={state.profil}
-                  onChange={(profil) => setState({ ...state, profil })}
+                  onChange={(profil) => {
+                    setState({ ...state, profil });
+                    if (errors.nom) setErrors({});
+                  }}
+                  error={errors.nom}
                 />
               )}
               {currentStep === 1 && (
@@ -422,9 +468,11 @@ export default function OnboardingPage() {
                   profileType={state.profil.profileType}
                   objectifs={state.objectifs}
                   data={state.saisieExpress}
-                  onChange={(saisieExpress) =>
-                    setState({ ...state, saisieExpress })
-                  }
+                  onChange={(saisieExpress) => {
+                    setState({ ...state, saisieExpress });
+                    setErrors({});
+                  }}
+                  errors={errors}
                 />
               )}
             </motion.div>
@@ -439,7 +487,7 @@ export default function OnboardingPage() {
               variant="outline"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="h-11 px-4 sm:px-5 rounded-xl border-border hover:bg-muted text-[13px] font-bold cursor-pointer shrink-0"
+              className="h-11 px-4 sm:px-5 rounded-xl border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[13px] font-bold cursor-pointer shrink-0"
             >
               <ArrowLeftIcon className="w-4 h-4 mr-1 sm:mr-2" />
               <span>Précédent</span>
@@ -457,7 +505,7 @@ export default function OnboardingPage() {
             {isSubmitting ? (
               <>
                 <Spinner size="sm" className="mr-2" />
-                Initialisation…
+                Configuration en cours…
               </>
             ) : currentStep === 2 ? (
               <>
@@ -474,7 +522,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-[11.5px] text-muted-foreground">
+        <p className="text-center text-[11.5px] text-slate-500">
           Configuration certifiée conforme à la réglementation béninoise des baux d'habitation.
         </p>
       </div>

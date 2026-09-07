@@ -63,16 +63,16 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-card hover:bg-muted border border-border rounded-xl text-left shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="text-[16px] leading-none shrink-0">{selectedCountry.flag}</span>
-          <span className="text-[13.5px] font-medium text-foreground truncate">
+          <span className="text-[13.5px] font-medium text-slate-900 truncate">
             {selectedCountry.name}
           </span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0 ${
+          className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
             isOpen ? "rotate-180 text-emerald-600" : ""
           }`}
         />
@@ -80,17 +80,17 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 mt-1.5 w-full bg-card border border-border rounded-2xl shadow-xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute z-50 mt-1.5 w-full bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
           {/* Champ de recherche */}
-          <div className="p-2 border-b border-border bg-muted/40">
+          <div className="p-2 border-b border-slate-100 bg-slate-50">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un pays..."
-                className="w-full pl-8 pr-3 py-1.5 bg-background border border-border rounded-lg text-[12.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-emerald-600"
+                className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[12.5px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600"
                 autoFocus
               />
             </div>
@@ -99,7 +99,7 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
           {/* Liste déroulante */}
           <div className="max-h-56 overflow-y-auto p-1.5 space-y-0.5">
             {filtered.length === 0 ? (
-              <div className="py-4 text-center text-[12px] text-muted-foreground">
+              <div className="py-4 text-center text-[12px] text-slate-500">
                 Aucun pays trouvé
               </div>
             ) : (
@@ -116,8 +116,8 @@ export function CustomCountrySelect({ value, onChange }: CustomCountrySelectProp
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                       isSelected
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold"
-                        : "text-foreground hover:bg-muted"
+                        ? "bg-emerald-50 text-emerald-700 font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">

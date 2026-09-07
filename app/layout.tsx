@@ -37,7 +37,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{
-              var t=localStorage.getItem('lokka_pref_theme')||'dark';
+              var t=localStorage.getItem('lokka_pref_theme')||'light';
               var d=window.matchMedia('(prefers-color-scheme: dark)').matches;
               var r=t==='system'?(d?'dark':'light'):t;
               var e=document.documentElement;

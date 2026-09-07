@@ -12,6 +12,7 @@ import { Home, Building2, Smartphone, Landmark, ShieldCheck } from "lucide-react
 interface StepProfilProps {
   data: ProfilStepData;
   onChange: (data: ProfilStepData) => void;
+  error?: string;
 }
 
 /** Pill-style toggle buttons */
@@ -25,7 +26,7 @@ function BrandedToggleGroup({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 p-1.5 bg-muted/60 border border-border rounded-2xl">
+    <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 border border-slate-200 rounded-2xl">
       {options.map((opt) => {
         const isSelected = value === opt.value;
         const Icon = opt.icon;
@@ -37,8 +38,8 @@ function BrandedToggleGroup({
             className={cn(
               "flex items-center justify-center gap-2 py-2.5 px-3 text-[13px] font-bold rounded-xl transition-all duration-200 cursor-pointer",
               isSelected
-                ? "bg-card text-foreground shadow-2xs ring-1 ring-border"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white text-slate-900 shadow-2xs border border-slate-200"
+                : "text-slate-600 hover:text-slate-900"
             )}
           >
             {Icon && <Icon className="w-4 h-4" />}
@@ -50,7 +51,7 @@ function BrandedToggleGroup({
   );
 }
 
-export function StepProfil({ data, onChange }: StepProfilProps) {
+export function StepProfil({ data, onChange, error }: StepProfilProps) {
   const updateData = (updates: Partial<ProfilStepData>) => {
     onChange({ ...data, ...updates });
   };
@@ -65,14 +66,14 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
             Étape 1 sur 3
           </span>
-          <span className="text-[11px] text-muted-foreground font-medium">
+          <span className="text-[11px] text-slate-500 font-medium">
             Configuration initiale
           </span>
         </div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-foreground tracking-tight">
+        <h2 className="text-[22px] sm:text-[25px] font-extrabold text-slate-900 tracking-tight">
           Quel est votre statut d'activité ?
         </h2>
-        <p className="text-[13px] text-muted-foreground mt-1">
+        <p className="text-[13px] text-slate-600 mt-1">
           Lokka adapte son interface, ses calculs de commissions et ses baux légaux à votre métier.
         </p>
       </div>
@@ -101,8 +102,8 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
 
       {/* Bannière d'encadrement légal pour l'agence */}
       {isAgency && (
-        <div className="flex items-center gap-3 p-3 bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/30 rounded-xl text-blue-800 dark:text-blue-300 text-[12px]">
-          <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+        <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[12px]">
+          <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
           <div className="leading-snug">
             <span className="font-bold">Cadre légal Loi n° 2022-30 :</span> Vos mandats et reversements seront automatiquement plafonnés au barème officiel de 10% d'honoraires.
           </div>
@@ -110,12 +111,12 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       )}
 
       {/* Nom ou Raison Sociale */}
-      <FormField
-        label={isAgency ? "Raison sociale du cabinet ou de l'agence" : "Votre nom complet"}
-        htmlFor="onboarding-nom"
-        required
-      >
-        <Input
+      <div className="space-y-1.5">
+        <label htmlFor="onboarding-nom" className="text-[13px] font-bold text-slate-900 block">
+          {isAgency ? "Raison sociale du cabinet ou de l'agence" : "Votre nom complet"}
+          <span className="text-rose-500 ml-1">*</span>
+        </label>
+        <input
           id="onboarding-nom"
           type="text"
           autoComplete="name"
@@ -126,13 +127,21 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
               ? "Ex: Cabinet Immobilier du Golfe, Agence Bénin Prestige"
               : "Ex: Koudjo Dossou, Claudine Mensah"
           }
-          className="h-11 rounded-xl text-[14px]"
+          className={cn(
+            "w-full px-3.5 py-2.5 bg-white border rounded-xl text-[13.5px] text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all shadow-2xs",
+            error
+              ? "border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/15"
+              : "border-slate-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+          )}
         />
-      </FormField>
+        {error && (
+          <p className="text-[11.5px] text-rose-600 font-medium">{error}</p>
+        )}
+      </div>
 
       {/* Moyen de réception des fonds privilégié */}
       <div className="space-y-2">
-        <label className="text-[13px] font-bold text-foreground block">
+        <label className="text-[13px] font-bold text-slate-900 block">
           Moyen de réception des loyers privilégié
         </label>
         <BrandedToggleGroup
@@ -153,7 +162,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       {/* Opérateur Mobile Money avec design soigné */}
       {data.moyenReception === "mobile_money" && (
         <div className="space-y-2 animate-in fade-in-50 duration-200">
-          <label className="text-[12.5px] font-semibold text-foreground block">
+          <label className="text-[12.5px] font-semibold text-slate-900 block">
             Réseau Mobile Money principal
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -172,7 +181,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
                     "py-2.5 px-2 text-[12px] font-bold rounded-xl border transition-all text-center cursor-pointer",
                     active
                       ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs ring-1 ring-emerald-500/30"
-                      : "bg-card text-muted-foreground border-border hover:text-foreground hover:bg-muted"
+                      : "bg-white text-slate-700 border-slate-200 hover:text-slate-900 hover:bg-slate-50"
                   )}
                 >
                   {prov.label}
@@ -185,7 +194,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
 
       {/* Zone géographique */}
       <div className="space-y-2">
-        <label className="text-[13px] font-bold text-foreground block">
+        <label className="text-[13px] font-bold text-slate-900 block">
           Localisation de votre activité
         </label>
         <BrandedToggleGroup
@@ -206,7 +215,7 @@ export function StepProfil({ data, onChange }: StepProfilProps) {
       {/* Sélecteur de pays diaspora sur-mesure (sans <select> natif) */}
       {data.zoneGeo === "diaspora" && (
         <div className="space-y-2 animate-in fade-in-50 duration-200">
-          <label className="text-[12.5px] font-semibold text-foreground block">
+          <label className="text-[12.5px] font-semibold text-slate-900 block">
             Pays de résidence actuel
           </label>
           <CustomCountrySelect

@@ -29,17 +29,17 @@ export function StepObjectifs({ profileType, selected, onChange }: StepObjectifs
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
             Étape 2 sur 3
           </span>
-          <span className="text-[11px] text-muted-foreground font-medium">
-            Priorités opérationnelles
+          <span className="text-[11px] text-slate-500 font-medium">
+            Priorités
           </span>
         </div>
-        <h2 className="text-[22px] sm:text-[26px] font-extrabold text-foreground tracking-tight leading-tight">
+        <h2 className="text-[22px] sm:text-[25px] font-extrabold text-slate-900 tracking-tight leading-tight">
           {isAgency
             ? "Quels sont les objectifs de votre cabinet ?"
             : "Quels sont vos objectifs prioritaires ?"}
         </h2>
-        <p className="text-[13px] text-muted-foreground mt-1.5">
-          Sélectionnez les modules à activer en priorité sur votre cockpit (plusieurs choix possibles).
+        <p className="text-[13px] text-slate-600 mt-1">
+          Sélectionnez vos modules prioritaires (plusieurs choix possibles).
         </p>
       </div>
 
