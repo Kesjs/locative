@@ -16,6 +16,7 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
+import { resolveOrgLogoUrl } from "@/lib/upload-org-logo";
 import { type OnboardingState, type ProfilStepData } from "./_types";
 import { StepProfil } from "./_components/StepProfil";
 import { StepSaisieExpress } from "./_components/StepSaisieExpress";
@@ -244,7 +245,16 @@ export default function OnboardingPage() {
             activeOrgId = orgData;
           }
 
-          // 2. Mettre à jour le profil avec le rôle canonique, onboarding_completed et logo_url
+          // 2. Résoudre le logo : upload sur Supabase Storage si c'est un
+          // base64 (fichier importé), sinon on garde l'URL telle quelle
+          // (preset ou saisie manuelle). Évite de stocker un base64 lourd
+          // directement dans la ligne profiles, ce qui ralentissait la
+          // finalisation de l'onboarding.
+          const resolvedLogoUrl = state.profil.logo_url
+            ? await resolveOrgLogoUrl(state.profil.logo_url, user.id)
+            : "";
+
+          // 3. Mettre à jour le profil avec le rôle canonique, onboarding_completed et logo_url
           const { error: profileError } = await supabase
             .from("profiles")
             .update({
@@ -252,7 +262,7 @@ export default function OnboardingPage() {
               role: canonicalRole,
               preferred_payment_channel: state.profil.moyenReception,
               onboarding_completed: true,
-              logo_url: state.profil.logo_url || null,
+              logo_url: resolvedLogoUrl || null,
             })
             .eq("id", user.id);
 
@@ -265,7 +275,7 @@ export default function OnboardingPage() {
             return;
           }
 
-          // 3. ENREGISTREMENT RÉEL : PATRIMOINE & LOTS
+          // 4. ENREGISTREMENT RÉEL : PATRIMOINE & LOTS
           const { saisieExpress } = state;
           const bienVille = "Cotonou";
 
@@ -347,56 +357,77 @@ export default function OnboardingPage() {
                   },
                 ];
 
-            let insertionErrorsCount = 0;
-
-            for (const lot of lotsToInsert) {
+            // Préparation des lots à insérer en une seule requête (au lieu
+            // d'un aller-retour réseau séquentiel par lot), avec leurs
+            // métadonnées associées pour créer ensuite les échéances de
+            // loyer correspondantes en un seul batch également.
+            const lotsMeta = lotsToInsert.map((lot) => {
               const lotNomComplet = `${nomPatrimoine} - ${lot.nom.trim()}`;
               const lotStatut: "loué" | "vacant" = lot.statut === "loue" ? "loué" : "vacant";
               const lotLocataire = lotStatut === "loué"
                 ? (lot.locataireNom?.trim() || "Locataire en place")
                 : null;
               const lotLoyer = Number(lot.loyer) || 0;
+              return {
+                lotNomComplet,
+                lotStatut,
+                lotLocataire,
+                lotLoyer,
+                type: lot.type || lot.nom.trim(),
+              };
+            });
 
-              const { data: insertedBien, error: bienError } = await supabase
-                .from("biens")
-                .insert({
-                  nom: lotNomComplet,
+            const { data: insertedBiens, error: bienError } = await supabase
+              .from("biens")
+              .insert(
+                lotsMeta.map((lot) => ({
+                  nom: lot.lotNomComplet,
                   adresse: bienAdresse,
                   ville: bienVille,
-                  type: lot.type || lot.nom.trim(),
-                  loyer_mensuel: lotLoyer,
+                  type: lot.type,
+                  loyer_mensuel: lot.lotLoyer,
                   charges: 0,
-                  statut: lotStatut,
-                  locataire_nom: lotLocataire,
+                  statut: lot.lotStatut,
+                  locataire_nom: lot.lotLocataire,
                   photos: [],
                   photo_principale: null,
                   archive: false,
                   organization_id: activeOrgId,
-                })
-                .select()
-                .maybeSingle();
+                }))
+              )
+              .select();
 
-              if (bienError) {
-                console.error("Erreur insertion lot:", lotNomComplet, bienError);
-                insertionErrorsCount++;
-              } else if (insertedBien && lotStatut === "loué") {
-                // Créer une première échéance de loyer pour chaque lot loué
-                const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+            let insertionErrorsCount = 0;
+
+            if (bienError) {
+              console.error("Erreur insertion lots (batch):", bienError);
+              insertionErrorsCount = lotsMeta.length;
+            } else if (insertedBiens) {
+              // Échéances de loyer pour tous les lots loués, en un seul insert
+              const echeance = saisieExpress.prochaineEcheance || new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
+              const methode = (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any;
+
+              const transactionsToInsert = insertedBiens
+                .map((insertedBien, index) => ({ insertedBien, meta: lotsMeta[index] }))
+                .filter(({ meta }) => meta?.lotStatut === "loué")
+                .map(({ insertedBien, meta }) => ({
+                  bien_id: insertedBien.id,
+                  bien_nom: meta.lotNomComplet,
+                  locataire_nom: meta.lotLocataire || "Locataire en place",
+                  montant: meta.lotLoyer,
+                  methode,
+                  statut: "en_attente" as const,
+                  echeance,
+                  organization_id: activeOrgId,
+                }));
+
+              if (transactionsToInsert.length > 0) {
                 const { error: txError } = await supabase
                   .from("loyers_transactions")
-                  .insert({
-                    bien_id: insertedBien.id,
-                    bien_nom: lotNomComplet,
-                    locataire_nom: lotLocataire || "Locataire en place",
-                    montant: lotLoyer,
-                    methode: (state.profil.moyenReception === "banque" ? "Virement" : "MTN MoMo") as any,
-                    statut: "en_attente" as const,
-                    echeance,
-                    organization_id: activeOrgId,
-                  });
+                  .insert(transactionsToInsert);
 
                 if (txError) {
-                  console.warn("Notice insertion loyer transaction:", txError.message);
+                  console.warn("Notice insertion loyers transactions (batch):", txError.message);
                 }
               }
             }
@@ -414,8 +445,8 @@ export default function OnboardingPage() {
           localStorage.setItem("lokka_onboarding_objectifs", JSON.stringify(state.objectifs));
           localStorage.setItem("lokka_dev_role", isAgency ? "Agence" : "Propriétaire Bailleur");
           localStorage.setItem("lokka_dev_plan", isAgency ? "agence" : "pro");
-          if (state.profil.logo_url) {
-            localStorage.setItem("lokka_custom_logo", state.profil.logo_url);
+          if (resolvedLogoUrl) {
+            localStorage.setItem("lokka_custom_logo", resolvedLogoUrl);
           }
           localStorage.setItem(
             "lokka_user_profile",
@@ -423,7 +454,7 @@ export default function OnboardingPage() {
               name: state.profil.nom,
               role: canonicalRole,
               accountType: isAgency ? "agence" : "bailleur",
-              logo_url: state.profil.logo_url || "",
+              logo_url: resolvedLogoUrl,
             })
           );
           if (typeof window !== "undefined") {
