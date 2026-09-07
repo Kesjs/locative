@@ -60,8 +60,7 @@ function LocataireLoginForm() {
       }
 
       if (data?.user) {
-        // Enregistrer la session locataire et rediriger
-        localStorage.setItem("lokka_dev_role", "Locataire");
+        // Le rôle locataire est déterminé par profiles.role en base, pas par le localStorage.
         router.push("/locataire");
       }
     } catch (err: any) {
