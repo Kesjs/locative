@@ -4,9 +4,13 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 export interface Mandat {
   id: string;
   proprietaire: string;
+  email?: string | null;
+  telephone?: string | null;
   biens: number;
   commission: string;
+  commission_pct?: number | null;
   solde: number;
+  organization_id?: string | null;
   created_at?: string;
 }
 
@@ -41,7 +45,24 @@ export function useAddMandat() {
         return { ...newMandat, id: Date.now().toString() };
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("mandats").insert([newMandat]).select().single();
+      const { data: { user } } = await supabase.auth.getUser();
+      let orgId: string | null = null;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", user.id)
+          .maybeSingle();
+        orgId = profile?.organization_id || null;
+      }
+
+      const payload = {
+        ...newMandat,
+        organization_id: orgId,
+        created_by: user?.id || null,
+      };
+
+      const { data, error } = await supabase.from("mandats").insert([payload]).select().single();
       if (error) throw error;
       return data;
     },

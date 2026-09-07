@@ -128,7 +128,7 @@ export function StepSaisieExpress({
   const vacantsCount = lots.length - louesCount;
   const tauxOccupation = Math.round((louesCount / lots.length) * 100);
 
-  const agencyLoyer = Number(data.loyerActuelMandat || 250000);
+  const agencyLoyer = Number(data.loyerActuelMandat || 0);
 
   return (
     <div className="space-y-6">

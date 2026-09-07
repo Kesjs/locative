@@ -42,8 +42,8 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [lots, setLots] = useState<LotEntry[]>([
-    { id: "1", nom: "Chambre 1", loyer: 75000, statut: "loue", locataireNom: "" },
-    { id: "2", nom: "Chambre 2", loyer: 75000, statut: "vacant" },
+    { id: "1", nom: "Chambre 1", loyer: 0, statut: "loue", locataireNom: "" },
+    { id: "2", nom: "Chambre 2", loyer: 0, statut: "vacant" },
   ]);
 
   if (!isOpen) return null;
@@ -68,7 +68,7 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
       {
         id: String(Date.now()),
         nom: prefix + " " + nextIdx,
-        loyer: 75000,
+        loyer: 0,
         statut: "vacant",
       },
     ]);
@@ -97,7 +97,7 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
       const created: LotEntry[] = Array.from({ length: diff }, (_, i) => ({
         id: String(Date.now() + i),
         nom: prefix + " " + (lots.length + i + 1),
-        loyer: 75000,
+        loyer: 0,
         statut: "vacant",
       }));
       setLots([...lots, ...created]);
@@ -411,7 +411,7 @@ export function AddPatrimoineModal({ isOpen, onClose }: AddPatrimoineModalProps)
                             const val = e.target.value.replace(/\D/g, "");
                             handleUpdateLot(lot.id, { loyer: val ? parseInt(val, 10) : 0 });
                           }}
-                          placeholder="Loyer"
+                          placeholder="Ex: 50 000"
                           className="w-full px-3 py-1.5 pr-16 bg-white border border-slate-200 rounded-xl text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 shadow-2xs"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">

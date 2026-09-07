@@ -208,13 +208,6 @@ export default function OnboardingPage() {
     const isAgency = state.profil.profileType === "agence";
     const canonicalRole = isAgency ? "agency_admin" : "owner";
 
-    // Si profil diaspora, initialiser la devise locale sur EUR
-    if (state.profil.zoneGeo === "diaspora") {
-      try {
-        localStorage.setItem("lokka_currency", "eur");
-      } catch (_) {}
-    }
-
     try {
       if (isSupabaseConfigured()) {
         const supabase = createClient();
@@ -272,12 +265,11 @@ export default function OnboardingPage() {
 
           // 3. ENREGISTREMENT RÉEL : PATRIMOINE & LOTS
           const { saisieExpress } = state;
-          const isDiaspora = state.profil.zoneGeo === "diaspora";
-          const bienVille = isDiaspora ? (state.profil.paysDiaspora || "International") : "Cotonou";
+          const bienVille = "Cotonou";
 
           // CAS A : AGENCE (Mandat + Lot sous gestion)
           if (isAgency) {
-            const montantLoyer = Number(saisieExpress.loyerActuelMandat || 250000);
+            const montantLoyer = Number(saisieExpress.loyerActuelMandat) || 0;
             const mandantNom = saisieExpress.proprietaireMandantNom || "M. Mensah (Mandant)";
             const soldeMandant = Math.round(montantLoyer * 0.9); // 90% reversés
 
@@ -347,7 +339,7 @@ export default function OnboardingPage() {
                   {
                     id: "1",
                     nom: saisieExpress.typeLot?.trim() || "Chambre 1",
-                    loyer: Number(saisieExpress.loyerMensuel) || 75000,
+                    loyer: Number(saisieExpress.loyerMensuel) || 0,
                     statut: (saisieExpress.statutOccupation === "vacant" ? "vacant" : "loue") as "loue" | "vacant",
                     locataireNom: saisieExpress.locataireEnPlaceNom?.trim() || "",
                   },

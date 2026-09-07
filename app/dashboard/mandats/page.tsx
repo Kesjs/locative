@@ -6,12 +6,16 @@ import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
 import { PlusIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
 import { FileSignature, Building2, HandCoins, Landmark } from "lucide-react";
-import { useMandats } from "@/lib/hooks/useMandats";
+import { useMandats, type Mandat } from "@/lib/hooks/useMandats";
 import { AddMandatModal } from "./_components/AddMandatModal";
+import { ConventionMandatModal } from "./_components/ConventionMandatModal";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function MandatsPage() {
+  const userProfile = useUserProfile();
   const { data: mandats = [], isLoading } = useMandats();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMandat, setSelectedMandat] = useState<Mandat | null>(null);
 
   const totalLots = mandats.reduce((sum, m) => sum + (m.biens || 0), 0);
   const totalSolde = mandats.reduce((sum, m) => sum + (m.solde || 0), 0);
@@ -57,10 +61,10 @@ export default function MandatsPage() {
     {
       key: "actions",
       header: "Actions",
-      renderCell: () => (
+      renderCell: (row: Mandat) => (
         <button
           type="button"
-          onClick={() => {}}
+          onClick={() => setSelectedMandat(row)}
           className="text-blue-600 hover:text-blue-800 font-bold text-[12px] underline cursor-pointer"
         >
           Voir la convention
@@ -162,6 +166,12 @@ export default function MandatsPage() {
       </div>
 
       <AddMandatModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ConventionMandatModal
+        isOpen={Boolean(selectedMandat)}
+        onClose={() => setSelectedMandat(null)}
+        mandat={selectedMandat}
+        agencyName={userProfile.name || "Cabinet Immobilier Lokka Gérance"}
+      />
     </div>
   );
 }

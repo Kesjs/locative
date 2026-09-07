@@ -267,7 +267,7 @@ export default function ParametresPage() {
               </span>
             ) : (
               <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                Propriétaire Bailleur · Bénin &amp; Diaspora
+                Propriétaire Bailleur · Bénin
               </span>
             )}
             <span className="text-[11px] text-muted-foreground font-medium">République du Bénin</span>
@@ -526,7 +526,7 @@ export default function ParametresPage() {
                   <option value="Porto-Novo">Porto-Novo (Ouémé)</option>
                   <option value="Parakou">Parakou (Borgou)</option>
                   <option value="Ouidah">Ouidah (Atlantique)</option>
-                  <option value="Diaspora (France / International)">Diaspora (France / International)</option>
+                  <option value="Bohicon">Bohicon (Zou)</option>
                 </select>
               </div>
 

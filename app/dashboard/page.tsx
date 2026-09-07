@@ -264,42 +264,6 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {/* Sélecteur de Devise Agence & Mandants Internationaux */}
-            <div className="inline-flex items-center p-1 bg-muted/60 border border-border rounded-xl">
-              <button
-                type="button"
-                onClick={() => setCurrency("fcfa")}
-                className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
-                  currency === "fcfa"
-                    ? "bg-card text-foreground shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                FCFA
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrency("eur")}
-                className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
-                  currency === "eur"
-                    ? "bg-blue-600 text-white shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                EUR (€)
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrency("usd")}
-                className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
-                  currency === "usd"
-                    ? "bg-blue-600 text-white shadow-2xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                USD ($)
-              </button>
-            </div>
 
             <button
               type="button"
@@ -552,61 +516,16 @@ export default function DashboardPage() {
             <span className="text-[11px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
               Espace Propriétaire Bailleur
             </span>
-            <span className="text-[11px] text-muted-foreground font-medium">Bénin &amp; Diaspora</span>
-            {currency !== "fcfa" && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 animate-pulse">
-                <Globe className="w-3 h-3" />
-                Mode Diaspora actif
-              </span>
-            )}
+            <span className="text-[11px] text-muted-foreground font-medium">Bénin</span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-normal text-foreground tracking-tight">
             Performances de votre patrimoine
           </h1>
           <p className="text-[13px] text-muted-foreground max-w-2xl">
-            Suivi des encaissements, quittances certifiées Loi 2022-30 et conversion devises en temps réel.
+            Suivi des encaissements, quittances certifiées Loi 2022-30 et gestion de vos logements.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {/* Sélecteur de Devise Intégré (Bénin & Diaspora) */}
-          <div className="inline-flex items-center p-1 bg-muted/60 border border-border rounded-xl">
-            <button
-              type="button"
-              onClick={() => setCurrency("fcfa")}
-              className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
-                currency === "fcfa"
-                  ? "bg-card text-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              title="Francs CFA (UEMOA)"
-            >
-              FCFA
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrency("eur")}
-              className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
-                currency === "eur"
-                  ? "bg-primary text-primary-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              title="Conversion automatique en Euros (1 € = 655,957 F)"
-            >
-              EUR (€)
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrency("usd")}
-              className={`px-2.5 py-1 text-[11.5px] font-bold rounded-lg transition-all cursor-pointer ${
-                currency === "usd"
-                  ? "bg-primary text-primary-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              title="Conversion automatique en Dollars (1 $ = 600 F)"
-            >
-              USD ($)
-            </button>
-          </div>
 
           <button
             type="button"

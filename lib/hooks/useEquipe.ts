@@ -4,14 +4,16 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 export interface EquipeMember {
   id: string;
   nom: string;
+  email?: string | null;
   role: string;
   statut: string;
+  organization_id?: string | null;
   created_at?: string;
 }
 
 const DEMO_EQUIPE: EquipeMember[] = [
-  { id: "1", nom: "Alexandre K.", role: "Administrateur", statut: "Actif" },
-  { id: "2", nom: "Marie C.", role: "Comptable", statut: "Actif" },
+  { id: "1", nom: "Alexandre K.", email: "alexandre@lokka.bj", role: "Administrateur", statut: "Actif" },
+  { id: "2", nom: "Marie C.", email: "marie@lokka.bj", role: "Comptable", statut: "Actif" },
 ];
 
 export function useEquipe() {
@@ -40,7 +42,23 @@ export function useAddEquipeMember() {
         return { ...newMember, id: Date.now().toString() };
       }
       const supabase = createClient();
-      const { data, error } = await supabase.from("equipe").insert([newMember]).select().single();
+      const { data: { user } } = await supabase.auth.getUser();
+      let orgId: string | null = null;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", user.id)
+          .maybeSingle();
+        orgId = profile?.organization_id || null;
+      }
+
+      const payload = {
+        ...newMember,
+        organization_id: orgId,
+      };
+
+      const { data, error } = await supabase.from("equipe").insert([payload]).select().single();
       if (error) throw error;
       return data;
     },
