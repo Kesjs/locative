@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { Building2 } from "lucide-react";
 
 interface LogoProps {
   variant?: "dark" | "light";
@@ -33,13 +32,13 @@ export default function Logo({
     <div className="flex items-center gap-2.5">
       {/* Brand Icon Mark */}
       <div
-        className={`flex ${currentSize.markClass} items-center justify-center rounded-lg shadow-xs transition-transform duration-200 group-hover:scale-105 ${
-          isLight
-            ? "bg-[#9D6B3C] text-white"
-            : "bg-slate-900 dark:bg-emerald-600 text-white"
-        }`}
+        className={`flex ${currentSize.markClass} items-center justify-center overflow-hidden rounded-lg shadow-xs transition-transform duration-200 group-hover:scale-105`}
       >
-        <Building2 size={currentSize.iconSize} className="stroke-[2.2]" />
+        <img
+          src="/logo-icon.png"
+          alt="Lokka"
+          className="h-full w-full object-contain"
+        />
       </div>
 
       {/* Brand Typographic Logotype */}
