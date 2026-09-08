@@ -50,6 +50,24 @@ export function AddPaiementModal({
   const [directLocataire, setDirectLocataire] = useState("");
   const [directMontant, setDirectMontant] = useState("");
 
+  // Commun aux deux modes : justificatif de paiement
+  const [referencePaiement, setReferencePaiement] = useState("");
+  const [preuveFile, setPreuveFile] = useState<File | null>(null);
+  const [preuvePreview, setPreuvePreview] = useState<string | null>(null);
+
+  const handlePreuveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setPreuveFile(file);
+    if (preuvePreview) URL.revokeObjectURL(preuvePreview);
+    setPreuvePreview(file ? URL.createObjectURL(file) : null);
+  };
+
+  const clearPreuve = () => {
+    setPreuveFile(null);
+    if (preuvePreview) URL.revokeObjectURL(preuvePreview);
+    setPreuvePreview(null);
+  };
+
   const handleBienSelect = (bienId: string) => {
     const found = biens.find((b) => b.id === bienId);
     if (found) {
@@ -67,6 +85,8 @@ export function AddPaiementModal({
       setDirectBienId(null);
       setDirectLocataire("");
       setDirectMontant("");
+      setReferencePaiement("");
+      clearPreuve();
       onClose();
     }
   };
@@ -77,7 +97,12 @@ export function AddPaiementModal({
     if (mode === "pending") {
       if (!selectedTxId) return;
       try {
-        await encaisser({ id: selectedTxId, methode });
+        await encaisser({
+          id: selectedTxId,
+          methode,
+          reference_paiement: referencePaiement || undefined,
+          preuveFile,
+        });
         toast.success("Paiement encaissé avec succès ! Quittance mise à jour.");
         handleOpenChange(false);
       } catch (error) {
@@ -96,6 +121,8 @@ export function AddPaiementModal({
           locataire_nom: directLocataire,
           montant: Number(directMontant),
           methode,
+          reference_paiement: referencePaiement || undefined,
+          preuveFile,
         });
         toast.success("Paiement enregistré avec succès !");
         handleOpenChange(false);
@@ -222,6 +249,43 @@ export function AddPaiementModal({
               </div>
             </div>
           )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="reference-paiement">
+              ID transaction MoMo/Moov <span className="text-muted-foreground font-normal">(optionnel)</span>
+            </Label>
+            <Input
+              id="reference-paiement"
+              placeholder="Ex: MP240611.1032.A12345"
+              value={referencePaiement}
+              onChange={(e) => setReferencePaiement(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="preuve-paiement">
+              Preuve de paiement <span className="text-muted-foreground font-normal">(optionnel)</span>
+            </Label>
+            {preuvePreview ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={preuvePreview}
+                  alt="Aperçu de la preuve de paiement"
+                  className="h-14 w-14 rounded-md object-cover border"
+                />
+                <Button type="button" variant="ghost" size="sm" onClick={clearPreuve}>
+                  Retirer
+                </Button>
+              </div>
+            ) : (
+              <Input
+                id="preuve-paiement"
+                type="file"
+                accept="image/*"
+                onChange={handlePreuveChange}
+              />
+            )}
+          </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="methode-select">Moyen de paiement reçu</Label>

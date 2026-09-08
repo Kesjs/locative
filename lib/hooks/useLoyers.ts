@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { uploadPaymentProof } from "@/lib/upload-payment-proof";
 
 export interface LoyerTransaction {
   id: string;
@@ -12,6 +13,8 @@ export interface LoyerTransaction {
   quittance_url?: string;
   date_reglement?: string;
   echeance: string;
+  reference_paiement?: string | null;
+  preuve_url?: string | null;
 }
 
 const LOCAL_LOYERS_KEY = "lokka_loyers_cache";
@@ -64,12 +67,23 @@ export function useLoyers() {
 export function useEncaisserLoyer() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { id: string; methode: LoyerTransaction["methode"] }) => {
+    mutationFn: async (payload: {
+      id: string;
+      methode: LoyerTransaction["methode"];
+      reference_paiement?: string;
+      preuveFile?: File | null;
+    }) => {
       // Mettre à jour en local
       const local = getLocalLoyers();
       const updatedLocal = local.map((l) =>
         l.id === payload.id
-          ? { ...l, statut: "payé" as const, methode: payload.methode, date_reglement: new Date().toISOString() }
+          ? {
+              ...l,
+              statut: "payé" as const,
+              methode: payload.methode,
+              date_reglement: new Date().toISOString(),
+              reference_paiement: payload.reference_paiement || l.reference_paiement,
+            }
           : l
       );
       saveLocalLoyers(updatedLocal);
@@ -80,9 +94,25 @@ export function useEncaisserLoyer() {
 
       const supabase = createClient();
       try {
+        let preuve_url: string | undefined;
+        if (payload.preuveFile) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            preuve_url = await uploadPaymentProof(payload.preuveFile, user.id);
+          }
+        }
+
+        const updatePayload: Record<string, any> = {
+          statut: "payé",
+          methode: payload.methode,
+          date_reglement: new Date().toISOString(),
+        };
+        if (payload.reference_paiement) updatePayload.reference_paiement = payload.reference_paiement;
+        if (preuve_url) updatePayload.preuve_url = preuve_url;
+
         const { data, error } = await supabase
           .from("loyers_transactions")
-          .update({ statut: "payé", methode: payload.methode, date_reglement: new Date().toISOString() })
+          .update(updatePayload)
           .eq("id", payload.id)
           .select()
           .single();
@@ -93,9 +123,7 @@ export function useEncaisserLoyer() {
         // Mise à jour du cache local de confort seulement après succès réel Supabase
         const local = getLocalLoyers();
         const updatedLocal = local.map((l) =>
-          l.id === payload.id
-            ? { ...l, statut: "payé" as const, methode: payload.methode, date_reglement: new Date().toISOString() }
-            : l
+          l.id === payload.id ? { ...l, ...(data as LoyerTransaction) } : l
         );
         saveLocalLoyers(updatedLocal);
         return data;
@@ -120,6 +148,8 @@ export function useAddPaymentDirect() {
       montant: number;
       methode: LoyerTransaction["methode"];
       echeance?: string;
+      reference_paiement?: string;
+      preuveFile?: File | null;
     }) => {
       if (!isSupabaseConfigured()) {
         const local = getLocalLoyers();
@@ -133,6 +163,7 @@ export function useAddPaymentDirect() {
           statut: "payé",
           date_reglement: new Date().toISOString(),
           echeance: payload.echeance || new Date().toISOString().split("T")[0],
+          reference_paiement: payload.reference_paiement || null,
         };
         saveLocalLoyers([newTx, ...local]);
         return newTx;
@@ -151,6 +182,11 @@ export function useAddPaymentDirect() {
           orgId = profile?.organization_id || null;
         }
 
+        let preuve_url: string | undefined;
+        if (payload.preuveFile && user) {
+          preuve_url = await uploadPaymentProof(payload.preuveFile, user.id);
+        }
+
         const insertPayload: Record<string, any> = {
           bien_nom: payload.bien_nom,
           bien_id: payload.bien_id || null,
@@ -162,6 +198,8 @@ export function useAddPaymentDirect() {
           echeance: payload.echeance || new Date().toISOString().split("T")[0],
         };
         if (orgId) insertPayload.organization_id = orgId;
+        if (payload.reference_paiement) insertPayload.reference_paiement = payload.reference_paiement;
+        if (preuve_url) insertPayload.preuve_url = preuve_url;
 
         const { data, error } = await supabase
           .from("loyers_transactions")
