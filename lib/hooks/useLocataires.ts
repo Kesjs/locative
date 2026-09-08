@@ -101,10 +101,8 @@ export function useLeases() {
   return useQuery({
     queryKey: ["leases"],
     queryFn: async (): Promise<LeaseWithDetails[]> => {
-      const local = getLocalLeases();
-
       if (!isSupabaseConfigured()) {
-        return local;
+        return getLocalLeases();
       }
       const supabase = createClient();
       try {
@@ -113,20 +111,19 @@ export function useLeases() {
           .select("*, tenant:tenants(*), bien:biens(*)")
           .order("created_at", { ascending: false });
 
+        // Le cache local (lokka_leases_cache) est un filet de secours pour
+        // le mode hors-ligne uniquement. On ne le fusionne JAMAIS avec une
+        // réponse serveur réussie : ce cache n'est pas lié au compte
+        // connecté, et le fusionner mélangeait les données d'un compte
+        // précédemment utilisé sur cet appareil avec celles du compte
+        // réellement connecté.
         if (error) {
-          return local;
+          return getLocalLeases();
         }
 
-        const supaLeases = (data as LeaseWithDetails[]) || [];
-        const combined = [...supaLeases];
-        for (const loc of local) {
-          if (!combined.some((l) => l.id === loc.id)) {
-            combined.push(loc);
-          }
-        }
-        return combined;
+        return (data as LeaseWithDetails[]) || [];
       } catch {
-        return local;
+        return getLocalLeases();
       }
     },
   });
@@ -217,6 +214,48 @@ export function useAddTenantWithLease() {
       } catch (err: any) {
         throw new Error(err?.message || "Impossible de créer le bail et le locataire.");
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leases"] });
+      queryClient.invalidateQueries({ queryKey: ["biens"] });
+    },
+  });
+}
+
+// Met à jour la fiche d'un locataire existant (complétion post-onboarding : téléphone, pièce d'identité...)
+export function useUpdateTenant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: Partial<Tenant> & { id: string }) => {
+      if (!isSupabaseConfigured()) {
+        const local = getLocalLeases();
+        const updated = local.map((l) =>
+          l.tenant?.id === id ? { ...l, tenant: { ...l.tenant, ...patch } } : l
+        );
+        saveLocalLeases(updated as LeaseWithDetails[]);
+        return { id, ...patch } as Tenant;
+      }
+
+      const supabase = createClient();
+      const { data, error } = await supabase.from("tenants").update(patch).eq("id", id).select().single();
+      if (error) {
+        throw new Error(`Erreur lors de la mise à jour du locataire: ${error.message}`);
+      }
+
+      // Si le nom change, on resynchronise le cache d'affichage sur le(s) bien(s) de son bail actif
+      if (patch.full_name) {
+        const { data: activeLeases } = await supabase
+          .from("leases")
+          .select("bien_id")
+          .eq("tenant_id", id)
+          .eq("is_active", true);
+        const bienIds = (activeLeases || []).map((l) => l.bien_id).filter(Boolean);
+        if (bienIds.length > 0) {
+          await supabase.from("biens").update({ locataire_nom: patch.full_name }).in("id", bienIds);
+        }
+      }
+
+      return data as Tenant;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leases"] });

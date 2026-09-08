@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
 import {
   Squares2X2Icon,
   UsersIcon,
@@ -84,6 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const supabase = createClient();
       await supabase.auth.signOut();
     }
+    clearLocalAccountCache();
     router.push("/auth/login");
   };
 

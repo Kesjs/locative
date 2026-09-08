@@ -1,15 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
-import { PlusIcon, DocumentTextIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, DocumentTextIcon, CheckCircleIcon, XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Building2 } from "lucide-react";
 import { useLeases, type LeaseWithDetails } from "@/lib/hooks/useLocataires";
+import { usePatrimoineFilter, useActiveGroupBienIds } from "@/lib/patrimoineFilterContext";
 import { AddLocataireModal } from "../locataires/_components/AddLocataireModal";
 
 export default function BauxPage() {
-  const { data: baux = [], isLoading } = useLeases();
+  const { data: allBaux = [], isLoading } = useLeases();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const activeGroupBienIds = useActiveGroupBienIds();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const baux = useMemo(() => {
+    if (!activeGroupBienIds) return allBaux;
+    return allBaux.filter((b) => activeGroupBienIds.includes(b.bien_id));
+  }, [allBaux, activeGroupBienIds]);
+
+  const filteredBaux = useMemo(() => {
+    if (!search.trim()) return baux;
+    const q = search.trim().toLowerCase();
+    return baux.filter(
+      (b) =>
+        b.tenant?.full_name?.toLowerCase().includes(q) ||
+        b.tenant?.phone_number?.toLowerCase().includes(q) ||
+        b.bien?.nom?.toLowerCase().includes(q)
+    );
+  }, [baux, search]);
 
   const columns = [
     {
@@ -87,7 +108,24 @@ export default function BauxPage() {
         </button>
       </div>
 
-      {baux.length === 0 ? (
+      {activeGroup && (
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+          <span className="flex items-center gap-1.5">
+            <Building2 className="w-4 h-4" />
+            Filtré sur le groupe « {activeGroup} »
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveGroup(null)}
+            className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+          >
+            <XMarkIcon className="w-3.5 h-3.5" />
+            Retirer le filtre
+          </button>
+        </div>
+      )}
+
+      {allBaux.length === 0 ? (
         <EmptyState
           icon={DocumentTextIcon}
           title="Aucun contrat de bail enregistré"
@@ -95,9 +133,30 @@ export default function BauxPage() {
           actionLabel="Créer un bail"
           onAction={() => setIsModalOpen(true)}
         />
+      ) : baux.length === 0 ? (
+        <div className="text-center py-12 text-[13px] text-muted-foreground border border-dashed border-border rounded-xl">
+          Aucun bail dans cette résidence.
+        </div>
       ) : (
         <div className="bg-card border border-border rounded-xl p-5 shadow-xs">
-          <DataTable data={baux} columns={columns} keyExtractor={(r) => r.id} />
+          <div className="relative max-w-md mb-4">
+            <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un locataire, un téléphone, un logement..."
+              className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-[13px] bg-card text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+
+          {filteredBaux.length === 0 ? (
+            <div className="text-center py-12 text-[13px] text-muted-foreground border border-dashed border-border rounded-xl">
+              Aucun bail ne correspond à cette recherche.
+            </div>
+          ) : (
+            <DataTable data={filteredBaux} columns={columns} keyExtractor={(r) => r.id} />
+          )}
         </div>
       )}
 

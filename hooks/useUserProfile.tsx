@@ -13,6 +13,8 @@ export interface UserProfile {
   role: string;
   plan: LokkaPlan;
   quotaBiens: { current: number; max: number };
+  organizationName?: string;
+  organizationType?: string;
 }
 
 // État affiché brièvement le temps que le vrai profil Supabase soit chargé —
@@ -26,6 +28,8 @@ const DEFAULT_PROFILE: UserProfile = {
   role: "Propriétaire Bailleur",
   plan: "pro",
   quotaBiens: { current: 0, max: 10 },
+  organizationName: "",
+  organizationType: "",
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -89,7 +93,7 @@ export function useUserProfile(): UserProfile & {
 
       const { data } = await supabase
         .from("profiles")
-        .select("full_name, email, avatar_url, role, logo_url")
+        .select("full_name, email, avatar_url, role, logo_url, organization_id")
         .eq("id", user.id)
         .single();
 
@@ -100,7 +104,21 @@ export function useUserProfile(): UserProfile & {
         const devPlan = isDev ? (localStorage.getItem("lokka_dev_plan") as LokkaPlan) : null;
         const savedPlan = devPlan || (isAgencyRole ? "agence" : "pro");
         const customLogo = data.logo_url || localStorage.getItem("lokka_custom_logo") || "";
-        
+
+        let organizationName = "";
+        let organizationType = "";
+        if (data.organization_id) {
+          const { data: org } = await supabase
+            .from("organizations")
+            .select("name, type")
+            .eq("id", data.organization_id)
+            .maybeSingle();
+          organizationName = org?.name || "";
+          organizationType = org?.type || "";
+        }
+
+        if (!isMounted) return;
+
         setProfile({
           name: data.full_name || (isAgencyRole ? "Agence Immobilière" : "Propriétaire"),
           email: data.email || user.email || "",
@@ -109,6 +127,8 @@ export function useUserProfile(): UserProfile & {
           role,
           plan: savedPlan,
           quotaBiens: PLAN_QUOTAS[savedPlan] || { current: 4, max: 10 },
+          organizationName,
+          organizationType,
         });
       }
     }

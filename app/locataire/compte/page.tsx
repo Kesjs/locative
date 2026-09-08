@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
 
 export default function ComptePage() {
   const router = useRouter();
@@ -117,6 +118,7 @@ export default function ComptePage() {
       const supabase = createClient();
       await supabase.auth.signOut();
     }
+    clearLocalAccountCache();
     router.push("/auth/locataire");
   };
 

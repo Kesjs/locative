@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
 
 const NAV_ITEMS = [
   { name: "Mon Loyer", href: "/locataire", icon: Wallet },
@@ -33,6 +34,7 @@ export default function LocataireLayout({ children }: { children: React.ReactNod
       const supabase = createClient();
       await supabase.auth.signOut();
     }
+    clearLocalAccountCache();
     router.push("/auth/login");
   };
 

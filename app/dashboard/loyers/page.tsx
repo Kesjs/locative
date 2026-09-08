@@ -12,12 +12,15 @@ import {
   ExclamationCircleIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
-import { Wallet, Smartphone, Landmark, CheckCircle2, AlertCircle } from "lucide-react";
+import { Wallet, Smartphone, Landmark, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
 import { useLoyers, type LoyerTransaction } from "@/lib/hooks/useLoyers";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useLeases } from "@/lib/hooks/useLocataires";
+import { usePatrimoineFilter, useActiveGroupBienIds, useActiveGroupBienNames } from "@/lib/patrimoineFilterContext";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AddPaiementModal } from "./_components/AddPaiementModal";
 import ReceiptModal from "@/components/dashboard/ReceiptModal";
 
@@ -26,10 +29,23 @@ export default function LoyersPage() {
   const [filterYear, setFilterYear] = useState("2026");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [search, setSearch] = useState("");
 
-  const { data: loyers = [], isLoading } = useLoyers();
+  const { data: allLoyers = [], isLoading } = useLoyers();
   const { data: leases = [] } = useLeases();
   const userProfile = useUserProfile();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const activeGroupBienIds = useActiveGroupBienIds();
+  const activeGroupBienNames = useActiveGroupBienNames();
+
+  // Filtre résidence : match par bien_id quand disponible, sinon repli sur bien_nom
+  // (nécessaire pour les transactions historiques enregistrées avant le lien bien_id).
+  const loyers = useMemo(() => {
+    if (!activeGroupBienIds || !activeGroupBienNames) return allLoyers;
+    return allLoyers.filter((l) =>
+      l.bien_id ? activeGroupBienIds.includes(l.bien_id) : activeGroupBienNames.includes(l.bien_nom)
+    );
+  }, [allLoyers, activeGroupBienIds, activeGroupBienNames]);
 
   // Statistics calculation
   const stats = useMemo(() => {
@@ -45,6 +61,18 @@ export default function LoyersPage() {
 
     return { totalTransactions, totalEncaisse, totalReste, tauxRecouvrement, payesCount: payes.length, impayesCount: impayes.length };
   }, [loyers]);
+
+  // Recherche : locataire, logement ou méthode de paiement
+  const filteredLoyers = useMemo(() => {
+    if (!search.trim()) return loyers;
+    const q = search.trim().toLowerCase();
+    return loyers.filter(
+      (l) =>
+        l.locataire_nom?.toLowerCase().includes(q) ||
+        l.bien_nom?.toLowerCase().includes(q) ||
+        l.methode?.toLowerCase().includes(q)
+    );
+  }, [loyers, search]);
 
   const handleOpenReceipt = (row: LoyerTransaction) => {
     setSelectedReceipt({
@@ -232,6 +260,23 @@ export default function LoyersPage() {
         </div>
       </div>
 
+      {activeGroup && (
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+          <span className="flex items-center gap-1.5">
+            <Building2 className="w-4 h-4" />
+            Filtré sur le groupe « {activeGroup} »
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveGroup(null)}
+            className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+          >
+            <XMarkIcon className="w-3.5 h-3.5" />
+            Retirer le filtre
+          </button>
+        </div>
+      )}
+
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <KpiCard
@@ -268,11 +313,28 @@ export default function LoyersPage() {
             <p className="text-[12px] text-muted-foreground">Registre officiel des loyers perçus et en attente pour la période</p>
           </div>
           <span className="text-[12px] font-bold text-muted-foreground">
-            {loyers.length} ligne{loyers.length > 1 ? "s" : ""}
+            {filteredLoyers.length} ligne{filteredLoyers.length > 1 ? "s" : ""}
           </span>
         </div>
 
-        <DataTable data={loyers} columns={columns} keyExtractor={(r) => r.id} />
+        <div className="relative max-w-md mb-4">
+          <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un locataire, un logement, une méthode..."
+            className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-[13px] bg-card text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+
+        {filteredLoyers.length === 0 ? (
+          <div className="text-center py-12 text-[13px] text-muted-foreground border border-dashed border-border rounded-xl">
+            Aucune transaction ne correspond à cette recherche.
+          </div>
+        ) : (
+          <DataTable data={filteredLoyers} columns={columns} keyExtractor={(r) => r.id} />
+        )}
       </div>
 
       {/* Modales connectées */}

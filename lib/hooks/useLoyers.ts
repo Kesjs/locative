@@ -5,6 +5,7 @@ export interface LoyerTransaction {
   id: string;
   locataire_nom: string;
   bien_nom: string;
+  bien_id?: string | null;
   montant: number;
   methode: "MTN MoMo" | "Moov Money" | "Espèces" | "Virement";
   statut: "payé" | "en_attente" | "retard";
@@ -114,6 +115,7 @@ export function useAddPaymentDirect() {
   return useMutation({
     mutationFn: async (payload: {
       bien_nom: string;
+      bien_id?: string | null;
       locataire_nom: string;
       montant: number;
       methode: LoyerTransaction["methode"];
@@ -124,6 +126,7 @@ export function useAddPaymentDirect() {
         const newTx: LoyerTransaction = {
           id: "tx_" + Date.now().toString(36),
           bien_nom: payload.bien_nom,
+          bien_id: payload.bien_id || null,
           locataire_nom: payload.locataire_nom,
           montant: payload.montant,
           methode: payload.methode,
@@ -150,6 +153,7 @@ export function useAddPaymentDirect() {
 
         const insertPayload: Record<string, any> = {
           bien_nom: payload.bien_nom,
+          bien_id: payload.bien_id || null,
           locataire_nom: payload.locataire_nom,
           montant: payload.montant,
           methode: payload.methode,

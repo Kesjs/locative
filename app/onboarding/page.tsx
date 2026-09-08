@@ -321,6 +321,7 @@ export default function OnboardingPage() {
                 photo_principale: null,
                 archive: false,
                 organization_id: activeOrgId,
+                groupe_patrimoine: nomPatrimoine,
               })
               .select()
               .maybeSingle();
@@ -344,6 +345,16 @@ export default function OnboardingPage() {
             // CAS B : BAILLEUR (Résidence Multi-Lots : Chambres / Appartements)
             const nomPatrimoine = saisieExpress.nomPatrimoine?.trim() || "Résidence Principale";
             const bienAdresse = `${nomPatrimoine}, ${bienVille}`;
+
+            // Résidence créée comme vraie entité (table residences), pas seulement comme texte sur
+            // biens.groupe_patrimoine — pour qu'elle apparaisse tout de suite dans le sélecteur sidebar,
+            // même symboliquement vide si l'insertion des lots venait à échouer plus bas.
+            const { error: residenceError } = await supabase
+              .from("residences")
+              .insert({ nom: nomPatrimoine, organization_id: activeOrgId });
+            if (residenceError) {
+              console.warn("Notice création résidence onboarding:", residenceError.message);
+            }
 
             const lotsToInsert = (saisieExpress.lots && saisieExpress.lots.length > 0)
               ? saisieExpress.lots
@@ -394,6 +405,7 @@ export default function OnboardingPage() {
                   photo_principale: null,
                   archive: false,
                   organization_id: activeOrgId,
+                  groupe_patrimoine: nomPatrimoine,
                 }))
               )
               .select();

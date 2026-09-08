@@ -21,6 +21,7 @@ export interface Bien {
   nb_pieces?: number | null;
   compteur_sbee?: string;
   compteur_soneb?: string;
+  groupe_patrimoine?: string | null;
   archive?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -193,6 +194,7 @@ export function useAddBien() {
           repere: newBien.repere || null,
           compteur_sbee: newBien.compteur_sbee || null,
           compteur_soneb: newBien.compteur_soneb || null,
+          groupe_patrimoine: newBien.groupe_patrimoine || null,
         };
 
         if (organizationId) payload.organization_id = organizationId;

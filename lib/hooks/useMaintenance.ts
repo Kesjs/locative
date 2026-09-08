@@ -5,6 +5,7 @@ export interface Ticket {
   id: string;
   titre: string;
   bien: string;
+  bien_id?: string | null;
   urgence: "Haute" | "Moyenne" | "Basse";
   statut: "Nouveau" | "En cours" | "Résolu";
   cout_estime?: number;
@@ -42,6 +43,7 @@ export function useTickets() {
           id: t.id,
           titre: t.title || t.titre || "Incident",
           bien: t.description || t.bien || "Bien concerné",
+          bien_id: t.bien_id || null,
           urgence: t.urgency === "high" ? "Haute" : t.urgency === "low" ? "Basse" : "Moyenne",
           statut: t.status === "resolved" ? "Résolu" : t.status === "in_progress" ? "En cours" : "Nouveau",
           cout_estime: Number(t.cout_estime) || 0,
@@ -89,6 +91,7 @@ export function useAddTicket() {
         const payload: Record<string, any> = {
           title: newTicket.titre,
           description: newTicket.bien,
+          bien_id: newTicket.bien_id || null,
           urgency: urgencyMap[newTicket.urgence] || "medium",
           status: statusMap[newTicket.statut] || "open",
           cout_estime: Number(newTicket.cout_estime) || 0,
@@ -109,6 +112,7 @@ export function useAddTicket() {
           id: data.id,
           titre: data.title,
           bien: data.description,
+          bien_id: data.bien_id || null,
           urgence: newTicket.urgence,
           statut: newTicket.statut,
           cout_estime: Number(data.cout_estime) || 0,

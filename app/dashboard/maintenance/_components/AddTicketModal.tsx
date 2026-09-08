@@ -43,13 +43,14 @@ export function AddTicketModal({
   const [formData, setFormData] = useState({
     titre: "",
     bien: "",
+    bien_id: "" as string,
     urgence: "Moyenne" as Ticket["urgence"],
     statut: "Nouveau" as Ticket["statut"],
   });
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setFormData({ titre: "", bien: "", urgence: "Moyenne", statut: "Nouveau" });
+      setFormData({ titre: "", bien: "", bien_id: "", urgence: "Moyenne", statut: "Nouveau" });
       onClose();
     }
   };
@@ -97,15 +98,18 @@ export function AddTicketModal({
             <Label htmlFor="ticket-bien">Bien concerné</Label>
             {biens.length > 0 ? (
               <Select
-                value={formData.bien}
-                onValueChange={(v) => setFormData({ ...formData, bien: v })}
+                value={formData.bien_id}
+                onValueChange={(v) => {
+                  const bienChoisi = biens.find((b) => b.id === v);
+                  setFormData({ ...formData, bien_id: v, bien: bienChoisi?.nom || "" });
+                }}
               >
                 <SelectTrigger id="ticket-bien">
                   <SelectValue placeholder="Sélectionner un bien..." />
                 </SelectTrigger>
                 <SelectContent>
                   {biens.map((b) => (
-                    <SelectItem key={b.id} value={b.nom}>
+                    <SelectItem key={b.id} value={b.id}>
                       {b.nom}
                     </SelectItem>
                   ))}

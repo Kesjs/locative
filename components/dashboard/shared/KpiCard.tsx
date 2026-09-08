@@ -30,7 +30,7 @@ export function KpiCard({
   icon: Icon,
   iconColor = "default",
 }: KpiCardProps) {
-  const { isPrivacyMode, currency: globalCurrency } = useSidebar();
+  const { isPrivacyMode } = useSidebar();
   const resolvedDelta = delta ?? (trend ? { value: trend, trend: trendUp ? ("up" as const) : ("down" as const) } : undefined);
   
   const iconColorStyles = {
@@ -45,22 +45,10 @@ export function KpiCard({
   const isMonetary = Boolean(currencyProp);
   const rawNum = typeof value === "number" ? value : Number(value) || 0;
 
-  // Calcul du montant selon la devise sélectionnée
-  let displayValue = rawNum;
-  let displayUnit = currencyProp || "FCFA";
-
-  if (isMonetary) {
-    if (globalCurrency === "eur") {
-      displayValue = Math.round(rawNum / 655.957);
-      displayUnit = "€";
-    } else if (globalCurrency === "usd") {
-      displayValue = Math.round(rawNum / 600);
-      displayUnit = "$";
-    } else {
-      displayValue = rawNum;
-      displayUnit = "FCFA";
-    }
-  }
+  // Lokka Bénin fonctionne exclusivement en FCFA (pas de conversion de devise :
+  // le bailleur béninois facture et perçoit ses loyers en FCFA).
+  const displayValue = rawNum;
+  const displayUnit = currencyProp || "FCFA";
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 shadow-xs hover:border-primary/40 transition-all flex flex-col justify-between group">

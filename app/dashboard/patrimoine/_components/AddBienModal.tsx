@@ -26,6 +26,7 @@ import {
   type Bien,
 } from "@/lib/hooks/useBiens";
 import { useAddTenantWithLease } from "@/lib/hooks/useLocataires";
+import { useResidences, useCreateResidence } from "@/lib/hooks/useResidences";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -73,6 +74,7 @@ interface FormState {
   caution_montant: string;
   compteur_sbee: string;
   compteur_soneb: string;
+  groupe_patrimoine: string;
   statut: Bien["statut"];
   locataire_nom: string;
   locataire_telephone: string;
@@ -96,6 +98,7 @@ const EMPTY_FORM: FormState = {
   caution_montant: "",
   compteur_sbee: "",
   compteur_soneb: "",
+  groupe_patrimoine: "",
   statut: "vacant",
   locataire_nom: "",
   locataire_telephone: "",
@@ -120,6 +123,7 @@ function bienToForm(bien: Bien): FormState {
     caution_montant: bien.caution_montant ? String(bien.caution_montant) : "",
     compteur_sbee: bien.compteur_sbee || "",
     compteur_soneb: bien.compteur_soneb || "",
+    groupe_patrimoine: bien.groupe_patrimoine || "",
     statut: bien.statut,
     locataire_nom: bien.locataire_nom || "",
     locataire_telephone: "",
@@ -142,6 +146,8 @@ export function AddBienModal({
   const { mutateAsync: addBien, isPending: isAdding } = useAddBien();
   const { mutateAsync: updateBien, isPending: isUpdating } = useUpdateBien();
   const { mutateAsync: addTenantWithLease } = useAddTenantWithLease();
+  const { data: residences = [] } = useResidences();
+  const { mutateAsync: createResidence, isPending: isCreatingResidence } = useCreateResidence();
   const isPending = isAdding || isUpdating;
 
   const [step, setStep] = useState<StepIndex>(0);
@@ -151,6 +157,8 @@ export function AddBienModal({
   const [uploading, setUploading] = useState(false);
   const [isGeolocating, setIsGeolocating] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [isNewResidenceMode, setIsNewResidenceMode] = useState(false);
+  const [newResidenceName, setNewResidenceName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragFromIndex = useRef<number | null>(null);
 
@@ -370,6 +378,7 @@ export function AddBienModal({
       nb_pieces: form.nb_pieces ? Number(form.nb_pieces) : null,
       compteur_sbee: form.compteur_sbee.trim() || undefined,
       compteur_soneb: form.compteur_soneb.trim() || undefined,
+      groupe_patrimoine: form.groupe_patrimoine.trim() || undefined,
     };
 
     try {
@@ -815,6 +824,77 @@ export function AddBienModal({
                       </Field>
                     </div>
                   </div>
+
+                  {/* Groupe de patrimoine / Résidence */}
+                  <Field label="Résidence (Optionnel)">
+                    {isNewResidenceMode ? (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          autoFocus
+                          value={newResidenceName}
+                          onChange={(e) => setNewResidenceName(e.target.value)}
+                          placeholder="Ex. Résidence Les Cocotiers, SCI Familiale du Golfe..."
+                          className="rounded-lg text-[12.5px]"
+                        />
+                        <button
+                          type="button"
+                          disabled={!newResidenceName.trim() || isCreatingResidence}
+                          onClick={async () => {
+                            try {
+                              const created = await createResidence({ nom: newResidenceName.trim() });
+                              update({ groupe_patrimoine: created.nom });
+                              setIsNewResidenceMode(false);
+                              setNewResidenceName("");
+                              toast.success(`Résidence « ${created.nom} » créée`);
+                            } catch (err: any) {
+                              toast.error(err?.message || "Erreur lors de la création de la résidence.");
+                            }
+                          }}
+                          className="shrink-0 px-3 py-2 rounded-lg text-[12px] font-bold bg-[var(--primary)] text-white hover:opacity-90 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isCreatingResidence ? "..." : "Créer"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsNewResidenceMode(false);
+                            setNewResidenceName("");
+                          }}
+                          className="shrink-0 px-2.5 py-2 rounded-lg text-[12px] font-bold text-muted-foreground hover:bg-muted transition cursor-pointer"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    ) : (
+                      <Select
+                        value={form.groupe_patrimoine || "__none__"}
+                        onValueChange={(value) => {
+                          if (value === "__new__") {
+                            setIsNewResidenceMode(true);
+                            return;
+                          }
+                          update({ groupe_patrimoine: value === "__none__" ? "" : value });
+                        }}
+                      >
+                        <SelectTrigger className="rounded-lg text-[12.5px]">
+                          <SelectValue placeholder="Aucune résidence" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">Aucune résidence</SelectItem>
+                          {residences.map((r) => (
+                            <SelectItem key={r.id} value={r.nom}>
+                              {r.nom}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="__new__">+ Nouvelle résidence</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <span className="text-[11px] text-muted-foreground mt-1 block">
+                      Permet de filtrer et regrouper ce bien avec d'autres dans le sélecteur du menu.
+                    </span>
+                  </Field>
                 </>
               )}
 

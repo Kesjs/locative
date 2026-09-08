@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
-import { PlusIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, UsersIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Users2, ShieldCheck, UserCheck, Briefcase } from "lucide-react";
 import { useEquipe, type EquipeMember } from "@/lib/hooks/useEquipe";
 import { AddMemberModal } from "./_components/AddMemberModal";
@@ -12,6 +12,18 @@ import { AddMemberModal } from "./_components/AddMemberModal";
 export default function EquipePage() {
   const { data: equipe = [], isLoading } = useEquipe();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredEquipe = useMemo(() => {
+    if (!search.trim()) return equipe;
+    const q = search.trim().toLowerCase();
+    return equipe.filter(
+      (m) =>
+        m.nom?.toLowerCase().includes(q) ||
+        m.email?.toLowerCase().includes(q) ||
+        m.role?.toLowerCase().includes(q)
+    );
+  }, [equipe, search]);
 
   const columns = [
     {
@@ -126,7 +138,7 @@ export default function EquipePage() {
             <p className="text-[12px] text-muted-foreground">Liste des membres du cabinet et niveau d'autorisation</p>
           </div>
           <span className="text-[12px] font-bold text-muted-foreground">
-            {equipe.length} membre{equipe.length > 1 ? "s" : ""}
+            {filteredEquipe.length} membre{filteredEquipe.length > 1 ? "s" : ""}
           </span>
         </div>
 
@@ -139,7 +151,26 @@ export default function EquipePage() {
             onAction={() => setIsModalOpen(true)}
           />
         ) : (
-          <DataTable data={equipe} columns={columns} keyExtractor={(r) => r.id} />
+          <>
+            <div className="relative max-w-md mb-4">
+              <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher un collaborateur, un rôle, un email..."
+                className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-[13px] bg-card text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+
+            {filteredEquipe.length === 0 ? (
+              <div className="text-center py-12 text-[13px] text-muted-foreground border border-dashed border-border rounded-xl">
+                Aucun collaborateur ne correspond à cette recherche.
+              </div>
+            ) : (
+              <DataTable data={filteredEquipe} columns={columns} keyExtractor={(r) => r.id} />
+            )}
+          </>
         )}
       </div>
 

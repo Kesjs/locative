@@ -6,6 +6,8 @@ import { PlusIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { useBiens, type Bien } from "@/lib/hooks/useBiens";
+import { usePatrimoineFilter } from "@/lib/patrimoineFilterContext";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useLoyers } from "@/lib/hooks/useLoyers";
 import { AddBienModal } from "./_components/AddBienModal";
 import { PatrimoineKpis } from "./_components/PatrimoineKpis";
@@ -30,6 +32,7 @@ export default function PatrimoinePage() {
   const { role } = useUserProfile();
   const { data: biens = [], isLoading } = useBiens();
   const { data: loyers = [] } = useLoyers();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddPatrimoineOpen, setIsAddPatrimoineOpen] = useState(false);
@@ -56,6 +59,10 @@ export default function PatrimoinePage() {
 
   const filteredBiens = useMemo(() => {
     let result = [...biens];
+
+    if (activeGroup) {
+      result = result.filter((b) => (b.groupe_patrimoine || "").trim() === activeGroup);
+    }
 
     if (selectedPatrimoine) {
       result = result.filter((b) => b.nom.startsWith(selectedPatrimoine));
@@ -98,7 +105,7 @@ export default function PatrimoinePage() {
     }
 
     return result;
-  }, [biens, filters, selectedPatrimoine]);
+  }, [biens, filters, selectedPatrimoine, activeGroup]);
 
   const handleFilterVacants30j = () => {
     const now = Date.now();
@@ -167,6 +174,24 @@ export default function PatrimoinePage() {
       ) : (
         <>
           <PatrimoineKpis biens={biens} loyers={loyers} onFilterVacants30j={handleFilterVacants30j} />
+
+          {/* Bandeau filtre actif (groupe de patrimoine choisi dans la sidebar) */}
+          {activeGroup && (
+            <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+              <span className="flex items-center gap-1.5">
+                <Building2 className="w-4 h-4" />
+                Filtré sur le groupe « {activeGroup} »
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveGroup(null)}
+                className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+              >
+                <XMarkIcon className="w-3.5 h-3.5" />
+                Retirer le filtre
+              </button>
+            </div>
+          )}
 
           {/* Onglets Filtres par Patrimoine Parent */}
           {patrimoinesList.length > 0 && (

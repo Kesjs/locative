@@ -4,11 +4,15 @@ import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { useResidences, useRenameResidence } from "@/lib/hooks/useResidences";
+import { useBiens } from "@/lib/hooks/useBiens";
+import { usePatrimoineFilter } from "@/lib/patrimoineFilterContext";
 import {
   UserCircle,
   CreditCard,
   Bell,
   Building,
+  Building2,
   Sparkles,
   ShieldCheck,
   CheckCircle2,
@@ -21,9 +25,12 @@ import {
   Percent,
   Briefcase,
   FileCheck2,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 
-type Tab = "profil" | "encaissement" | "notifications" | "fiscalite" | "abonnement";
+type Tab = "profil" | "residences" | "encaissement" | "notifications" | "fiscalite" | "abonnement";
 
 export default function ParametresPage() {
   const { role, plan, quotaBiens, customLogo, updateCustomLogo } = useUserProfile();
@@ -32,6 +39,15 @@ export default function ParametresPage() {
   const [activeTab, setActiveTab] = useState<Tab>("profil");
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Résidences — renommage inline
+  const { data: residences = [] } = useResidences();
+  const { data: biensList = [] } = useBiens();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const renameResidence = useRenameResidence();
+  const [editingResidenceId, setEditingResidenceId] = useState<string | null>(null);
+  const [editingResidenceValue, setEditingResidenceValue] = useState("");
+  const [residenceError, setResidenceError] = useState<string | null>(null);
 
   // Form states
   const [profile, setProfile] = useState({
@@ -302,6 +318,11 @@ export default function ParametresPage() {
             icon: isAgency ? Briefcase : UserCircle,
           },
           {
+            id: "residences",
+            label: "Mes Résidences",
+            icon: Building2,
+          },
+          {
             id: "encaissement",
             label: isAgency ? "Honoraires & Reversements" : "Mobile Money & Banques",
             icon: isAgency ? Percent : CreditCard,
@@ -543,6 +564,146 @@ export default function ParametresPage() {
                 />
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB : MES RÉSIDENCES — liste + renommage inline                          */}
+        {/* ========================================================================= */}
+        {activeTab === "residences" && (
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-xs space-y-6 animate-in fade-in duration-150">
+            <div className="space-y-1 border-b border-border pb-4">
+              <h2 className="text-[16px] font-bold text-card-foreground">Mes Résidences</h2>
+              <p className="text-[13px] text-muted-foreground">
+                Renommer une résidence met automatiquement à jour tous les biens qui y sont rattachés — aucune
+                désynchronisation possible avec le sélecteur de la barre latérale.
+              </p>
+            </div>
+
+            {residences.length === 0 ? (
+              <div className="p-6 text-center text-[13px] text-muted-foreground bg-muted/30 border border-border rounded-2xl">
+                Aucune résidence créée pour l'instant. Utilisez « Créer une résidence » depuis le sélecteur en haut de
+                la barre latérale.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {residences.map((residence) => {
+                  const isEditing = editingResidenceId === residence.id;
+                  const biensCount = biensList.filter(
+                    (b: any) => (b.groupe_patrimoine || "").trim() === residence.nom
+                  ).length;
+
+                  const startEdit = () => {
+                    setEditingResidenceId(residence.id);
+                    setEditingResidenceValue(residence.nom);
+                    setResidenceError(null);
+                  };
+
+                  const cancelEdit = () => {
+                    setEditingResidenceId(null);
+                    setEditingResidenceValue("");
+                    setResidenceError(null);
+                  };
+
+                  const confirmRename = () => {
+                    const nouveauNom = editingResidenceValue.trim();
+                    if (!nouveauNom || nouveauNom === residence.nom) {
+                      cancelEdit();
+                      return;
+                    }
+                    setResidenceError(null);
+                    renameResidence.mutate(
+                      { id: residence.id, nouveauNom, ancienNom: residence.nom },
+                      {
+                        onSuccess: ({ ancienNom, residence: updated }) => {
+                          // Resynchronise le filtre actif si la résidence renommée était celle sélectionnée,
+                          // sinon le sélecteur pointerait encore vers l'ancien nom (activeGroup = texte libre).
+                          if (activeGroup === ancienNom) {
+                            setActiveGroup(updated.nom);
+                          }
+                          toast.success(`Résidence renommée en « ${updated.nom} »`);
+                          cancelEdit();
+                        },
+                        onError: (err: any) => {
+                          setResidenceError(err?.message || "Impossible de renommer la résidence.");
+                        },
+                      }
+                    );
+                  };
+
+                  return (
+                    <div
+                      key={residence.id}
+                      className="flex items-center gap-3 p-3.5 bg-muted/30 border border-border rounded-xl"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-card border border-border flex items-center justify-center shrink-0">
+                        <Building2 className="w-4 h-4 text-primary" />
+                      </div>
+
+                      {isEditing ? (
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              autoFocus
+                              value={editingResidenceValue}
+                              onChange={(e) => setEditingResidenceValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") confirmRename();
+                                if (e.key === "Escape") cancelEdit();
+                              }}
+                              className="flex-1 min-w-0 px-3 py-1.5 bg-background border border-primary rounded-lg text-[13px] text-foreground outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={confirmRename}
+                              disabled={renameResidence.isPending}
+                              title="Valider"
+                              className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition cursor-pointer disabled:opacity-50"
+                            >
+                              {renameResidence.isPending ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Check className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEdit}
+                              title="Annuler"
+                              className="w-8 h-8 flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground transition cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          {residenceError && (
+                            <p className="text-[11.5px] text-rose-600 dark:text-rose-400">{residenceError}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[13.5px] font-bold text-foreground truncate">{residence.nom}</div>
+                            <div className="text-[11.5px] text-muted-foreground">
+                              {biensCount} bien{biensCount > 1 ? "s" : ""} rattaché{biensCount > 1 ? "s" : ""}
+                              {residence.type ? ` · ${residence.type}` : ""}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={startEdit}
+                            title="Renommer"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer shrink-0"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

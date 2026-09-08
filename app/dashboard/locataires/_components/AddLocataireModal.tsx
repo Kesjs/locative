@@ -17,6 +17,7 @@ import {
 import { useBiens, plafondCaution } from "@/lib/hooks/useBiens";
 import { useAddTenantWithLease } from "@/lib/hooks/useLocataires";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useActiveGroupBienIds } from "@/lib/patrimoineFilterContext";
 import { Building2, Sparkles, KeyRound, Mail, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -77,6 +78,7 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const isAgency = userProfile.role === "Agence" || userProfile.plan === "agence";
   const { data: biens = [] } = useBiens();
   const { mutateAsync: addTenantWithLease, isPending } = useAddTenantWithLease();
+  const activeGroupBienIds = useActiveGroupBienIds();
 
   const [step, setStep] = useState<StepIndex>(0);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -84,18 +86,20 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const [selectedPatrimoineFilter, setSelectedPatrimoineFilter] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const biensVacants = useMemo(() => biens.filter((b) => b.statut === "vacant"), [biens]);
+  // Respecte la résidence active choisie dans la sidebar — cohérent avec Loyers/Maintenance/
+  // Comptabilité/Accueil : on ne propose que les lots vacants de la résidence filtrée.
+  const biensVacants = useMemo(() => {
+    const vacants = biens.filter((b) => b.statut === "vacant");
+    if (!activeGroupBienIds) return vacants;
+    return vacants.filter((b) => activeGroupBienIds.includes(b.id));
+  }, [biens, activeGroupBienIds]);
   const bienSelectionne = useMemo(() => biens.find((b) => b.id === form.bien_id), [biens, form.bien_id]);
 
-  // Groupement des biens vacants par Patrimoine parent
+  // Groupement des biens vacants par vraie résidence (groupe_patrimoine), pas par déduction sur le nom.
   const patrimoinesVacantsMap = useMemo(() => {
     const map = new Map<string, typeof biensVacants>();
     biensVacants.forEach((b) => {
-      const p = b.nom.includes(" - ")
-        ? b.nom.split(" - ")[0].trim()
-        : b.nom.includes(" (")
-        ? b.nom.split(" (")[0].trim()
-        : "Autre patrimoine";
+      const p = b.groupe_patrimoine && b.groupe_patrimoine.trim() ? b.groupe_patrimoine.trim() : "Sans résidence";
       if (!map.has(p)) map.set(p, []);
       map.get(p)!.push(b);
     });
@@ -459,7 +463,8 @@ export function AddLocataireModal({ isOpen, onClose }: { isOpen: boolean; onClos
                           {biensVacants
                             .filter((b) => {
                               if (!selectedPatrimoineFilter) return true;
-                              return b.nom.startsWith(selectedPatrimoineFilter);
+                              const p = b.groupe_patrimoine && b.groupe_patrimoine.trim() ? b.groupe_patrimoine.trim() : "Sans résidence";
+                              return p === selectedPatrimoineFilter;
                             })
                             .map((b) => {
                               const isSelected = !isCandidatSansLogement && form.bien_id === b.id;

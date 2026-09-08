@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sideb
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import Header from "@/components/dashboard/Header";
 import { DevPlanSwitcher } from "@/components/dashboard/DevPlanSwitcher";
+import { PatrimoineFilterProvider } from "@/lib/patrimoineFilterContext";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
@@ -24,9 +25,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider defaultOpen={true}>
-      <AppSidebar />
-      <DashboardContent>{children}</DashboardContent>
-    </SidebarProvider>
+    <PatrimoineFilterProvider>
+      <SidebarProvider defaultOpen={true}>
+        <AppSidebar />
+        <DashboardContent>{children}</DashboardContent>
+      </SidebarProvider>
+    </PatrimoineFilterProvider>
   );
 }

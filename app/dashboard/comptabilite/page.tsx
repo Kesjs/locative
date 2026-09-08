@@ -6,6 +6,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import {
   ArrowDownTrayIcon,
   ShieldCheckIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import {
   HandCoins,
@@ -22,8 +23,10 @@ import { useLoyers } from "@/lib/hooks/useLoyers";
 import { useTickets } from "@/lib/hooks/useMaintenance";
 import { useMandats } from "@/lib/hooks/useMandats";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { usePatrimoineFilter, useActiveGroupBienIds, useActiveGroupBienNames } from "@/lib/patrimoineFilterContext";
 import { toast } from "sonner";
 import { CrgModal, type CrgData } from "./_components/CrgModal";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function AccountingPage() {
   const userProfile = useUserProfile();
@@ -34,9 +37,28 @@ export default function AccountingPage() {
   );
   const [selectedYear, setSelectedYear] = useState("2026");
 
-  const { data: loyers = [], isLoading: isLoadingLoyers } = useLoyers();
-  const { data: tickets = [], isLoading: isLoadingTickets } = useTickets();
+  const { data: allLoyers = [], isLoading: isLoadingLoyers } = useLoyers();
+  const { data: allTickets = [], isLoading: isLoadingTickets } = useTickets();
   const { data: mandats = [] } = useMandats();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const activeGroupBienIds = useActiveGroupBienIds();
+  const activeGroupBienNames = useActiveGroupBienNames();
+
+  // Filtre résidence appliqué aux loyers et tickets utilisés dans tous les calculs du bilan
+  // (mêmes hooks/logique que Loyers & Maintenance) : match par bien_id, repli par nom du bien.
+  const loyers = useMemo(() => {
+    if (!activeGroupBienIds || !activeGroupBienNames) return allLoyers;
+    return allLoyers.filter((l) =>
+      l.bien_id ? activeGroupBienIds.includes(l.bien_id) : activeGroupBienNames.includes(l.bien_nom)
+    );
+  }, [allLoyers, activeGroupBienIds, activeGroupBienNames]);
+
+  const tickets = useMemo(() => {
+    if (!activeGroupBienIds || !activeGroupBienNames) return allTickets;
+    return allTickets.filter((t) =>
+      t.bien_id ? activeGroupBienIds.includes(t.bien_id) : activeGroupBienNames.includes(t.bien)
+    );
+  }, [allTickets, activeGroupBienIds, activeGroupBienNames]);
 
   // Suivi persistant des reversements validés
   const [validatedReversements, setValidatedReversements] = useState<string[]>(() => {
@@ -50,6 +72,9 @@ export default function AccountingPage() {
 
   // État de la modale CRG
   const [selectedCrg, setSelectedCrg] = useState<CrgData | null>(null);
+
+  // Recherche sur la table des reversements mandants
+  const [searchReversements, setSearchReversements] = useState("");
 
   const handleValidateReversement = (loyerId: string, montantNet: number) => {
     const updated = [...validatedReversements, loyerId];
@@ -116,6 +141,18 @@ export default function AccountingPage() {
       payes,
     };
   }, [loyers, tickets, validatedReversements]);
+
+  // Filtrage de la table des reversements par mandant ou par lot
+  const filteredPayes = useMemo(() => {
+    if (!searchReversements.trim()) return stats.payes;
+    const q = searchReversements.trim().toLowerCase();
+    return stats.payes.filter((l) => {
+      const mandantLabel = l.bien_nom.includes("SCI")
+        ? "SCI Partenaire"
+        : (mandats[0]?.proprietaire || "Propriétaire Mandant");
+      return l.bien_nom?.toLowerCase().includes(q) || mandantLabel.toLowerCase().includes(q);
+    });
+  }, [stats.payes, searchReversements, mandats]);
 
   const accountingLines = [
     {
@@ -215,6 +252,23 @@ export default function AccountingPage() {
         )}
       </div>
 
+      {activeGroup && (
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+          <span className="flex items-center gap-1.5">
+            <Building2 className="w-4 h-4" />
+            Filtré sur le groupe « {activeGroup} »
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveGroup(null)}
+            className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+          >
+            <XMarkIcon className="w-3.5 h-3.5" />
+            Retirer le filtre
+          </button>
+        </div>
+      )}
+
       {/* VUE REVERSEMENTS MANDANTS (AGENCE) */}
       {isAgency && activeTab === "reversements" ? (
         <div className="space-y-6">
@@ -292,7 +346,7 @@ export default function AccountingPage() {
                 </p>
               </div>
               <span className="text-[11.5px] font-bold text-muted-foreground">
-                {stats.payes.length} encaissement(s) éligible(s)
+                {filteredPayes.length} encaissement(s) éligible(s)
               </span>
             </div>
 
@@ -301,6 +355,23 @@ export default function AccountingPage() {
                 Aucun loyer encaissé pour le moment. Dès qu'un locataire règle son loyer, le décompte des honoraires et du reversement net s'affichera ici.
               </div>
             ) : (
+              <>
+                <div className="relative max-w-md">
+                  <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchReversements}
+                    onChange={(e) => setSearchReversements(e.target.value)}
+                    placeholder="Rechercher un mandant, un lot..."
+                    className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-[13px] bg-card text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+
+                {filteredPayes.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground text-[13px] border border-dashed border-border rounded-xl">
+                    Aucun reversement ne correspond à cette recherche.
+                  </div>
+                ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead>
@@ -315,7 +386,7 @@ export default function AccountingPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {stats.payes.map((l) => {
+                    {filteredPayes.map((l) => {
                       const montant = Number(l.montant) || 0;
                       const com = Math.round(montant * 0.1);
                       const net = montant - com;
@@ -373,6 +444,8 @@ export default function AccountingPage() {
                   </tbody>
                 </table>
               </div>
+                )}
+              </>
             )}
           </div>
         </div>

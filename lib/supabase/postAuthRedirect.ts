@@ -1,4 +1,5 @@
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
 
 /**
  * Après vérification du code OTP (que l'utilisateur soit parti de /auth/login
@@ -15,6 +16,11 @@ export async function getPostAuthRedirect(fallbackEmail?: string): Promise<strin
   } = await supabase.auth.getUser();
 
   if (!user) return "/dashboard";
+
+  // Nouvelle session confirmée : on purge le cache local laissé par un
+  // éventuel compte précédent utilisé sur cet appareil, pour ne jamais
+  // mélanger ses données avec celles du compte qui vient de se connecter.
+  clearLocalAccountCache();
 
   const { data: profile } = await supabase
     .from("profiles")

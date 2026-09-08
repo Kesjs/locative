@@ -21,12 +21,17 @@ import {
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { XMarkIcon, ArrowLeftOnRectangleIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useBiens } from "@/lib/hooks/useBiens";
-import { Sparkles, ArrowRight, Sliders } from "lucide-react";
+import { useMandats } from "@/lib/hooks/useMandats";
+import { useResidences } from "@/lib/hooks/useResidences";
+import { CreateResidenceModal } from "@/components/dashboard/CreateResidenceModal";
+import { usePatrimoineFilter } from "@/lib/patrimoineFilterContext";
+import { Sparkles, ArrowRight, Building, Building2, Briefcase, ChevronDown, Plus } from "lucide-react";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
 
 export function MobileNavigation() {
   const router = useRouter();
   const pathname = usePathname();
-  const { openMobile, setOpenMobile, devRole, setIsCustomizerOpen } = useSidebar();
+  const { openMobile, setOpenMobile, devRole } = useSidebar();
   const userProfile = useUserProfile();
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -38,12 +43,25 @@ export function MobileNavigation() {
   );
 
   const { data: biens = [] } = useBiens();
-  const activeBiensCount = biens.filter((b) => !b.archive).length;
-  const planMaxBiens = 3;
-  const planUsagePercent = Math.min(100, Math.round((activeBiensCount / planMaxBiens) * 100));
-  const isPlanFull = activeBiensCount >= planMaxBiens;
   const isNormalizedAdminOrLocataire =
     currentRole.toLowerCase().includes("admin") || currentRole.toLowerCase().includes("locataire");
+  const isAgency = currentRole.toLowerCase().includes("agence");
+
+  const { data: mandats = [] } = useMandats();
+  const { data: residences = [] } = useResidences();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const [isSwitcherOpen, setIsSwitcherOpen] = React.useState(false);
+  const [isCreateResidenceOpen, setIsCreateResidenceOpen] = React.useState(false);
+  const patrimoineGroups = React.useMemo(() => {
+    const set = new Set<string>();
+    residences.forEach((r) => {
+      if (r.nom && r.nom.trim()) set.add(r.nom.trim());
+    });
+    biens.forEach((b) => {
+      if (b.groupe_patrimoine && b.groupe_patrimoine.trim()) set.add(b.groupe_patrimoine.trim());
+    });
+    return Array.from(set);
+  }, [biens, residences]);
 
   const handleClose = React.useCallback(() => {
     setOpenMobile(false);
@@ -68,10 +86,7 @@ export function MobileNavigation() {
         const supabase = createClient();
         await supabase.auth.signOut();
       }
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("lokka_dev_plan");
-        localStorage.removeItem("lokka_dev_role");
-      }
+      clearLocalAccountCache();
       setShowLogoutDialog(false);
       handleClose();
       router.push("/auth/login");
@@ -122,16 +137,16 @@ export function MobileNavigation() {
                       className="w-full h-full object-contain p-0.5"
                     />
                   </div>
-                  <div className="flex flex-col leading-tight">
-                    <span className="font-extrabold text-[15px] tracking-tight text-foreground">
-                      Lokka
+                  <div className="flex flex-col leading-tight min-w-0">
+                    <span className="font-extrabold text-[15px] tracking-tight text-foreground truncate max-w-[150px]">
+                      {isNormalizedAdminOrLocataire ? "Lokka" : userProfile.organizationName || "Lokka"}
                     </span>
-                    <span className="text-[10.5px] font-bold text-primary uppercase tracking-wider">
+                    <span className="text-[10.5px] font-bold text-primary uppercase tracking-wider truncate max-w-[150px]">
                       {isNormalizedAdminOrLocataire
                         ? currentRole.toLowerCase().includes("admin")
                           ? "Admin HQ"
                           : "Espace Locataire"
-                        : "Patrimoine Lokka"}
+                        : activeGroup || "Tout le patrimoine"}
                     </span>
                   </div>
                 </div>
@@ -145,6 +160,99 @@ export function MobileNavigation() {
                   <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
+
+              {/* ── SÉLECTEUR PATRIMOINE / MANDATS (bailleur & agence uniquement) ── */}
+              {!isNormalizedAdminOrLocataire && (
+                <div className="border-b border-border shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsSwitcherOpen((v) => !v)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      {isAgency ? <Briefcase className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
+                      {isAgency ? "Cabinet & Mandats" : "Groupes de patrimoine"}
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSwitcherOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {isSwitcherOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-3 pb-2.5 space-y-1">
+                          {isAgency ? (
+                            mandats.length > 0 ? (
+                              mandats.map((mandat) => (
+                                <div
+                                  key={mandat.id}
+                                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground"
+                                >
+                                  <Briefcase className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                  <span className="truncate flex-1">{mandat.proprietaire}</span>
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-semibold shrink-0">
+                                    {mandat.biens} bien{mandat.biens > 1 ? "s" : ""}
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="px-2.5 py-1.5 text-[11.5px] text-muted-foreground">Aucun mandat pour l'instant.</p>
+                            )
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setActiveGroup(null)}
+                                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium cursor-pointer ${
+                                  !activeGroup ? "bg-muted text-[var(--primary)] font-semibold" : "text-foreground hover:bg-muted"
+                                }`}
+                              >
+                                <Building2 className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate flex-1 text-left">Tout le patrimoine</span>
+                              </button>
+                              {patrimoineGroups.length > 0 ? (
+                                patrimoineGroups.map((group) => (
+                                  <button
+                                    key={group}
+                                    type="button"
+                                    onClick={() => setActiveGroup(group)}
+                                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium cursor-pointer ${
+                                      activeGroup === group
+                                        ? "bg-muted text-[var(--primary)] font-semibold"
+                                        : "text-foreground hover:bg-muted"
+                                    }`}
+                                  >
+                                    <Building className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="truncate flex-1 text-left">{group}</span>
+                                  </button>
+                                ))
+                              ) : (
+                                <p className="px-2.5 py-1.5 text-[11.5px] text-muted-foreground">
+                                  Aucun groupe défini pour l'instant.
+                                </p>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsSwitcherOpen(false);
+                                  setIsCreateResidenceOpen(true);
+                                }}
+                                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11.5px] font-medium text-muted-foreground hover:bg-muted cursor-pointer"
+                              >
+                                <Plus className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate flex-1 text-left">Créer une résidence</span>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {/* ── NAVIGATION LIST: Matching Desktop Items ── */}
               <div className="flex-1 overflow-y-auto px-3 py-4 sidebar-scrollbar">
@@ -187,52 +295,8 @@ export function MobileNavigation() {
                 </div>
               </div>
 
-              {/* ── FOOTER: Upgrade Plan + User Profile & Quick Logout ── */}
+              {/* ── FOOTER: User Profile & Quick Logout ── */}
               <div className="border-t border-border p-3 bg-card shrink-0 space-y-2">
-                {/* Bloc Upgrade Plan */}
-                <div
-                  className="p-3 rounded-xl border shadow-xs transition-colors"
-                  style={{
-                    borderColor: "color-mix(in srgb, var(--brand-accent) 25%, transparent)",
-                    backgroundColor: "color-mix(in srgb, var(--brand-accent) 6%, transparent)",
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11.5px] font-bold text-foreground flex items-center gap-1.5">
-                      <Sparkles className="size-3.5" style={{ color: "var(--brand-accent)" }} />
-                      Plan Gratuit
-                    </span>
-                    <span
-                      className="text-[10px] font-bold px-1.5 py-0.5 rounded border"
-                      style={{
-                        color: "var(--brand-accent)",
-                        borderColor: "color-mix(in srgb, var(--brand-accent) 30%, transparent)",
-                        backgroundColor: "color-mix(in srgb, var(--brand-accent) 12%, transparent)",
-                      }}
-                    >
-                      {activeBiensCount} / {planMaxBiens} biens
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden mb-2.5">
-                    <div
-                      className="h-full rounded-full transition-all duration-300"
-                      style={{
-                        width: `${planUsagePercent}%`,
-                        backgroundColor: isPlanFull ? "#F59E0B" : "var(--brand-accent)",
-                      }}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { router.push("/tarifs"); handleClose(); }}
-                    className="w-full py-1.5 px-2.5 text-white text-[11.5px] font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:opacity-90 active:scale-[0.98]"
-                    style={{ backgroundColor: "var(--brand-accent)" }}
-                  >
-                    <span>Passer à Pro</span>
-                    <ArrowRight className="size-3" />
-                  </button>
-                </div>
-
                 {/* Profil utilisateur */}
                 <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/40 border border-border">
                   <Avatar className="h-9 w-9 rounded-full border border-border shrink-0">
@@ -251,19 +315,7 @@ export function MobileNavigation() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClose();
-                      setIsCustomizerOpen(true);
-                    }}
-                    className="flex items-center justify-center gap-1.5 py-2 px-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-[11.5px] font-semibold transition cursor-pointer"
-                  >
-                    <Sliders className="h-3.5 w-3.5 text-[var(--primary)]" />
-                    <span>Thème</span>
-                  </button>
-
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
                   <Link
                     href="/dashboard/parametres"
                     onClick={handleClose}
@@ -320,6 +372,8 @@ export function MobileNavigation() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <CreateResidenceModal isOpen={isCreateResidenceOpen} onClose={() => setIsCreateResidenceOpen(false)} />
     </>
   );
 }

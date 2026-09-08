@@ -11,10 +11,12 @@ import {
   ExclamationTriangleIcon,
   DocumentArrowDownIcon,
   WrenchScrewdriverIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import { plafondCaution } from "@/lib/hooks/useBiens";
 import {
   type LeaseWithDetails,
+  type Tenant,
   useRentLedger,
   useReceipts,
   useRecordPayment,
@@ -24,6 +26,7 @@ import {
   statutPaiement,
 } from "@/lib/hooks/useLocataires";
 import { useTickets } from "@/lib/hooks/useMaintenance";
+import { EditLocataireModal } from "./EditLocataireModal";
 
 type Tab = "profil" | "bail" | "paiements" | "maintenance";
 
@@ -45,6 +48,7 @@ export function LocataireDetailDrawer({ lease, onClose }: LocataireDetailDrawerP
   const [renewDate, setRenewDate] = useState("");
   const [showRenew, setShowRenew] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
 
   const { mutateAsync: terminateLease, isPending: isTerminating } = useTerminateLease();
   const { mutateAsync: renewLease, isPending: isRenewing } = useRenewLease();
@@ -110,10 +114,11 @@ export function LocataireDetailDrawer({ lease, onClose }: LocataireDetailDrawerP
   };
 
   return (
-    <AnimatePresence>
-      {lease && (
-        <>
-          <motion.div
+    <>
+      <AnimatePresence>
+        {lease && (
+          <>
+            <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -166,7 +171,7 @@ export function LocataireDetailDrawer({ lease, onClose }: LocataireDetailDrawerP
                   transition={{ duration: 0.15 }}
                   className="p-5"
                 >
-                  {tab === "profil" && <ProfilTab lease={lease} />}
+                  {tab === "profil" && <ProfilTab lease={lease} onEdit={() => setEditingTenant(lease.tenant)} />}
                   {tab === "bail" && (
                     <BailTab
                       lease={lease}
@@ -221,16 +226,38 @@ export function LocataireDetailDrawer({ lease, onClose }: LocataireDetailDrawerP
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+      <EditLocataireModal tenant={editingTenant} onClose={() => setEditingTenant(null)} />
+    </>
   );
 }
 
-function ProfilTab({ lease }: { lease: LeaseWithDetails }) {
+function ProfilTab({ lease, onEdit }: { lease: LeaseWithDetails; onEdit: () => void }) {
   const t = lease.tenant;
+  const isIncomplete = !t.phone_number || !t.id_card_number || !t.profession;
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        {isIncomplete ? (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-500/10 border border-amber-500/25 px-2 py-1 rounded-lg">
+            <ExclamationTriangleIcon className="w-3.5 h-3.5" />
+            Profil incomplet
+          </span>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          onClick={onEdit}
+          className="flex items-center gap-1.5 text-[12px] font-bold text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+        >
+          <PencilSquareIcon className="w-4 h-4" />
+          Modifier
+        </button>
+      </div>
+
       <div className="rounded-xl border border-border p-4 space-y-3">
-        <InfoRow icon={PhoneIcon} label="Téléphone" value={t.phone_number} />
+        <InfoRow icon={PhoneIcon} label="Téléphone" value={t.phone_number || "Non renseigné"} />
         {t.whatsapp_number && <InfoRow icon={PhoneIcon} label="WhatsApp" value={t.whatsapp_number} />}
         {t.email && <InfoRow icon={PhoneIcon} label="Email" value={t.email} />}
         {t.profession && <InfoRow icon={IdentificationIcon} label="Profession" value={t.profession} />}

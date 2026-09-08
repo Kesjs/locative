@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { UsersIcon, PlusIcon, MagnifyingGlassIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
+import { UsersIcon, PlusIcon, MagnifyingGlassIcon, EnvelopeIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Building2 } from "lucide-react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { useLeases, statutPaiement, joursAvantEcheanceBail, type LeaseWithDetails } from "@/lib/hooks/useLocataires";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { usePatrimoineFilter, useActiveGroupBienIds } from "@/lib/patrimoineFilterContext";
 import { AddLocataireModal } from "./_components/AddLocataireModal";
 import { LocatairesKpis } from "./_components/LocatairesKpis";
 import { LocataireDetailDrawer } from "./_components/LocataireDetailDrawer";
@@ -15,13 +17,20 @@ export default function LocatairesPage() {
   const userProfile = useUserProfile();
   const isAgency = userProfile.role === "Agence" || userProfile.plan === "agence";
   const { data: leases = [], isLoading } = useLeases();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const activeGroupBienIds = useActiveGroupBienIds();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLease, setSelectedLease] = useState<LeaseWithDetails | null>(null);
   const [invitingLease, setInvitingLease] = useState<LeaseWithDetails | null>(null);
   const [search, setSearch] = useState("");
 
+  const leasesResidence = useMemo(() => {
+    if (!activeGroupBienIds) return leases;
+    return leases.filter((l) => activeGroupBienIds.includes(l.bien_id));
+  }, [leases, activeGroupBienIds]);
+
   const filteredLeases = useMemo(() => {
-    const actives = leases.filter((l) => l.is_active);
+    const actives = leasesResidence.filter((l) => l.is_active);
     if (!search.trim()) return actives;
     const q = search.trim().toLowerCase();
     return actives.filter(
@@ -30,7 +39,7 @@ export default function LocatairesPage() {
         l.tenant.phone_number.includes(q) ||
         l.bien?.nom?.toLowerCase().includes(q)
     );
-  }, [leases, search]);
+  }, [leasesResidence, search]);
 
   const handleOpenInvitation = (l: LeaseWithDetails, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,8 +52,18 @@ export default function LocatairesPage() {
       header: "Locataire",
       renderCell: (l: LeaseWithDetails) => (
         <div>
-          <p className="font-bold text-card-foreground">{l.tenant.full_name}</p>
-          <p className="text-[11.5px] text-muted-foreground">{l.tenant.phone_number}</p>
+          <p className="font-bold text-card-foreground flex items-center gap-1.5">
+            {l.tenant.full_name}
+            {(!l.tenant.phone_number || !l.tenant.id_card_number) && (
+              <span
+                title="Profil incomplet"
+                className="text-[9.5px] font-bold text-amber-700 bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 rounded"
+              >
+                Incomplet
+              </span>
+            )}
+          </p>
+          <p className="text-[11.5px] text-muted-foreground">{l.tenant.phone_number || "Téléphone non renseigné"}</p>
         </div>
       ),
     },
@@ -137,7 +156,24 @@ export default function LocatairesPage() {
         />
       ) : (
         <>
-          <LocatairesKpis leases={leases} />
+          {activeGroup && (
+            <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+              <span className="flex items-center gap-1.5">
+                <Building2 className="w-4 h-4" />
+                Filtré sur le groupe « {activeGroup} »
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveGroup(null)}
+                className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+              >
+                <XMarkIcon className="w-3.5 h-3.5" />
+                Retirer le filtre
+              </button>
+            </div>
+          )}
+
+          <LocatairesKpis leases={leasesResidence} />
 
           <div className="relative max-w-md">
             <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />

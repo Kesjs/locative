@@ -16,9 +16,9 @@ import { AddBienModal } from "@/app/dashboard/patrimoine/_components/AddBienModa
 import { AddPaiementModal } from "@/app/dashboard/loyers/_components/AddPaiementModal";
 import { AddTicketModal } from "@/app/dashboard/maintenance/_components/AddTicketModal";
 import ReceiptModal from "@/components/dashboard/ReceiptModal";
-import { useSidebar, type CurrencyMode } from "@/components/ui/sidebar";
+import { usePatrimoineFilter, useActiveGroupBienIds, useActiveGroupBienNames } from "@/lib/patrimoineFilterContext";
 import DashboardLoading from "./loading";
-import { ArrowRightIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, CheckCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   Wallet,
   AlertCircle,
@@ -43,12 +43,40 @@ import {
 export default function DashboardPage() {
   const userProfile = useUserProfile();
   const role = userProfile.role;
-  const { currency, setCurrency } = useSidebar();
 
-  const { data: biens = [], isLoading: isLoadingBiens } = useBiens();
-  const { data: loyers = [], isLoading: isLoadingLoyers } = useLoyers();
-  const { data: leases = [], isLoading: isLoadingLeases } = useLeases();
-  const { data: tickets = [], isLoading: isLoadingTickets } = useTickets();
+  const { data: allBiens = [], isLoading: isLoadingBiens } = useBiens();
+  const { data: allLoyers = [], isLoading: isLoadingLoyers } = useLoyers();
+  const { data: allLeases = [], isLoading: isLoadingLeases } = useLeases();
+  const { data: allTickets = [], isLoading: isLoadingTickets } = useTickets();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const activeGroupBienIds = useActiveGroupBienIds();
+  const activeGroupBienNames = useActiveGroupBienNames();
+
+  // Filtre résidence appliqué à toutes les stats de l'Accueil (biens, loyers, baux, tickets)
+  // selon la résidence active — même logique que Loyers/Maintenance/Comptabilité.
+  const biens = useMemo(() => {
+    if (!activeGroupBienIds) return allBiens;
+    return allBiens.filter((b) => activeGroupBienIds.includes(b.id));
+  }, [allBiens, activeGroupBienIds]);
+
+  const loyers = useMemo(() => {
+    if (!activeGroupBienIds || !activeGroupBienNames) return allLoyers;
+    return allLoyers.filter((l) =>
+      l.bien_id ? activeGroupBienIds.includes(l.bien_id) : activeGroupBienNames.includes(l.bien_nom)
+    );
+  }, [allLoyers, activeGroupBienIds, activeGroupBienNames]);
+
+  const leases = useMemo(() => {
+    if (!activeGroupBienIds) return allLeases;
+    return allLeases.filter((l) => activeGroupBienIds.includes(l.bien_id));
+  }, [allLeases, activeGroupBienIds]);
+
+  const tickets = useMemo(() => {
+    if (!activeGroupBienIds || !activeGroupBienNames) return allTickets;
+    return allTickets.filter((t) =>
+      t.bien_id ? activeGroupBienIds.includes(t.bien_id) : activeGroupBienNames.includes(t.bien)
+    );
+  }, [allTickets, activeGroupBienIds, activeGroupBienNames]);
 
   // Modals state
   const [isAddBienOpen, setIsAddBienOpen] = useState(false);
@@ -282,6 +310,23 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {activeGroup && (
+          <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+            <span className="flex items-center gap-1.5">
+              <Building2 className="w-4 h-4" />
+              Filtré sur le groupe « {activeGroup} »
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveGroup(null)}
+              className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+            >
+              <XMarkIcon className="w-3.5 h-3.5" />
+              Retirer le filtre
+            </button>
+          </div>
+        )}
 
         {/* KPIs Agence d'Élite */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -545,6 +590,23 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      {activeGroup && (
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-[var(--primary)]/25 bg-[var(--primary-subtle)] text-[12.5px] font-semibold text-[var(--primary)]">
+          <span className="flex items-center gap-1.5">
+            <Building2 className="w-4 h-4" />
+            Filtré sur le groupe « {activeGroup} »
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveGroup(null)}
+            className="flex items-center gap-1 text-[11.5px] font-bold px-2 py-1 rounded-lg hover:bg-white/60 cursor-pointer"
+          >
+            <XMarkIcon className="w-3.5 h-3.5" />
+            Retirer le filtre
+          </button>
+        </div>
+      )}
 
       {stats.totalBiens === 0 ? (
         /* Checklist d'Activation Guidée (au lieu du grand vide punitif) */

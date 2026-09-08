@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
-import { PlusIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, BriefcaseIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FileSignature, Building2, HandCoins, Landmark } from "lucide-react";
 import { useMandats, type Mandat } from "@/lib/hooks/useMandats";
 import { AddMandatModal } from "./_components/AddMandatModal";
@@ -16,9 +16,16 @@ export default function MandatsPage() {
   const { data: mandats = [], isLoading } = useMandats();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMandat, setSelectedMandat] = useState<Mandat | null>(null);
+  const [search, setSearch] = useState("");
 
   const totalLots = mandats.reduce((sum, m) => sum + (m.biens || 0), 0);
   const totalSolde = mandats.reduce((sum, m) => sum + (m.solde || 0), 0);
+
+  const filteredMandats = useMemo(() => {
+    if (!search.trim()) return mandats;
+    const q = search.trim().toLowerCase();
+    return mandats.filter((m: any) => m.proprietaire?.toLowerCase().includes(q));
+  }, [mandats, search]);
 
   const columns = [
     {
@@ -148,7 +155,7 @@ export default function MandatsPage() {
             <p className="text-[12px] text-muted-foreground">Liste des propriétaires et conditions de rémunération de l'agence</p>
           </div>
           <span className="text-[12px] font-bold text-muted-foreground">
-            {mandats.length} contrat{mandats.length > 1 ? "s" : ""}
+            {filteredMandats.length} contrat{filteredMandats.length > 1 ? "s" : ""}
           </span>
         </div>
 
@@ -161,7 +168,26 @@ export default function MandatsPage() {
             onAction={() => setIsModalOpen(true)}
           />
         ) : (
-          <DataTable data={mandats} columns={columns} keyExtractor={(r) => r.id} />
+          <>
+            <div className="relative max-w-md mb-4">
+              <MagnifyingGlassIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher un propriétaire mandant..."
+                className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-[13px] bg-card text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+
+            {filteredMandats.length === 0 ? (
+              <div className="text-center py-12 text-[13px] text-muted-foreground border border-dashed border-border rounded-xl">
+                Aucun mandat ne correspond à cette recherche.
+              </div>
+            ) : (
+              <DataTable data={filteredMandats} columns={columns} keyExtractor={(r) => r.id} />
+            )}
+          </>
         )}
       </div>
 

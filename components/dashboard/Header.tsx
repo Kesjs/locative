@@ -39,6 +39,15 @@ import { MobileNavigation } from "@/components/dashboard/MobileNavigation";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
+import { useBiens } from "@/lib/hooks/useBiens";
+import { useLeases } from "@/lib/hooks/useLocataires";
+import { useLoyers } from "@/lib/hooks/useLoyers";
+import {
+  useNotifications,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+} from "@/lib/hooks/useNotifications";
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -61,6 +70,18 @@ interface HeaderProps {
   title?: string;
   subtitle?: string;
   breadcrumbs?: string[];
+}
+
+function formatRelativeTime(isoDate: string): string {
+  const diffMs = Date.now() - new Date(isoDate).getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return "à l'instant";
+  if (diffMin < 60) return `il y a ${diffMin} min`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `il y a ${diffH} h`;
+  const diffJ = Math.floor(diffH / 24);
+  if (diffJ < 7) return `il y a ${diffJ} j`;
+  return new Date(isoDate).toLocaleDateString("fr-FR");
 }
 
 export default function Header({
@@ -87,6 +108,11 @@ export default function Header({
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const userProfile = useUserProfile();
+
+  const { data: notifications = [] } = useNotifications();
+  const markNotificationRead = useMarkNotificationRead();
+  const markAllNotificationsRead = useMarkAllNotificationsRead();
+  const unreadNotifications = notifications.filter((n) => !n.read_at);
 
   // Keyboard shortcut for ⌘K
   React.useEffect(() => {
@@ -126,6 +152,7 @@ export default function Header({
         const supabase = createClient();
         await supabase.auth.signOut();
       }
+      clearLocalAccountCache();
       if (typeof window !== "undefined") {
         localStorage.removeItem("lokka_dev_plan");
         localStorage.removeItem("lokka_dev_role");
@@ -140,43 +167,55 @@ export default function Header({
     }
   };
 
-  const searchableItems = [
-    {
-      category: "Biens",
-      title: "Villa Les Cocotiers",
-      subtitle: "Haie Vive · 450 000 FCFA/mois (3 unités)",
-      url: "/dashboard/patrimoine",
-      icon: BuildingOffice2Icon,
-    },
-    {
-      category: "Biens",
-      title: "Résidence Le Manguier",
-      subtitle: "Akpakpa · 180 000 FCFA/mois (6 unités)",
-      url: "/dashboard/patrimoine",
-      icon: BuildingOffice2Icon,
-    },
-    {
-      category: "Locataires",
-      title: "Koudjo Dossou",
-      subtitle: "Villa Cocotiers Apt 2B · À jour (+229 97 00 11 22)",
-      url: "/dashboard/locataires",
-      icon: UsersIcon,
-    },
-    {
-      category: "Locataires",
-      title: "Rachidi Saka",
-      subtitle: "Arconville · Retard 5j (+229 96 14 77 30)",
-      url: "/dashboard/locataires",
-      icon: UsersIcon,
-    },
-    {
-      category: "Quittances",
-      title: "Quittance LOK-2026-0891",
-      subtitle: "Koudjo Dossou · Septembre 2026 · MTN MoMo",
-      url: "/dashboard/loyers",
-      icon: DocumentTextIcon,
-    },
-  ];
+  const { data: biensData = [] } = useBiens();
+  const { data: leasesData = [] } = useLeases();
+  const { data: loyersData = [] } = useLoyers();
+
+  const searchableItems = React.useMemo(() => {
+    const items: {
+      category: string;
+      title: string;
+      subtitle: string;
+      url: string;
+      icon: typeof BuildingOffice2Icon;
+    }[] = [];
+
+    biensData.forEach((b) => {
+      items.push({
+        category: "Biens",
+        title: b.nom,
+        subtitle: `${b.groupe_patrimoine ? b.groupe_patrimoine + " · " : ""}${b.quartier || b.ville || ""} · ${Number(b.loyer_mensuel || 0).toLocaleString("fr-FR")} FCFA/mois${b.locataire_nom ? " · " + b.locataire_nom : " · Vacant"}`,
+        url: "/dashboard/patrimoine",
+        icon: BuildingOffice2Icon,
+      });
+    });
+
+    leasesData.forEach((l) => {
+      const statutLabel = l.balance_due > 0 ? `Retard ${Number(l.balance_due).toLocaleString("fr-FR")} FCFA` : "À jour";
+      items.push({
+        category: "Locataires",
+        title: l.tenant?.full_name || "Locataire",
+        subtitle: `${l.bien?.nom || ""} · ${statutLabel}${l.tenant?.phone_number ? " · " + l.tenant.phone_number : ""}`,
+        url: "/dashboard/locataires",
+        icon: UsersIcon,
+      });
+    });
+
+    loyersData
+      .filter((t) => t.statut === "payé")
+      .slice(0, 30)
+      .forEach((t) => {
+        items.push({
+          category: "Quittances",
+          title: `${t.locataire_nom} — ${Number(t.montant).toLocaleString("fr-FR")} FCFA`,
+          subtitle: `${t.bien_nom} · ${t.date_reglement ? new Date(t.date_reglement).toLocaleDateString("fr-FR") : ""} · ${t.methode}`,
+          url: "/dashboard/loyers",
+          icon: DocumentTextIcon,
+        });
+      });
+
+    return items;
+  }, [biensData, leasesData, loyersData]);
 
   const filteredItems = searchableItems.filter(
     (item) =>
@@ -331,7 +370,9 @@ export default function Header({
                 title="Notifications"
               >
                 <BellIcon className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
+                {unreadNotifications.length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
+                )}
               </button>
 
               {/* Notifications Popover */}
@@ -345,20 +386,50 @@ export default function Header({
                   >
                     <div className="flex items-center justify-between pb-2 border-b border-[var(--border)] font-bold text-[var(--foreground)]">
                       <span>Notifications récentes</span>
-                      <span className="text-[10px] text-[var(--success)] font-bold bg-[var(--success-subtle)] px-2 py-0.5 rounded border border-[var(--success)]/20">
-                        ● MoMo Live
-                      </span>
+                      {unreadNotifications.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            markAllNotificationsRead.mutate(unreadNotifications.map((n) => n.id))
+                          }
+                          className="text-[10.5px] font-semibold text-[var(--primary)] hover:underline cursor-pointer"
+                        >
+                          Tout marquer comme lu
+                        </button>
+                      )}
                     </div>
-                    <div className="py-2 space-y-2">
-                      <div className="p-2.5 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)]">
-                        <div className="font-bold text-[var(--foreground)] flex items-center justify-between">
-                          <span>Loyer reçu (MTN MoMo)</span>
-                          <span className="text-[10px] text-[var(--text-secondary)]">09:42</span>
+                    <div className="py-2 space-y-2 max-h-[320px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="py-6 text-center text-[12px] text-[var(--text-secondary)]">
+                          Aucune notification pour l'instant.
                         </div>
-                        <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">
-                          Koudjo Dossou a réglé 350 000 FCFA avec succès.
-                        </p>
-                      </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            onClick={() => {
+                              if (!n.read_at) markNotificationRead.mutate(n.id);
+                              if (n.reference_url) {
+                                router.push(n.reference_url);
+                                setShowNotifications(false);
+                              }
+                            }}
+                            className={`p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                              n.read_at
+                                ? "bg-[var(--surface-secondary)] border-[var(--border)] opacity-70"
+                                : "bg-[var(--primary-subtle)] border-[var(--primary)]/30"
+                            }`}
+                          >
+                            <div className="font-bold text-[var(--foreground)] flex items-center justify-between gap-2">
+                              <span className="truncate">{n.title}</span>
+                              <span className="text-[10px] text-[var(--text-secondary)] shrink-0">
+                                {formatRelativeTime(n.created_at)}
+                              </span>
+                            </div>
+                            <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">{n.body}</p>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -392,11 +463,11 @@ export default function Header({
               className="h-8.5 w-8.5 border border-[var(--border)] rounded-lg bg-[var(--surface)] cursor-pointer text-[var(--foreground)]"
             />
 
-            {/* 5. Layout Customizer Button (Accessible Mobile & Desktop) */}
+            {/* 5. Layout Customizer Button (Desktop uniquement — les modes Overlay/Push/Compact/Full n'ont pas de sens sur le drawer mobile) */}
             <button
               type="button"
               onClick={() => setIsCustomizerOpen(true)}
-              className="flex h-8.5 w-8.5 items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
+              className="hidden md:flex h-8.5 w-8.5 items-center justify-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg text-[var(--foreground)] transition-all shadow-2xs cursor-pointer"
               title="Personnaliser l'affichage"
             >
               <AdjustmentsHorizontalIcon className="h-4 w-4" />

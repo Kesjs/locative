@@ -16,7 +16,6 @@ import {
 export type SidebarVariant = "sidebar" | "floating" | "inset";
 export type LayoutMode = "overlay" | "push" | "full" | "default";
 export type ThemeMode = "system" | "light" | "dark";
-export type CurrencyMode = "fcfa" | "eur" | "usd";
 export type DensityMode = "comfort" | "compact";
 export type NavLayoutMode = "sidebar" | "topnav";
 export type DevRole = "agence" | "bailleur" | "locataire" | "admin";
@@ -81,8 +80,6 @@ type SidebarContext = {
   setNavLayout: (n: NavLayoutMode) => void;
   theme: ThemeMode;
   setTheme: (t: ThemeMode) => void;
-  currency: CurrencyMode;
-  setCurrency: (c: CurrencyMode) => void;
   colorTheme: ColorTheme;
   setColorTheme: (c: ColorTheme) => void;
   customColorHex: string;
@@ -154,7 +151,6 @@ export const SidebarProvider = React.forwardRef<
     const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>("push");
     const [navLayout, setNavLayoutState] = React.useState<NavLayoutMode>("sidebar");
     const [theme, setThemeState] = React.useState<ThemeMode>("dark");
-    const [currency, setCurrencyState] = React.useState<CurrencyMode>("fcfa");
     const [colorTheme, _setColorTheme] = React.useState<ColorTheme>("amber");
     const [customColorHex, setCustomColorHexState] = React.useState<string>("#F59E0B");
     const [isPrivacyMode, setIsPrivacyMode] = React.useState<boolean>(false);
@@ -195,9 +191,6 @@ export const SidebarProvider = React.forwardRef<
           setThemeState("dark");
           applyThemeMode("dark");
         }
-
-        const cu = localStorage.getItem("lokka_pref_currency") as CurrencyMode;
-        if (cu === "fcfa" || cu === "eur" || cu === "usd") setCurrencyState(cu);
 
         const custHex = localStorage.getItem("lokka_pref_custom_hex");
         if (custHex) setCustomColorHexState(custHex);
@@ -276,13 +269,6 @@ export const SidebarProvider = React.forwardRef<
       } catch (_) {}
     };
 
-    const setCurrency = (c: CurrencyMode) => {
-      setCurrencyState(c);
-      try {
-        localStorage.setItem("lokka_pref_currency", c);
-      } catch (_) {}
-    };
-
     const setColorTheme = (c: ColorTheme) => {
       _setColorTheme(c);
       try {
@@ -357,8 +343,6 @@ export const SidebarProvider = React.forwardRef<
         setNavLayout,
         theme,
         setTheme,
-        currency,
-        setCurrency,
         colorTheme,
         setColorTheme,
         customColorHex,
@@ -387,7 +371,6 @@ export const SidebarProvider = React.forwardRef<
         layoutMode,
         navLayout,
         theme,
-        currency,
         colorTheme,
         customColorHex,
         isPrivacyMode,
@@ -508,7 +491,7 @@ export const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, onClick, style, ...props }, ref) => {
-  const { toggleSidebar, state } = useSidebar();
+  const { toggleSidebar, state, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   return (
@@ -537,25 +520,44 @@ export const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        strokeWidth="2"
-        fill="none"
-        stroke="currentColor"
-        style={{
-          width: 18,
-          height: 18,
-          transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
-          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      >
-        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-        <path d="M9 4v16" />
-        <path d="M14 10l2 2l-2 2" />
-      </svg>
+      {isMobile ? (
+        // Icône hamburger : plus explicite qu'un icône de panneau sur mobile, où le trigger
+        // ouvre un drawer plein écran (MobileNavigation) et non un simple collapse de colonne.
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeWidth="2"
+          fill="none"
+          stroke="currentColor"
+          style={{ width: 18, height: 18 }}
+        >
+          <path d="M4 6h16" />
+          <path d="M4 12h16" />
+          <path d="M4 18h16" />
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeWidth="2"
+          fill="none"
+          stroke="currentColor"
+          style={{
+            width: 18,
+            height: 18,
+            transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+          <path d="M9 4v16" />
+          <path d="M14 10l2 2l-2 2" />
+        </svg>
+      )}
       <span className="sr-only">Toggle Sidebar</span>
     </button>
   );

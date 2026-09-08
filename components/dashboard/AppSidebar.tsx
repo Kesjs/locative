@@ -41,7 +41,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useBiens } from "@/lib/hooks/useBiens";
+import { useMandats } from "@/lib/hooks/useMandats";
+import { useResidences } from "@/lib/hooks/useResidences";
+import { CreateResidenceModal } from "@/components/dashboard/CreateResidenceModal";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { clearLocalAccountCache } from "@/lib/clearLocalCache";
+import { usePatrimoineFilter } from "@/lib/patrimoineFilterContext";
 import {
   LayoutDashboard,
   Building2,
@@ -314,8 +319,24 @@ export function AppSidebar() {
 
   const { data: biens = [] } = useBiens();
   const activeBiensCount = biens.filter((b) => !b.archive).length;
+  const { data: mandats = [] } = useMandats();
+  const { data: residences = [] } = useResidences();
+  const { activeGroup, setActiveGroup } = usePatrimoineFilter();
+  const [isCreateResidenceOpen, setIsCreateResidenceOpen] = React.useState(false);
 
-  const [activeTeam, setActiveTeam] = React.useState(SIDEBAR_DATA.teams[0]);
+  // Groupes réels de patrimoine : union des noms de résidences créées explicitement et des
+  // valeurs libres encore présentes sur biens.groupe_patrimoine (compat avec l'existant), sans doublon.
+  const patrimoineGroups = React.useMemo(() => {
+    const set = new Set<string>();
+    residences.forEach((r) => {
+      if (r.nom && r.nom.trim()) set.add(r.nom.trim());
+    });
+    biens.forEach((b) => {
+      if (b.groupe_patrimoine && b.groupe_patrimoine.trim()) set.add(b.groupe_patrimoine.trim());
+    });
+    return Array.from(set);
+  }, [biens, residences]);
+
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
@@ -332,11 +353,13 @@ export function AppSidebar() {
     currentRole.toLowerCase().includes("admin") || currentRole.toLowerCase().includes("locataire");
 
   const workspaceName = isAgency
-    ? userProfile.name || "Cabinet Immobilier"
-    : userProfile.name || activeTeam.name;
+    ? userProfile.organizationName || "Cabinet Immobilier"
+    : userProfile.organizationName || "Mon Patrimoine";
 
   const workspaceSubtitle = isAgency
     ? `${activeBiensCount} lot${activeBiensCount > 1 ? "s" : ""} · Cabinet Agréé 🇧🇯`
+    : activeGroup
+    ? `Filtré · ${activeGroup}`
     : `${activeBiensCount} bien${activeBiensCount > 1 ? "s" : ""} · Patrimoine Privé`;
 
   const isLinkActive = (href: string) => {
@@ -351,10 +374,7 @@ export function AppSidebar() {
         const supabase = createClient();
         await supabase.auth.signOut();
       }
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("lokka_dev_plan");
-        localStorage.removeItem("lokka_dev_role");
-      }
+      clearLocalAccountCache();
       setShowLogoutDialog(false);
       router.push("/auth/login");
     } catch (err) {
@@ -364,11 +384,6 @@ export function AppSidebar() {
       setIsLoggingOut(false);
     }
   };
-
-  // Calcul du quota selon le plan
-  const planMaxBiens = isAgency ? 999 : 10;
-  const planUsagePercent = Math.min(100, Math.round((activeBiensCount / planMaxBiens) * 100));
-  const isPlanFull = !isAgency && activeBiensCount >= planMaxBiens;
 
   if (navLayout === "topnav" && !isMobile) {
     return null;
@@ -447,52 +462,86 @@ export function AppSidebar() {
                     sideOffset={6}
                   >
                     <DropdownMenuLabel className="text-[10px] text-muted-foreground px-2 py-1 font-bold uppercase tracking-wider">
-                      {isAgency ? "Votre Cabinet & Mandats" : "Vos Patrimoines & SCI"}
+                      {isAgency ? "Votre Cabinet & Mandats" : "Vos Groupes de Patrimoine"}
                     </DropdownMenuLabel>
                     {isAgency ? (
-                      <>
-                        <DropdownMenuItem className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer bg-blue-500/10 text-blue-700 dark:text-blue-400 font-semibold">
-                          <Building2 className="size-4 text-blue-600" />
-                          <span className="truncate flex-1">{workspaceName}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold">Actif</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium text-muted-foreground hover:bg-muted cursor-pointer">
-                          <Briefcase className="size-4" />
-                          <span className="truncate flex-1">Mandats Exclusifs UEMOA</span>
-                        </DropdownMenuItem>
-                      </>
+                      mandats.length > 0 ? (
+                        mandats.map((mandat) => (
+                          <DropdownMenuItem
+                            key={mandat.id}
+                            className="gap-2.5 p-2 rounded-lg text-[12.5px] font-medium cursor-pointer text-foreground hover:bg-muted"
+                          >
+                            <Briefcase className="size-4 text-blue-600" />
+                            <span className="truncate flex-1">{mandat.proprietaire}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-semibold">
+                              {mandat.biens} bien{mandat.biens > 1 ? "s" : ""}
+                            </span>
+                          </DropdownMenuItem>
+                        ))
+                      ) : (
+                        <div className="px-2 py-2 text-[11.5px] text-muted-foreground">
+                          Aucun mandat pour l'instant.
+                        </div>
+                      )
                     ) : (
-                      SIDEBAR_DATA.teams.map((team, index) => (
+                      <>
                         <DropdownMenuItem
-                          key={team.name}
-                          onClick={() => setActiveTeam(team)}
+                          onClick={() => setActiveGroup(null)}
                           className={`gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer ${
-                            activeTeam.name === team.name
+                            !activeGroup
                               ? "bg-muted text-[var(--primary)] font-semibold"
                               : "text-foreground hover:bg-muted"
                           }`}
                         >
                           <div
                             className="flex size-5 items-center justify-center rounded border border-border"
-                            style={{
-                              backgroundColor: "var(--primary-subtle)",
-                              color: "var(--primary)",
-                            }}
+                            style={{ backgroundColor: "var(--primary-subtle)", color: "var(--primary)" }}
                           >
-                            <team.logo className="size-3" />
+                            <Building2 className="size-3" />
                           </div>
-                          <span className="truncate flex-1">{team.name}</span>
-                          <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                          <span className="truncate flex-1">Tout le patrimoine</span>
                         </DropdownMenuItem>
-                      ))
+                        {patrimoineGroups.length > 0 ? (
+                          patrimoineGroups.map((group, index) => (
+                            <DropdownMenuItem
+                              key={group}
+                              onClick={() => setActiveGroup(group)}
+                              className={`gap-2 p-1.5 rounded-md text-[12px] font-medium cursor-pointer ${
+                                activeGroup === group
+                                  ? "bg-muted text-[var(--primary)] font-semibold"
+                                  : "text-foreground hover:bg-muted"
+                              }`}
+                            >
+                              <div
+                                className="flex size-5 items-center justify-center rounded border border-border"
+                                style={{ backgroundColor: "var(--primary-subtle)", color: "var(--primary)" }}
+                              >
+                                <Building className="size-3" />
+                              </div>
+                              <span className="truncate flex-1">{group}</span>
+                              <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-2 text-[11.5px] text-muted-foreground">
+                            Aucun groupe défini — étiquette tes biens depuis "Mon Patrimoine".
+                          </div>
+                        )}
+                      </>
                     )}
                     <DropdownMenuSeparator className="bg-border my-1" />
                     <DropdownMenuItem
-                      onClick={() => router.push("/dashboard/parametres")}
+                      onClick={() => {
+                        if (isAgency) {
+                          router.push("/dashboard/parametres");
+                        } else {
+                          setIsCreateResidenceOpen(true);
+                        }
+                      }}
                       className="gap-2 p-2 rounded-lg text-[11.5px] font-medium text-muted-foreground hover:bg-muted cursor-pointer"
                     >
                       <Plus className="size-3.5 text-muted-foreground" />
-                      <span>{isAgency ? "Paramétrer une nouvelle antenne" : "Ajouter une SCI / Portefeuille"}</span>
+                      <span>{isAgency ? "Paramétrer une nouvelle antenne" : "Créer une résidence"}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -575,54 +624,8 @@ export function AppSidebar() {
           ))}
         </SidebarContent>
 
-        {/* ─── 3. FOOTER : CARTE D'UPGRADE PLAN + PROFIL UTILISATEUR ─── */}
+        {/* ─── 3. FOOTER : PROFIL UTILISATEUR ─── */}
         <SidebarFooter className="border-t border-[var(--sidebar-border)] p-2 space-y-2">
-          {/* Bloc Upgrade Plan Dynamique */}
-          {!isCollapsed ? (
-            <div
-              className="p-3 rounded-lg border shadow-2xs transition-colors bg-[var(--surface-secondary)] border-[var(--border)]"
-            >
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11.5px] font-bold text-[var(--foreground)] flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-[var(--primary)]" />
-                  Plan Gratuit
-                </span>
-                <span
-                  className="text-[10px] font-bold px-1.5 py-0.2 rounded border bg-[var(--primary-subtle)] text-[var(--primary)] border-[var(--primary-border)]"
-                >
-                  {activeBiensCount} / {planMaxBiens} biens
-                </span>
-              </div>
-              <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden mb-2.5">
-                <div
-                  className="h-full rounded-full transition-all duration-300 bg-[var(--primary)]"
-                  style={{
-                    width: `${planUsagePercent}%`,
-                  }}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => router.push("/tarifs")}
-                className="w-full py-1.5 px-2.5 text-[11.5px] font-semibold rounded-md flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:opacity-90 active:scale-[0.98] bg-[var(--primary)] text-[var(--primary-foreground)]"
-              >
-                <span>Passer à Pro</span>
-                <ArrowRight className="size-3" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex justify-center mb-1">
-              <button
-                type="button"
-                onClick={() => router.push("/tarifs")}
-                className="size-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border hover:opacity-90 bg-[var(--primary-subtle)] border-[var(--primary-border)] text-[var(--primary)]"
-                title={`Passer à Pro (${activeBiensCount}/${planMaxBiens} biens)`}
-              >
-                <Sparkles className="size-4" />
-              </button>
-            </div>
-          )}
-
           {/* Profil Utilisateur */}
           <SidebarMenu>
             <SidebarMenuItem>
@@ -740,6 +743,9 @@ export function AppSidebar() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modale de création de résidence */}
+      <CreateResidenceModal isOpen={isCreateResidenceOpen} onClose={() => setIsCreateResidenceOpen(false)} />
     </>
   );
 }

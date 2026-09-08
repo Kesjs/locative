@@ -46,6 +46,7 @@ export function AddPaiementModal({
 
   // Mode Direct
   const [directBien, setDirectBien] = useState("");
+  const [directBienId, setDirectBienId] = useState<string | null>(null);
   const [directLocataire, setDirectLocataire] = useState("");
   const [directMontant, setDirectMontant] = useState("");
 
@@ -53,6 +54,7 @@ export function AddPaiementModal({
     const found = biens.find((b) => b.id === bienId);
     if (found) {
       setDirectBien(found.nom);
+      setDirectBienId(found.id);
       if (found.locataire_nom) setDirectLocataire(found.locataire_nom);
       if (found.loyer_mensuel) setDirectMontant(String(found.loyer_mensuel));
     }
@@ -62,6 +64,7 @@ export function AddPaiementModal({
     if (!open) {
       setSelectedTxId("");
       setDirectBien("");
+      setDirectBienId(null);
       setDirectLocataire("");
       setDirectMontant("");
       onClose();
@@ -89,6 +92,7 @@ export function AddPaiementModal({
       try {
         await addDirectPayment({
           bien_nom: directBien,
+          bien_id: directBienId,
           locataire_nom: directLocataire,
           montant: Number(directMontant),
           methode,
@@ -186,7 +190,10 @@ export function AddPaiementModal({
                   required
                   placeholder="Ex: Villa Cadjêhoun - Lot 4"
                   value={directBien}
-                  onChange={(e) => setDirectBien(e.target.value)}
+                  onChange={(e) => {
+                    setDirectBien(e.target.value);
+                    setDirectBienId(null);
+                  }}
                 />
               </div>
 
