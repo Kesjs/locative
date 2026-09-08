@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useEncaisserLoyer, useAddPaymentDirect, LoyerTransaction } from "@/lib/hooks/useLoyers";
 import { useBiens } from "@/lib/hooks/useBiens";
+import { parseMomoSms } from "@/lib/parse-momo-sms";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -55,6 +56,54 @@ export function AddPaiementModal({
   const [preuveFile, setPreuveFile] = useState<File | null>(null);
   const [preuvePreview, setPreuvePreview] = useState<string | null>(null);
 
+  // Rapprochement instantané : coller le SMS de confirmation MoMo/Moov
+  const [smsText, setSmsText] = useState("");
+  const [smsOpen, setSmsOpen] = useState(false);
+  const [smsStatus, setSmsStatus] = useState<"idle" | "matched" | "unmatched" | "unreadable" | "duplicate">("idle");
+  const [duplicateTx, setDuplicateTx] = useState<LoyerTransaction | null>(null);
+
+  const findByReference = (ref: string, excludeId?: string) =>
+    transactions.find((t) => t.reference_paiement && t.reference_paiement === ref && t.id !== excludeId);
+
+  const handleAnalyserSms = () => {
+    const parsed = parseMomoSms(smsText);
+    if (!parsed) {
+      setSmsStatus("unreadable");
+      setDuplicateTx(null);
+      return;
+    }
+
+    if (parsed.reference) {
+      const doublon = findByReference(parsed.reference);
+      if (doublon) {
+        setDuplicateTx(doublon);
+        setSmsStatus("duplicate");
+        return; // on n'auto-remplit rien : mieux vaut forcer une vérification manuelle
+      }
+    }
+    setDuplicateTx(null);
+
+    if (parsed.reference) setReferencePaiement(parsed.reference);
+    if (parsed.operateur) setMethode(parsed.operateur);
+
+    // Mode échéance en attente : on cherche une correspondance exacte par montant
+    if (pendingTxs.length > 0) {
+      const candidates = pendingTxs.filter((t) => Number(t.montant) === parsed.montant);
+      if (candidates.length === 1) {
+        setMode("pending");
+        setSelectedTxId(candidates[0].id);
+        setSmsStatus("matched");
+        return;
+      }
+    }
+
+    // Pas de correspondance unique : on bascule en paiement direct pré-rempli
+    setMode("direct");
+    setDirectMontant(String(parsed.montant));
+    if (parsed.expediteurNom) setDirectLocataire(parsed.expediteurNom);
+    setSmsStatus("unmatched");
+  };
+
   const handlePreuveChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setPreuveFile(file);
@@ -87,12 +136,26 @@ export function AddPaiementModal({
       setDirectMontant("");
       setReferencePaiement("");
       clearPreuve();
+      setSmsText("");
+      setSmsOpen(false);
+      setSmsStatus("idle");
+      setDuplicateTx(null);
       onClose();
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (referencePaiement) {
+      const doublon = findByReference(referencePaiement, mode === "pending" ? selectedTxId : undefined);
+      if (doublon) {
+        toast.error(
+          `Cette référence est déjà associée à un encaissement de ${Number(doublon.montant).toLocaleString("fr-FR")} FCFA (${doublon.locataire_nom}). Vérifie avant de continuer.`
+        );
+        return;
+      }
+    }
 
     if (mode === "pending") {
       if (!selectedTxId) return;
@@ -174,6 +237,54 @@ export function AddPaiementModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <button
+              type="button"
+              onClick={() => setSmsOpen((v) => !v)}
+              className="text-[12.5px] font-bold text-foreground flex items-center gap-1.5"
+            >
+              📋 Coller le SMS MoMo/Moov {smsOpen ? "▲" : "▼"}
+            </button>
+            {smsOpen && (
+              <div className="space-y-2">
+                <textarea
+                  className="w-full rounded-md border bg-background p-2 text-[13px] min-h-[70px]"
+                  placeholder="Colle ici le SMS de confirmation reçu (Transfert ... F de ... Ref:... ID:...)"
+                  value={smsText}
+                  onChange={(e) => {
+                    setSmsText(e.target.value);
+                    setSmsStatus("idle");
+                  }}
+                />
+                <Button type="button" variant="secondary" size="sm" onClick={handleAnalyserSms}>
+                  Analyser le SMS
+                </Button>
+                {smsStatus === "matched" && (
+                  <p className="text-[12.5px] text-green-600">
+                    ✓ SMS reconnu — échéance correspondante pré-sélectionnée, vérifie et confirme.
+                  </p>
+                )}
+                {smsStatus === "unmatched" && (
+                  <p className="text-[12.5px] text-amber-600">
+                    Montant reconnu mais aucune échéance en attente ne correspond exactement — champs pré-remplis en paiement direct, à vérifier.
+                  </p>
+                )}
+                {smsStatus === "unreadable" && (
+                  <p className="text-[12.5px] text-destructive">
+                    Format non reconnu — remplis les champs manuellement ci-dessous.
+                  </p>
+                )}
+                {smsStatus === "duplicate" && duplicateTx && (
+                  <p className="text-[12.5px] text-destructive">
+                    ⚠️ Ce SMS a déjà été enregistré — {duplicateTx.locataire_nom},{" "}
+                    {Number(duplicateTx.montant).toLocaleString("fr-FR")} FCFA ({duplicateTx.bien_nom}). Rien n'a été
+                    pré-rempli pour éviter un double comptage.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           {mode === "pending" && pendingTxs.length > 0 ? (
             <div className="space-y-1.5">
               <Label htmlFor="tx-select">Sélectionner l'échéance à solder</Label>
