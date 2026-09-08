@@ -22,13 +22,23 @@ import { useLeases } from "@/lib/hooks/useLocataires";
 import { usePatrimoineFilter, useActiveGroupBienIds, useActiveGroupBienNames } from "@/lib/patrimoineFilterContext";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AddPaiementModal } from "./_components/AddPaiementModal";
+import { EditPaiementModal } from "./_components/EditPaiementModal";
 import ReceiptModal from "@/components/dashboard/ReceiptModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, Pencil } from "lucide-react";
 
 export default function LoyersPage() {
   const [filterMonth, setFilterMonth] = useState("09");
   const [filterYear, setFilterYear] = useState("2026");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [preselectedTxId, setPreselectedTxId] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [editingTransaction, setEditingTransaction] = useState<LoyerTransaction | null>(null);
   const [search, setSearch] = useState("");
 
   const { data: allLoyers = [], isLoading } = useLoyers();
@@ -166,21 +176,40 @@ export default function LoyersPage() {
       renderCell: (row: LoyerTransaction) => {
         if (row.statut === "payé") {
           return (
-            <button
-              type="button"
-              onClick={() => handleOpenReceipt(row)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-[12px] transition cursor-pointer"
-            >
-              <DocumentArrowDownIcon className="w-4 h-4" />
-              <span>Quittance certifiée</span>
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-[12px] transition cursor-pointer"
+                >
+                  <DocumentArrowDownIcon className="w-4 h-4" />
+                  <span>Quittance certifiée</span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[11rem]">
+                <DropdownMenuItem onClick={() => handleOpenReceipt(row)} className="text-[12.5px] font-medium cursor-pointer">
+                  Voir la quittance
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setEditingTransaction(row)}
+                  className="text-[12.5px] font-medium cursor-pointer flex items-center gap-1.5"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Corriger / Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           );
         }
         return (
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                setPreselectedTxId(row.id);
+                setIsModalOpen(true);
+              }}
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11.5px] transition cursor-pointer shadow-2xs"
             >
               <Wallet className="w-3.5 h-3.5" />
@@ -252,7 +281,10 @@ export default function LoyersPage() {
           </select>
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setPreselectedTxId(null);
+              setIsModalOpen(true);
+            }}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[13px] font-bold transition-all shadow-xs cursor-pointer"
           >
             <PlusIcon className="w-4 h-4" /> Encaisser un loyer
@@ -338,8 +370,21 @@ export default function LoyersPage() {
       </div>
 
       {/* Modales connectées */}
-      <AddPaiementModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} transactions={loyers} />
+      <AddPaiementModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setPreselectedTxId(null);
+        }}
+        transactions={loyers}
+        preselectedTransactionId={preselectedTxId}
+      />
       <ReceiptModal isOpen={!!selectedReceipt} onClose={() => setSelectedReceipt(null)} data={selectedReceipt} />
+      <EditPaiementModal
+        isOpen={!!editingTransaction}
+        onClose={() => setEditingTransaction(null)}
+        transaction={editingTransaction}
+      />
     </div>
   );
 }

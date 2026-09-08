@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useEncaisserLoyer, useAddPaymentDirect, LoyerTransaction } from "@/lib/hooks/useLoyers";
 import { useBiens } from "@/lib/hooks/useBiens";
 import { parseMomoSms } from "@/lib/parse-momo-sms";
@@ -29,10 +29,13 @@ export function AddPaiementModal({
   isOpen,
   onClose,
   transactions,
+  preselectedTransactionId,
 }: {
   isOpen: boolean;
   onClose: () => void;
   transactions: LoyerTransaction[];
+  /** Échéance à présélectionner (ex: clic sur "Encaisser" depuis une ligne précise) */
+  preselectedTransactionId?: string | null;
 }) {
   const { mutateAsync: encaisser, isPending: isPendingEncaisser } = useEncaisserLoyer();
   const { mutateAsync: addDirectPayment, isPending: isPendingDirect } = useAddPaymentDirect();
@@ -61,6 +64,15 @@ export function AddPaiementModal({
   const [smsOpen, setSmsOpen] = useState(false);
   const [smsStatus, setSmsStatus] = useState<"idle" | "matched" | "unmatched" | "unreadable" | "duplicate">("idle");
   const [duplicateTx, setDuplicateTx] = useState<LoyerTransaction | null>(null);
+
+  // Présélection de l'échéance quand la modale est ouverte depuis le bouton
+  // "Encaisser" d'une ligne précise, pour éviter à l'utilisateur de la rechercher à nouveau.
+  useEffect(() => {
+    if (isOpen && preselectedTransactionId) {
+      setMode("pending");
+      setSelectedTxId(preselectedTransactionId);
+    }
+  }, [isOpen, preselectedTransactionId]);
 
   const findByReference = (ref: string, excludeId?: string) =>
     transactions.find((t) => t.reference_paiement && t.reference_paiement === ref && t.id !== excludeId);

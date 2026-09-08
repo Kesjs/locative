@@ -308,20 +308,37 @@ export function useDeleteBien() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const local = getLocalBiens();
-      const updatedLocal = local.filter((b) => b.id !== id);
-      saveLocalBiens(updatedLocal);
-
       if (!isSupabaseConfigured()) {
+        const local = getLocalBiens();
+        saveLocalBiens(local.filter((b) => b.id !== id));
         return true;
       }
       const supabase = createClient();
-      try {
-        await supabase.from("biens").update({ archive: true }).eq("id", id);
-        return true;
-      } catch {
-        return true;
+
+      // Garde-fou : on ne supprime jamais définitivement un bien qui a un
+      // historique légal ou financier (baux, loyers, tickets). Dans ce cas
+      // on force l'archivage, qui préserve les quittances et l'historique
+      // (obligation légale au Bénin — Loi n° 2022-30).
+      const [bauxRes, loyersRes, ticketsRes] = await Promise.all([
+        supabase.from("baux").select("id", { count: "exact", head: true }).eq("bien_id", id),
+        supabase.from("loyers_transactions").select("id", { count: "exact", head: true }).eq("bien_id", id),
+        supabase.from("maintenance_tickets").select("id", { count: "exact", head: true }).eq("bien_id", id),
+      ]);
+
+      const hasHistorique =
+        (bauxRes.count || 0) > 0 || (loyersRes.count || 0) > 0 || (ticketsRes.count || 0) > 0;
+
+      if (hasHistorique) {
+        throw new Error(
+          "Ce bien a un historique (baux, loyers ou tickets) et ne peut pas être supprimé définitivement. Utilisez plutôt « Archiver »."
+        );
       }
+
+      const { error } = await supabase.from("biens").delete().eq("id", id);
+      if (error) {
+        throw new Error(`Erreur lors de la suppression du bien: ${error.message}`);
+      }
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["biens"] });

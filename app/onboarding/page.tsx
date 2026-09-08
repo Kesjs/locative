@@ -379,7 +379,13 @@ export default function OnboardingPage() {
             // locataire + bail sera créée (source unique de vérité : useAddTenantWithLease).
             const lotsMeta = lotsToInsert.map((lot) => {
               const lotNomComplet = `${nomPatrimoine} - ${lot.nom.trim()}`;
-              const lotStatut: "loué" | "vacant" = lot.statut === "loue" ? "loué" : "vacant";
+              // Jamais "loué" ici : cette étape ne crée aucun locataire/bail réel
+              // (voir note ci-dessus), donc un lot "loué" atterrirait dans le même
+              // état cassé que celui rencontré en prod (loué + aucun tenant/lease,
+              // invisible dans "Mes Locataires"). On force "vacant" quel que soit
+              // ce que l'utilisateur a coché dans l'assistant — le bailleur passera
+              // par "Trouver un locataire" juste après pour créer le vrai bail.
+              const lotStatut: "loué" | "vacant" = "vacant";
               const lotLoyer = Number(lot.loyer) || 0;
               return {
                 lotNomComplet,

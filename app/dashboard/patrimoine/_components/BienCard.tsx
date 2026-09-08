@@ -45,6 +45,11 @@ export function BienCard({ bien, onClick }: { bien: Bien; onClick: () => void })
         <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full backdrop-blur-sm ${STATUT_STYLES[bien.statut]}`}>
           {bien.statut}
         </span>
+        {bien.statut !== "vacant" && !bien.locataire_nom && (
+          <span className="absolute top-3 right-3 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-destructive/90 text-white backdrop-blur-sm">
+            À compléter
+          </span>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-bold text-[14px] text-card-foreground truncate">{bien.nom}</h3>

@@ -133,7 +133,116 @@ export function useEncaisserLoyer() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["loyers"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
+    },
+  });
+}
+
+export function useUpdatePayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      id: string;
+      locataire_nom: string;
+      bien_nom: string;
+      montant: number;
+      methode: LoyerTransaction["methode"];
+      date_reglement?: string;
+      reference_paiement?: string | null;
+    }) => {
+      if (!isSupabaseConfigured()) {
+        const local = getLocalLoyers();
+        const updatedLocal = local.map((l) => (l.id === payload.id ? { ...l, ...payload } : l));
+        saveLocalLoyers(updatedLocal);
+        return { ...payload };
+      }
+
+      const supabase = createClient();
+
+      // Garde-fou : un paiement pour lequel une quittance certifiée a déjà
+      // été délivrée ne doit pas être modifié silencieusement — l'obligation
+      // légale (Loi 2022-30) est que la quittance reflète fidèlement le
+      // règlement effectif. On bloque la correction dans ce cas.
+      const { data: existing, error: fetchError } = await supabase
+        .from("loyers_transactions")
+        .select("quittance_url")
+        .eq("id", payload.id)
+        .single();
+
+      if (fetchError) {
+        throw new Error(`Erreur lors de la vérification du paiement: ${fetchError.message}`);
+      }
+      if (existing?.quittance_url) {
+        throw new Error(
+          "Une quittance certifiée a déjà été émise pour ce paiement : il ne peut plus être modifié."
+        );
+      }
+
+      const { data, error } = await supabase
+        .from("loyers_transactions")
+        .update({
+          locataire_nom: payload.locataire_nom,
+          bien_nom: payload.bien_nom,
+          montant: payload.montant,
+          methode: payload.methode,
+          date_reglement: payload.date_reglement,
+          reference_paiement: payload.reference_paiement || null,
+        })
+        .eq("id", payload.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Erreur lors de la correction du paiement: ${error.message}`);
+      }
+
+      const local = getLocalLoyers();
+      saveLocalLoyers(local.map((l) => (l.id === payload.id ? { ...l, ...(data as LoyerTransaction) } : l)));
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["loyers"] });
+    },
+  });
+}
+
+export function useDeletePayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!isSupabaseConfigured()) {
+        const local = getLocalLoyers();
+        saveLocalLoyers(local.filter((l) => l.id !== id));
+        return true;
+      }
+
+      const supabase = createClient();
+
+      const { data: existing, error: fetchError } = await supabase
+        .from("loyers_transactions")
+        .select("quittance_url")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) {
+        throw new Error(`Erreur lors de la vérification du paiement: ${fetchError.message}`);
+      }
+      if (existing?.quittance_url) {
+        throw new Error(
+          "Une quittance certifiée a déjà été émise pour ce paiement : il ne peut plus être supprimé."
+        );
+      }
+
+      const { error } = await supabase.from("loyers_transactions").delete().eq("id", id);
+      if (error) {
+        throw new Error(`Erreur lors de la suppression du paiement: ${error.message}`);
+      }
+
+      const local = getLocalLoyers();
+      saveLocalLoyers(local.filter((l) => l.id !== id));
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["loyers"] });
     },
   });
 }
@@ -220,7 +329,6 @@ export function useAddPaymentDirect() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["loyers"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard_stats"] });
     },
   });
 }

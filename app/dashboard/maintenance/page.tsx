@@ -19,10 +19,17 @@ import { DataTable } from "@/components/dashboard/shared/DataTable";
 import { EmptyState } from "@/components/dashboard/shared/EmptyState";
 import { KpiCard } from "@/components/dashboard/shared/KpiCard";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { useTickets, useArtisans, type Ticket, type Artisan } from "@/lib/hooks/useMaintenance";
+import { useTickets, useArtisans, useUpdateTicketStatut, type Ticket, type Artisan } from "@/lib/hooks/useMaintenance";
 import { usePatrimoineFilter, useActiveGroupBienIds, useActiveGroupBienNames } from "@/lib/patrimoineFilterContext";
 import { AddTicketModal } from "./_components/AddTicketModal";
 import { AddArtisanModal } from "./_components/AddArtisanModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 export default function MaintenancePage() {
   const { role } = useUserProfile();
@@ -30,6 +37,7 @@ export default function MaintenancePage() {
 
   const { data: allTickets = [], isLoading: isLoadingTickets } = useTickets();
   const { data: artisans = [], isLoading: isLoadingArtisans } = useArtisans();
+  const { mutateAsync: updateTicketStatut, isPending: isUpdatingStatut } = useUpdateTicketStatut();
   const { activeGroup, setActiveGroup } = usePatrimoineFilter();
   const activeGroupBienIds = useActiveGroupBienIds();
   const activeGroupBienNames = useActiveGroupBienNames();
@@ -81,6 +89,16 @@ export default function MaintenancePage() {
     window.location.href = `tel:${cleanPhone}`;
   };
 
+  const handleChangeStatut = async (ticket: Ticket, statut: Ticket["statut"]) => {
+    if (ticket.statut === statut) return;
+    try {
+      await updateTicketStatut({ id: ticket.id, statut });
+      toast.success(`Ticket « ${ticket.titre} » marqué « ${statut} »`);
+    } catch (err: any) {
+      toast.error(err?.message || "Impossible de mettre à jour le statut du ticket.");
+    }
+  };
+
   const handleWhatsAppArtisan = (artisan: Artisan) => {
     const cleanPhone = artisan.telephone.replace(/[^0-9]/g, "");
     const msg = encodeURIComponent(
@@ -125,24 +143,33 @@ export default function MaintenancePage() {
         if (row.statut === "Nouveau") badgeClass = "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
 
         return (
-          <span className={`px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase border ${badgeClass}`}>
-            {row.statut}
-          </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                disabled={isUpdatingStatut}
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase border cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${badgeClass}`}
+              >
+                {row.statut}
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-[9rem]">
+              {(["Nouveau", "En cours", "Résolu"] as Ticket["statut"][]).map((statut) => (
+                <DropdownMenuItem
+                  key={statut}
+                  onClick={() => handleChangeStatut(row, statut)}
+                  className={`text-[12.5px] font-medium cursor-pointer ${
+                    row.statut === statut ? "text-primary font-bold" : "text-foreground"
+                  }`}
+                >
+                  {statut}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       },
-    },
-    {
-      key: "actions",
-      header: "Action",
-      renderCell: (row: Ticket) => (
-        <button
-          type="button"
-          onClick={() => toast.info(`Détails du ticket : ${row.titre}`)}
-          className="text-emerald-700 dark:text-emerald-400 hover:underline font-bold text-[12px] cursor-pointer"
-        >
-          Consulter le dossier
-        </button>
-      ),
     },
   ];
 

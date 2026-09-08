@@ -17,7 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { RevenueChart } from "@/components/dashboard/shared/RevenueChart";
 import type { Bien } from "@/lib/hooks/useBiens";
-import { useUpdateBienStatut, useArchiveBien, plafondCaution } from "@/lib/hooks/useBiens";
+import { useUpdateBienStatut, useArchiveBien, useDeleteBien, plafondCaution } from "@/lib/hooks/useBiens";
 import { useLoyers } from "@/lib/hooks/useLoyers";
 import { useTickets } from "@/lib/hooks/useMaintenance";
 import { useAnnonces, useToggleAnnonceStatut } from "@/lib/hooks/useAnnonces";
@@ -32,7 +32,14 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "maintenance", label: "Maintenance" },
 ];
 
-const STATUT_OPTIONS: Bien["statut"][] = ["loué", "vacant", "travaux"];
+// "loué" est volontairement exclu de ce menu rapide : le marquer "loué" ici
+// ne faisait que changer le statut du bien, sans jamais créer de locataire
+// (table tenants/leases) ni renseigner locataire_nom. Résultat : le bien
+// s'affichait "loué" mais n'apparaissait nulle part dans "Mes Locataires"
+// et sa fiche montrait "Locataire actuel : —". Le passage à "loué" doit
+// toujours passer par l'assignation d'un vrai locataire (bouton "Trouver
+// un locataire" ci-dessous), qui crée le bail et synchronise tout.
+const STATUT_OPTIONS: Bien["statut"][] = ["vacant", "travaux"];
 
 interface BienDetailDrawerProps {
   bien: Bien | null;
@@ -45,10 +52,12 @@ export function BienDetailDrawer({ bien, onClose, onEdit }: BienDetailDrawerProp
   const [photoIndex, setPhotoIndex] = useState(0);
   const [statutMenuOpen, setStatutMenuOpen] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [historiqueOpen, setHistoriqueOpen] = useState(false);
 
   const { mutateAsync: updateStatut, isPending: isUpdatingStatut } = useUpdateBienStatut();
   const { mutateAsync: archiveBien, isPending: isArchiving } = useArchiveBien();
+  const { mutateAsync: deleteBien, isPending: isDeleting } = useDeleteBien();
 
   useEffect(() => {
     if (bien) {
@@ -56,6 +65,7 @@ export function BienDetailDrawer({ bien, onClose, onEdit }: BienDetailDrawerProp
       setPhotoIndex(0);
       setStatutMenuOpen(false);
       setConfirmArchive(false);
+      setConfirmDelete(false);
     }
   }, [bien?.id]);
 
@@ -87,6 +97,19 @@ export function BienDetailDrawer({ bien, onClose, onEdit }: BienDetailDrawerProp
       onClose();
     } catch {
       toast.error("Erreur lors de l'archivage");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!bien) return;
+    try {
+      await deleteBien(bien.id);
+      toast.success("Bien supprimé définitivement");
+      setConfirmDelete(false);
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.message || "Erreur lors de la suppression");
+      setConfirmDelete(false);
     }
   };
 
@@ -229,6 +252,40 @@ export function BienDetailDrawer({ bien, onClose, onEdit }: BienDetailDrawerProp
                   <button
                     onClick={() => setConfirmArchive(false)}
                     className="px-3 py-2.5 border border-border rounded-lg text-[12.5px] font-bold text-foreground"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Suppression définitive — action secondaire, séparée de l'archivage
+                pour éviter tout clic accidentel. Bloquée côté hook si le bien a
+                un historique (baux, loyers, tickets) : archiver reste alors la
+                seule option pour préserver les quittances et l'historique légal. */}
+            <div className="px-4 pb-4 -mt-1 shrink-0 flex justify-center">
+              {!confirmDelete ? (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="text-[11.5px] font-semibold text-muted-foreground hover:text-destructive underline decoration-dotted underline-offset-2 transition-colors"
+                >
+                  Supprimer définitivement ce bien
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 text-center">
+                  <span className="text-[11.5px] text-muted-foreground">
+                    Action irréversible —
+                  </span>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="px-2.5 py-1 bg-destructive text-white rounded-md text-[11.5px] font-bold disabled:opacity-50"
+                  >
+                    {isDeleting ? "..." : "Confirmer"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-2.5 py-1 border border-border rounded-md text-[11.5px] font-bold text-foreground"
                   >
                     Annuler
                   </button>
@@ -398,6 +455,16 @@ function LocationTab({
           >
             Trouver un locataire
           </Link>
+        </div>
+      ) : !bien.locataire_nom ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-center space-y-2">
+          <p className="text-[13px] font-semibold text-foreground">
+            Ce bien est marqué "{bien.statut}" mais aucun locataire n'y est réellement rattaché.
+          </p>
+          <p className="text-[12.5px] text-muted-foreground">
+            Repasse-le en "Vacant" via "Modifier", puis assigne un locataire depuis "Mes Locataires" pour que tout
+            se synchronise correctement (bail, quittances, échéancier).
+          </p>
         </div>
       ) : (
         <div className="rounded-xl border border-border p-4">

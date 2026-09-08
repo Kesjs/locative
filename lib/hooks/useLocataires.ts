@@ -237,6 +237,20 @@ export function useUpdateTenant() {
       }
 
       const supabase = createClient();
+
+      // On capture l'ancien nom avant écrasement : nécessaire pour ne resynchroniser
+      // que les transactions qui portaient bien ce nom (et pas celles d'un ancien
+      // locataire du même bien, le cas échéant).
+      let previousFullName: string | null = null;
+      if (patch.full_name) {
+        const { data: currentTenant } = await supabase
+          .from("tenants")
+          .select("full_name")
+          .eq("id", id)
+          .maybeSingle();
+        previousFullName = currentTenant?.full_name || null;
+      }
+
       const { data, error } = await supabase.from("tenants").update(patch).eq("id", id).select().single();
       if (error) {
         throw new Error(`Erreur lors de la mise à jour du locataire: ${error.message}`);
@@ -252,6 +266,18 @@ export function useUpdateTenant() {
         const bienIds = (activeLeases || []).map((l) => l.bien_id).filter(Boolean);
         if (bienIds.length > 0) {
           await supabase.from("biens").update({ locataire_nom: patch.full_name }).in("id", bienIds);
+
+          // Resynchronise aussi l'historique des loyers (locataire_nom y est dupliqué,
+          // pas joint dynamiquement) : quittances et relances WhatsApp affichaient sinon
+          // encore l'ancien nom après une correction. Scoping strict sur l'ancien nom pour
+          // ne pas renommer par erreur les transactions d'un précédent locataire du bien.
+          if (previousFullName && previousFullName !== patch.full_name) {
+            await supabase
+              .from("loyers_transactions")
+              .update({ locataire_nom: patch.full_name })
+              .in("bien_id", bienIds)
+              .eq("locataire_nom", previousFullName);
+          }
         }
       }
 
@@ -260,6 +286,7 @@ export function useUpdateTenant() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leases"] });
       queryClient.invalidateQueries({ queryKey: ["biens"] });
+      queryClient.invalidateQueries({ queryKey: ["loyers"] });
     },
   });
 }

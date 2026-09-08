@@ -129,6 +129,35 @@ export function useAddTicket() {
   });
 }
 
+export function useUpdateTicketStatut() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, statut }: { id: string; statut: Ticket["statut"] }) => {
+      if (!isSupabaseConfigured()) {
+        return { id, statut };
+      }
+      const supabase = createClient();
+      const statusMap: Record<string, string> = {
+        Nouveau: "open",
+        "En cours": "in_progress",
+        Résolu: "resolved",
+      };
+      const { error } = await supabase
+        .from("maintenance_tickets")
+        .update({ status: statusMap[statut] || "open" })
+        .eq("id", id);
+
+      if (error) {
+        throw new Error(`Erreur lors de la mise à jour du ticket: ${error.message}`);
+      }
+      return { id, statut };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maintenance-tickets"] });
+    },
+  });
+}
+
 export function useArtisans() {
   return useQuery({
     queryKey: ["maintenance-artisans"],

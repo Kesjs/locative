@@ -20,6 +20,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { XMarkIcon, ArrowLeftOnRectangleIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useBiens } from "@/lib/hooks/useBiens";
 import { useMandats } from "@/lib/hooks/useMandats";
 import { useResidences } from "@/lib/hooks/useResidences";
@@ -102,6 +108,16 @@ export function MobileNavigation() {
     if (url === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(url);
   };
+
+  // Si le nom du compte (profiles.full_name) est identique au nom de
+  // l'organisation (organizations.name) — cas d'un profil de test mal
+  // renseigné — on affiche l'email en second niveau du footer pour éviter
+  // la confusion visuelle avec le nom d'organisation déjà affiché en haut.
+  const nameMatchesOrg =
+    !!userProfile.name &&
+    !!userProfile.organizationName &&
+    userProfile.name.trim().toLowerCase() === userProfile.organizationName.trim().toLowerCase();
+  const footerSubtitle = nameMatchesOrg && userProfile.email ? userProfile.email : userProfile.role;
 
   return (
     <>
@@ -295,45 +311,58 @@ export function MobileNavigation() {
                 </div>
               </div>
 
-              {/* ── FOOTER: User Profile & Quick Logout ── */}
-              <div className="border-t border-border p-3 bg-card shrink-0 space-y-2">
-                {/* Profil utilisateur */}
-                <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/40 border border-border">
-                  <Avatar className="h-9 w-9 rounded-full border border-border shrink-0">
-                    <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-                    <AvatarFallback className="bg-[#087F5B] text-white text-[12px] font-bold">
-                      {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0 leading-tight">
-                    <div className="text-[13px] font-bold text-foreground truncate">
-                      {userProfile.name}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground truncate">
-                      {userProfile.role}
-                    </div>
-                  </div>
-                </div>
+              {/* ── FOOTER: User Profile Menu (Réglages + Déconnexion) ── */}
+              <div className="border-t border-border p-3 bg-card shrink-0">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 p-2 rounded-xl bg-muted/40 border border-border hover:bg-muted/70 transition cursor-pointer group"
+                    >
+                      <Avatar className="h-9 w-9 rounded-full border border-border shrink-0">
+                        <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+                        <AvatarFallback className="bg-[#087F5B] text-white text-[12px] font-bold">
+                          {(userProfile.name || "AK").slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0 leading-tight text-left">
+                        <div className="text-[13px] font-bold text-foreground truncate">
+                          {userProfile.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          {footerSubtitle}
+                        </div>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+                    </button>
+                  </DropdownMenuTrigger>
 
-                <div className="grid grid-cols-2 gap-1.5 pt-1">
-                  <Link
-                    href="/dashboard/parametres"
-                    onClick={handleClose}
-                    className="flex items-center justify-center gap-1.5 py-2 px-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-[11.5px] font-semibold transition"
+                  <DropdownMenuContent
+                    align="start"
+                    side="top"
+                    sideOffset={8}
+                    className="w-[--radix-dropdown-menu-trigger-width]"
                   >
-                    <Cog6ToothIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>Réglages</span>
-                  </Link>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/dashboard/parametres"
+                        onClick={handleClose}
+                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-foreground cursor-pointer"
+                      >
+                        <Cog6ToothIcon className="h-4 w-4 text-muted-foreground" />
+                        <span>Réglages</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowLogoutDialog(true)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/15 text-destructive text-[11.5px] font-semibold transition cursor-pointer"
-                  >
-                    <ArrowLeftOnRectangleIcon className="h-3.5 w-3.5" />
-                    <span>Quitter</span>
-                  </button>
-                </div>
+                    <DropdownMenuItem
+                      onClick={() => setShowLogoutDialog(true)}
+                      className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-destructive focus:text-destructive cursor-pointer"
+                    >
+                      <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                      <span>Déconnexion</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </motion.aside>
           </div>

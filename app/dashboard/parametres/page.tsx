@@ -164,6 +164,20 @@ export default function ParametresPage() {
           } else if (parsedPayments) {
             setPaymentSettings(parsedPayments);
           }
+
+          // Préférences de notifications : stockées dans profiles.payment_details.notificationSettings
+          // (même colonne JSON que les autres réglages du compte, pour rester
+          // synchronisées entre appareils). Repli sur le cache local si absentes en base.
+          const savedNotifications = localStorage.getItem("lokka_notification_settings");
+          const parsedNotifications = savedNotifications ? JSON.parse(savedNotifications) : null;
+          if (paymentDetailsParsed?.notificationSettings) {
+            setNotificationSettings((prev) => ({
+              ...prev,
+              ...paymentDetailsParsed.notificationSettings,
+            }));
+          } else if (parsedNotifications) {
+            setNotificationSettings(parsedNotifications);
+          }
         }
       } catch (err) {
         console.error("Error loading profile:", err);
@@ -192,6 +206,7 @@ export default function ParametresPage() {
             gerantNom: profile.gerantNom,
             rccmNumber: profile.rccmNumber,
             cachetUrl: profile.cachetUrl,
+            notificationSettings,
           };
 
           const updatePayload: Record<string, any> = {
